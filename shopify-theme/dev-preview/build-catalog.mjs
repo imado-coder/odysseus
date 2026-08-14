@@ -41,14 +41,19 @@ const pillLabels = [
 ];
 
 function cpills(v) {
-  return `<div class="cpills" data-variant="${v}">
-  <div class="cpills__track">
+  return `<nav class="cpills" data-variant="${v}" data-scroller aria-label="Filtrer par catégorie">
+  <ul class="cpills__track" data-scroller-track>
     ${pillLabels
-      .map((l, i) => `<a class="cpill" href="#"${i === 0 ? ' aria-current="true"' : ""}>${l}</a>`)
+      .map(
+        (l, i) =>
+          `<li><a class="cpill" href="#" data-label="${l}"${i === 0 ? ' aria-current="page"' : ""}>${l}</a></li>`
+      )
       .join("\n    ")}
-  </div>
-  <button class="cpills__next" type="button" aria-label="Suivant">›</button>
-</div>`;
+  </ul>
+  <button class="cpills__next" type="button" data-scroller-next aria-label="Catégories suivantes">
+    <span aria-hidden="true">\u203a</span>
+  </button>
+</nav>`;
 }
 
 /* --- PART 7 -------------------------------------------------------------- */
@@ -65,40 +70,49 @@ const items = [
   { t: "Sac à main structuré bandoulière amovible cuir grainé", p: "3.91", c: "13.34", note: "#2 Article meilleure vente dans Sacs", rank: true, stars: 4.5, sold: "150,000+", ad: false, seller: true, video: false },
 ];
 
-const starStr = (n) => "★".repeat(Math.floor(n)) + (n % 1 ? "⯨" : "") + "☆".repeat(5 - Math.ceil(n));
+const starStr = (n) =>
+  "\u2605".repeat(Math.floor(n)) +
+  (n % 1 ? "\u2bea" : "") +
+  "\u2606".repeat(5 - Math.ceil(n));
 
-function pgc(it, i, v) {
-  return `<article class="pgc" data-variant="${v}">
-  <a class="pgc__media" href="#">
-    <img class="pgc__img" src="${photo(i)}" alt="${it.t}" loading="lazy" width="700" height="700">
-    ${it.ad ? '<span class="pgc__ad">Pub</span>' : ""}
-    ${it.video ? '<span class="pgc__play" aria-hidden="true">▶</span>' : ""}
-  </a>
-  <h3 class="pgc__title"><a href="#">${it.t}</a></h3>
+function pgc(it, i, v, idx) {
+  const titleId = `pgc-${v}-${idx}`;
+  return `<article class="pgc" data-variant="${v}" aria-labelledby="${titleId}">
+  <div class="pgc__media">
+    <a href="#" tabindex="-1" aria-hidden="true">
+      <img class="pgc__img" src="${photo(i)}" alt="" loading="lazy" width="700" height="700">
+    </a>
+    ${it.ad ? '<span class="pgc__ad"><span class="visually-hidden">Annonce : </span>Pub</span>' : ""}
+    ${it.video ? '<span class="pgc__play" aria-hidden="true">\u25b6</span>' : ""}
+  </div>
+  <h3 class="pgc__title" id="${titleId}"><a href="#">${it.t}</a></h3>
   <div class="pgc__price-row">
     <span class="pgc__price-wrap">
       <span class="pgc__deal">Dernier jour</span>
-      <span class="pgc__price">€${it.p}</span>
-      <s class="pgc__compare">€${it.c}</s>
+      <span class="pgc__price">\u20ac${it.p}</span>
+      <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>\u20ac${it.c}</s>
     </span>
-    <button class="pgc__add" type="button" aria-label="Ajouter au panier">🛒</button>
+    <button class="pgc__add" type="button" aria-label="Ajouter au panier : ${it.t}">
+      <span aria-hidden="true">\ud83d\uded2</span>
+    </button>
   </div>
   ${
     it.note
-      ? `<div class="pgc__note${it.rank ? " pgc__note--rank" : ""}">${it.note}${it.noteInfo ? " ⓘ" : ""}</div>`
+      ? `<div class="pgc__note${it.rank ? " pgc__note--rank" : ""}">${it.note}${it.noteInfo ? ' <span aria-hidden="true">\u24d8</span>' : ""}</div>`
       : ""
   }
   <div class="pgc__rating">
     <span class="pgc__stars" aria-hidden="true">${starStr(it.stars)}</span>
-    <span class="pgc__sold"><span class="pgc__flame">🔥</span> ${it.sold} ventes</span>
+    <span class="visually-hidden">Noté ${String(it.stars).replace(".", ",")} sur 5.</span>
+    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">\u25c6</span> ${it.sold} ventes</span>
   </div>
-  ${it.seller ? '<span class="pgc__seller">⭐ Vendeur vedette</span>' : ""}
+  ${it.seller ? '<span class="pgc__seller"><span aria-hidden="true">\u2605</span> Vendeur vedette</span>' : ""}
 </article>`;
 }
 
 function cgrid(v, n = 10) {
   return `<div class="cgrid">
-  ${items.slice(0, n).map((it, i) => pgc(it, i, v)).join("\n  ")}
+  ${items.slice(0, n).map((it, i) => pgc(it, i, v, i)).join("\n  ")}
 </div>`;
 }
 
@@ -125,17 +139,17 @@ function tfoot(v) {
       ${footCols
         .map(
           ([title, links]) => `<div>
-        <h3 class="tfoot__title">${title}</h3>
+        <h2 class="tfoot__title">${title}</h2>
         <div class="tfoot__list">
           ${links.map((l) => `<a class="tfoot__link" href="#">${l}</a>`).join("\n          ")}
         </div>
       </div>`
         )
         .join("\n      ")}
-      <div>
-        <h3 class="tfoot__title">Téléchargez l'app ${BRAND}</h3>
+      <div class="tfoot__col--app">
+        <h2 class="tfoot__title">Téléchargez l'app ${BRAND}</h2>
         <div class="tfoot__perks">
-          ${perks.map((p) => `<span class="tfoot__perk">✔ <span>${p}</span></span>`).join("\n          ")}
+          ${perks.map((p) => `<span class="tfoot__perk"><span aria-hidden="true">\u2714</span> <span>${p}</span></span>`).join("\n          ")}
         </div>
         <div class="tfoot__stores">
           <a class="store-btn" href="#">
@@ -143,11 +157,11 @@ function tfoot(v) {
             <span><span class="store-btn__small">Télécharger dans</span><span class="store-btn__big">l'App Store</span></span>
           </a>
           <a class="store-btn" href="#">
-            <span class="store-btn__icon" aria-hidden="true">▶</span>
+            <span class="store-btn__icon" aria-hidden="true">\u25b6</span>
             <span><span class="store-btn__small">Disponible sur</span><span class="store-btn__big">Google Play</span></span>
           </a>
         </div>
-        <h3 class="tfoot__social-title">Connectez-vous avec ${BRAND}</h3>
+        <h2 class="tfoot__title tfoot__social-title">Connectez-vous avec ${BRAND}</h2>
         <div class="tfoot__social">
           <a href="#" aria-label="Instagram">📷</a>
           <a href="#" aria-label="Facebook">📘</a>
@@ -161,13 +175,13 @@ function tfoot(v) {
 
     <div class="tfoot__badges">
       <div>
-        <h3 class="tfoot__title">Certificats de sécurité</h3>
+        <h2 class="tfoot__title">Certificats de sécurité</h2>
         <div class="tfoot__badge-row">
           ${certs.map((c) => `<span class="paychip">${c}</span>`).join("\n          ")}
         </div>
       </div>
       <div>
-        <h3 class="tfoot__title">Nous acceptons</h3>
+        <h2 class="tfoot__title">Nous acceptons</h2>
         <div class="tfoot__badge-row">
           ${pays.map((p) => `<span class="paychip">${p}</span>`).join("\n          ")}
         </div>
@@ -187,7 +201,11 @@ function tfoot(v) {
 /* --- PART 9 -------------------------------------------------------------- */
 function loadmore(v) {
   return `<div class="loadmore" data-variant="${v}">
-  <button class="loadmore__btn" type="button">Afficher plus <span class="loadmore__caret">▼</span></button>
+  <button class="loadmore__btn" type="button" data-loadmore
+          data-idle-label="Afficher plus" data-busy-label="Chargement…">
+    <span data-loadmore-label>Afficher plus</span>
+    <span class="loadmore__caret" aria-hidden="true">\u25be</span>
+  </button>
 </div>`;
 }
 
@@ -201,6 +219,7 @@ const head = (title) => `<!doctype html>
 <link rel="stylesheet" href="../assets/base.css">
 <link rel="stylesheet" href="../assets/header-system.css">
 <link rel="stylesheet" href="../assets/catalog-system.css">
+<script src="../assets/theme.js" defer></script>
 <style>
   body { background: #eceef0; }
   .demo { padding: 26px 0 6px; }
@@ -258,9 +277,14 @@ writeFileSync(
   join(here, "collection.html"),
   head("Page collection") +
     `<style>body{background:#fff}</style>
+<a class="skip-to-content visually-hidden" href="#MainContent">Aller au contenu</a>
+<main id="MainContent" tabindex="-1">
+  <h1 class="visually-hidden">Recommandé pour vous</h1>
 ${cpills(1)}
+  <h2 class="visually-hidden">Produits</h2>
 ${cgrid(1, 10)}
 ${loadmore(1)}
+</main>
 ${tfoot(1)}
 </body></html>`
 );

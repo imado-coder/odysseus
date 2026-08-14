@@ -9,7 +9,7 @@
    PART 6 — Category pill row
    ========================================================================== */
 .cpills {
-  --cpill-border: #d4d6d8;
+  --cpill-border: #8f9498; /* 3.03:1 — #d4d6d8 measured 1.46:1 */
   --cpill-border-active: #101418;
   --cpill-bg: #ffffff;
   --cpill-fg: #101418;
@@ -26,6 +26,9 @@
   overflow-x: auto;
   scroll-behavior: smooth;
   scroll-snap-type: inline proximity;
+  /* Without this the snap engine parks the first pill at the scrollport
+     edge, opening the track at scrollLeft:16 and misaligning it with .cgrid. */
+  scroll-padding-inline-start: 16px;
   padding-inline: 16px;
   scrollbar-width: none;
 }
@@ -50,11 +53,22 @@
   transition: border-color 120ms ease, background-color 120ms ease;
 }
 
+/* The current pill goes to 600 weight, which widens its text and pushes every
+   pill after it. Reserve the bold width on all pills so nothing moves. */
+.cpill::after {
+  content: attr(data-label);
+  display: block;
+  block-size: 0;
+  overflow: hidden;
+  visibility: hidden;
+  font-weight: 600;
+}
+
 .cpill:hover {
   border-color: var(--cpill-border-active);
 }
 
-.cpill[aria-current="true"] {
+.cpill[aria-current] {
   border-color: var(--cpill-border-active);
   border-width: 2px;
   font-weight: 600;
@@ -79,6 +93,12 @@
   color: #101418;
 }
 
+.cpills__next::before {
+  content: "";
+  position: absolute;
+  inset: -5px;
+}
+
 .cpills::after {
   content: "";
   position: absolute;
@@ -99,7 +119,7 @@
   --cpill-border: transparent;
 }
 
-.cpills[data-variant="2"] .cpill[aria-current="true"] {
+.cpills[data-variant="2"] .cpill[aria-current] {
   background: #101418;
   color: #fff;
   border-color: transparent;
@@ -115,9 +135,9 @@
   --cpill-border-active: var(--c-accent, #ff6d00);
 }
 
-.cpills[data-variant="4"] .cpill[aria-current="true"] {
+.cpills[data-variant="4"] .cpill[aria-current] {
   background: var(--c-accent-light, #fff1e6);
-  color: var(--c-accent-dark, #e05c00);
+  color: #a54200; /* 4.6:1 on #fff1e6 */
 }
 
 /* Variant 5 — compact single-line */
@@ -145,7 +165,7 @@
 @media (min-width: 1200px) { .cgrid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
 
 .pgc {
-  --pgc-price: #ff6d00;
+  --pgc-price: var(--c-accent-text, #c24e00);
   --pgc-radius: 8px;
 
   display: flex;
@@ -218,15 +238,22 @@
   min-inline-size: 0;
 }
 
+/* One line at every width: at 360px the card is 158px against a ~155px
+   content run, so wrapping doubled the row height and floated the quick-add. */
 .pgc__price-wrap {
   display: flex;
   align-items: baseline;
   gap: 5px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   min-inline-size: 0;
+  overflow: hidden;
 }
 
+/* The deal label is the one part of the row allowed to truncate. */
 .pgc__deal {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: 13px;
   font-weight: 700;
   color: var(--pgc-price);
@@ -243,7 +270,7 @@
 
 .pgc__compare {
   font-size: 12px;
-  color: #8a939c;
+  color: var(--c-ink-3, #6e7781);
   text-decoration: line-through;
   white-space: nowrap;
 }
@@ -254,13 +281,21 @@
   inline-size: 30px;
   block-size: 30px;
   border-radius: 50%;
-  border: 1px solid #d4d6d8;
+  border: 1px solid #8f9498;
   background: #fff;
   color: #101418;
   display: grid;
   place-items: center;
   font-size: 14px;
+  position: relative;
   transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+/* Visible circle stays 30px; the touch target reaches the 44px floor. */
+.pgc__add::before {
+  content: "";
+  position: absolute;
+  inset: -7px;
 }
 
 .pgc__add:hover {
@@ -280,7 +315,6 @@
 }
 
 .pgc__note--rank { color: #101418; }
-.pgc__note--rank b { color: #101418; font-weight: 700; }
 
 .pgc__rating {
   display: flex;
@@ -367,7 +401,7 @@
   --tfoot-bg: #141414;
   --tfoot-fg: #ffffff;
   --tfoot-muted: #b3b6b9;
-  --tfoot-rule: rgba(255, 255, 255, 0.14);
+  --tfoot-rule: rgba(255, 255, 255, 0.42); /* .14 measured 1.50:1 */
 
   background: var(--tfoot-bg);
   color: var(--tfoot-fg);
@@ -390,7 +424,8 @@
   .tfoot__cols { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
-.tfoot__title {
+.tfoot__title,
+.tfoot__social-title {
   font-size: 14px;
   font-weight: 700;
   margin-block-end: 14px;
@@ -457,9 +492,9 @@
 .store-btn__small { display: block; font-size: 9px; opacity: 0.8; }
 .store-btn__big { display: block; font-size: 13px; font-weight: 700; }
 
+/* Same type as .tfoot__title — carried by the shared selector, this adds
+   only the spacing that differs. */
 .tfoot__social-title {
-  font-size: 14px;
-  font-weight: 700;
   margin-block: 24px 12px;
 }
 
@@ -555,10 +590,8 @@
   padding-block: 28px 16px;
 }
 
-.tfoot[data-variant="5"] .tfoot__perks,
-.tfoot[data-variant="5"] .tfoot__stores,
-.tfoot[data-variant="5"] .tfoot__social,
-.tfoot[data-variant="5"] .tfoot__social-title {
+/* Hiding the children left the column heading orphaned over empty space. */
+.tfoot[data-variant="5"] .tfoot__col--app {
   display: none;
 }
 
@@ -573,7 +606,7 @@
 }
 
 .loadmore__btn {
-  --lm-bg: var(--c-accent, #ff6d00);
+  --lm-bg: var(--c-accent-text, #c24e00);
   --lm-fg: #ffffff;
   --lm-border: transparent;
 
@@ -598,6 +631,7 @@
 
 /* Busy state — the label is swapped by JS, the spinner is CSS only */
 .loadmore__btn[aria-busy="true"] .loadmore__caret {
+  font-size: 0; /* clear the caret glyph, or it spins inside the ring */
   inline-size: 13px;
   block-size: 13px;
   border: 2px solid currentColor;
@@ -611,8 +645,8 @@
 /* Variant 2 — outlined */
 .loadmore[data-variant="2"] .loadmore__btn {
   --lm-bg: transparent;
-  --lm-fg: var(--c-accent, #ff6d00);
-  --lm-border: var(--c-accent, #ff6d00);
+  --lm-fg: var(--c-accent-text, #c24e00);
+  --lm-border: var(--c-accent-text, #c24e00);
 }
 
 /* Variant 3 — ink */
@@ -630,4 +664,15 @@
   inline-size: min(520px, 100% - 32px);
   justify-content: center;
   border-radius: 12px;
+}
+
+/* List semantics without changing layout: the list items collapse away so the
+   pills stay the flex children and the anchors stay the snap targets. */
+.cpills__track > li {
+  display: contents;
+}
+
+.pgc__media > a {
+  display: block;
+  block-size: 100%;
 }

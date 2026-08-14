@@ -47,7 +47,7 @@ for (const s of sizes) {
       const r = el.getBoundingClientRect();
       if (r.width > 0 && (r.right > de.clientWidth + 1 || r.left < -1)) {
         const parent = el.closest(
-          ".rail, .tabbar, .ubar__inner, .tbar__list, .cpills__track"
+          ".rail, .tabbar, .ubar__inner, .tbar__list, .cpills__track, .gallery__thumbs, .bb__swatches, .bb__pills"
         );
         if (parent && parent !== el) continue; // rails scroll on purpose
         offenders.push(

@@ -36,60 +36,74 @@ const ubarItems = [
 ];
 
 function ubar(v) {
-  const items = ubarItems
-    .map(
-      (it) => `<div class="ubar__item">
+  const item = (it, dup) => `<div class="ubar__item${dup ? " ubar__item--dup" : ""}"${dup ? ' aria-hidden="true"' : ""}>
       <span class="ubar__icon" aria-hidden="true">${it.icon}</span>
       <span class="ubar__text" style="--item-color:${it.color}">
-        <span class="ubar__title">${it.title}${it.chev ? ' <span class="ubar__chev">›</span>' : ""}</span>
+        <span class="ubar__title">${it.title}${it.chev ? ' <span class="ubar__chev" aria-hidden="true">\u203a</span>' : ""}</span>
         <span class="ubar__sub">${it.sub}</span>
       </span>
-    </div>`
-    )
-    .join("\n    ");
-  const inner =
-    v === 2
-      ? `<div class="ubar__inner"><div class="ubar__track">${items}${items}</div></div>`
-      : `<div class="ubar__inner">${items}</div>`;
-  return `<div class="ubar" data-variant="${v}">${inner}</div>`;
+    </div>`;
+  const run = (dup) => ubarItems.map((it) => item(it, dup)).join("\n    ");
+  return `<div class="ubar" data-variant="${v}">
+  <div class="ubar__inner" data-scroller-track role="region" aria-label="Avantages du magasin" tabindex="0">
+    <div class="ubar__track">${run(false)}${run(true)}</div>
+  </div>
+</div>`;
 }
 
 /* --- PART 2 -------------------------------------------------------------- */
-function mhead(v, { open = false } = {}) {
+const navLinks = [
+  ["\ud83d\udc4d", "Meilleures ventes"],
+  ["\u2b50", "Notés 5 étoiles"],
+  ["\u2728", "Nouveautés"],
+];
+
+function mhead(v, { open = false, id = "MegaMenu" } = {}) {
   return `<header class="mhead" data-variant="${v}">
   <div class="mhead__inner">
     <a class="mhead__logo" href="#">
       <span class="logo-tile">
-        <span class="logo-tile__mark">🛍</span>
+        <span class="logo-tile__mark" aria-hidden="true">\ud83d\udecd</span>
         <span class="logo-tile__word">${BRAND}</span>
       </span>
     </a>
-    <nav class="mhead__nav">
-      <a class="mhead__nav-link" href="#">👍 Meilleures ventes</a>
-      <a class="mhead__nav-link" href="#">⭐ Notés 5 étoiles</a>
-      <a class="mhead__nav-link" href="#">Nouveautés</a>
+    <nav class="mhead__nav" aria-label="Principal">
+      ${navLinks
+        .map(
+          ([icon, label]) =>
+            `<a class="mhead__nav-link" href="#"><span aria-hidden="true">${icon}</span> ${label}</a>`
+        )
+        .join("\n      ")}
       <span class="mhead__cat-wrap">
-        <button class="mhead__cat" type="button" aria-expanded="${open}">
-          Catégories <span class="mhead__cat-caret">▲</span>
+        <button class="mhead__cat" type="button" data-disclosure
+                aria-expanded="${open}" aria-haspopup="true" aria-controls="${id}">
+          Catégories <span class="mhead__cat-caret" aria-hidden="true">\u25be</span>
         </button>
-        ${open ? mega(1) : ""}
+        ${mega(1, { id, open })}
       </span>
     </nav>
-    <form class="mhead__search" role="search">
-      <input class="mhead__search-input" type="search" placeholder="Rechercher un produit…">
-      <button class="mhead__search-btn" type="submit" aria-label="Rechercher">🔍</button>
+    <form class="mhead__search" role="search" action="/search" method="get">
+      <label class="visually-hidden" for="Search-${v}">Rechercher un produit</label>
+      <input class="mhead__search-input" id="Search-${v}" type="search" name="q"
+             placeholder="Rechercher un produit…">
+      <button class="mhead__search-btn" type="submit" aria-label="Lancer la recherche">
+        <span aria-hidden="true">\ud83d\udd0d</span>
+      </button>
     </form>
     <div class="mhead__end">
       <a class="mhead__acct" href="#">
-        <span class="mhead__avatar">N</span>
+        <span class="mhead__avatar" aria-hidden="true">N</span>
         <span class="mhead__acct-lines">
           <span class="mhead__acct-hi">Bonjour, Nassim</span>
           <span class="mhead__acct-main">Commandes et Compte</span>
         </span>
       </a>
-      <a class="mhead__util" href="#"><span aria-hidden="true">🎧</span> Aide</a>
-      <a class="mhead__util" href="#"><span class="mhead__flag">FR</span> Français</a>
-      <a class="mhead__cart" href="#" aria-label="Panier">🛒<span class="mhead__cart-count">3</span></a>
+      <a class="mhead__util" href="#"><span aria-hidden="true">\ud83c\udfa7</span> Aide</a>
+      <a class="mhead__util" href="#"><span class="mhead__flag" aria-hidden="true">FR</span> Français</a>
+      <a class="mhead__cart" href="#" aria-label="Panier, 3 articles">
+        <span aria-hidden="true">\ud83d\uded2</span>
+        <span class="mhead__cart-count" aria-hidden="true">3</span>
+      </a>
     </div>
   </div>
 </header>`;
@@ -106,12 +120,14 @@ function tbar(v) {
   return `<div class="tbar" data-variant="${v}">
   <div class="tbar__inner">
     <span class="tbar__lead"><span aria-hidden="true">🛡</span> Pourquoi choisir ${BRAND} ?</span>
-    <div class="tbar__list">
+    <div class="tbar__list" role="region" aria-label="Garanties" tabindex="0">
       ${tbarItems
         .map(
           ([i, t], n) =>
             `<span class="tbar__item"><span class="tbar__icon" aria-hidden="true">${i}</span>${t}${
-              n === tbarItems.length - 1 ? " ›" : ""
+              n === tbarItems.length - 1
+                ? ' <span aria-hidden="true">\u203a</span>'
+                : ""
             }</span>`
         )
         .join("\n      ")}
@@ -150,31 +166,31 @@ const megaTiles = [
   ["Serviettes et Rideaux", false], ["Produits de nettoyage", false],
 ];
 
-function mega(v) {
-  return `<div class="mega" data-variant="${v}" data-open="true">
-  <aside class="mega__aside">
+function mega(v, { id = "MegaMenu", open = true } = {}) {
+  return `<div class="mega" id="${id}" data-variant="${v}" data-open="${open}"${open ? "" : " hidden"}>
+  <ul class="mega__aside" role="region" aria-label="Toutes les catégories" tabindex="0">
     ${megaCats
       .map(
         (c, i) =>
-          `<div class="mega__cat"${i === 1 ? ' aria-current="true"' : ""}>${c}<span class="mega__cat-chev">›</span></div>`
+          `<li><a class="mega__cat" href="#"${i === 1 ? ' aria-current="page"' : ""}>${c}<span class="mega__cat-chev" aria-hidden="true">\u203a</span></a></li>`
       )
       .join("\n    ")}
-  </aside>
+  </ul>
   <div class="mega__panel">
-    <h3 class="mega__panel-title">Tout Maison et Cuisine ›</h3>
-    <div class="mega__grid">
+    <h3 class="mega__panel-title">Tout Maison et Cuisine <span aria-hidden="true">\u203a</span></h3>
+    <ul class="mega__grid">
       ${megaTiles
         .map(
-          ([label, hot], i) => `<a class="mega__tile" href="#">
+          ([label, hot], i) => `<li><a class="mega__tile" href="#">
         <span class="mega__tile-media">
           <img src="${tileImg(i)}" alt="" loading="lazy" width="120" height="120">
           ${hot ? '<span class="mega__hot">HOT</span>' : ""}
         </span>
         <span class="mega__tile-label">${label}</span>
-      </a>`
+      </a></li>`
         )
         .join("\n      ")}
-    </div>
+    </ul>
   </div>
 </div>`;
 }
@@ -182,10 +198,10 @@ function mega(v) {
 /* --- page ---------------------------------------------------------------- */
 const parts = [
   { n: 1, title: "Partie 1 — Barre utilitaire", render: ubar, count: 5 },
-  { n: 2, title: "Partie 2 — En-tête principal", render: mhead, count: 5 },
+  { n: 2, title: "Partie 2 — En-tête principal", render: (v) => mhead(v, { id: `MegaHead${v}` }), count: 5 },
   { n: 3, title: "Partie 3 — Barre de confiance", render: tbar, count: 5 },
   { n: 4, title: "Partie 4 — Carte promo", render: pcard, count: 5 },
-  { n: 5, title: "Partie 5 — Méga menu Catégories", render: mega, count: 5 },
+  { n: 5, title: "Partie 5 — Méga menu Catégories", render: (v) => mega(v, { id: `MegaSolo${v}` }), count: 5 },
 ];
 
 const body = parts
@@ -213,6 +229,7 @@ const html = `<!doctype html>
 <title>Composants — 5 variantes</title>
 <link rel="stylesheet" href="../assets/base.css">
 <link rel="stylesheet" href="../assets/header-system.css">
+<script src="../assets/theme.js" defer></script>
 <style>
   body { background: #eceef0; }
   .demo { padding: 28px 0 8px; }
@@ -247,9 +264,11 @@ const stacked = `<!doctype html>
 <title>Pile d'en-tête</title>
 <link rel="stylesheet" href="../assets/base.css">
 <link rel="stylesheet" href="../assets/header-system.css">
+<script src="../assets/theme.js" defer></script>
 <style>body{background:#fff}.spacer{padding:22px 20px;display:flex;justify-content:center}</style>
 </head>
 <body>
+<a class="skip-to-content visually-hidden" href="#MainContent">Aller au contenu</a>
 ${ubar(1)}
 ${mhead(1, { open: true })}
 ${tbar(1)}
@@ -260,6 +279,6 @@ ${tbar(1)}
 writeFileSync(join(here, "stack.html"), stacked);
 writeFileSync(
   join(here, "stack-closed.html"),
-  stacked.replace(mhead(1, { open: true }), mhead(1))
+  stacked.replace(mhead(1, { open: true }), mhead(1, { open: false }))
 );
 console.log("wrote parts.html + stack.html + stack-closed.html");

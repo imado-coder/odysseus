@@ -1,0 +1,953 @@
+/* ==========================================================================
+   product-page.css — PDP surface.
+   Two columns: the media/content column scrolls, the buy box sticks.
+   The buy box is a stack of independent blocks; any of them can be dropped
+   for a given product without the others shifting, so the section schema can
+   expose each as its own toggle.
+   ========================================================================== */
+
+.pdp {
+  background: #fff;
+  padding-block-end: 40px;
+}
+
+.pdp__inner {
+  max-inline-size: 1440px;
+  margin-inline: auto;
+  padding-inline: 16px;
+}
+
+/* --- breadcrumb ---------------------------------------------------------- */
+.pdp__crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding-block: 14px;
+  font-size: 13px;
+  color: var(--c-ink-2, #5b6570);
+}
+
+.pdp__crumbs a:hover { text-decoration: underline; }
+
+.pdp__crumb-sep { color: var(--c-ink-3, #6e7781); }
+
+.pdp__crumb-current {
+  color: var(--c-ink, #101418);
+  max-inline-size: 24ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- two-column frame ---------------------------------------------------- */
+.pdp__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (min-width: 990px) {
+  .pdp__grid {
+    grid-template-columns: minmax(0, 1fr) 560px;
+    gap: 40px;
+  }
+}
+
+/* The buy box tracks the viewport while the left column scrolls past it. */
+@media (min-width: 990px) {
+  .pdp__buybox {
+    position: sticky;
+    inset-block-start: 16px;
+    align-self: start;
+    max-block-size: calc(100vh - 32px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+}
+
+/* ==========================================================================
+   Gallery
+   ========================================================================== */
+.gallery {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+@media (max-width: 749px) {
+  .gallery {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.gallery__thumbs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-block-size: 620px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.gallery__thumbs::-webkit-scrollbar { display: none; }
+
+@media (max-width: 749px) {
+  .gallery__thumbs {
+    flex-direction: row;
+    max-block-size: none;
+    overflow-x: auto;
+    order: 2;
+  }
+}
+
+.gallery__thumb {
+  flex: none;
+  inline-size: 64px;
+  block-size: 64px;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--c-border, #e7eaec);
+  background: #fff;
+  padding: 0;
+  position: relative;
+}
+
+.gallery__thumb img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.gallery__thumb[aria-current] {
+  border-color: var(--c-ink, #101418);
+  border-width: 2px;
+}
+
+.gallery__stage {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--c-surface-2, #fafbfb);
+}
+
+.gallery__stage img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+/* ==========================================================================
+   Buy box blocks
+   Each block is a sibling with its own bottom margin, so removing one leaves
+   no orphaned spacing.
+   ========================================================================== */
+.bb > * + * {
+  margin-block-start: 12px;
+}
+
+/* --- savings ribbon --- */
+.bb__savings {
+  display: flex;
+  align-items: stretch;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--c-accent-light, #fff1e6);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.bb__savings-flag {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 18px 8px 12px;
+  background: #ffd84d;
+  color: #7a4a00;
+  font-weight: 800;
+  white-space: nowrap;
+  /* Angled trailing edge, as on the reference ribbon. */
+  clip-path: polygon(0 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
+  padding-inline-end: 24px;
+}
+
+.bb__savings-list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  padding: 8px 12px;
+  color: var(--c-accent-text, #c24e00);
+  min-inline-size: 0;
+}
+
+.bb__savings-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+/* --- title --- */
+.bb__title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.bb__title {
+  flex: 1;
+  min-inline-size: 0;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--c-ink, #101418);
+}
+
+.bb__share {
+  flex: none;
+  inline-size: 34px;
+  block-size: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--c-ink-2, #5b6570);
+  font-size: 16px;
+}
+
+.bb__share:hover { background: var(--c-bg, #f4f5f6); }
+
+/* --- rating line --- */
+.bb__rating {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--c-ink-2, #5b6570);
+}
+
+.bb__rating-score {
+  font-weight: 800;
+  color: var(--c-accent-text, #c24e00);
+}
+
+.bb__rating-stars {
+  color: var(--c-accent-text, #c24e00);
+  font-size: 14px;
+  letter-spacing: -0.5px;
+}
+
+.bb__rating-count {
+  font-weight: 700;
+  color: var(--c-accent-text, #c24e00);
+}
+
+.bb__rating-sep { color: var(--c-border-strong, #d3d8dc); }
+
+.bb__seller-dot {
+  inline-size: 16px;
+  block-size: 16px;
+  border-radius: 50%;
+  background: var(--c-accent-light, #fff1e6);
+  display: inline-block;
+  vertical-align: -3px;
+}
+
+/* --- rank --- */
+.bb__rank {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--c-ink, #101418);
+}
+
+.bb__rank-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 7px;
+  border-radius: 3px;
+  background: #0f7a3d;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* --- price --- */
+.bb__price-row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bb__price-was {
+  font-size: 20px;
+  color: var(--c-ink-3, #6e7781);
+  text-decoration: line-through;
+}
+
+.bb__price-deal {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  color: var(--c-accent-text, #c24e00);
+  font-weight: 800;
+}
+
+.bb__price-label {
+  font-size: 17px;
+  white-space: nowrap;
+}
+
+.bb__price-now {
+  font-size: 28px;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.bb__price-note {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--c-ink-2, #5b6570);
+}
+
+.bb__price-note b { color: var(--c-ink, #101418); }
+
+.bb__off {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 3px;
+  background: #0f7a3d;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* --- stock warning --- */
+.bb__stock {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border: 1px solid var(--c-accent-text, #c24e00);
+  border-radius: 4px;
+  color: var(--c-accent-text, #c24e00);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* --- promo panel --- */
+.bb__promo {
+  border: 1px solid var(--c-accent, #ff6d00);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.bb__promo-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--c-accent, #ff6d00);
+  color: #fff;
+  font-size: 13px;
+}
+
+.bb__promo-name {
+  font-weight: 800;
+  font-style: italic;
+  white-space: nowrap;
+}
+
+.bb__promo-rule {
+  inline-size: 34px;
+  block-size: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.bb__promo-timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  /* Time runs left-to-right even on an RTL storefront. */
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-variant-numeric: tabular-nums;
+}
+
+.bb__promo-more {
+  margin-inline-start: auto;
+  font-size: 16px;
+}
+
+.bb__promo-body { padding: 12px; }
+
+/* --- variants --- */
+.bb__opt-label {
+  font-size: 13px;
+  margin-block-end: 8px;
+}
+
+.bb__opt-label b { font-weight: 700; }
+
+.bb__swatches {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-block-end: 2px;
+}
+
+.bb__swatches::-webkit-scrollbar { display: none; }
+
+.bb__swatch {
+  flex: none;
+  inline-size: 96px;
+  border: 1px solid var(--c-border-strong, #d3d8dc);
+  border-radius: 4px;
+  overflow: hidden;
+  background: #fff;
+  padding: 0;
+  text-align: center;
+}
+
+.bb__swatch[aria-current] {
+  border-color: var(--c-ink, #101418);
+  border-width: 2px;
+}
+
+.bb__swatch img {
+  inline-size: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.bb__swatch-name {
+  display: block;
+  padding: 4px 5px;
+  font-size: 11px;
+  color: var(--c-ink-2, #5b6570);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- primary call to action --- */
+.bb__cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  inline-size: 100%;
+  min-block-size: 56px;
+  padding-inline: 24px;
+  border-radius: 999px;
+  background: var(--c-accent-text, #c24e00);
+  color: #fff;
+  font-size: 17px;
+  font-weight: 700;
+  transition: filter 120ms ease, transform 120ms ease;
+}
+
+.bb__cta:hover { filter: brightness(0.94); }
+.bb__cta:active { transform: scale(0.99); }
+
+.bb__cta-timer {
+  padding: 3px 7px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.28);
+  font-size: 14px;
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- trust list --- */
+.bb__trust {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-block-start: 4px;
+  font-size: 13px;
+}
+
+.bb__trust-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--c-ink, #101418);
+}
+
+.bb__trust-row--ship {
+  color: #0f7a3d;
+  font-weight: 700;
+}
+
+.bb__pills {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.bb__pills::-webkit-scrollbar { display: none; }
+
+.bb__pill {
+  flex: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  background: #0f7a3d;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   Reviews
+   ========================================================================== */
+.reviews {
+  margin-block-start: 32px;
+  border-block-start: 1px solid var(--c-border, #e7eaec);
+  padding-block-start: 20px;
+}
+
+.reviews__head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+}
+
+.reviews__count {
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.reviews__sep { color: var(--c-border-strong, #d3d8dc); }
+
+.reviews__score {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.reviews__stars {
+  color: var(--c-ink, #101418);
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
+.reviews__verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-inline-start: auto;
+  padding: 5px 9px;
+  border-radius: 4px;
+  background: #eaf6ee;
+  color: #0b5f2f;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* fit meters */
+.reviews__fit {
+  display: grid;
+  gap: 8px;
+  margin-block: 18px;
+  max-inline-size: 460px;
+}
+
+.fitrow {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) 40px;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.fitrow__track {
+  block-size: 4px;
+  border-radius: 2px;
+  background: var(--c-border, #e7eaec);
+  overflow: hidden;
+}
+
+.fitrow__bar {
+  display: block;
+  block-size: 100%;
+  border-radius: 2px;
+  background: var(--c-ink, #101418);
+}
+
+.fitrow__val {
+  text-align: end;
+  color: var(--c-ink-2, #5b6570);
+  font-variant-numeric: tabular-nums;
+}
+
+/* review list */
+.review {
+  padding-block: 16px;
+  border-block-start: 1px solid var(--c-border, #e7eaec);
+}
+
+.review__head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--c-ink-2, #5b6570);
+}
+
+.review__avatar {
+  inline-size: 28px;
+  block-size: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--c-bg, #f4f5f6);
+  color: var(--c-ink-2, #5b6570);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.review__name {
+  color: var(--c-ink, #101418);
+  font-weight: 600;
+}
+
+.review__meta { display: inline-flex; align-items: center; gap: 5px; }
+
+.review__rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-block: 8px 6px;
+}
+
+.review__stars {
+  color: var(--c-ink, #101418);
+  font-size: 15px;
+  letter-spacing: 1px;
+}
+
+.review__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border: 1px solid var(--c-accent-text, #c24e00);
+  border-radius: 3px;
+  color: var(--c-accent-text, #c24e00);
+  font-size: 12px;
+  font-weight: 700;
+  font-style: italic;
+}
+
+.review__text {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--c-ink, #101418);
+}
+
+/* ==========================================================================
+   Landing content — merchant-authored image and video stack
+   ========================================================================== */
+.landing {
+  margin-block-start: 32px;
+}
+
+.landing__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  inline-size: 100%;
+  padding-block: 12px;
+  border-block: 1px solid var(--c-border, #e7eaec);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.landing__stack {
+  display: grid;
+  gap: 4px;
+  margin-block-start: 16px;
+}
+
+.landing__item {
+  position: relative;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--c-surface-2, #fafbfb);
+}
+
+.landing__item img {
+  inline-size: 100%;
+  block-size: auto;
+}
+
+.landing__play {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  transform: translate(-50%, -50%);
+  inline-size: 56px;
+  block-size: 56px;
+  border-radius: 50%;
+  background: rgba(16, 20, 24, 0.42);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  backdrop-filter: blur(2px);
+}
+
+/* ==========================================================================
+   Related products
+   ========================================================================== */
+.related {
+  margin-block-start: 36px;
+}
+
+.related__title {
+  font-size: 17px;
+  font-weight: 800;
+  margin-block-end: 14px;
+}
+
+/* The related grid reuses the catalog card; it only needs its own gutters. */
+.related .cgrid {
+  padding-inline: 0;
+}
+
+/* ==========================================================================
+   Sticky mobile CTA — the buy box is far up the page once it stops sticking
+   ========================================================================== */
+.pdp__mobile-cta {
+  position: fixed;
+  inset-block-end: 0;
+  inset-inline: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+  background: #fff;
+  border-block-start: 1px solid var(--c-border, #e7eaec);
+  box-shadow: 0 -2px 14px rgba(16, 20, 24, 0.08);
+}
+
+@media (min-width: 990px) {
+  .pdp__mobile-cta { display: none; }
+}
+
+.pdp__mobile-price {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.pdp__mobile-price b {
+  font-size: 18px;
+  color: var(--c-accent-text, #c24e00);
+}
+
+.pdp__mobile-price s {
+  font-size: 12px;
+  color: var(--c-ink-3, #6e7781);
+}
+
+.pdp__mobile-cta .bb__cta {
+  flex: 1;
+  min-block-size: 46px;
+  font-size: 15px;
+}
+
+@media (max-width: 989px) {
+  .pdp { padding-block-end: 84px; }
+}
+
+/* ==========================================================================
+   Buy-box block library — additional blocks
+   Each is independent and optional; the merchant enables per product.
+   ========================================================================== */
+
+/* --- flash variant of the savings ribbon --- */
+.bb__savings--flash .bb__savings-flag {
+  background: #ffe14d;
+  color: #8a3b00;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.bb__savings--flash {
+  background: #ff7a45;
+}
+
+.bb__savings--flash .bb__savings-list { color: #fff; }
+
+/* --- featured seller chip, sits inline in the rating row --- */
+.bb__seller-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  background: #6b3fd4;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* --- outlined notice pill: price drop, low stock --- */
+.bb__notice {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border: 1px solid var(--c-accent-text, #c24e00);
+  border-radius: 4px;
+  color: var(--c-accent-text, #c24e00);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* --- quantity --- */
+.bb__qty-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.bb__qty-select {
+  min-block-size: 40px;
+  padding: 0 34px 0 12px;
+  border: 1px solid var(--c-border-strong, #d3d8dc);
+  border-radius: 6px;
+  background: #fff;
+  font-size: 14px;
+}
+
+.bb__qty-sold {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--c-accent-text, #c24e00);
+  font-weight: 700;
+}
+
+/* --- promo panel with its own inline add button --- */
+.bb__promo-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.bb__promo-thumb {
+  inline-size: 64px;
+  block-size: 64px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex: none;
+}
+
+.bb__promo-fields {
+  flex: 1;
+  min-inline-size: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.bb__promo-add {
+  flex: none;
+  min-block-size: 44px;
+  padding-inline: 18px;
+  border-radius: 999px;
+  background: #ffc233;
+  color: #5a3600;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* --- shipping and carriers --- */
+.bb__ship-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #0f7a3d;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.bb__ship-line {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  font-size: 13px;
+  color: var(--c-ink-2, #5b6570);
+}
+
+.bb__carriers {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+
+.bb__carrier {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--c-ink, #101418);
+}
+
+.bb__carrier-logo {
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: 34px;
+  block-size: 18px;
+  padding-inline: 4px;
+  border-radius: 2px;
+  background: var(--c-bg, #f4f5f6);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+/* Grid and flex children default to min-content width, which lets the thumb
+   strip and the swatch row push the whole page wider on small screens. */
+.pdp__grid > *,
+.pdp__media,
+.gallery > *,
+.bb > * {
+  min-inline-size: 0;
+}

@@ -11,8 +11,8 @@
 .ubar {
   --ubar-bg: #0d0d0d;
   --ubar-fg: #ffffff;
-  --ubar-divider: rgba(255, 255, 255, 0.22);
-  --ubar-pad-y: 5px;
+  --ubar-divider: rgba(255, 255, 255, 0.42); /* .22 measured 1.93:1 */
+  --ubar-pad-y: 6px;
 
   background: var(--ubar-bg);
   color: var(--ubar-fg);
@@ -93,12 +93,6 @@
   overflow: hidden;
   white-space: nowrap;
   padding-block: 8px;
-}
-
-.ubar[data-variant="2"] .ubar__track {
-  display: inline-flex;
-  gap: 48px;
-  animation: ubar-marquee 22s linear infinite;
 }
 
 .ubar[data-variant="2"] .ubar__item {
@@ -214,7 +208,7 @@
   inline-size: 46px;
   block-size: 46px;
   border-radius: 12px;
-  background: var(--logo-bg, #ff5a1f);
+  background: var(--logo-bg, var(--c-accent, #ff6d00));
   color: #fff;
   display: flex;
   flex-direction: column;
@@ -291,7 +285,7 @@
 
 .mhead__cat:hover,
 .mhead__cat[aria-expanded="true"] {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.32);
 }
 
 .mhead__cat-caret {
@@ -323,13 +317,12 @@
   min-inline-size: 0;
   border: 0;
   background: none;
-  outline: none;
   font-size: 14px;
   color: #101418;
 }
 
 .mhead__search-input::placeholder {
-  color: #8a939c;
+  color: var(--c-ink-3, #6e7781);
 }
 
 .mhead__search-btn {
@@ -347,6 +340,25 @@
 
 .mhead__search-btn:hover {
   transform: scale(1.06);
+}
+
+.mhead__search:focus-within {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px #101418;
+}
+
+/* Visible circles stay at their reference sizes; hit areas reach 44px. */
+.mhead__search-btn,
+.mhead__cart {
+  position: relative;
+}
+
+.mhead__search-btn::before,
+.mhead__cart::before {
+  content: "";
+  position: absolute;
+  inset: -5px;
 }
 
 /* --- account cluster --- */
@@ -520,7 +532,7 @@
     order: 10;
     flex-basis: 100%;
     max-inline-size: none;
-    block-size: 38px;
+    block-size: 44px;
     margin-block-end: 10px;
   }
   .mhead__inner {
@@ -635,7 +647,7 @@
 .pcard {
   --pcard-bg: #ffffff;
   --pcard-fg: #101418;
-  --pcard-accent: #ff5a1f;
+  --pcard-accent: var(--c-accent, #ff6d00);
   --pcard-border: transparent;
 
   display: inline-flex;
@@ -652,14 +664,11 @@
   text-align: center;
 }
 
+.pcard__top,
 .pcard__top {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 15px;
-  font-weight: 900;
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
 }
 
 .pcard__star {
@@ -691,7 +700,7 @@
 
 /* Variant 4 — outlined */
 .pcard[data-variant="4"] {
-  --pcard-border: #ff5a1f;
+  --pcard-border: var(--c-accent, #ff6d00);
 }
 
 /* Variant 5 — gradient */
@@ -710,8 +719,13 @@
   inset-block-start: 100%;
   z-index: 80;
   display: none;
-  inline-size: min(1100px, calc(100vw - 32px));
+  /* Sized against the anchor, not the viewport: 100vw includes a classic
+     scrollbar and would eat half the intended inset on Windows. */
+  inline-size: min(1100px, calc(100% - 32px));
   background: #fff;
+  /* The overlay sits inside .mhead, which sets a light foreground. Reset ink
+     here or the panel title renders white on white. */
+  color: #101418;
   border-radius: 10px;
   box-shadow: 0 12px 40px rgba(16, 20, 24, 0.22);
   overflow: hidden;
@@ -742,13 +756,13 @@
 }
 
 .mega__cat:hover,
-.mega__cat[aria-current="true"] {
+.mega__cat[aria-current] {
   background: #f4f5f6;
   font-weight: 700;
 }
 
 .mega__cat-chev {
-  color: #8a939c;
+  color: var(--c-ink-3, #6e7781);
   font-size: 12px;
 }
 
@@ -805,7 +819,7 @@
   padding: 2px 6px;
   border-start-end-radius: 8px;
   border-end-start-radius: 8px;
-  background: var(--c-accent, #ff6d00);
+  background: var(--c-accent-text, #c24e00);
   color: #fff;
   font-size: 10px;
   font-weight: 800;
@@ -850,9 +864,13 @@
   max-inline-size: none;
 }
 
-/* Variant 4 — wide sidebar, larger tiles */
-.mega[data-variant="4"][data-open="true"] {
-  grid-template-columns: 300px 1fr;
+/* Variant 4 — wide sidebar, larger tiles. Guarded: the variant selector
+   outranks the ≤900px collapse, so without this the sidebar survives to
+   360px and crushes the panel to 44px. */
+@media (min-width: 901px) {
+  .mega[data-variant="4"][data-open="true"] {
+    grid-template-columns: 300px 1fr;
+  }
 }
 
 @media (min-width: 901px) {
@@ -895,4 +913,34 @@
 /* The trigger stays in normal flow; the panel anchors to .mhead__inner. */
 .mhead__cat-wrap {
   position: static;
+}
+
+/* --------------------------------------------------------------------------
+   Utility bar marquee track.
+   The track wrapper is always present so the marquee variant is a pure token
+   swap rather than a markup fork; it only becomes a flex row when animating,
+   and the duplicated run it needs to loop seamlessly stays hidden otherwise.
+   -------------------------------------------------------------------------- */
+.ubar__track {
+  display: contents;
+}
+
+.ubar__item--dup {
+  display: none;
+}
+
+.ubar[data-variant="2"] .ubar__track {
+  display: inline-flex;
+  gap: 48px;
+  animation: ubar-marquee 22s linear infinite;
+}
+
+.ubar[data-variant="2"] .ubar__item--dup {
+  display: flex;
+}
+
+/* List semantics for the mega menu: the rows and tiles are real links inside
+   real lists, so the grid cells are the list items. */
+.mega__aside li {
+  list-style: none;
 }

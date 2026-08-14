@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="../assets/base.css">
 <link rel="stylesheet" href="../assets/header-system.css">
 <link rel="stylesheet" href="../assets/catalog-system.css">
+<script src="../assets/theme.js" defer></script>
 <style>
   body { background: #eceef0; }
   .demo { padding: 26px 0 6px; }
@@ -22,88 +23,98 @@
   <h2 class="demo__title">Partie 6 — Ligne de filtres catégories</h2>
   <div class="demo__variant">
     <div class="demo__label">Variante 1</div>
-    <div class="demo__stage"><div class="cpills" data-variant="1">
-  <div class="cpills__track">
-    <a class="cpill" href="#" aria-current="true">Recommandé</a>
-    <a class="cpill" href="#">Beauté et Soins personnels</a>
-    <a class="cpill" href="#">Vêtements femme</a>
-    <a class="cpill" href="#">Maison et Cuisine</a>
-    <a class="cpill" href="#">Vêtements homme</a>
-    <a class="cpill" href="#">Chaussures femme</a>
-    <a class="cpill" href="#">Pyjamas et Sous-vêtements homme</a>
-    <a class="cpill" href="#">Sports et Activités d'extérieur</a>
-    <a class="cpill" href="#">Fournitures de bureau et écoles</a>
-  </div>
-  <button class="cpills__next" type="button" aria-label="Suivant">›</button>
-</div></div>
+    <div class="demo__stage"><nav class="cpills" data-variant="1" data-scroller aria-label="Filtrer par catégorie">
+  <ul class="cpills__track" data-scroller-track>
+    <li><a class="cpill" href="#" data-label="Recommandé" aria-current="page">Recommandé</a></li>
+    <li><a class="cpill" href="#" data-label="Beauté et Soins personnels">Beauté et Soins personnels</a></li>
+    <li><a class="cpill" href="#" data-label="Vêtements femme">Vêtements femme</a></li>
+    <li><a class="cpill" href="#" data-label="Maison et Cuisine">Maison et Cuisine</a></li>
+    <li><a class="cpill" href="#" data-label="Vêtements homme">Vêtements homme</a></li>
+    <li><a class="cpill" href="#" data-label="Chaussures femme">Chaussures femme</a></li>
+    <li><a class="cpill" href="#" data-label="Pyjamas et Sous-vêtements homme">Pyjamas et Sous-vêtements homme</a></li>
+    <li><a class="cpill" href="#" data-label="Sports et Activités d'extérieur">Sports et Activités d'extérieur</a></li>
+    <li><a class="cpill" href="#" data-label="Fournitures de bureau et écoles">Fournitures de bureau et écoles</a></li>
+  </ul>
+  <button class="cpills__next" type="button" data-scroller-next aria-label="Catégories suivantes">
+    <span aria-hidden="true">›</span>
+  </button>
+</nav></div>
   </div>
   <div class="demo__variant">
     <div class="demo__label">Variante 2</div>
-    <div class="demo__stage"><div class="cpills" data-variant="2">
-  <div class="cpills__track">
-    <a class="cpill" href="#" aria-current="true">Recommandé</a>
-    <a class="cpill" href="#">Beauté et Soins personnels</a>
-    <a class="cpill" href="#">Vêtements femme</a>
-    <a class="cpill" href="#">Maison et Cuisine</a>
-    <a class="cpill" href="#">Vêtements homme</a>
-    <a class="cpill" href="#">Chaussures femme</a>
-    <a class="cpill" href="#">Pyjamas et Sous-vêtements homme</a>
-    <a class="cpill" href="#">Sports et Activités d'extérieur</a>
-    <a class="cpill" href="#">Fournitures de bureau et écoles</a>
-  </div>
-  <button class="cpills__next" type="button" aria-label="Suivant">›</button>
-</div></div>
+    <div class="demo__stage"><nav class="cpills" data-variant="2" data-scroller aria-label="Filtrer par catégorie">
+  <ul class="cpills__track" data-scroller-track>
+    <li><a class="cpill" href="#" data-label="Recommandé" aria-current="page">Recommandé</a></li>
+    <li><a class="cpill" href="#" data-label="Beauté et Soins personnels">Beauté et Soins personnels</a></li>
+    <li><a class="cpill" href="#" data-label="Vêtements femme">Vêtements femme</a></li>
+    <li><a class="cpill" href="#" data-label="Maison et Cuisine">Maison et Cuisine</a></li>
+    <li><a class="cpill" href="#" data-label="Vêtements homme">Vêtements homme</a></li>
+    <li><a class="cpill" href="#" data-label="Chaussures femme">Chaussures femme</a></li>
+    <li><a class="cpill" href="#" data-label="Pyjamas et Sous-vêtements homme">Pyjamas et Sous-vêtements homme</a></li>
+    <li><a class="cpill" href="#" data-label="Sports et Activités d'extérieur">Sports et Activités d'extérieur</a></li>
+    <li><a class="cpill" href="#" data-label="Fournitures de bureau et écoles">Fournitures de bureau et écoles</a></li>
+  </ul>
+  <button class="cpills__next" type="button" data-scroller-next aria-label="Catégories suivantes">
+    <span aria-hidden="true">›</span>
+  </button>
+</nav></div>
   </div>
   <div class="demo__variant">
     <div class="demo__label">Variante 3</div>
-    <div class="demo__stage"><div class="cpills" data-variant="3">
-  <div class="cpills__track">
-    <a class="cpill" href="#" aria-current="true">Recommandé</a>
-    <a class="cpill" href="#">Beauté et Soins personnels</a>
-    <a class="cpill" href="#">Vêtements femme</a>
-    <a class="cpill" href="#">Maison et Cuisine</a>
-    <a class="cpill" href="#">Vêtements homme</a>
-    <a class="cpill" href="#">Chaussures femme</a>
-    <a class="cpill" href="#">Pyjamas et Sous-vêtements homme</a>
-    <a class="cpill" href="#">Sports et Activités d'extérieur</a>
-    <a class="cpill" href="#">Fournitures de bureau et écoles</a>
-  </div>
-  <button class="cpills__next" type="button" aria-label="Suivant">›</button>
-</div></div>
+    <div class="demo__stage"><nav class="cpills" data-variant="3" data-scroller aria-label="Filtrer par catégorie">
+  <ul class="cpills__track" data-scroller-track>
+    <li><a class="cpill" href="#" data-label="Recommandé" aria-current="page">Recommandé</a></li>
+    <li><a class="cpill" href="#" data-label="Beauté et Soins personnels">Beauté et Soins personnels</a></li>
+    <li><a class="cpill" href="#" data-label="Vêtements femme">Vêtements femme</a></li>
+    <li><a class="cpill" href="#" data-label="Maison et Cuisine">Maison et Cuisine</a></li>
+    <li><a class="cpill" href="#" data-label="Vêtements homme">Vêtements homme</a></li>
+    <li><a class="cpill" href="#" data-label="Chaussures femme">Chaussures femme</a></li>
+    <li><a class="cpill" href="#" data-label="Pyjamas et Sous-vêtements homme">Pyjamas et Sous-vêtements homme</a></li>
+    <li><a class="cpill" href="#" data-label="Sports et Activités d'extérieur">Sports et Activités d'extérieur</a></li>
+    <li><a class="cpill" href="#" data-label="Fournitures de bureau et écoles">Fournitures de bureau et écoles</a></li>
+  </ul>
+  <button class="cpills__next" type="button" data-scroller-next aria-label="Catégories suivantes">
+    <span aria-hidden="true">›</span>
+  </button>
+</nav></div>
   </div>
   <div class="demo__variant">
     <div class="demo__label">Variante 4</div>
-    <div class="demo__stage"><div class="cpills" data-variant="4">
-  <div class="cpills__track">
-    <a class="cpill" href="#" aria-current="true">Recommandé</a>
-    <a class="cpill" href="#">Beauté et Soins personnels</a>
-    <a class="cpill" href="#">Vêtements femme</a>
-    <a class="cpill" href="#">Maison et Cuisine</a>
-    <a class="cpill" href="#">Vêtements homme</a>
-    <a class="cpill" href="#">Chaussures femme</a>
-    <a class="cpill" href="#">Pyjamas et Sous-vêtements homme</a>
-    <a class="cpill" href="#">Sports et Activités d'extérieur</a>
-    <a class="cpill" href="#">Fournitures de bureau et écoles</a>
-  </div>
-  <button class="cpills__next" type="button" aria-label="Suivant">›</button>
-</div></div>
+    <div class="demo__stage"><nav class="cpills" data-variant="4" data-scroller aria-label="Filtrer par catégorie">
+  <ul class="cpills__track" data-scroller-track>
+    <li><a class="cpill" href="#" data-label="Recommandé" aria-current="page">Recommandé</a></li>
+    <li><a class="cpill" href="#" data-label="Beauté et Soins personnels">Beauté et Soins personnels</a></li>
+    <li><a class="cpill" href="#" data-label="Vêtements femme">Vêtements femme</a></li>
+    <li><a class="cpill" href="#" data-label="Maison et Cuisine">Maison et Cuisine</a></li>
+    <li><a class="cpill" href="#" data-label="Vêtements homme">Vêtements homme</a></li>
+    <li><a class="cpill" href="#" data-label="Chaussures femme">Chaussures femme</a></li>
+    <li><a class="cpill" href="#" data-label="Pyjamas et Sous-vêtements homme">Pyjamas et Sous-vêtements homme</a></li>
+    <li><a class="cpill" href="#" data-label="Sports et Activités d'extérieur">Sports et Activités d'extérieur</a></li>
+    <li><a class="cpill" href="#" data-label="Fournitures de bureau et écoles">Fournitures de bureau et écoles</a></li>
+  </ul>
+  <button class="cpills__next" type="button" data-scroller-next aria-label="Catégories suivantes">
+    <span aria-hidden="true">›</span>
+  </button>
+</nav></div>
   </div>
   <div class="demo__variant">
     <div class="demo__label">Variante 5</div>
-    <div class="demo__stage"><div class="cpills" data-variant="5">
-  <div class="cpills__track">
-    <a class="cpill" href="#" aria-current="true">Recommandé</a>
-    <a class="cpill" href="#">Beauté et Soins personnels</a>
-    <a class="cpill" href="#">Vêtements femme</a>
-    <a class="cpill" href="#">Maison et Cuisine</a>
-    <a class="cpill" href="#">Vêtements homme</a>
-    <a class="cpill" href="#">Chaussures femme</a>
-    <a class="cpill" href="#">Pyjamas et Sous-vêtements homme</a>
-    <a class="cpill" href="#">Sports et Activités d'extérieur</a>
-    <a class="cpill" href="#">Fournitures de bureau et écoles</a>
-  </div>
-  <button class="cpills__next" type="button" aria-label="Suivant">›</button>
-</div></div>
+    <div class="demo__stage"><nav class="cpills" data-variant="5" data-scroller aria-label="Filtrer par catégorie">
+  <ul class="cpills__track" data-scroller-track>
+    <li><a class="cpill" href="#" data-label="Recommandé" aria-current="page">Recommandé</a></li>
+    <li><a class="cpill" href="#" data-label="Beauté et Soins personnels">Beauté et Soins personnels</a></li>
+    <li><a class="cpill" href="#" data-label="Vêtements femme">Vêtements femme</a></li>
+    <li><a class="cpill" href="#" data-label="Maison et Cuisine">Maison et Cuisine</a></li>
+    <li><a class="cpill" href="#" data-label="Vêtements homme">Vêtements homme</a></li>
+    <li><a class="cpill" href="#" data-label="Chaussures femme">Chaussures femme</a></li>
+    <li><a class="cpill" href="#" data-label="Pyjamas et Sous-vêtements homme">Pyjamas et Sous-vêtements homme</a></li>
+    <li><a class="cpill" href="#" data-label="Sports et Activités d'extérieur">Sports et Activités d'extérieur</a></li>
+    <li><a class="cpill" href="#" data-label="Fournitures de bureau et écoles">Fournitures de bureau et écoles</a></li>
+  </ul>
+  <button class="cpills__next" type="button" data-scroller-next aria-label="Catégories suivantes">
+    <span aria-hidden="true">›</span>
+  </button>
+</nav></div>
   </div>
 </section>
 <section class="demo">
@@ -111,575 +122,700 @@
   <div class="demo__variant">
     <div class="demo__label">Variante 1</div>
     <div class="demo__stage"><div class="cgrid">
-  <article class="pgc" data-variant="1">
-  <a class="pgc__media" href="#">
-    <img class="pgc__img" src="photos/prod-1.jpg" alt="Montre connectée écran tactile étanche IP68 multisport" loading="lazy" width="700" height="700">
+  <article class="pgc" data-variant="1" aria-labelledby="pgc-1-0">
+  <div class="pgc__media">
+    <a href="#" tabindex="-1" aria-hidden="true">
+      <img class="pgc__img" src="photos/prod-1.jpg" alt="" loading="lazy" width="700" height="700">
+    </a>
     
     <span class="pgc__play" aria-hidden="true">▶</span>
-  </a>
-  <h3 class="pgc__title"><a href="#">Montre connectée écran tactile étanche IP68 multisport</a></h3>
+  </div>
+  <h3 class="pgc__title" id="pgc-1-0"><a href="#">Montre connectée écran tactile étanche IP68 multisport</a></h3>
   <div class="pgc__price-row">
     <span class="pgc__price-wrap">
       <span class="pgc__deal">Dernier jour</span>
       <span class="pgc__price">€1.53</span>
-      <s class="pgc__compare">€7.38</s>
+      <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€7.38</s>
     </span>
-    <button class="pgc__add" type="button" aria-label="Ajouter au panier">🛒</button>
+    <button class="pgc__add" type="button" aria-label="Ajouter au panier : Montre connectée écran tactile étanche IP68 multisport">
+      <span aria-hidden="true">🛒</span>
+    </button>
   </div>
   <div class="pgc__note">À baissé de €0.21</div>
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯨</span>
-    <span class="pgc__sold"><span class="pgc__flame">🔥</span> 40,000+ ventes</span>
+    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
+    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 40,000+ ventes</span>
   </div>
-  <span class="pgc__seller">⭐ Vendeur vedette</span>
+  <span class="pgc__seller"><span aria-hidden="true">★</span> Vendeur vedette</span>
 </article>
-  <article class="pgc" data-variant="1">
-  <a class="pgc__media" href="#">
-    <img class="pgc__img" src="photos/prod-2.jpg" alt="Casque audio sans fil réduction de bruit active 40h" loading="lazy" width="700" height="700">
+  <article class="pgc" data-variant="1" aria-labelledby="pgc-1-1">
+  <div class="pgc__media">
+    <a href="#" tabindex="-1" aria-hidden="true">
+      <img class="pgc__img" src="photos/prod-2.jpg" alt="" loading="lazy" width="700" height="700">
+    </a>
     
     <span class="pgc__play" aria-hidden="true">▶</span>
-  </a>
-  <h3 class="pgc__title"><a href="#">Casque audio sans fil réduction de bruit active 40h</a></h3>
+  </div>
+  <h3 class="pgc__title" id="pgc-1-1"><a href="#">Casque audio sans fil réduction de bruit active 40h</a></h3>
   <div class="pgc__price-row">
     <span class="pgc__price-wrap">
       <span class="pgc__deal">Dernier jour</span>
       <span class="pgc__price">€4.99</span>
-      <s class="pgc__compare">€29.32</s>
+      <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€29.32</s>
     </span>
-    <button class="pgc__add" type="button" aria-label="Ajouter au panier">🛒</button>
+    <button class="pgc__add" type="button" aria-label="Ajouter au panier : Casque audio sans fil réduction de bruit active 40h">
+      <span aria-hidden="true">🛒</span>
+    </button>
   </div>
-  <div class="pgc__note">PLUS QUE 12 ⓘ</div>
+  <div class="pgc__note">PLUS QUE 12 <span aria-hidden="true">ⓘ</span></div>
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯨</span>
-    <span class="pgc__sold"><span class="pgc__flame">🔥</span> 12,000+ ventes</span>
+    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
+    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 12,000+ ventes</span>
   </div>
   
 </article>
-  <article class="pgc" data-variant="1">
-  <a class="pgc__media" href="#">
-    <img class="pgc__img" src="photos/prod-3.jpg" alt="Sac à dos imperméable avec port USB intégré 30L" loading="lazy" width="700" height="700">
-    <span class="pgc__ad">Pub</span>
+  <article class="pgc" data-variant="1" aria-labelledby="pgc-1-2">
+  <div class="pgc__media">
+    <a href="#" tabindex="-1" aria-hidden="true">
+      <img class="pgc__img" src="photos/prod-3.jpg" alt="" loading="lazy" width="700" height="700">
+    </a>
+    <span class="pgc__ad"><span class="visually-hidden">Annonce : </span>Pub</span>
     <span class="pgc__play" aria-hidden="true">▶</span>
-  </a>
-  <h3 class="pgc__title"><a href="#">Sac à dos imperméable avec port USB intégré 30L</a></h3>
+  </div>
+  <h3 class="pgc__title" id="pgc-1-2"><a href="#">Sac à dos imperméable avec port USB intégré 30L</a></h3>
   <div class="pgc__price-row">
     <span class="pgc__price-wrap">
       <span class="pgc__deal">Dernier jour</span>
       <span class="pgc__price">€29.97</span>
-      <s class="pgc__compare">€105.39</s>
+      <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€105.39</s>
     </span>
-    <button class="pgc__add" type="button" aria-label="Ajouter au panier">🛒</button>
+    <button class="pgc__add" type="button" aria-label="Ajouter au panier : Sac à dos imperméable avec port USB intégré 30L">
+      <span aria-hidden="true">🛒</span>
+    </button>
   </div>
   <div class="pgc__note pgc__note--rank">#5 Le mieux noté dans Bagages et Voyage</div>
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯨</span>
-    <span class="pgc__sold"><span class="pgc__flame">🔥</span> 5,000+ ventes</span>
+    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
+    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 5,000+ ventes</span>
   </div>
   
 </article>
-  <article class="pgc" data-variant="1">
-  <a class="pgc__media" href="#">
-    <img class="pgc__img" src="photos/prod-4.jpg" alt="Baskets homme running maille respirante semelle souple" loading="lazy" width="700" height="700">
+  <article class="pgc" data-variant="1" aria-labelledby="pgc-1-3">
+  <div class="pgc__media">
+    <a href="#" tabindex="-1" aria-hidden="true">
+      <img class="pgc__img" src="photos/prod-4.jpg" alt="" loading="lazy" width="700" height="700">
+    </a>
     
     <span class="pgc__play" aria-hidden="true">▶</span>
-  </a>
-  <h3 class="pgc__title"><a href="#">Baskets homme running maille respirante semelle souple</a></h3>
+  </div>
+  <h3 class="pgc__title" id="pgc-1-3"><a href="#">Baskets homme running maille respirante semelle souple</a></h3>
   <div class="pgc__price-row">
     <span class="pgc__price-wrap">
       <span class="pgc__deal">Dernier jour</span>
       <span class="pgc__price">€2.97</span>
-      <s class="pgc__compare">€19.01</s>
+      <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€19.01</s>
     </span>
-    <button class="pgc__add" type="button" aria-label="Ajouter au panier">🛒</button>
+    <button class="pgc__add" type="button" aria-label="Ajouter au panier : Baskets homme running maille respirante semelle souple">
+      <span aria-hidden="true">🛒</span>
+    </button>
   </div>
   
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯨</span>
-    <span class="pgc__sold"><span class="pgc__flame">🔥</span> 29,000+ ventes</span>
+    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
+    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 29,000+ ventes</span>
   </div>
   
 </article>
-  <article class="pgc" data-variant="1">
-  <a class="pgc__media" href="#">
-    <img class="pgc__img" src="photos/prod-5.jpg" alt="Sac à main cuir texturé anse rigide fermoir doré" loading="lazy" width="700" height="700">
-    <span class="pgc__ad">Pub</span>
+  <article class="pgc" data-variant="1" aria-labelledby="pgc-1-4">
+  <div class="pgc__media">
+    <a href="#" tabindex="-1" aria-hidden="true">
+      <img class="pgc__img" src="photos/prod-5.jpg" alt="" loading="lazy" width="700" height="700">
+    </a>
+    <span class="pgc__ad"><span class="visually-hidden">Annonce : </span>Pub</span>
     
-  </a>
-  <h3 class="pgc__title"><a href="#">Sac à main cuir texturé anse rigide fermoir doré</a></h3>
+  </div>
+  <h3 class="pgc__title" id="pgc-1-4"><a href="#">Sac à main cuir texturé anse rigide fermoir doré</a></h3>
   <div class="pgc__price-row">
     <span class="pgc__price-wrap">
       <span class="pgc__deal">Dernier jour</span>
       <span class="pgc__price">€2.76</span>
-      <s class="pgc__compare">€11.15</s>
+      <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€11.15</s>
     </span>
-    <button class="pgc__add" type="button" aria-label="Ajouter au panier">🛒</button>
+    <button class="pgc__add" type="button" aria-label="Ajouter au panier : Sac à main cuir texturé anse rigide fermoir doré">
+      <span aria-hidden="true">🛒</span>
+    </button>
   </div>
   
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯨</span>
-    <span class="pgc__sold"><span class="pgc__flame">🔥</span> 21,000+ ventes</span>
+    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
+    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 21,000+ ventes</span>
   </div>
-  <span class="pgc__seller">⭐ Vendeur vedette</span>
+  <span class="pgc__seller"><span aria-hidden="true">★</span> Vendeur vedette</span>
 </article>
 </div></div>
   </div>
   <div class="demo__variant">
     <div class="demo__label">Variante 2</div>
     <div class="demo__stage"><div class="cgrid">
-  <article class="pgc" data-variant="2">
-  <a class="pgc__media" href="#">
-    <img class="pgc__img" src="photos/prod-1.jpg" alt="Montre connectée écran tactile étanche IP68 multisport" loading="lazy" width="700" height="700">
+  <article class="pgc" data-variant="2" aria-labelledby="pgc-2-0">
+  <div class="pgc__media">
+    <a href="#" tabindex="-1" aria-hidden="true">
+      <img class="pgc__img" src="photos/prod-1.jpg" alt="" loading="lazy" width="700" height="700">
+    </a>
     
     <span class="pgc__play" aria-hidden="true">▶</span>
-  </a>
-  <h3 class="pgc__title"><a href="#">Montre connectée écran tactile étanche IP68 multisport</a></h3>
+  </div>
+  <h3 class="pgc__title" id="pgc-2-0"><a href="#">Montre connectée écran tactile étanche IP68 multisport</a></h3>
   <div class="pgc__price-row">
     <span class="pgc__price-wrap">
       <span class="pgc__deal">Dernier jour</span>
       <span class="pgc__price">€1.53</span>
-      <s class="pgc__compare">€7.38</s>
+      <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€7.38</s>
     </span>
-    <button class="pgc__add" type="button" aria-label="Ajouter au panier">🛒</button>
+    <button class="pgc__add" type="button" aria-label="Ajouter au panier : Montre connectée écran tactile étanche IP68 multisport">
+      <span aria-hidden="true">🛒</span>
+    </button>
   </div>
   <div class="pgc__note">À baissé de €0.21</div>
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯨</span>
-    <span class="pgc__sold"><span class="pgc__flame">🔥</span> 40,000+ ventes</span>
+    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
+    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 40,000+ ventes</span>
   </div>
-  <span class="pgc__seller">⭐ Vendeur vedette</span>
+  <span class="pgc__seller"><span aria-hidden="true">★</span> Vendeur vedette</span>
 </article>
-  <article class="pgc" data-variant="2">
-  <a class="pgc__media" href="#">
-    <img class="pgc__img" src="photos/prod-2.jpg" alt="Casque audio sans fil réduction de bruit active 40h" loading="lazy" width="700" height="700">
+  <article class="pgc" data-variant="2" aria-labelledby="pgc-2-1">
+  <div class="pgc__media">
+    <a href="#" tabindex="-1" aria-hidden="true">
+      <img class="pgc__img" src="photos/prod-2.jpg" alt="" loading="lazy" width="700" height="700">
+    </a>
     
     <span class="pgc__play" aria-hidden="true">▶</span>
-  </a>
-  <h3 class="pgc__title"><a href="#">Casque audio sans fil réduction de bruit active 40h</a></h3>
+  </div>
+  <h3 class="pgc__title" id="pgc-2-1"><a href="#">Casque audio sans fil réduction de bruit active 40h</a></h3>
   <div class="pgc__price-row">
     <span class="pgc__price-wrap">
       <span class="pgc__deal">Dernier jour</span>
       <span class="pgc__price">€4.99</span>
-      <s class="pgc__compare">€29.32</s>
+      <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€29.32</s>
     </span>
-    <button class="pgc__add" type="button" aria-label="Ajouter au panier">🛒</button>
+    <button class="pgc__add" type="button" aria-label="Ajouter au panier : Casque audio sans fil réduction de bruit active 40h">
+      <span aria-hidden="true">🛒</span>
+    </button>
   </div>
-  <div class="pgc__note">PLUS QUE 12 ⓘ</div>
+  <div class="pgc__note">PLUS QUE 12 <span aria-hidden="true">ⓘ</span></div>
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯨</span>
-    <span class="pgc__sold"><span class="pgc__flame">🔥</span> 12,000+ ventes</span>
+    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
+    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 12,000+ ventes</span>
   </div>
   
 </article>
-  <article class="pgc" data-variant="2">
-  <a class="pgc__media" href="#">
-    <img class="pgc__img" src="photos/prod-3.jpg" alt="Sac à dos imperméable avec port USB intégré 30L" loading="lazy" width="700" height="700">
-    <span class="pgc__ad">Pub</span>
+  <article class="pgc" data-variant="2" aria-labelledby="pgc-2-2">
+  <div class="pgc__media">
+    <a href="#" tabindex="-1" aria-hidden="true">
+      <img class="pgc__img" src="photos/prod-3.jpg" alt="" loading="lazy" width="700" height="700">
+    </a>
+    <span class="pgc__ad"><span class="visually-hidden">Annonce : </span>Pub</span>
     <span class="pgc__play" aria-hidden="true">▶</span>
-  </a>
-  <h3 class="pgc__title"><a href="#">Sac à dos imperméable avec port USB intégré 30L</a></h3>
+  </div>
+  <h3 class="pgc__title" id="pgc-2-2"><a href="#">Sac à dos imperméable avec port USB intégré 30L</a></h3>
   <div class="pgc__price-row">
     <span class="pgc__price-wrap">
       <span class="pgc__deal">Dernier jour</span>
       <span class="pgc__price">€29.97</span>
-      <s class="pgc__compare">€105.39</s>
+      <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€105.39</s>
     </span>
-    <button class="pgc__add" type="button" aria-label="Ajouter au panier">🛒</button>
+    <button class="pgc__add" type="button" aria-label="Ajouter au panier : Sac à dos imperméable avec port USB intégré 30L">
+      <span aria-hidden="true">🛒</span>
+    </button>
   </div>
   <div class="pgc__note pgc__note--rank">#5 Le mieux noté dans Bagages et Voyage</div>
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯨</span>
-    <span class="pgc__sold"><span class="pgc__flame">🔥</span> 5,000+ ventes</span>
+    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
+    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 5,000+ ventes</span>
   </div>
   
 </article>
-  <article class="pgc" data-variant="2">
-  <a class="pgc__media" href="#">
-    <img class="pgc__img" src="photos/prod-4.jpg" alt="Baskets homme running maille respirante semelle souple" loading="lazy" width="700" height="700">
+  <article class="pgc" data-variant="2" aria-labelledby="pgc-2-3">
+  <div class="pgc__media">
+    <a href="#" tabindex="-1" aria-hidden="true">
+      <img class="pgc__img" src="photos/prod-4.jpg" alt="" loading="lazy" width="700" height="700">
+    </a>
     
     <span class="pgc__play" aria-hidden="true">▶</span>
-  </a>
-  <h3 class="pgc__title"><a href="#">Baskets homme running maille respirante semelle souple</a></h3>
+  </div>
+  <h3 class="pgc__title" id="pgc-2-3"><a href="#">Baskets homme running maille respirante semelle souple</a></h3>
   <div class="pgc__price-row">
     <span class="pgc__price-wrap">
       <span class="pgc__deal">Dernier jour</span>
       <span class="pgc__price">€2.97</span>
-      <s class="pgc__compare">€19.01</s>
+      <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€19.01</s>
     </span>
-    <button class="pgc__add" type="button" aria-label="Ajouter au panier">🛒</button>
+    <button class="pgc__add" type="button" aria-label="Ajouter au panier : Baskets homme running maille respirante semelle souple">
+      <span aria-hidden="true">🛒</span>
+    </button>
   </div>
   
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯨</span>
-    <span class="pgc__sold"><span class="pgc__flame">🔥</span> 29,000+ ventes</span>
+    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
+    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 29,000+ ventes</span>
   </div>
   
 </article>
-  <article class="pgc" data-variant="2">
-  <a class="pgc__media" href="#">
-    <img class="pgc__img" src="photos/prod-5.jpg" alt="Sac à main cuir texturé anse rigide fermoir doré" loading="lazy" width="700" height="700">
-    <span class="pgc__ad">Pub</span>
+  <article class="pgc" data-variant="2" aria-labelledby="pgc-2-4">
+  <div class="pgc__media">
+    <a href="#" tabindex="-1" aria-hidden="true">
+      <img class="pgc__img" src="photos/prod-5.jpg" alt="" loading="lazy" width="700" height="700">
+    </a>
+    <span class="pgc__ad"><span class="visually-hidden">Annonce : </span>Pub</span>
     
-  </a>
-  <h3 class="pgc__title"><a href="#">Sac à main cuir texturé anse rigide fermoir doré</a></h3>
+  </div>
+  <h3 class="pgc__title" id="pgc-2-4"><a href="#">Sac à main cuir texturé anse rigide fermoir doré</a></h3>
   <div class="pgc__price-row">
     <span class="pgc__price-wrap">
       <span class="pgc__deal">Dernier jour</span>
       <span class="pgc__price">€2.76</span>
-      <s class="pgc__compare">€11.15</s>
+      <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€11.15</s>
     </span>
-    <button class="pgc__add" type="button" aria-label="Ajouter au panier">🛒</button>
+    <button class="pgc__add" type="button" aria-label="Ajouter au panier : Sac à main cuir texturé anse rigide fermoir doré">
+      <span aria-hidden="true">🛒</span>
+    </button>
   </div>
   
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯨</span>
-    <span class="pgc__sold"><span class="pgc__flame">🔥</span> 21,000+ ventes</span>
+    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
+    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 21,000+ ventes</span>
   </div>
-  <span class="pgc__seller">⭐ Vendeur vedette</span>
+  <span class="pgc__seller"><span aria-hidden="true">★</span> Vendeur vedette</span>
 </article>
 </div></div>
   </div>
   <div class="demo__variant">
     <div class="demo__label">Variante 3</div>
     <div class="demo__stage"><div class="cgrid">
-  <article class="pgc" data-variant="3">
-  <a class="pgc__media" href="#">
-    <img class="pgc__img" src="photos/prod-1.jpg" alt="Montre connectée écran tactile étanche IP68 multisport" loading="lazy" width="700" height="700">
+  <article class="pgc" data-variant="3" aria-labelledby="pgc-3-0">
+  <div class="pgc__media">
+    <a href="#" tabindex="-1" aria-hidden="true">
+      <img class="pgc__img" src="photos/prod-1.jpg" alt="" loading="lazy" width="700" height="700">
+    </a>
     
     <span class="pgc__play" aria-hidden="true">▶</span>
-  </a>
-  <h3 class="pgc__title"><a href="#">Montre connectée écran tactile étanche IP68 multisport</a></h3>
+  </div>
+  <h3 class="pgc__title" id="pgc-3-0"><a href="#">Montre connectée écran tactile étanche IP68 multisport</a></h3>
   <div class="pgc__price-row">
     <span class="pgc__price-wrap">
       <span class="pgc__deal">Dernier jour</span>
       <span class="pgc__price">€1.53</span>
-      <s class="pgc__compare">€7.38</s>
+      <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€7.38</s>
     </span>
-    <button class="pgc__add" type="button" aria-label="Ajouter au panier">🛒</button>
+    <button class="pgc__add" type="button" aria-label="Ajouter au panier : Montre connectée écran tactile étanche IP68 multisport">
+      <span aria-hidden="true">🛒</span>
+    </button>
   </div>
   <div class="pgc__note">À baissé de €0.21</div>
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯨</span>
-    <span class="pgc__sold"><span class="pgc__flame">🔥</span> 40,000+ ventes</span>
+    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
+    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 40,000+ ventes</span>
   </div>
-  <span class="pgc__seller">⭐ Vendeur vedette</span>
+  <span class="pgc__seller"><span aria-hidden="true">★</span> Vendeur vedette</span>
 </article>
-  <article class="pgc" data-variant="3">
-  <a class="pgc__media" href="#">
-    <img class="pgc__img" src="photos/prod-2.jpg" alt="Casque audio sans fil réduction de bruit active 40h" loading="lazy" width="700" height="700">
+  <article class="pgc" data-variant="3" aria-labelledby="pgc-3-1">
+  <div class="pgc__media">
+    <a href="#" tabindex="-1" aria-hidden="true">
+      <img class="pgc__img" src="photos/prod-2.jpg" alt="" loading="lazy" width="700" height="700">
+    </a>
     
     <span class="pgc__play" aria-hidden="true">▶</span>
-  </a>
-  <h3 class="pgc__title"><a href="#">Casque audio sans fil réduction de bruit active 40h</a></h3>
+  </div>
+  <h3 class="pgc__title" id="pgc-3-1"><a href="#">Casque audio sans fil réduction de bruit active 40h</a></h3>
   <div class="pgc__price-row">
     <span class="pgc__price-wrap">
       <span class="pgc__deal">Dernier jour</span>
       <span class="pgc__price">€4.99</span>
-      <s class="pgc__compare">€29.32</s>
+      <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€29.32</s>
     </span>
-    <button class="pgc__add" type="button" aria-label="Ajouter au panier">🛒</button>
+    <button class="pgc__add" type="button" aria-label="Ajouter au panier : Casque audio sans fil réduction de bruit active 40h">
+      <span aria-hidden="true">🛒</span>
+    </button>
   </div>
-  <div class="pgc__note">PLUS QUE 12 ⓘ</div>
+  <div class="pgc__note">PLUS QUE 12 <span aria-hidden="true">ⓘ</span></div>
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯨</span>
-    <span class="pgc__sold"><span class="pgc__flame">🔥</span> 12,000+ ventes</span>
+    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
+    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 12,000+ ventes</span>
   </div>
   
 </article>
-  <article class="pgc" data-variant="3">
-  <a class="pgc__media" href="#">
-    <img class="pgc__img" src="photos/prod-3.jpg" alt="Sac à dos imperméable avec port USB intégré 30L" loading="lazy" width="700" height="700">
-    <span class="pgc__ad">Pub</span>
+  <article class="pgc" data-variant="3" aria-labelledby="pgc-3-2">
+  <div class="pgc__media">
+    <a href="#" tabindex="-1" aria-hidden="true">
+      <img class="pgc__img" src="photos/prod-3.jpg" alt="" loading="lazy" width="700" height="700">
+    </a>
+    <span class="pgc__ad"><span class="visually-hidden">Annonce : </span>Pub</span>
     <span class="pgc__play" aria-hidden="true">▶</span>
-  </a>
-  <h3 class="pgc__title"><a href="#">Sac à dos imperméable avec port USB intégré 30L</a></h3>
+  </div>
+  <h3 class="pgc__title" id="pgc-3-2"><a href="#">Sac à dos imperméable avec port USB intégré 30L</a></h3>
   <div class="pgc__price-row">
     <span class="pgc__price-wrap">
       <span class="pgc__deal">Dernier jour</span>
       <span class="pgc__price">€29.97</span>
-      <s class="pgc__compare">€105.39</s>
+      <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€105.39</s>
     </span>
-    <button class="pgc__add" type="button" aria-label="Ajouter au panier">🛒</button>
+    <button class="pgc__add" type="button" aria-label="Ajouter au panier : Sac à dos imperméable avec port USB intégré 30L">
+      <span aria-hidden="true">🛒</span>
+    </button>
   </div>
   <div class="pgc__note pgc__note--rank">#5 Le mieux noté dans Bagages et Voyage</div>
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯨</span>
-    <span class="pgc__sold"><span class="pgc__flame">🔥</span> 5,000+ ventes</span>
+    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
+    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 5,000+ ventes</span>
   </div>
   
 </article>
-  <article class="pgc" data-variant="3">
-  <a class="pgc__media" href="#">
-    <img class="pgc__img" src="photos/prod-4.jpg" alt="Baskets homme running maille respirante semelle souple" loading="lazy" width="700" height="700">
+  <article class="pgc" data-variant="3" aria-labelledby="pgc-3-3">
+  <div class="pgc__media">
+    <a href="#" tabindex="-1" aria-hidden="true">
+      <img class="pgc__img" src="photos/prod-4.jpg" alt="" loading="lazy" width="700" height="700">
+    </a>
     
     <span class="pgc__play" aria-hidden="true">▶</span>
-  </a>
-  <h3 class="pgc__title"><a href="#">Baskets homme running maille respirante semelle souple</a></h3>
+  </div>
+  <h3 class="pgc__title" id="pgc-3-3"><a href="#">Baskets homme running maille respirante semelle souple</a></h3>
   <div class="pgc__price-row">
     <span class="pgc__price-wrap">
       <span class="pgc__deal">Dernier jour</span>
       <span class="pgc__price">€2.97</span>
-      <s class="pgc__compare">€19.01</s>
+      <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€19.01</s>
     </span>
-    <button class="pgc__add" type="button" aria-label="Ajouter au panier">🛒</button>
+    <button class="pgc__add" type="button" aria-label="Ajouter au panier : Baskets homme running maille respirante semelle souple">
+      <span aria-hidden="true">🛒</span>
+    </button>
   </div>
   
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯨</span>
-    <span class="pgc__sold"><span class="pgc__flame">🔥</span> 29,000+ ventes</span>
+    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
+    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 29,000+ ventes</span>
   </div>
   
 </article>
-  <article class="pgc" data-variant="3">
-  <a class="pgc__media" href="#">
-    <img class="pgc__img" src="photos/prod-5.jpg" alt="Sac à main cuir texturé anse rigide fermoir doré" loading="lazy" width="700" height="700">
-    <span class="pgc__ad">Pub</span>
+  <article class="pgc" data-variant="3" aria-labelledby="pgc-3-4">
+  <div class="pgc__media">
+    <a href="#" tabindex="-1" aria-hidden="true">
+      <img class="pgc__img" src="photos/prod-5.jpg" alt="" loading="lazy" width="700" height="700">
+    </a>
+    <span class="pgc__ad"><span class="visually-hidden">Annonce : </span>Pub</span>
     
-  </a>
-  <h3 class="pgc__title"><a href="#">Sac à main cuir texturé anse rigide fermoir doré</a></h3>
+  </div>
+  <h3 class="pgc__title" id="pgc-3-4"><a href="#">Sac à main cuir texturé anse rigide fermoir doré</a></h3>
   <div class="pgc__price-row">
     <span class="pgc__price-wrap">
       <span class="pgc__deal">Dernier jour</span>
       <span class="pgc__price">€2.76</span>
-      <s class="pgc__compare">€11.15</s>
+      <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€11.15</s>
     </span>
-    <button class="pgc__add" type="button" aria-label="Ajouter au panier">🛒</button>
+    <button class="pgc__add" type="button" aria-label="Ajouter au panier : Sac à main cuir texturé anse rigide fermoir doré">
+      <span aria-hidden="true">🛒</span>
+    </button>
   </div>
   
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯨</span>
-    <span class="pgc__sold"><span class="pgc__flame">🔥</span> 21,000+ ventes</span>
+    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
+    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 21,000+ ventes</span>
   </div>
-  <span class="pgc__seller">⭐ Vendeur vedette</span>
+  <span class="pgc__seller"><span aria-hidden="true">★</span> Vendeur vedette</span>
 </article>
 </div></div>
   </div>
   <div class="demo__variant">
     <div class="demo__label">Variante 4</div>
     <div class="demo__stage"><div class="cgrid">
-  <article class="pgc" data-variant="4">
-  <a class="pgc__media" href="#">
-    <img class="pgc__img" src="photos/prod-1.jpg" alt="Montre connectée écran tactile étanche IP68 multisport" loading="lazy" width="700" height="700">
+  <article class="pgc" data-variant="4" aria-labelledby="pgc-4-0">
+  <div class="pgc__media">
+    <a href="#" tabindex="-1" aria-hidden="true">
+      <img class="pgc__img" src="photos/prod-1.jpg" alt="" loading="lazy" width="700" height="700">
+    </a>
     
     <span class="pgc__play" aria-hidden="true">▶</span>
-  </a>
-  <h3 class="pgc__title"><a href="#">Montre connectée écran tactile étanche IP68 multisport</a></h3>
+  </div>
+  <h3 class="pgc__title" id="pgc-4-0"><a href="#">Montre connectée écran tactile étanche IP68 multisport</a></h3>
   <div class="pgc__price-row">
     <span class="pgc__price-wrap">
       <span class="pgc__deal">Dernier jour</span>
       <span class="pgc__price">€1.53</span>
-      <s class="pgc__compare">€7.38</s>
+      <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€7.38</s>
     </span>
-    <button class="pgc__add" type="button" aria-label="Ajouter au panier">🛒</button>
+    <button class="pgc__add" type="button" aria-label="Ajouter au panier : Montre connectée écran tactile étanche IP68 multisport">
+      <span aria-hidden="true">🛒</span>
+    </button>
   </div>
   <div class="pgc__note">À baissé de €0.21</div>
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯨</span>
-    <span class="pgc__sold"><span class="pgc__flame">🔥</span> 40,000+ ventes</span>
+    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
+    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 40,000+ ventes</span>
   </div>
-  <span class="pgc__seller">⭐ Vendeur vedette</span>
+  <span class="pgc__seller"><span aria-hidden="true">★</span> Vendeur vedette</span>
 </article>
-  <article class="pgc" data-variant="4">
-  <a class="pgc__media" href="#">
-    <img class="pgc__img" src="photos/prod-2.jpg" alt="Casque audio sans fil réduction de bruit active 40h" loading="lazy" width="700" height="700">
+  <article class="pgc" data-variant="4" aria-labelledby="pgc-4-1">
+  <div class="pgc__media">
+    <a href="#" tabindex="-1" aria-hidden="true">
+      <img class="pgc__img" src="photos/prod-2.jpg" alt="" loading="lazy" width="700" height="700">
+    </a>
     
     <span class="pgc__play" aria-hidden="true">▶</span>
-  </a>
-  <h3 class="pgc__title"><a href="#">Casque audio sans fil réduction de bruit active 40h</a></h3>
+  </div>
+  <h3 class="pgc__title" id="pgc-4-1"><a href="#">Casque audio sans fil réduction de bruit active 40h</a></h3>
   <div class="pgc__price-row">
     <span class="pgc__price-wrap">
       <span class="pgc__deal">Dernier jour</span>
       <span class="pgc__price">€4.99</span>
-      <s class="pgc__compare">€29.32</s>
+      <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€29.32</s>
     </span>
-    <button class="pgc__add" type="button" aria-label="Ajouter au panier">🛒</button>
+    <button class="pgc__add" type="button" aria-label="Ajouter au panier : Casque audio sans fil réduction de bruit active 40h">
+      <span aria-hidden="true">🛒</span>
+    </button>
   </div>
-  <div class="pgc__note">PLUS QUE 12 ⓘ</div>
+  <div class="pgc__note">PLUS QUE 12 <span aria-hidden="true">ⓘ</span></div>
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯨</span>
-    <span class="pgc__sold"><span class="pgc__flame">🔥</span> 12,000+ ventes</span>
+    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
+    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 12,000+ ventes</span>
   </div>
   
 </article>
-  <article class="pgc" data-variant="4">
-  <a class="pgc__media" href="#">
-    <img class="pgc__img" src="photos/prod-3.jpg" alt="Sac à dos imperméable avec port USB intégré 30L" loading="lazy" width="700" height="700">
-    <span class="pgc__ad">Pub</span>
+  <article class="pgc" data-variant="4" aria-labelledby="pgc-4-2">
+  <div class="pgc__media">
+    <a href="#" tabindex="-1" aria-hidden="true">
+      <img class="pgc__img" src="photos/prod-3.jpg" alt="" loading="lazy" width="700" height="700">
+    </a>
+    <span class="pgc__ad"><span class="visually-hidden">Annonce : </span>Pub</span>
     <span class="pgc__play" aria-hidden="true">▶</span>
-  </a>
-  <h3 class="pgc__title"><a href="#">Sac à dos imperméable avec port USB intégré 30L</a></h3>
+  </div>
+  <h3 class="pgc__title" id="pgc-4-2"><a href="#">Sac à dos imperméable avec port USB intégré 30L</a></h3>
   <div class="pgc__price-row">
     <span class="pgc__price-wrap">
       <span class="pgc__deal">Dernier jour</span>
       <span class="pgc__price">€29.97</span>
-      <s class="pgc__compare">€105.39</s>
+      <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€105.39</s>
     </span>
-    <button class="pgc__add" type="button" aria-label="Ajouter au panier">🛒</button>
+    <button class="pgc__add" type="button" aria-label="Ajouter au panier : Sac à dos imperméable avec port USB intégré 30L">
+      <span aria-hidden="true">🛒</span>
+    </button>
   </div>
   <div class="pgc__note pgc__note--rank">#5 Le mieux noté dans Bagages et Voyage</div>
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯨</span>
-    <span class="pgc__sold"><span class="pgc__flame">🔥</span> 5,000+ ventes</span>
+    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
+    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 5,000+ ventes</span>
   </div>
   
 </article>
-  <article class="pgc" data-variant="4">
-  <a class="pgc__media" href="#">
-    <img class="pgc__img" src="photos/prod-4.jpg" alt="Baskets homme running maille respirante semelle souple" loading="lazy" width="700" height="700">
+  <article class="pgc" data-variant="4" aria-labelledby="pgc-4-3">
+  <div class="pgc__media">
+    <a href="#" tabindex="-1" aria-hidden="true">
+      <img class="pgc__img" src="photos/prod-4.jpg" alt="" loading="lazy" width="700" height="700">
+    </a>
     
     <span class="pgc__play" aria-hidden="true">▶</span>
-  </a>
-  <h3 class="pgc__title"><a href="#">Baskets homme running maille respirante semelle souple</a></h3>
+  </div>
+  <h3 class="pgc__title" id="pgc-4-3"><a href="#">Baskets homme running maille respirante semelle souple</a></h3>
   <div class="pgc__price-row">
     <span class="pgc__price-wrap">
       <span class="pgc__deal">Dernier jour</span>
       <span class="pgc__price">€2.97</span>
-      <s class="pgc__compare">€19.01</s>
+      <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€19.01</s>
     </span>
-    <button class="pgc__add" type="button" aria-label="Ajouter au panier">🛒</button>
+    <button class="pgc__add" type="button" aria-label="Ajouter au panier : Baskets homme running maille respirante semelle souple">
+      <span aria-hidden="true">🛒</span>
+    </button>
   </div>
   
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯨</span>
-    <span class="pgc__sold"><span class="pgc__flame">🔥</span> 29,000+ ventes</span>
+    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
+    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 29,000+ ventes</span>
   </div>
   
 </article>
-  <article class="pgc" data-variant="4">
-  <a class="pgc__media" href="#">
-    <img class="pgc__img" src="photos/prod-5.jpg" alt="Sac à main cuir texturé anse rigide fermoir doré" loading="lazy" width="700" height="700">
-    <span class="pgc__ad">Pub</span>
+  <article class="pgc" data-variant="4" aria-labelledby="pgc-4-4">
+  <div class="pgc__media">
+    <a href="#" tabindex="-1" aria-hidden="true">
+      <img class="pgc__img" src="photos/prod-5.jpg" alt="" loading="lazy" width="700" height="700">
+    </a>
+    <span class="pgc__ad"><span class="visually-hidden">Annonce : </span>Pub</span>
     
-  </a>
-  <h3 class="pgc__title"><a href="#">Sac à main cuir texturé anse rigide fermoir doré</a></h3>
+  </div>
+  <h3 class="pgc__title" id="pgc-4-4"><a href="#">Sac à main cuir texturé anse rigide fermoir doré</a></h3>
   <div class="pgc__price-row">
     <span class="pgc__price-wrap">
       <span class="pgc__deal">Dernier jour</span>
       <span class="pgc__price">€2.76</span>
-      <s class="pgc__compare">€11.15</s>
+      <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€11.15</s>
     </span>
-    <button class="pgc__add" type="button" aria-label="Ajouter au panier">🛒</button>
+    <button class="pgc__add" type="button" aria-label="Ajouter au panier : Sac à main cuir texturé anse rigide fermoir doré">
+      <span aria-hidden="true">🛒</span>
+    </button>
   </div>
   
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯨</span>
-    <span class="pgc__sold"><span class="pgc__flame">🔥</span> 21,000+ ventes</span>
+    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
+    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 21,000+ ventes</span>
   </div>
-  <span class="pgc__seller">⭐ Vendeur vedette</span>
+  <span class="pgc__seller"><span aria-hidden="true">★</span> Vendeur vedette</span>
 </article>
 </div></div>
   </div>
   <div class="demo__variant">
     <div class="demo__label">Variante 5</div>
     <div class="demo__stage"><div class="cgrid">
-  <article class="pgc" data-variant="5">
-  <a class="pgc__media" href="#">
-    <img class="pgc__img" src="photos/prod-1.jpg" alt="Montre connectée écran tactile étanche IP68 multisport" loading="lazy" width="700" height="700">
+  <article class="pgc" data-variant="5" aria-labelledby="pgc-5-0">
+  <div class="pgc__media">
+    <a href="#" tabindex="-1" aria-hidden="true">
+      <img class="pgc__img" src="photos/prod-1.jpg" alt="" loading="lazy" width="700" height="700">
+    </a>
     
     <span class="pgc__play" aria-hidden="true">▶</span>
-  </a>
-  <h3 class="pgc__title"><a href="#">Montre connectée écran tactile étanche IP68 multisport</a></h3>
+  </div>
+  <h3 class="pgc__title" id="pgc-5-0"><a href="#">Montre connectée écran tactile étanche IP68 multisport</a></h3>
   <div class="pgc__price-row">
     <span class="pgc__price-wrap">
       <span class="pgc__deal">Dernier jour</span>
       <span class="pgc__price">€1.53</span>
-      <s class="pgc__compare">€7.38</s>
+      <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€7.38</s>
     </span>
-    <button class="pgc__add" type="button" aria-label="Ajouter au panier">🛒</button>
+    <button class="pgc__add" type="button" aria-label="Ajouter au panier : Montre connectée écran tactile étanche IP68 multisport">
+      <span aria-hidden="true">🛒</span>
+    </button>
   </div>
   <div class="pgc__note">À baissé de €0.21</div>
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯨</span>
-    <span class="pgc__sold"><span class="pgc__flame">🔥</span> 40,000+ ventes</span>
+    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
+    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 40,000+ ventes</span>
   </div>
-  <span class="pgc__seller">⭐ Vendeur vedette</span>
+  <span class="pgc__seller"><span aria-hidden="true">★</span> Vendeur vedette</span>
 </article>
-  <article class="pgc" data-variant="5">
-  <a class="pgc__media" href="#">
-    <img class="pgc__img" src="photos/prod-2.jpg" alt="Casque audio sans fil réduction de bruit active 40h" loading="lazy" width="700" height="700">
+  <article class="pgc" data-variant="5" aria-labelledby="pgc-5-1">
+  <div class="pgc__media">
+    <a href="#" tabindex="-1" aria-hidden="true">
+      <img class="pgc__img" src="photos/prod-2.jpg" alt="" loading="lazy" width="700" height="700">
+    </a>
     
     <span class="pgc__play" aria-hidden="true">▶</span>
-  </a>
-  <h3 class="pgc__title"><a href="#">Casque audio sans fil réduction de bruit active 40h</a></h3>
+  </div>
+  <h3 class="pgc__title" id="pgc-5-1"><a href="#">Casque audio sans fil réduction de bruit active 40h</a></h3>
   <div class="pgc__price-row">
     <span class="pgc__price-wrap">
       <span class="pgc__deal">Dernier jour</span>
       <span class="pgc__price">€4.99</span>
-      <s class="pgc__compare">€29.32</s>
+      <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€29.32</s>
     </span>
-    <button class="pgc__add" type="button" aria-label="Ajouter au panier">🛒</button>
+    <button class="pgc__add" type="button" aria-label="Ajouter au panier : Casque audio sans fil réduction de bruit active 40h">
+      <span aria-hidden="true">🛒</span>
+    </button>
   </div>
-  <div class="pgc__note">PLUS QUE 12 ⓘ</div>
+  <div class="pgc__note">PLUS QUE 12 <span aria-hidden="true">ⓘ</span></div>
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯨</span>
-    <span class="pgc__sold"><span class="pgc__flame">🔥</span> 12,000+ ventes</span>
+    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
+    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 12,000+ ventes</span>
   </div>
   
 </article>
-  <article class="pgc" data-variant="5">
-  <a class="pgc__media" href="#">
-    <img class="pgc__img" src="photos/prod-3.jpg" alt="Sac à dos imperméable avec port USB intégré 30L" loading="lazy" width="700" height="700">
-    <span class="pgc__ad">Pub</span>
+  <article class="pgc" data-variant="5" aria-labelledby="pgc-5-2">
+  <div class="pgc__media">
+    <a href="#" tabindex="-1" aria-hidden="true">
+      <img class="pgc__img" src="photos/prod-3.jpg" alt="" loading="lazy" width="700" height="700">
+    </a>
+    <span class="pgc__ad"><span class="visually-hidden">Annonce : </span>Pub</span>
     <span class="pgc__play" aria-hidden="true">▶</span>
-  </a>
-  <h3 class="pgc__title"><a href="#">Sac à dos imperméable avec port USB intégré 30L</a></h3>
+  </div>
+  <h3 class="pgc__title" id="pgc-5-2"><a href="#">Sac à dos imperméable avec port USB intégré 30L</a></h3>
   <div class="pgc__price-row">
     <span class="pgc__price-wrap">
       <span class="pgc__deal">Dernier jour</span>
       <span class="pgc__price">€29.97</span>
-      <s class="pgc__compare">€105.39</s>
+      <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€105.39</s>
     </span>
-    <button class="pgc__add" type="button" aria-label="Ajouter au panier">🛒</button>
+    <button class="pgc__add" type="button" aria-label="Ajouter au panier : Sac à dos imperméable avec port USB intégré 30L">
+      <span aria-hidden="true">🛒</span>
+    </button>
   </div>
   <div class="pgc__note pgc__note--rank">#5 Le mieux noté dans Bagages et Voyage</div>
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯨</span>
-    <span class="pgc__sold"><span class="pgc__flame">🔥</span> 5,000+ ventes</span>
+    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
+    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 5,000+ ventes</span>
   </div>
   
 </article>
-  <article class="pgc" data-variant="5">
-  <a class="pgc__media" href="#">
-    <img class="pgc__img" src="photos/prod-4.jpg" alt="Baskets homme running maille respirante semelle souple" loading="lazy" width="700" height="700">
+  <article class="pgc" data-variant="5" aria-labelledby="pgc-5-3">
+  <div class="pgc__media">
+    <a href="#" tabindex="-1" aria-hidden="true">
+      <img class="pgc__img" src="photos/prod-4.jpg" alt="" loading="lazy" width="700" height="700">
+    </a>
     
     <span class="pgc__play" aria-hidden="true">▶</span>
-  </a>
-  <h3 class="pgc__title"><a href="#">Baskets homme running maille respirante semelle souple</a></h3>
+  </div>
+  <h3 class="pgc__title" id="pgc-5-3"><a href="#">Baskets homme running maille respirante semelle souple</a></h3>
   <div class="pgc__price-row">
     <span class="pgc__price-wrap">
       <span class="pgc__deal">Dernier jour</span>
       <span class="pgc__price">€2.97</span>
-      <s class="pgc__compare">€19.01</s>
+      <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€19.01</s>
     </span>
-    <button class="pgc__add" type="button" aria-label="Ajouter au panier">🛒</button>
+    <button class="pgc__add" type="button" aria-label="Ajouter au panier : Baskets homme running maille respirante semelle souple">
+      <span aria-hidden="true">🛒</span>
+    </button>
   </div>
   
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯨</span>
-    <span class="pgc__sold"><span class="pgc__flame">🔥</span> 29,000+ ventes</span>
+    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
+    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 29,000+ ventes</span>
   </div>
   
 </article>
-  <article class="pgc" data-variant="5">
-  <a class="pgc__media" href="#">
-    <img class="pgc__img" src="photos/prod-5.jpg" alt="Sac à main cuir texturé anse rigide fermoir doré" loading="lazy" width="700" height="700">
-    <span class="pgc__ad">Pub</span>
+  <article class="pgc" data-variant="5" aria-labelledby="pgc-5-4">
+  <div class="pgc__media">
+    <a href="#" tabindex="-1" aria-hidden="true">
+      <img class="pgc__img" src="photos/prod-5.jpg" alt="" loading="lazy" width="700" height="700">
+    </a>
+    <span class="pgc__ad"><span class="visually-hidden">Annonce : </span>Pub</span>
     
-  </a>
-  <h3 class="pgc__title"><a href="#">Sac à main cuir texturé anse rigide fermoir doré</a></h3>
+  </div>
+  <h3 class="pgc__title" id="pgc-5-4"><a href="#">Sac à main cuir texturé anse rigide fermoir doré</a></h3>
   <div class="pgc__price-row">
     <span class="pgc__price-wrap">
       <span class="pgc__deal">Dernier jour</span>
       <span class="pgc__price">€2.76</span>
-      <s class="pgc__compare">€11.15</s>
+      <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€11.15</s>
     </span>
-    <button class="pgc__add" type="button" aria-label="Ajouter au panier">🛒</button>
+    <button class="pgc__add" type="button" aria-label="Ajouter au panier : Sac à main cuir texturé anse rigide fermoir doré">
+      <span aria-hidden="true">🛒</span>
+    </button>
   </div>
   
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯨</span>
-    <span class="pgc__sold"><span class="pgc__flame">🔥</span> 21,000+ ventes</span>
+    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
+    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 21,000+ ventes</span>
   </div>
-  <span class="pgc__seller">⭐ Vendeur vedette</span>
+  <span class="pgc__seller"><span aria-hidden="true">★</span> Vendeur vedette</span>
 </article>
 </div></div>
   </div>
@@ -689,31 +825,51 @@
   <div class="demo__variant">
     <div class="demo__label">Variante 1</div>
     <div class="demo__stage"><div class="loadmore" data-variant="1">
-  <button class="loadmore__btn" type="button">Afficher plus <span class="loadmore__caret">▼</span></button>
+  <button class="loadmore__btn" type="button" data-loadmore
+          data-idle-label="Afficher plus" data-busy-label="Chargement…">
+    <span data-loadmore-label>Afficher plus</span>
+    <span class="loadmore__caret" aria-hidden="true">▾</span>
+  </button>
 </div></div>
   </div>
   <div class="demo__variant">
     <div class="demo__label">Variante 2</div>
     <div class="demo__stage"><div class="loadmore" data-variant="2">
-  <button class="loadmore__btn" type="button">Afficher plus <span class="loadmore__caret">▼</span></button>
+  <button class="loadmore__btn" type="button" data-loadmore
+          data-idle-label="Afficher plus" data-busy-label="Chargement…">
+    <span data-loadmore-label>Afficher plus</span>
+    <span class="loadmore__caret" aria-hidden="true">▾</span>
+  </button>
 </div></div>
   </div>
   <div class="demo__variant">
     <div class="demo__label">Variante 3</div>
     <div class="demo__stage"><div class="loadmore" data-variant="3">
-  <button class="loadmore__btn" type="button">Afficher plus <span class="loadmore__caret">▼</span></button>
+  <button class="loadmore__btn" type="button" data-loadmore
+          data-idle-label="Afficher plus" data-busy-label="Chargement…">
+    <span data-loadmore-label>Afficher plus</span>
+    <span class="loadmore__caret" aria-hidden="true">▾</span>
+  </button>
 </div></div>
   </div>
   <div class="demo__variant">
     <div class="demo__label">Variante 4</div>
     <div class="demo__stage"><div class="loadmore" data-variant="4">
-  <button class="loadmore__btn" type="button">Afficher plus <span class="loadmore__caret">▼</span></button>
+  <button class="loadmore__btn" type="button" data-loadmore
+          data-idle-label="Afficher plus" data-busy-label="Chargement…">
+    <span data-loadmore-label>Afficher plus</span>
+    <span class="loadmore__caret" aria-hidden="true">▾</span>
+  </button>
 </div></div>
   </div>
   <div class="demo__variant">
     <div class="demo__label">Variante 5</div>
     <div class="demo__stage"><div class="loadmore" data-variant="5">
-  <button class="loadmore__btn" type="button">Afficher plus <span class="loadmore__caret">▼</span></button>
+  <button class="loadmore__btn" type="button" data-loadmore
+          data-idle-label="Afficher plus" data-busy-label="Chargement…">
+    <span data-loadmore-label>Afficher plus</span>
+    <span class="loadmore__caret" aria-hidden="true">▾</span>
+  </button>
 </div></div>
   </div>
 </section>

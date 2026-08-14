@@ -6,13 +6,17 @@
 <title>Pile d'en-tête</title>
 <link rel="stylesheet" href="../assets/base.css">
 <link rel="stylesheet" href="../assets/header-system.css">
+<script src="../assets/theme.js" defer></script>
 <style>body{background:#fff}.spacer{padding:22px 20px;display:flex;justify-content:center}</style>
 </head>
 <body>
-<div class="ubar" data-variant="1"><div class="ubar__inner"><div class="ubar__item">
+<a class="skip-to-content visually-hidden" href="#MainContent">Aller au contenu</a>
+<div class="ubar" data-variant="1">
+  <div class="ubar__inner" data-scroller-track role="region" aria-label="Avantages du magasin" tabindex="0">
+    <div class="ubar__track"><div class="ubar__item">
       <span class="ubar__icon" aria-hidden="true">🚚</span>
       <span class="ubar__text" style="--item-color:#7ee787">
-        <span class="ubar__title">Livraison gratuite sur toutes les commandes <span class="ubar__chev">›</span></span>
+        <span class="ubar__title">Livraison gratuite sur toutes les commandes <span class="ubar__chev" aria-hidden="true">›</span></span>
         <span class="ubar__sub">Offre à durée limitée</span>
       </span>
     </div>
@@ -29,51 +33,208 @@
         <span class="ubar__title">Application SOUQNA</span>
         <span class="ubar__sub">Commandez plus vite</span>
       </span>
-    </div></div></div>
+    </div><div class="ubar__item ubar__item--dup" aria-hidden="true">
+      <span class="ubar__icon" aria-hidden="true">🚚</span>
+      <span class="ubar__text" style="--item-color:#7ee787">
+        <span class="ubar__title">Livraison gratuite sur toutes les commandes <span class="ubar__chev" aria-hidden="true">›</span></span>
+        <span class="ubar__sub">Offre à durée limitée</span>
+      </span>
+    </div>
+    <div class="ubar__item ubar__item--dup" aria-hidden="true">
+      <span class="ubar__icon" aria-hidden="true">📦</span>
+      <span class="ubar__text" style="--item-color:#f7f0c8">
+        <span class="ubar__title">Garantie de livraison</span>
+        <span class="ubar__sub">Remboursement en cas de problèmes</span>
+      </span>
+    </div>
+    <div class="ubar__item ubar__item--dup" aria-hidden="true">
+      <span class="ubar__icon" aria-hidden="true">📱</span>
+      <span class="ubar__text" style="--item-color:#ffffff">
+        <span class="ubar__title">Application SOUQNA</span>
+        <span class="ubar__sub">Commandez plus vite</span>
+      </span>
+    </div></div>
+  </div>
+</div>
 <header class="mhead" data-variant="1">
   <div class="mhead__inner">
     <a class="mhead__logo" href="#">
       <span class="logo-tile">
-        <span class="logo-tile__mark">🛍</span>
+        <span class="logo-tile__mark" aria-hidden="true">🛍</span>
         <span class="logo-tile__word">SOUQNA</span>
       </span>
     </a>
-    <nav class="mhead__nav">
-      <a class="mhead__nav-link" href="#">👍 Meilleures ventes</a>
-      <a class="mhead__nav-link" href="#">⭐ Notés 5 étoiles</a>
-      <a class="mhead__nav-link" href="#">Nouveautés</a>
+    <nav class="mhead__nav" aria-label="Principal">
+      <a class="mhead__nav-link" href="#"><span aria-hidden="true">👍</span> Meilleures ventes</a>
+      <a class="mhead__nav-link" href="#"><span aria-hidden="true">⭐</span> Notés 5 étoiles</a>
+      <a class="mhead__nav-link" href="#"><span aria-hidden="true">✨</span> Nouveautés</a>
       <span class="mhead__cat-wrap">
-        <button class="mhead__cat" type="button" aria-expanded="false">
-          Catégories <span class="mhead__cat-caret">▲</span>
+        <button class="mhead__cat" type="button" data-disclosure
+                aria-expanded="false" aria-haspopup="true" aria-controls="MegaMenu">
+          Catégories <span class="mhead__cat-caret" aria-hidden="true">▾</span>
         </button>
-        
+        <div class="mega" id="MegaMenu" data-variant="1" data-open="false" hidden>
+  <ul class="mega__aside" role="region" aria-label="Toutes les catégories" tabindex="0">
+    <li><a class="mega__cat" href="#">En vedette<span class="mega__cat-chev" aria-hidden="true">›</span></a></li>
+    <li><a class="mega__cat" href="#" aria-current="page">Maison et Cuisine<span class="mega__cat-chev" aria-hidden="true">›</span></a></li>
+    <li><a class="mega__cat" href="#">Vêtements femme<span class="mega__cat-chev" aria-hidden="true">›</span></a></li>
+    <li><a class="mega__cat" href="#">Grandes tailles femme<span class="mega__cat-chev" aria-hidden="true">›</span></a></li>
+    <li><a class="mega__cat" href="#">Chaussures femme<span class="mega__cat-chev" aria-hidden="true">›</span></a></li>
+    <li><a class="mega__cat" href="#">Lingerie et Pyjamas<span class="mega__cat-chev" aria-hidden="true">›</span></a></li>
+    <li><a class="mega__cat" href="#">Vêtements homme<span class="mega__cat-chev" aria-hidden="true">›</span></a></li>
+    <li><a class="mega__cat" href="#">Chaussures homme<span class="mega__cat-chev" aria-hidden="true">›</span></a></li>
+    <li><a class="mega__cat" href="#">Sports et Extérieur<span class="mega__cat-chev" aria-hidden="true">›</span></a></li>
+    <li><a class="mega__cat" href="#">Bijoux et Accessoires<span class="mega__cat-chev" aria-hidden="true">›</span></a></li>
+    <li><a class="mega__cat" href="#">Beauté et Soins<span class="mega__cat-chev" aria-hidden="true">›</span></a></li>
+    <li><a class="mega__cat" href="#">Jouets et Jeux<span class="mega__cat-chev" aria-hidden="true">›</span></a></li>
+    <li><a class="mega__cat" href="#">Automobile<span class="mega__cat-chev" aria-hidden="true">›</span></a></li>
+    <li><a class="mega__cat" href="#">Mode Enfant<span class="mega__cat-chev" aria-hidden="true">›</span></a></li>
+  </ul>
+  <div class="mega__panel">
+    <h3 class="mega__panel-title">Tout Maison et Cuisine <span aria-hidden="true">›</span></h3>
+    <ul class="mega__grid">
+      <li><a class="mega__tile" href="#">
+        <span class="mega__tile-media">
+          <img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20120%22%3E%0A%3Crect%20width%3D%22120%22%20height%3D%22120%22%20fill%3D%22%23f3e8d8%22%2F%3E%0A%3Ccircle%20cx%3D%2242%22%20cy%3D%2246%22%20r%3D%2224%22%20fill%3D%22%23a8763a%22%20opacity%3D%22.55%22%2F%3E%0A%3Crect%20x%3D%2254%22%20y%3D%2252%22%20width%3D%2246%22%20height%3D%2246%22%20rx%3D%2210%22%20fill%3D%22%23a8763a%22%20opacity%3D%22.8%22%2F%3E%0A%3Crect%20x%3D%2218%22%20y%3D%2282%22%20width%3D%2234%22%20height%3D%2220%22%20rx%3D%226%22%20fill%3D%22%23a8763a%22%20opacity%3D%22.35%22%2F%3E%0A%3C%2Fsvg%3E" alt="" loading="lazy" width="120" height="120">
+          
+        </span>
+        <span class="mega__tile-label">Produits personnalisés</span>
+      </a></li>
+      <li><a class="mega__tile" href="#">
+        <span class="mega__tile-media">
+          <img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20120%22%3E%0A%3Crect%20width%3D%22120%22%20height%3D%22120%22%20fill%3D%22%23e6efe4%22%2F%3E%0A%3Ccircle%20cx%3D%2242%22%20cy%3D%2246%22%20r%3D%2224%22%20fill%3D%22%233f7a44%22%20opacity%3D%22.55%22%2F%3E%0A%3Crect%20x%3D%2254%22%20y%3D%2252%22%20width%3D%2246%22%20height%3D%2246%22%20rx%3D%2210%22%20fill%3D%22%233f7a44%22%20opacity%3D%22.8%22%2F%3E%0A%3Crect%20x%3D%2218%22%20y%3D%2282%22%20width%3D%2234%22%20height%3D%2220%22%20rx%3D%226%22%20fill%3D%22%233f7a44%22%20opacity%3D%22.35%22%2F%3E%0A%3C%2Fsvg%3E" alt="" loading="lazy" width="120" height="120">
+          
+        </span>
+        <span class="mega__tile-label">Décoration intérieure</span>
+      </a></li>
+      <li><a class="mega__tile" href="#">
+        <span class="mega__tile-media">
+          <img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20120%22%3E%0A%3Crect%20width%3D%22120%22%20height%3D%22120%22%20fill%3D%22%23e8eef8%22%2F%3E%0A%3Ccircle%20cx%3D%2242%22%20cy%3D%2246%22%20r%3D%2224%22%20fill%3D%22%233a5f9e%22%20opacity%3D%22.55%22%2F%3E%0A%3Crect%20x%3D%2254%22%20y%3D%2252%22%20width%3D%2246%22%20height%3D%2246%22%20rx%3D%2210%22%20fill%3D%22%233a5f9e%22%20opacity%3D%22.8%22%2F%3E%0A%3Crect%20x%3D%2218%22%20y%3D%2282%22%20width%3D%2234%22%20height%3D%2220%22%20rx%3D%226%22%20fill%3D%22%233a5f9e%22%20opacity%3D%22.35%22%2F%3E%0A%3C%2Fsvg%3E" alt="" loading="lazy" width="120" height="120">
+          
+        </span>
+        <span class="mega__tile-label">Rangements de cuisine</span>
+      </a></li>
+      <li><a class="mega__tile" href="#">
+        <span class="mega__tile-media">
+          <img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20120%22%3E%0A%3Crect%20width%3D%22120%22%20height%3D%22120%22%20fill%3D%22%23f7e8ec%22%2F%3E%0A%3Ccircle%20cx%3D%2242%22%20cy%3D%2246%22%20r%3D%2224%22%20fill%3D%22%23a8455f%22%20opacity%3D%22.55%22%2F%3E%0A%3Crect%20x%3D%2254%22%20y%3D%2252%22%20width%3D%2246%22%20height%3D%2246%22%20rx%3D%2210%22%20fill%3D%22%23a8455f%22%20opacity%3D%22.8%22%2F%3E%0A%3Crect%20x%3D%2218%22%20y%3D%2282%22%20width%3D%2234%22%20height%3D%2220%22%20rx%3D%226%22%20fill%3D%22%23a8455f%22%20opacity%3D%22.35%22%2F%3E%0A%3C%2Fsvg%3E" alt="" loading="lazy" width="120" height="120">
+          
+        </span>
+        <span class="mega__tile-label">Ustensiles de cuisine</span>
+      </a></li>
+      <li><a class="mega__tile" href="#">
+        <span class="mega__tile-media">
+          <img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20120%22%3E%0A%3Crect%20width%3D%22120%22%20height%3D%22120%22%20fill%3D%22%23eae7f5%22%2F%3E%0A%3Ccircle%20cx%3D%2242%22%20cy%3D%2246%22%20r%3D%2224%22%20fill%3D%22%235b4a9e%22%20opacity%3D%22.55%22%2F%3E%0A%3Crect%20x%3D%2254%22%20y%3D%2252%22%20width%3D%2246%22%20height%3D%2246%22%20rx%3D%2210%22%20fill%3D%22%235b4a9e%22%20opacity%3D%22.8%22%2F%3E%0A%3Crect%20x%3D%2218%22%20y%3D%2282%22%20width%3D%2234%22%20height%3D%2220%22%20rx%3D%226%22%20fill%3D%22%235b4a9e%22%20opacity%3D%22.35%22%2F%3E%0A%3C%2Fsvg%3E" alt="" loading="lazy" width="120" height="120">
+          
+        </span>
+        <span class="mega__tile-label">Literie</span>
+      </a></li>
+      <li><a class="mega__tile" href="#">
+        <span class="mega__tile-media">
+          <img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20120%22%3E%0A%3Crect%20width%3D%22120%22%20height%3D%22120%22%20fill%3D%22%23fdeee2%22%2F%3E%0A%3Ccircle%20cx%3D%2242%22%20cy%3D%2246%22%20r%3D%2224%22%20fill%3D%22%23b8642a%22%20opacity%3D%22.55%22%2F%3E%0A%3Crect%20x%3D%2254%22%20y%3D%2252%22%20width%3D%2246%22%20height%3D%2246%22%20rx%3D%2210%22%20fill%3D%22%23b8642a%22%20opacity%3D%22.8%22%2F%3E%0A%3Crect%20x%3D%2218%22%20y%3D%2282%22%20width%3D%2234%22%20height%3D%2220%22%20rx%3D%226%22%20fill%3D%22%23b8642a%22%20opacity%3D%22.35%22%2F%3E%0A%3C%2Fsvg%3E" alt="" loading="lazy" width="120" height="120">
+          <span class="mega__hot">HOT</span>
+        </span>
+        <span class="mega__tile-label">Rangement et Organisation</span>
+      </a></li>
+      <li><a class="mega__tile" href="#">
+        <span class="mega__tile-media">
+          <img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20120%22%3E%0A%3Crect%20width%3D%22120%22%20height%3D%22120%22%20fill%3D%22%23e4f1f2%22%2F%3E%0A%3Ccircle%20cx%3D%2242%22%20cy%3D%2246%22%20r%3D%2224%22%20fill%3D%22%232f7c85%22%20opacity%3D%22.55%22%2F%3E%0A%3Crect%20x%3D%2254%22%20y%3D%2252%22%20width%3D%2246%22%20height%3D%2246%22%20rx%3D%2210%22%20fill%3D%22%232f7c85%22%20opacity%3D%22.8%22%2F%3E%0A%3Crect%20x%3D%2218%22%20y%3D%2282%22%20width%3D%2234%22%20height%3D%2220%22%20rx%3D%226%22%20fill%3D%22%232f7c85%22%20opacity%3D%22.35%22%2F%3E%0A%3C%2Fsvg%3E" alt="" loading="lazy" width="120" height="120">
+          
+        </span>
+        <span class="mega__tile-label">Armoires de buanderie</span>
+      </a></li>
+      <li><a class="mega__tile" href="#">
+        <span class="mega__tile-media">
+          <img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20120%22%3E%0A%3Crect%20width%3D%22120%22%20height%3D%22120%22%20fill%3D%22%23f2f0e2%22%2F%3E%0A%3Ccircle%20cx%3D%2242%22%20cy%3D%2246%22%20r%3D%2224%22%20fill%3D%22%237a7530%22%20opacity%3D%22.55%22%2F%3E%0A%3Crect%20x%3D%2254%22%20y%3D%2252%22%20width%3D%2246%22%20height%3D%2246%22%20rx%3D%2210%22%20fill%3D%22%237a7530%22%20opacity%3D%22.8%22%2F%3E%0A%3Crect%20x%3D%2218%22%20y%3D%2282%22%20width%3D%2234%22%20height%3D%2220%22%20rx%3D%226%22%20fill%3D%22%237a7530%22%20opacity%3D%22.35%22%2F%3E%0A%3C%2Fsvg%3E" alt="" loading="lazy" width="120" height="120">
+          <span class="mega__hot">HOT</span>
+        </span>
+        <span class="mega__tile-label">Douches et Baignoires</span>
+      </a></li>
+      <li><a class="mega__tile" href="#">
+        <span class="mega__tile-media">
+          <img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20120%22%3E%0A%3Crect%20width%3D%22120%22%20height%3D%22120%22%20fill%3D%22%23f6e9f2%22%2F%3E%0A%3Ccircle%20cx%3D%2242%22%20cy%3D%2246%22%20r%3D%2224%22%20fill%3D%22%238a3f74%22%20opacity%3D%22.55%22%2F%3E%0A%3Crect%20x%3D%2254%22%20y%3D%2252%22%20width%3D%2246%22%20height%3D%2246%22%20rx%3D%2210%22%20fill%3D%22%238a3f74%22%20opacity%3D%22.8%22%2F%3E%0A%3Crect%20x%3D%2218%22%20y%3D%2282%22%20width%3D%2234%22%20height%3D%2220%22%20rx%3D%226%22%20fill%3D%22%238a3f74%22%20opacity%3D%22.35%22%2F%3E%0A%3C%2Fsvg%3E" alt="" loading="lazy" width="120" height="120">
+          <span class="mega__hot">HOT</span>
+        </span>
+        <span class="mega__tile-label">Espace de vie et Repas</span>
+      </a></li>
+      <li><a class="mega__tile" href="#">
+        <span class="mega__tile-media">
+          <img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20120%22%3E%0A%3Crect%20width%3D%22120%22%20height%3D%22120%22%20fill%3D%22%23e9f0e6%22%2F%3E%0A%3Ccircle%20cx%3D%2242%22%20cy%3D%2246%22%20r%3D%2224%22%20fill%3D%22%234f7a35%22%20opacity%3D%22.55%22%2F%3E%0A%3Crect%20x%3D%2254%22%20y%3D%2252%22%20width%3D%2246%22%20height%3D%2246%22%20rx%3D%2210%22%20fill%3D%22%234f7a35%22%20opacity%3D%22.8%22%2F%3E%0A%3Crect%20x%3D%2218%22%20y%3D%2282%22%20width%3D%2234%22%20height%3D%2220%22%20rx%3D%226%22%20fill%3D%22%234f7a35%22%20opacity%3D%22.35%22%2F%3E%0A%3C%2Fsvg%3E" alt="" loading="lazy" width="120" height="120">
+          
+        </span>
+        <span class="mega__tile-label">Accessoires de fête</span>
+      </a></li>
+      <li><a class="mega__tile" href="#">
+        <span class="mega__tile-media">
+          <img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20120%22%3E%0A%3Crect%20width%3D%22120%22%20height%3D%22120%22%20fill%3D%22%23f3e8d8%22%2F%3E%0A%3Ccircle%20cx%3D%2242%22%20cy%3D%2246%22%20r%3D%2224%22%20fill%3D%22%23a8763a%22%20opacity%3D%22.55%22%2F%3E%0A%3Crect%20x%3D%2254%22%20y%3D%2252%22%20width%3D%2246%22%20height%3D%2246%22%20rx%3D%2210%22%20fill%3D%22%23a8763a%22%20opacity%3D%22.8%22%2F%3E%0A%3Crect%20x%3D%2218%22%20y%3D%2282%22%20width%3D%2234%22%20height%3D%2220%22%20rx%3D%226%22%20fill%3D%22%23a8763a%22%20opacity%3D%22.35%22%2F%3E%0A%3C%2Fsvg%3E" alt="" loading="lazy" width="120" height="120">
+          
+        </span>
+        <span class="mega__tile-label">Tapis et Paillassons</span>
+      </a></li>
+      <li><a class="mega__tile" href="#">
+        <span class="mega__tile-media">
+          <img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20120%22%3E%0A%3Crect%20width%3D%22120%22%20height%3D%22120%22%20fill%3D%22%23e6efe4%22%2F%3E%0A%3Ccircle%20cx%3D%2242%22%20cy%3D%2246%22%20r%3D%2224%22%20fill%3D%22%233f7a44%22%20opacity%3D%22.55%22%2F%3E%0A%3Crect%20x%3D%2254%22%20y%3D%2252%22%20width%3D%2246%22%20height%3D%2246%22%20rx%3D%2210%22%20fill%3D%22%233f7a44%22%20opacity%3D%22.8%22%2F%3E%0A%3Crect%20x%3D%2218%22%20y%3D%2282%22%20width%3D%2234%22%20height%3D%2220%22%20rx%3D%226%22%20fill%3D%22%233f7a44%22%20opacity%3D%22.35%22%2F%3E%0A%3C%2Fsvg%3E" alt="" loading="lazy" width="120" height="120">
+          
+        </span>
+        <span class="mega__tile-label">Accessoires pour canapés</span>
+      </a></li>
+      <li><a class="mega__tile" href="#">
+        <span class="mega__tile-media">
+          <img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20120%22%3E%0A%3Crect%20width%3D%22120%22%20height%3D%22120%22%20fill%3D%22%23e8eef8%22%2F%3E%0A%3Ccircle%20cx%3D%2242%22%20cy%3D%2246%22%20r%3D%2224%22%20fill%3D%22%233a5f9e%22%20opacity%3D%22.55%22%2F%3E%0A%3Crect%20x%3D%2254%22%20y%3D%2252%22%20width%3D%2246%22%20height%3D%2246%22%20rx%3D%2210%22%20fill%3D%22%233a5f9e%22%20opacity%3D%22.8%22%2F%3E%0A%3Crect%20x%3D%2218%22%20y%3D%2282%22%20width%3D%2234%22%20height%3D%2220%22%20rx%3D%226%22%20fill%3D%22%233a5f9e%22%20opacity%3D%22.35%22%2F%3E%0A%3C%2Fsvg%3E" alt="" loading="lazy" width="120" height="120">
+          
+        </span>
+        <span class="mega__tile-label">Décorations de fête</span>
+      </a></li>
+      <li><a class="mega__tile" href="#">
+        <span class="mega__tile-media">
+          <img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20120%22%3E%0A%3Crect%20width%3D%22120%22%20height%3D%22120%22%20fill%3D%22%23f7e8ec%22%2F%3E%0A%3Ccircle%20cx%3D%2242%22%20cy%3D%2246%22%20r%3D%2224%22%20fill%3D%22%23a8455f%22%20opacity%3D%22.55%22%2F%3E%0A%3Crect%20x%3D%2254%22%20y%3D%2252%22%20width%3D%2246%22%20height%3D%2246%22%20rx%3D%2210%22%20fill%3D%22%23a8455f%22%20opacity%3D%22.8%22%2F%3E%0A%3Crect%20x%3D%2218%22%20y%3D%2282%22%20width%3D%2234%22%20height%3D%2220%22%20rx%3D%226%22%20fill%3D%22%23a8455f%22%20opacity%3D%22.35%22%2F%3E%0A%3C%2Fsvg%3E" alt="" loading="lazy" width="120" height="120">
+          
+        </span>
+        <span class="mega__tile-label">Serviettes et Rideaux</span>
+      </a></li>
+      <li><a class="mega__tile" href="#">
+        <span class="mega__tile-media">
+          <img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20120%22%3E%0A%3Crect%20width%3D%22120%22%20height%3D%22120%22%20fill%3D%22%23eae7f5%22%2F%3E%0A%3Ccircle%20cx%3D%2242%22%20cy%3D%2246%22%20r%3D%2224%22%20fill%3D%22%235b4a9e%22%20opacity%3D%22.55%22%2F%3E%0A%3Crect%20x%3D%2254%22%20y%3D%2252%22%20width%3D%2246%22%20height%3D%2246%22%20rx%3D%2210%22%20fill%3D%22%235b4a9e%22%20opacity%3D%22.8%22%2F%3E%0A%3Crect%20x%3D%2218%22%20y%3D%2282%22%20width%3D%2234%22%20height%3D%2220%22%20rx%3D%226%22%20fill%3D%22%235b4a9e%22%20opacity%3D%22.35%22%2F%3E%0A%3C%2Fsvg%3E" alt="" loading="lazy" width="120" height="120">
+          
+        </span>
+        <span class="mega__tile-label">Produits de nettoyage</span>
+      </a></li>
+    </ul>
+  </div>
+</div>
       </span>
     </nav>
-    <form class="mhead__search" role="search">
-      <input class="mhead__search-input" type="search" placeholder="Rechercher un produit…">
-      <button class="mhead__search-btn" type="submit" aria-label="Rechercher">🔍</button>
+    <form class="mhead__search" role="search" action="/search" method="get">
+      <label class="visually-hidden" for="Search-1">Rechercher un produit</label>
+      <input class="mhead__search-input" id="Search-1" type="search" name="q"
+             placeholder="Rechercher un produit…">
+      <button class="mhead__search-btn" type="submit" aria-label="Lancer la recherche">
+        <span aria-hidden="true">🔍</span>
+      </button>
     </form>
     <div class="mhead__end">
       <a class="mhead__acct" href="#">
-        <span class="mhead__avatar">N</span>
+        <span class="mhead__avatar" aria-hidden="true">N</span>
         <span class="mhead__acct-lines">
           <span class="mhead__acct-hi">Bonjour, Nassim</span>
           <span class="mhead__acct-main">Commandes et Compte</span>
         </span>
       </a>
       <a class="mhead__util" href="#"><span aria-hidden="true">🎧</span> Aide</a>
-      <a class="mhead__util" href="#"><span class="mhead__flag">FR</span> Français</a>
-      <a class="mhead__cart" href="#" aria-label="Panier">🛒<span class="mhead__cart-count">3</span></a>
+      <a class="mhead__util" href="#"><span class="mhead__flag" aria-hidden="true">FR</span> Français</a>
+      <a class="mhead__cart" href="#" aria-label="Panier, 3 articles">
+        <span aria-hidden="true">🛒</span>
+        <span class="mhead__cart-count" aria-hidden="true">3</span>
+      </a>
     </div>
   </div>
 </header>
 <div class="tbar" data-variant="1">
   <div class="tbar__inner">
     <span class="tbar__lead"><span aria-hidden="true">🛡</span> Pourquoi choisir SOUQNA ?</span>
-    <div class="tbar__list">
+    <div class="tbar__list" role="region" aria-label="Garanties" tabindex="0">
       <span class="tbar__item"><span class="tbar__icon" aria-hidden="true">🔒</span>Protection des données</span>
       <span class="tbar__item"><span class="tbar__icon" aria-hidden="true">💳</span>Paiement sécurisé</span>
-      <span class="tbar__item"><span class="tbar__icon" aria-hidden="true">✅</span>Garantie de livraison ›</span>
+      <span class="tbar__item"><span class="tbar__icon" aria-hidden="true">✅</span>Garantie de livraison <span aria-hidden="true">›</span></span>
     </div>
   </div>
 </div>

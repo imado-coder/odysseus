@@ -14,15 +14,24 @@
   --c-brand-dark: #00614f;
   --c-brand-light: #e6f2ef;
 
+  /* Same split as the accent: the bright value fills, the -text value is the
+     one that clears 4.5:1 when set on small type over white. */
   --c-sale: #ff4438;
+  --c-sale-text: #c9271c;
   --c-sale-dark: #d92d22;
   --c-sale-light: #ffecea;
 
   --c-amber: #ffb020;
+  --c-amber-text: #a97400;
   --c-amber-light: #fff6e3;
 
-  /* Deal accent — drives the buy box, price and urgency cues. */
+  /* Deal accent — drives the buy box, price and urgency cues.
+     --c-accent paints fills and large shapes, where its contrast against
+     white is fine. Small accent TEXT on white measures 2.82:1, below the
+     4.5:1 floor, so text uses --c-accent-text (4.55:1) instead. The two read
+     as the same orange at label sizes; revert by pointing -text at --c-accent. */
   --c-accent: #ff6d00;
+  --c-accent-text: #c24e00;
   --c-accent-dark: #e05c00;
   --c-accent-light: #fff1e6;
   --c-peach: #fff3ec;
@@ -30,7 +39,7 @@
   /* Ink */
   --c-ink: #101418;
   --c-ink-2: #5b6570;
-  --c-ink-3: #8a939c;
+  --c-ink-3: #6e7781; /* 4.54:1 on white — the old #8a939c measured 3.12:1 */
   --c-ink-inverse: #ffffff;
 
   /* Surfaces */
@@ -182,10 +191,32 @@ ul, ol {
   list-style: none;
 }
 
+/* Two-tone focus ring. A single colour cannot clear 3:1 against every surface
+   this theme paints — the blue ring measured 1.47:1 on the header, 1.25:1 on
+   the trust bar. A light core plus a dark halo stays visible on both. */
 :focus-visible {
-  outline: 2px solid var(--c-focus);
+  outline: 2px solid #ffffff;
   outline-offset: 2px;
+  box-shadow: 0 0 0 4px #101418;
   border-radius: var(--r-xs);
+}
+
+/* Skip link: present for keyboard users, revealed only on focus. */
+.skip-to-content:focus {
+  position: fixed;
+  inset-block-start: var(--s-2);
+  inset-inline-start: var(--s-2);
+  z-index: 100;
+  inline-size: auto;
+  block-size: auto;
+  margin: 0;
+  padding: var(--s-3) var(--s-4);
+  clip: auto;
+  overflow: visible;
+  border-radius: var(--r-sm);
+  background: var(--c-surface);
+  color: var(--c-ink);
+  font-weight: 700;
 }
 
 @media (prefers-reduced-motion: reduce) {

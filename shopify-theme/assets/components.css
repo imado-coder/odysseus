@@ -230,12 +230,13 @@
   background: var(--c-surface);
 }
 
+/* No outline reset here: the ring is drawn on the .search wrapper via
+   :focus-within, so the whole pill lights up instead of the bare input. */
 .search__input {
   flex: 1;
   min-inline-size: 0;
   border: 0;
   background: none;
-  outline: none;
   font-size: var(--t-base);
 }
 
@@ -313,7 +314,7 @@
 }
 
 .nav__link--hot {
-  color: var(--c-sale);
+  color: var(--c-sale-text);
 }
 
 /* --------------------------------------------------------------------------
@@ -621,7 +622,7 @@
 }
 
 .card__wish:hover {
-  color: var(--c-sale);
+  color: var(--c-sale-text);
 }
 
 /* Sold-count ribbon over the image bottom — social proof without extra height */
@@ -661,7 +662,7 @@
 }
 
 .card__stars {
-  color: var(--c-amber);
+  color: var(--c-amber-text);
   letter-spacing: -1px;
   font-size: var(--t-sm);
 }
@@ -677,7 +678,7 @@
 .price {
   font-size: var(--t-md);
   font-weight: 900;
-  color: var(--c-sale);
+  color: var(--c-sale-text);
   font-variant-numeric: tabular-nums;
 }
 
@@ -833,11 +834,10 @@
   border: 0;
   background: rgba(255, 255, 255, 0.12);
   color: #fff;
-  outline: none;
 }
 
 .newsletter__input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.72);
 }
 
 /* --------------------------------------------------------------------------
