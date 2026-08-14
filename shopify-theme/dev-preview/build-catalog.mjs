@@ -7,6 +7,11 @@ import { fileURLToPath } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
 const BRAND = "SOUQNA";
 
+/* Real product photography for the preview (Unsplash licence, unbranded
+   subjects only). Dev harness assets — the theme itself renders whatever the
+   merchant uploads to Shopify. */
+const photo = (i) => `photos/prod-${(i % 10) + 1}.jpg`;
+
 const pal = [
   ["#eef1f4", "#2b3a4a", "#7d94a8"], ["#f0f2ee", "#3d4a2f", "#8fa578"],
   ["#f6eeea", "#7a3b26", "#c98a66"], ["#eceef2", "#3b3f52", "#8c92ad"],
@@ -48,16 +53,16 @@ function cpills(v) {
 
 /* --- PART 7 -------------------------------------------------------------- */
 const items = [
-  { t: "Support Téléphone Magnétique à Ventouse pour voiture", p: "1.53", c: "7.38", note: "À baissé de €0.21", stars: 4.5, sold: "40,000+", ad: false, seller: true, video: true },
-  { t: "Chaussures Homme Printemps Été Maille Respirante", p: "4.99", c: "29.32", note: "PLUS QUE 12", noteInfo: true, stars: 4.5, sold: "12,000+", ad: false, seller: false, video: true },
-  { t: "Compresseur d'air portable 10-en-1 amélioré", p: "29.97", c: "105.39", note: "#5 Le mieux noté dans Outils et Équipement", rank: true, stars: 4.5, sold: "5,000+", ad: true, seller: false, video: true },
-  { t: "Sac Bandoulière Homme Sac Carré Sacs à main", p: "2.97", c: "19.01", stars: 4.5, sold: "29,000+", ad: false, seller: false, video: true },
-  { t: "Pare-soleil de pare-brise avant spécifique à la voiture", p: "2.76", c: "11.15", stars: 4.5, sold: "21,000+", ad: true, seller: true, video: false },
-  { t: "[3 Scénarios Disponibles] Coussin de Siège Ergonomique", p: "10.45", c: "48.54", note: "Article meilleure vente dans Linge de table", rank: true, stars: 4.5, sold: "15,000+", ad: false, seller: false, video: true },
-  { t: "Ensemble 2 pièces pour hommes, chemise et pantalon", p: "12.87", c: "51.54", note: "PLUS QUE 3", noteInfo: true, stars: 4, sold: "6,000+", ad: false, seller: false, video: true },
-  { t: "Horloge Murale Numérique Minimaliste Créative", p: "1.39", c: "6.48", note: "#10 DES ARTICLES LES PLUS VENDUS", rank: true, stars: 4.5, sold: "150,000+", ad: false, seller: true, video: false },
-  { t: "300 bâtonnets de fil dentaire sains - nettoyage", p: "2.52", c: "6.15", note: "#2 Article meilleure vente dans Matériel", rank: true, stars: 5, sold: "7,000+", ad: true, seller: true, video: true },
-  { t: "Support Téléphone Magnétique Super Puissant", p: "3.91", c: "13.34", note: "#2 Article meilleure vente dans Support", rank: true, stars: 4.5, sold: "150,000+", ad: false, seller: true, video: false },
+  { t: "Montre connectée écran tactile étanche IP68 multisport", p: "1.53", c: "7.38", note: "À baissé de €0.21", stars: 4.5, sold: "40,000+", ad: false, seller: true, video: true },
+  { t: "Casque audio sans fil réduction de bruit active 40h", p: "4.99", c: "29.32", note: "PLUS QUE 12", noteInfo: true, stars: 4.5, sold: "12,000+", ad: false, seller: false, video: true },
+  { t: "Sac à dos imperméable avec port USB intégré 30L", p: "29.97", c: "105.39", note: "#5 Le mieux noté dans Bagages et Voyage", rank: true, stars: 4.5, sold: "5,000+", ad: true, seller: false, video: true },
+  { t: "Baskets homme running maille respirante semelle souple", p: "2.97", c: "19.01", stars: 4.5, sold: "29,000+", ad: false, seller: false, video: true },
+  { t: "Sac à main cuir texturé anse rigide fermoir doré", p: "2.76", c: "11.15", stars: 4.5, sold: "21,000+", ad: true, seller: true, video: false },
+  { t: "Parure bijoux plaqué or pierres naturelles 3 pièces", p: "10.45", c: "48.54", note: "Article meilleure vente dans Bijoux", rank: true, stars: 4.5, sold: "15,000+", ad: false, seller: false, video: true },
+  { t: "Set 5 pièces ustensiles de cuisine en fonte émaillée", p: "12.87", c: "51.54", note: "PLUS QUE 3", noteInfo: true, stars: 4, sold: "6,000+", ad: false, seller: false, video: true },
+  { t: "Costume 3 pièces homme coupe ajustée laine mélangée", p: "1.39", c: "6.48", note: "#10 DES ARTICLES LES PLUS VENDUS", rank: true, stars: 4.5, sold: "150,000+", ad: false, seller: true, video: false },
+  { t: "Horloge murale silencieuse 30 cm cadran minimaliste", p: "2.52", c: "6.15", note: "#2 Article meilleure vente dans Décoration", rank: true, stars: 5, sold: "7,000+", ad: true, seller: true, video: true },
+  { t: "Sac à main structuré bandoulière amovible cuir grainé", p: "3.91", c: "13.34", note: "#2 Article meilleure vente dans Sacs", rank: true, stars: 4.5, sold: "150,000+", ad: false, seller: true, video: false },
 ];
 
 const starStr = (n) => "★".repeat(Math.floor(n)) + (n % 1 ? "⯨" : "") + "☆".repeat(5 - Math.ceil(n));
@@ -65,7 +70,7 @@ const starStr = (n) => "★".repeat(Math.floor(n)) + (n % 1 ? "⯨" : "") + "☆
 function pgc(it, i, v) {
   return `<article class="pgc" data-variant="${v}">
   <a class="pgc__media" href="#">
-    <img class="pgc__img" src="${img(i)}" alt="${it.t}" loading="lazy" width="300" height="300">
+    <img class="pgc__img" src="${photo(i)}" alt="${it.t}" loading="lazy" width="700" height="700">
     ${it.ad ? '<span class="pgc__ad">Pub</span>' : ""}
     ${it.video ? '<span class="pgc__play" aria-hidden="true">▶</span>' : ""}
   </a>
