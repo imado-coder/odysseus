@@ -1,0 +1,898 @@
+/* ==========================================================================
+   header-system.css — the five header-stack components.
+   Each component ships 5 variants, selected from the theme editor via a
+   data-variant attribute. Variants are token overrides on the component
+   root, so switching one costs nothing at runtime and never forks markup.
+   ========================================================================== */
+
+/* ==========================================================================
+   PART 1 — Utility bar (top strip)
+   ========================================================================== */
+.ubar {
+  --ubar-bg: #0d0d0d;
+  --ubar-fg: #ffffff;
+  --ubar-divider: rgba(255, 255, 255, 0.22);
+  --ubar-pad-y: 5px;
+
+  background: var(--ubar-bg);
+  color: var(--ubar-fg);
+  border-block-end: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.ubar__inner {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  max-inline-size: 1512px;
+  margin-inline: auto;
+  padding-inline: 16px;
+}
+
+.ubar__item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex: 1 1 0;
+  justify-content: center;
+  padding: var(--ubar-pad-y) 20px;
+  position: relative;
+  min-inline-size: 0;
+}
+
+.ubar__item + .ubar__item::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block: 6px;
+  inline-size: 1px;
+  background: var(--ubar-divider);
+}
+
+.ubar__icon {
+  flex: none;
+  font-size: 19px;
+  line-height: 1;
+}
+
+.ubar__text {
+  min-inline-size: 0;
+}
+
+.ubar__title {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--item-color, var(--ubar-fg));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ubar__sub {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--item-color, var(--ubar-fg));
+  opacity: 0.82;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ubar__chev {
+  font-weight: 400;
+  opacity: 0.9;
+  margin-inline-start: 2px;
+}
+
+/* Variant 2 — single-line marquee, for long promo copy on narrow screens */
+.ubar[data-variant="2"] .ubar__inner {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  padding-block: 8px;
+}
+
+.ubar[data-variant="2"] .ubar__track {
+  display: inline-flex;
+  gap: 48px;
+  animation: ubar-marquee 22s linear infinite;
+}
+
+.ubar[data-variant="2"] .ubar__item {
+  flex: none;
+  padding: 0;
+}
+
+.ubar[data-variant="2"] .ubar__item::before {
+  display: none;
+}
+
+.ubar[data-variant="2"] .ubar__sub {
+  display: none;
+}
+
+@keyframes ubar-marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+/* Variant 3 — light strip on white shells */
+.ubar[data-variant="3"] {
+  --ubar-bg: #ffffff;
+  --ubar-fg: #101418;
+  --ubar-divider: #e7eaec;
+  border-block-end: 1px solid #e7eaec;
+}
+
+/* Per-item colors are tuned for the dark strip; on white they must not win. */
+.ubar[data-variant="3"] .ubar__title,
+.ubar[data-variant="3"] .ubar__sub {
+  --item-color: #101418;
+}
+
+/* Variant 4 — brand-accent strip */
+.ubar[data-variant="4"] {
+  --ubar-bg: var(--c-accent, #ff6d00);
+  --ubar-fg: #ffffff;
+  --ubar-divider: rgba(255, 255, 255, 0.32);
+}
+
+.ubar[data-variant="4"] .ubar__title,
+.ubar[data-variant="4"] .ubar__sub {
+  --item-color: #ffffff;
+}
+
+/* Variant 5 — compact, titles only */
+.ubar[data-variant="5"] {
+  --ubar-pad-y: 3px;
+}
+
+.ubar[data-variant="5"] .ubar__sub {
+  display: none;
+}
+
+.ubar[data-variant="5"] .ubar__icon {
+  font-size: 15px;
+}
+
+.ubar[data-variant="5"] .ubar__title {
+  font-size: 12px;
+}
+
+/* Mobile: three columns never fit — keep the first item, scroll the rest */
+@media (max-width: 749px) {
+  .ubar__inner {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .ubar__inner::-webkit-scrollbar { display: none; }
+  .ubar__item {
+    flex: none;
+    padding-inline: 14px;
+  }
+}
+
+/* ==========================================================================
+   PART 2 — Main header
+   ========================================================================== */
+.mhead {
+  --mhead-bg: #46a2e8;
+  --mhead-fg: #ffffff;
+  --mhead-search-bg: #ffffff;
+  --mhead-search-btn: #101418;
+  --mhead-h: 72px;
+
+  background: var(--mhead-bg);
+  color: var(--mhead-fg);
+}
+
+.mhead__inner {
+  /* Anchor for the mega menu: it aligns to the container edge, not to the
+     Catégories button, so it never runs past the viewport. */
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  max-inline-size: 1512px;
+  margin-inline: auto;
+  min-block-size: var(--mhead-h);
+  padding-inline: 16px;
+}
+
+/* --- logo --- */
+.mhead__logo {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-tile {
+  inline-size: 46px;
+  block-size: 46px;
+  border-radius: 12px;
+  background: var(--logo-bg, #ff5a1f);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  line-height: 1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
+.logo-tile__mark {
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.logo-tile__word {
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.95;
+}
+
+.logo-tile img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.mhead__logo-text {
+  font-size: 19px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+/* --- nav --- */
+.mhead__nav {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex: none;
+}
+
+.mhead__nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  padding-block: 6px;
+  opacity: 0.98;
+}
+
+.mhead__nav-link:hover {
+  text-decoration: underline;
+}
+
+/* Categories trigger keeps a pill so the open state has somewhere to live */
+.mhead__cat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: background-color 120ms ease;
+}
+
+.mhead__cat:hover,
+.mhead__cat[aria-expanded="true"] {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.mhead__cat-caret {
+  font-size: 10px;
+  transition: transform 160ms ease;
+}
+
+.mhead__cat[aria-expanded="true"] .mhead__cat-caret {
+  transform: rotate(180deg);
+}
+
+/* --- search --- */
+.mhead__search {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  max-inline-size: 560px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  block-size: 44px;
+  padding-inline-start: 18px;
+  padding-inline-end: 4px;
+  border-radius: 999px;
+  background: var(--mhead-search-bg);
+}
+
+.mhead__search-input {
+  flex: 1;
+  min-inline-size: 0;
+  border: 0;
+  background: none;
+  outline: none;
+  font-size: 14px;
+  color: #101418;
+}
+
+.mhead__search-input::placeholder {
+  color: #8a939c;
+}
+
+.mhead__search-btn {
+  flex: none;
+  inline-size: 36px;
+  block-size: 36px;
+  border-radius: 50%;
+  background: var(--mhead-search-btn);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  transition: transform 120ms ease;
+}
+
+.mhead__search-btn:hover {
+  transform: scale(1.06);
+}
+
+/* --- account cluster --- */
+.mhead__end {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-inline-start: auto;
+}
+
+.mhead__acct {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-inline-size: 190px;
+}
+
+.mhead__avatar {
+  flex: none;
+  inline-size: 28px;
+  block-size: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  color: #101418;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.mhead__acct-lines {
+  min-inline-size: 0;
+  line-height: 1.25;
+}
+
+.mhead__acct-hi {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0.95;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mhead__acct-main {
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.mhead__util {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.mhead__flag {
+  inline-size: 18px;
+  block-size: 18px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: grid;
+  place-items: center;
+  font-size: 9px;
+  font-weight: 800;
+  color: #101418;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.mhead__cart {
+  position: relative;
+  display: grid;
+  place-items: center;
+  inline-size: 34px;
+  block-size: 34px;
+  font-size: 22px;
+}
+
+.mhead__cart-count {
+  position: absolute;
+  inset-block-start: -2px;
+  inset-inline-end: -2px;
+  min-inline-size: 18px;
+  block-size: 18px;
+  padding-inline: 4px;
+  border-radius: 999px;
+  background: #ff3b30;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+}
+
+/* Variant 2 — white header, ink text */
+.mhead[data-variant="2"] {
+  --mhead-bg: #ffffff;
+  --mhead-fg: #101418;
+  --mhead-search-bg: #f4f5f6;
+  border-block-end: 1px solid #e7eaec;
+}
+
+.mhead[data-variant="2"] .mhead__avatar {
+  background: #101418;
+  color: #fff;
+}
+
+.mhead[data-variant="2"] .mhead__cat:hover,
+.mhead[data-variant="2"] .mhead__cat[aria-expanded="true"] {
+  background: #f0f1f2;
+}
+
+/* Variant 3 — ink header */
+.mhead[data-variant="3"] {
+  --mhead-bg: #101418;
+  --mhead-search-btn: var(--c-accent, #ff6d00);
+}
+
+/* Variant 4 — accent header */
+.mhead[data-variant="4"] {
+  --mhead-bg: var(--c-accent, #ff6d00);
+  --mhead-search-btn: #101418;
+}
+
+.mhead[data-variant="4"] .logo-tile {
+  --logo-bg: #101418;
+}
+
+/* Variant 5 — compact, search drops to its own row */
+.mhead[data-variant="5"] {
+  --mhead-h: 56px;
+}
+
+.mhead[data-variant="5"] .mhead__nav {
+  display: none;
+}
+
+.mhead[data-variant="5"] .mhead__search {
+  block-size: 38px;
+  max-inline-size: none;
+}
+
+.mhead[data-variant="5"] .logo-tile {
+  inline-size: 38px;
+  block-size: 38px;
+  border-radius: 10px;
+}
+
+/* Mobile behaviour shared by all variants */
+@media (max-width: 1200px) {
+  .mhead__nav { display: none; }
+}
+
+@media (max-width: 900px) {
+  .mhead__acct-lines,
+  .mhead__util { display: none; }
+  .mhead__inner { gap: 10px; }
+}
+
+@media (max-width: 749px) {
+  .mhead {
+    --mhead-h: 56px;
+  }
+  .mhead__search {
+    order: 10;
+    flex-basis: 100%;
+    max-inline-size: none;
+    block-size: 38px;
+    margin-block-end: 10px;
+  }
+  .mhead__inner {
+    flex-wrap: wrap;
+    padding-block-start: 8px;
+  }
+  .mhead__logo-text { font-size: 17px; }
+}
+
+/* ==========================================================================
+   PART 3 — Trust bar
+   ========================================================================== */
+.tbar {
+  --tbar-bg: #128012;
+  --tbar-fg: #ffffff;
+  --tbar-divider: rgba(255, 255, 255, 0.38);
+
+  background: var(--tbar-bg);
+  color: var(--tbar-fg);
+}
+
+.tbar__inner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-inline-size: 1512px;
+  margin-inline: auto;
+  padding: 7px 16px;
+}
+
+.tbar__lead {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.tbar__list {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-inline-start: auto;
+  min-inline-size: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tbar__list::-webkit-scrollbar { display: none; }
+
+.tbar__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  position: relative;
+  padding-inline-start: 14px;
+}
+
+.tbar__item::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block: 2px;
+  inline-size: 1px;
+  background: var(--tbar-divider);
+}
+
+.tbar__item:first-child { padding-inline-start: 0; }
+.tbar__item:first-child::before { display: none; }
+
+.tbar__icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* Variant 2 — deep green */
+.tbar[data-variant="2"] { --tbar-bg: #0b5f0b; }
+
+/* Variant 3 — tinted, dark text */
+.tbar[data-variant="3"] {
+  --tbar-bg: #e8f6e8;
+  --tbar-fg: #0b5f0b;
+  --tbar-divider: rgba(11, 95, 11, 0.25);
+}
+
+/* Variant 4 — neutral */
+.tbar[data-variant="4"] {
+  --tbar-bg: #f4f5f6;
+  --tbar-fg: #101418;
+  --tbar-divider: #d3d8dc;
+  border-block: 1px solid #e7eaec;
+}
+
+/* Variant 5 — accent */
+.tbar[data-variant="5"] {
+  --tbar-bg: var(--c-accent, #ff6d00);
+}
+
+@media (max-width: 749px) {
+  .tbar__lead { display: none; }
+  .tbar__list { margin-inline-start: 0; }
+  .tbar__inner { padding-inline: 12px; }
+}
+
+/* ==========================================================================
+   PART 4 — Promo card
+   ========================================================================== */
+.pcard {
+  --pcard-bg: #ffffff;
+  --pcard-fg: #101418;
+  --pcard-accent: #ff5a1f;
+  --pcard-border: transparent;
+
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-inline-size: 208px;
+  padding: 10px 22px;
+  border-radius: 6px;
+  background: var(--pcard-bg);
+  color: var(--pcard-fg);
+  border: 1px solid var(--pcard-border);
+  text-align: center;
+}
+
+.pcard__top {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.pcard__star {
+  color: var(--pcard-accent);
+  font-size: 13px;
+  line-height: 1;
+}
+
+.pcard__bottom {
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+/* Variant 2 — filled accent */
+.pcard[data-variant="2"] {
+  --pcard-bg: var(--c-accent, #ff6d00);
+  --pcard-fg: #ffffff;
+  --pcard-accent: #ffffff;
+}
+
+/* Variant 3 — ink */
+.pcard[data-variant="3"] {
+  --pcard-bg: #101418;
+  --pcard-fg: #ffffff;
+  --pcard-accent: #ffb020;
+}
+
+/* Variant 4 — outlined */
+.pcard[data-variant="4"] {
+  --pcard-border: #ff5a1f;
+}
+
+/* Variant 5 — gradient */
+.pcard[data-variant="5"] {
+  --pcard-fg: #ffffff;
+  --pcard-accent: #ffe08a;
+  background: linear-gradient(135deg, #ff5a1f, #ff9500);
+}
+
+/* ==========================================================================
+   PART 5 — Categories mega menu
+   ========================================================================== */
+.mega {
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-start: 100%;
+  z-index: 80;
+  display: none;
+  inline-size: min(1100px, calc(100vw - 32px));
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 12px 40px rgba(16, 20, 24, 0.22);
+  overflow: hidden;
+}
+
+.mega[data-open="true"] {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+}
+
+.mega__aside {
+  border-inline-end: 1px solid #eceff1;
+  padding-block: 8px;
+  max-block-size: 560px;
+  overflow-y: auto;
+}
+
+.mega__cat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #101418;
+  cursor: pointer;
+}
+
+.mega__cat:hover,
+.mega__cat[aria-current="true"] {
+  background: #f4f5f6;
+  font-weight: 700;
+}
+
+.mega__cat-chev {
+  color: #8a939c;
+  font-size: 12px;
+}
+
+.mega__panel {
+  padding: 18px 22px 24px;
+  max-block-size: 560px;
+  overflow-y: auto;
+}
+
+.mega__panel-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-block-end: 16px;
+}
+
+.mega__grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 18px 14px;
+}
+
+.mega__tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.mega__tile-media {
+  position: relative;
+  inline-size: 92px;
+  block-size: 92px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f4f5f6;
+}
+
+.mega__tile-media img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  transition: transform 220ms ease;
+}
+
+.mega__tile:hover .mega__tile-media img {
+  transform: scale(1.06);
+}
+
+.mega__hot {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  padding: 2px 6px;
+  border-start-end-radius: 8px;
+  border-end-start-radius: 8px;
+  background: var(--c-accent, #ff6d00);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+.mega__tile-label {
+  font-size: 12px;
+  line-height: 1.3;
+  color: #101418;
+  max-inline-size: 96px;
+}
+
+/* Variant 2 — no sidebar, 6-column tile wall */
+.mega[data-variant="2"][data-open="true"] {
+  grid-template-columns: 1fr;
+}
+
+.mega[data-variant="2"] .mega__aside { display: none; }
+
+@media (min-width: 901px) {
+  .mega[data-variant="2"] .mega__grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+/* Variant 3 — text columns only, fastest to render */
+.mega[data-variant="3"] .mega__tile-media { display: none; }
+
+.mega[data-variant="3"] .mega__grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px 24px;
+}
+
+.mega[data-variant="3"] .mega__tile {
+  align-items: flex-start;
+  text-align: start;
+}
+
+.mega[data-variant="3"] .mega__tile-label {
+  font-size: 13px;
+  max-inline-size: none;
+}
+
+/* Variant 4 — wide sidebar, larger tiles */
+.mega[data-variant="4"][data-open="true"] {
+  grid-template-columns: 300px 1fr;
+}
+
+@media (min-width: 901px) {
+  .mega[data-variant="4"] .mega__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .mega[data-variant="4"] .mega__tile-media {
+    inline-size: 116px;
+    block-size: 116px;
+  }
+}
+
+/* Variant 5 — compact list, mobile-leaning */
+.mega[data-variant="5"][data-open="true"] {
+  grid-template-columns: 1fr;
+  inline-size: min(420px, calc(100vw - 24px));
+}
+
+.mega[data-variant="5"] .mega__aside {
+  border-inline-end: 0;
+  max-block-size: 70vh;
+}
+
+.mega[data-variant="5"] .mega__panel { display: none; }
+
+@media (max-width: 900px) {
+  .mega[data-open="true"] {
+    grid-template-columns: 1fr;
+  }
+  .mega__aside {
+    border-inline-end: 0;
+    border-block-end: 1px solid #eceff1;
+    max-block-size: 240px;
+  }
+  .mega__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* The trigger stays in normal flow; the panel anchors to .mhead__inner. */
+.mhead__cat-wrap {
+  position: static;
+}
