@@ -1,0 +1,633 @@
+/* ==========================================================================
+   catalog-system.css — catalog-surface components.
+   Parts 6-9: category pills, catalog product card, footer, load-more.
+   Same contract as header-system.css: five variants per part, selected with
+   a data-variant attribute, implemented as token overrides on the root.
+   ========================================================================== */
+
+/* ==========================================================================
+   PART 6 — Category pill row
+   ========================================================================== */
+.cpills {
+  --cpill-border: #d4d6d8;
+  --cpill-border-active: #101418;
+  --cpill-bg: #ffffff;
+  --cpill-fg: #101418;
+  --cpill-radius: 999px;
+
+  position: relative;
+  background: #fff;
+  padding-block: 12px;
+}
+
+.cpills__track {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: inline proximity;
+  padding-inline: 16px;
+  scrollbar-width: none;
+}
+
+.cpills__track::-webkit-scrollbar { display: none; }
+
+.cpill {
+  flex: none;
+  scroll-snap-align: start;
+  display: grid;
+  place-items: center;
+  min-block-size: 52px;
+  max-inline-size: 200px;
+  padding: 8px 20px;
+  border: 1px solid var(--cpill-border);
+  border-radius: var(--cpill-radius);
+  background: var(--cpill-bg);
+  color: var(--cpill-fg);
+  font-size: 13px;
+  line-height: 1.25;
+  text-align: center;
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.cpill:hover {
+  border-color: var(--cpill-border-active);
+}
+
+.cpill[aria-current="true"] {
+  border-color: var(--cpill-border-active);
+  border-width: 2px;
+  font-weight: 600;
+  padding: 7px 19px;
+}
+
+/* Arrow floats over the trailing edge, with a fade so pills slide under it */
+.cpills__next {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: 10px;
+  transform: translateY(-50%);
+  z-index: 2;
+  inline-size: 34px;
+  block-size: 34px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(16, 20, 24, 0.22);
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  color: #101418;
+}
+
+.cpills::after {
+  content: "";
+  position: absolute;
+  inset-block: 12px;
+  inset-inline-end: 0;
+  inline-size: 76px;
+  background: linear-gradient(to left, #fff 42%, transparent);
+  pointer-events: none;
+}
+
+[dir="rtl"] .cpills::after {
+  background: linear-gradient(to right, #fff 42%, transparent);
+}
+
+/* Variant 2 — filled chips, no outline */
+.cpills[data-variant="2"] {
+  --cpill-bg: #f2f3f4;
+  --cpill-border: transparent;
+}
+
+.cpills[data-variant="2"] .cpill[aria-current="true"] {
+  background: #101418;
+  color: #fff;
+  border-color: transparent;
+}
+
+/* Variant 3 — square corners */
+.cpills[data-variant="3"] {
+  --cpill-radius: 8px;
+}
+
+/* Variant 4 — accent-tinted active state */
+.cpills[data-variant="4"] {
+  --cpill-border-active: var(--c-accent, #ff6d00);
+}
+
+.cpills[data-variant="4"] .cpill[aria-current="true"] {
+  background: var(--c-accent-light, #fff1e6);
+  color: var(--c-accent-dark, #e05c00);
+}
+
+/* Variant 5 — compact single-line */
+.cpills[data-variant="5"] .cpill {
+  min-block-size: 36px;
+  padding-block: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   PART 7 — Catalog product card
+   Borderless by design: the images carry the page, so chrome stays out.
+   ========================================================================== */
+.cgrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 12px;
+  padding-inline: 16px;
+  background: #fff;
+}
+
+@media (min-width: 600px) { .cgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 900px) { .cgrid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 26px 20px; } }
+@media (min-width: 1200px) { .cgrid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+
+.pgc {
+  --pgc-price: #ff6d00;
+  --pgc-radius: 8px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pgc__media {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--pgc-radius);
+  overflow: hidden;
+  background: #f4f5f6;
+}
+
+.pgc__img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  transition: transform 300ms ease;
+}
+
+@media (hover: hover) {
+  .pgc:hover .pgc__img { transform: scale(1.04); }
+}
+
+.pgc__ad {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  padding: 3px 8px;
+  border-end-start-radius: 6px;
+  background: rgba(16, 20, 24, 0.86);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.pgc__play {
+  position: absolute;
+  inset-block-end: 8px;
+  inset-inline-start: 8px;
+  inline-size: 26px;
+  block-size: 26px;
+  border-radius: 50%;
+  background: rgba(16, 20, 24, 0.42);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  backdrop-filter: blur(2px);
+}
+
+.pgc__title {
+  font-size: 13px;
+  line-height: 1.35;
+  color: #101418;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Price row: deal label, price, compare, and the quick-add on the far edge */
+.pgc__price-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+  min-inline-size: 0;
+}
+
+.pgc__price-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  flex-wrap: wrap;
+  min-inline-size: 0;
+}
+
+.pgc__deal {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--pgc-price);
+  white-space: nowrap;
+}
+
+.pgc__price {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--pgc-price);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.pgc__compare {
+  font-size: 12px;
+  color: #8a939c;
+  text-decoration: line-through;
+  white-space: nowrap;
+}
+
+.pgc__add {
+  flex: none;
+  margin-inline-start: auto;
+  inline-size: 30px;
+  block-size: 30px;
+  border-radius: 50%;
+  border: 1px solid #d4d6d8;
+  background: #fff;
+  color: #101418;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.pgc__add:hover {
+  border-color: #101418;
+  background: #f4f5f6;
+}
+
+/* Secondary line — price drop, low stock, or category rank */
+.pgc__note {
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--pgc-price);
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pgc__note--rank { color: #101418; }
+.pgc__note--rank b { color: #101418; font-weight: 700; }
+
+.pgc__rating {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #5b6570;
+}
+
+.pgc__stars {
+  color: #101418;
+  font-size: 12px;
+  letter-spacing: -0.5px;
+}
+
+.pgc__sold {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: #5b6570;
+  white-space: nowrap;
+}
+
+.pgc__flame { color: var(--pgc-price); }
+
+.pgc__seller {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: #6b3fd4;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Variant 2 — carded: white surface, border, padding */
+.pgc[data-variant="2"] {
+  border: 1px solid #e7eaec;
+  border-radius: 12px;
+  padding: 0 0 12px;
+  overflow: hidden;
+  gap: 5px;
+}
+
+.pgc[data-variant="2"] .pgc__media { border-radius: 0; }
+
+.pgc[data-variant="2"] .pgc__title,
+.pgc[data-variant="2"] .pgc__price-row,
+.pgc[data-variant="2"] .pgc__note,
+.pgc[data-variant="2"] .pgc__rating,
+.pgc[data-variant="2"] .pgc__seller {
+  margin-inline: 12px;
+}
+
+/* Variant 3 — two-line titles, roomier */
+.pgc[data-variant="3"] .pgc__title {
+  -webkit-line-clamp: 2;
+  min-block-size: calc(13px * 1.35 * 2);
+}
+
+/* Variant 4 — jade price instead of accent */
+.pgc[data-variant="4"] {
+  --pgc-price: var(--c-brand, #00806a);
+}
+
+/* Variant 5 — minimal: no ad badge, no seller badge, no note */
+.pgc[data-variant="5"] .pgc__ad,
+.pgc[data-variant="5"] .pgc__seller,
+.pgc[data-variant="5"] .pgc__note {
+  display: none;
+}
+
+.pgc[data-variant="5"] {
+  --pgc-radius: 14px;
+}
+
+/* ==========================================================================
+   PART 8 — Footer
+   ========================================================================== */
+.tfoot {
+  --tfoot-bg: #141414;
+  --tfoot-fg: #ffffff;
+  --tfoot-muted: #b3b6b9;
+  --tfoot-rule: rgba(255, 255, 255, 0.14);
+
+  background: var(--tfoot-bg);
+  color: var(--tfoot-fg);
+  padding-block: 40px 20px;
+}
+
+.tfoot__inner {
+  max-inline-size: 1400px;
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+
+.tfoot__cols {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 32px 24px;
+}
+
+@media (min-width: 900px) {
+  .tfoot__cols { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+.tfoot__title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-block-end: 14px;
+}
+
+.tfoot__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tfoot__link {
+  font-size: 13px;
+  color: var(--tfoot-muted);
+  line-height: 1.4;
+}
+
+.tfoot__link:hover {
+  color: var(--tfoot-fg);
+  text-decoration: underline;
+}
+
+/* App perks render as a two-column list of short benefit lines */
+.tfoot__perks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 14px;
+  margin-block-end: 16px;
+}
+
+.tfoot__perk {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--tfoot-muted);
+  min-inline-size: 0;
+}
+
+.tfoot__perk span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tfoot__stores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.store-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 1px solid var(--tfoot-rule);
+  border-radius: 8px;
+  color: var(--tfoot-fg);
+  line-height: 1.15;
+}
+
+.store-btn__icon { font-size: 20px; }
+.store-btn__small { display: block; font-size: 9px; opacity: 0.8; }
+.store-btn__big { display: block; font-size: 13px; font-weight: 700; }
+
+.tfoot__social-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-block: 24px 12px;
+}
+
+.tfoot__social {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 19px;
+}
+
+.tfoot__badges {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin-block-start: 32px;
+}
+
+@media (max-width: 749px) {
+  .tfoot__badges { grid-template-columns: 1fr; }
+}
+
+.tfoot__badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.paychip {
+  display: grid;
+  place-items: center;
+  min-inline-size: 46px;
+  block-size: 28px;
+  padding-inline: 7px;
+  border-radius: 4px;
+  background: #fff;
+  color: #101418;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-align: center;
+  line-height: 1.05;
+}
+
+.tfoot__bottom {
+  margin-block-start: 28px;
+  padding-block-start: 18px;
+  border-block-start: 1px solid var(--tfoot-rule);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 18px;
+  font-size: 12px;
+  color: var(--tfoot-muted);
+  text-align: center;
+}
+
+.tfoot__bottom a { text-decoration: underline; }
+
+/* Variant 2 — light footer */
+.tfoot[data-variant="2"] {
+  --tfoot-bg: #ffffff;
+  --tfoot-fg: #101418;
+  --tfoot-muted: #5b6570;
+  --tfoot-rule: #e7eaec;
+  border-block-start: 1px solid #e7eaec;
+}
+
+.tfoot[data-variant="2"] .paychip {
+  border: 1px solid #e7eaec;
+}
+
+/* Variant 3 — brand-jade footer */
+.tfoot[data-variant="3"] {
+  --tfoot-bg: var(--c-brand-dark, #00614f);
+  --tfoot-muted: rgba(255, 255, 255, 0.78);
+  --tfoot-rule: rgba(255, 255, 255, 0.2);
+}
+
+/* Variant 4 — grey, no app column emphasis */
+.tfoot[data-variant="4"] {
+  --tfoot-bg: #f4f5f6;
+  --tfoot-fg: #101418;
+  --tfoot-muted: #5b6570;
+  --tfoot-rule: #d3d8dc;
+}
+
+.tfoot[data-variant="4"] .paychip { border: 1px solid #d3d8dc; }
+
+/* Variant 5 — condensed: links only, no app or social blocks */
+.tfoot[data-variant="5"] {
+  padding-block: 28px 16px;
+}
+
+.tfoot[data-variant="5"] .tfoot__perks,
+.tfoot[data-variant="5"] .tfoot__stores,
+.tfoot[data-variant="5"] .tfoot__social,
+.tfoot[data-variant="5"] .tfoot__social-title {
+  display: none;
+}
+
+/* ==========================================================================
+   PART 9 — Load more
+   ========================================================================== */
+.loadmore {
+  display: flex;
+  justify-content: center;
+  padding-block: 28px;
+  background: #fff;
+}
+
+.loadmore__btn {
+  --lm-bg: var(--c-accent, #ff6d00);
+  --lm-fg: #ffffff;
+  --lm-border: transparent;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-block-size: 48px;
+  padding-inline: 44px;
+  border: 1.5px solid var(--lm-border);
+  border-radius: 999px;
+  background: var(--lm-bg);
+  color: var(--lm-fg);
+  font-size: 15px;
+  font-weight: 700;
+  transition: filter 120ms ease, transform 120ms ease;
+}
+
+.loadmore__btn:hover { filter: brightness(0.94); }
+.loadmore__btn:active { transform: scale(0.98); }
+
+.loadmore__caret { font-size: 11px; }
+
+/* Busy state — the label is swapped by JS, the spinner is CSS only */
+.loadmore__btn[aria-busy="true"] .loadmore__caret {
+  inline-size: 13px;
+  block-size: 13px;
+  border: 2px solid currentColor;
+  border-block-start-color: transparent;
+  border-radius: 50%;
+  animation: lm-spin 700ms linear infinite;
+}
+
+@keyframes lm-spin { to { transform: rotate(360deg); } }
+
+/* Variant 2 — outlined */
+.loadmore[data-variant="2"] .loadmore__btn {
+  --lm-bg: transparent;
+  --lm-fg: var(--c-accent, #ff6d00);
+  --lm-border: var(--c-accent, #ff6d00);
+}
+
+/* Variant 3 — ink */
+.loadmore[data-variant="3"] .loadmore__btn {
+  --lm-bg: #101418;
+}
+
+/* Variant 4 — jade */
+.loadmore[data-variant="4"] .loadmore__btn {
+  --lm-bg: var(--c-brand, #00806a);
+}
+
+/* Variant 5 — full-width block, best on mobile */
+.loadmore[data-variant="5"] .loadmore__btn {
+  inline-size: min(520px, 100% - 32px);
+  justify-content: center;
+  border-radius: 12px;
+}

@@ -46,7 +46,9 @@ for (const s of sizes) {
     for (const el of document.querySelectorAll("body *")) {
       const r = el.getBoundingClientRect();
       if (r.width > 0 && (r.right > de.clientWidth + 1 || r.left < -1)) {
-        const parent = el.closest(".rail, .tabbar, .ubar__inner, .tbar__list");
+        const parent = el.closest(
+          ".rail, .tabbar, .ubar__inner, .tbar__list, .cpills__track"
+        );
         if (parent && parent !== el) continue; // rails scroll on purpose
         offenders.push(
           el.tagName.toLowerCase() +
