@@ -104,7 +104,30 @@
     });
   }
 
+  /* ----------------------------------------------------------------------
+     Sticky column that is taller than the viewport.
+     Pins the bottom edge instead of the top so nothing is unreachable.
+     ---------------------------------------------------------------------- */
+  function initStickyFit(el) {
+    var gap = parseInt(el.dataset.stickyGap || "16", 10);
+
+    function measure() {
+      // Clear first so the measurement is not skewed by the current offset.
+      el.style.removeProperty("--sticky-top");
+      var overflow = el.offsetHeight - window.innerHeight;
+      el.style.setProperty(
+        "--sticky-top",
+        (overflow > -gap ? -(overflow + gap) : gap) + "px"
+      );
+    }
+
+    measure();
+    window.addEventListener("resize", measure, { passive: true });
+    if ("ResizeObserver" in window) new ResizeObserver(measure).observe(el);
+  }
+
   function boot() {
+    document.querySelectorAll("[data-sticky-fit]").forEach(initStickyFit);
     document.querySelectorAll("[data-disclosure]").forEach(initDisclosure);
     document.querySelectorAll("[data-scroller]").forEach(initScroller);
     document.querySelectorAll("[data-loadmore]").forEach(initLoadMore);

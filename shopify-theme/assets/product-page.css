@@ -55,16 +55,19 @@
   }
 }
 
-/* The buy box tracks the viewport while the left column scrolls past it. */
+/* The buy box tracks the viewport while the left column scrolls past it.
+
+   A tall buy box must not get its own scrollbar — a nested scroller traps the
+   wheel and hides the CTA. Instead the sticky offset is allowed to go
+   negative: the box scrolls up with the page until its BOTTOM reaches the
+   viewport bottom, then pins there, so the whole stack is readable and the
+   CTA stays on screen. theme.js measures the box and sets --sticky-top;
+   16px is the fallback for a box that already fits. */
 @media (min-width: 990px) {
   .pdp__buybox {
     position: sticky;
-    inset-block-start: 16px;
+    inset-block-start: var(--sticky-top, 16px);
     align-self: start;
-    max-block-size: calc(100vh - 32px);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-width: thin;
   }
 }
 

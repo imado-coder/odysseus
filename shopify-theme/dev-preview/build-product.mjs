@@ -284,7 +284,7 @@ const html = `<!doctype html>
         ${landing}
         ${related}
       </div>
-      <div class="pdp__buybox">
+      <div class="pdp__buybox" data-sticky-fit>
         <div class="bb">
           ${B.join("\n          ")}
         </div>
