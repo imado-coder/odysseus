@@ -1,3 +1,29 @@
 {
-  "current": "Défaut"
+  "current": {
+    "logo_text": "MA BOUTIQUE",
+    "color_accent": "#ff6d00",
+    "color_accent_text": "#c24e00",
+    "color_brand": "#00806a",
+    "color_sale": "#ff4438",
+    "color_ink": "#101418",
+    "color_surface": "#ffffff",
+    "color_page_bg": "#f4f5f6",
+    "color_border": "#e7eaec",
+    "color_success": "#12805c",
+    "layout_max_width": 1440,
+    "radius_base": 8,
+    "button_shape": "pill",
+    "text_direction": "ltr",
+    "card_show_rating": true,
+    "card_show_sold": true,
+    "card_show_compare": true,
+    "card_show_discount": true,
+    "card_show_quick_add": true,
+    "card_show_second_image": true,
+    "card_deal_label": "Dernier jour",
+    "card_variant": "1",
+    "cod_tariffs": "{}",
+    "cod_tariff_fallback": "[600,350]",
+    "cod_currency_suffix": "DA"
+  }
 }

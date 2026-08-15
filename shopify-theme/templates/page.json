@@ -1,6 +1,1 @@
-{
-  "sections": {
-    "main": { "type": "product-grid", "settings": {} }
-  },
-  "order": ["main"]
-}
+{ "sections": { "main": { "type": "product-grid", "settings": { "title": "", "count": 10 } } }, "order": ["main"] }
