@@ -10,6 +10,8 @@
  * and `options` arguments — not `input`.
  */
 
+import type { AdminApiContext } from "@shopify/shopify-app-react-router/server";
+
 const ORDER_CREATE = `#graphql
   mutation CreateCodOrder($order: OrderCreateOrderInput!, $options: OrderCreateOptionsInput) {
     orderCreate(order: $order, options: $options) {
@@ -36,6 +38,8 @@ export type CodOrderDraft = {
   lastName: string;
   address: string;
   commune: string;
+  /** ISO 3166-2:DZ subdivision code, "01"–"58". */
+  wilayaCode: string;
   wilayaName: string;
   items: CodItem[];
   shipping: number;
@@ -44,20 +48,67 @@ export type CodOrderDraft = {
   note?: string | null;
 };
 
-type GraphqlClient = {
-  graphql: (query: string, opts?: { variables?: unknown }) => Promise<Response>;
-};
+/**
+ * How the wilaya is written into the address.
+ *
+ * `provinceCode` is the field Shopify wants — `province` is deprecated. But
+ * `provinceCode` is only accepted for countries whose subdivisions Shopify
+ * actually carries, and a rejected code fails the whole order. So the code is
+ * tried first and the free-text name is the fallback: whichever Shopify
+ * accepts, the merchant still gets the order.
+ */
+type ProvinceStyle = "code" | "name";
 
-export async function createCodOrder(admin: GraphqlClient, draft: CodOrderDraft) {
-  const address = {
+function buildAddress(draft: CodOrderDraft, style: ProvinceStyle) {
+  return {
     firstName: draft.firstName,
     lastName: draft.lastName,
     address1: draft.address,
     city: draft.commune,
-    province: draft.wilayaName,
+    ...(style === "code"
+      ? { provinceCode: draft.wilayaCode }
+      : { province: draft.wilayaName }),
     countryCode: "DZ",
     phone: draft.phone,
   };
+}
+
+function isProvinceError(errors: { field?: string[]; message: string }[]) {
+  return errors.some(
+    (e) =>
+      e.field?.some((f) => /province/i.test(f)) ||
+      /province|region|state/i.test(e.message),
+  );
+}
+
+export async function createCodOrder(
+  admin: AdminApiContext,
+  draft: CodOrderDraft,
+) {
+  let result = await attempt(admin, draft, "code");
+
+  /* Shopify does not know this country's subdivisions — send the name. */
+  if (!result.order && isProvinceError(result.userErrors)) {
+    result = await attempt(admin, draft, "name");
+  }
+
+  if (!result.order || result.userErrors.length) {
+    const message =
+      result.userErrors
+        .map((e) => `${e.field?.join(".") ?? "order"}: ${e.message}`)
+        .join("; ") || "orderCreate returned no order";
+    throw new Error(message);
+  }
+
+  return result.order;
+}
+
+async function attempt(
+  admin: AdminApiContext,
+  draft: CodOrderDraft,
+  style: ProvinceStyle,
+) {
+  const address = buildAddress(draft, style);
 
   const response = await admin.graphql(ORDER_CREATE, {
     variables: {
@@ -99,15 +150,11 @@ export async function createCodOrder(admin: GraphqlClient, draft: CodOrderDraft)
   const body = await response.json();
   const result = body?.data?.orderCreate;
 
-  if (!result?.order || result.userErrors?.length) {
-    const message =
-      result?.userErrors
-        ?.map((e: { field?: string[]; message: string }) =>
-          `${e.field?.join(".") ?? "order"}: ${e.message}`,
-        )
-        .join("; ") || "orderCreate returned no order";
-    throw new Error(message);
-  }
-
-  return result.order as { id: string; name: string };
+  return {
+    order: (result?.order ?? null) as { id: string; name: string } | null,
+    userErrors: (result?.userErrors ?? []) as {
+      field?: string[];
+      message: string;
+    }[],
+  };
 }

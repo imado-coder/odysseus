@@ -20,11 +20,27 @@ export type CleanLead = {
   items: { variantId: string; quantity: number }[];
 };
 
-const PHONE = /^0[5-7]\d{8}$/;
-const MOBILE_OR_LANDLINE = /^0\d{8,9}$/;
+/* Algerian numbering plan: mobiles are 0 + 5/6/7 + 8 digits (Djezzy, Mobilis,
+   Ooredoo), landlines are 0 + area code 2-4 + 7 digits. A bare `^0\d{8,9}$`
+   would wave through 08…/09…, which no operator issues. */
+const MOBILE = /^0[5-7]\d{8}$/;
+const LANDLINE = /^0[2-4]\d{7}$/;
 
 function str(v: unknown, max = 200) {
   return typeof v === "string" ? v.trim().slice(0, max) : "";
+}
+
+/**
+ * Customers type their number every way there is: +213, 00213, spaces, dots,
+ * dashes. All of those mean the same person, so they are folded to the local
+ * 0-prefixed form before validation rather than rejected.
+ */
+export function normalizePhone(input: string) {
+  let p = input.replace(/[\s.\-()]/g, "");
+  if (p.startsWith("+")) p = p.slice(1);
+  if (p.startsWith("00")) p = p.slice(2);
+  if (p.startsWith("213")) p = "0" + p.slice(3);
+  return p;
 }
 
 export function validateLead(raw: RawLead) {
@@ -35,7 +51,7 @@ export function validateLead(raw: RawLead) {
   const address = str(raw.adresse ?? raw.address, 400);
   const commune = str(raw.commune, 120);
   const wilayaCode = str(raw.wilaya ?? raw.wilayaCode, 2).padStart(2, "0");
-  const phone = str(raw.telephone ?? raw.phone, 20).replace(/[\s.\-()]/g, "");
+  const phone = normalizePhone(str(raw.telephone ?? raw.phone, 24));
 
   if (!firstName) errors.firstName = "required";
   if (!lastName) errors.lastName = "required";
@@ -44,7 +60,7 @@ export function validateLead(raw: RawLead) {
   if (!/^\d{2}$/.test(wilayaCode) || +wilayaCode < 1 || +wilayaCode > 58) {
     errors.wilaya = "invalid";
   }
-  if (!PHONE.test(phone) && !MOBILE_OR_LANDLINE.test(phone)) {
+  if (!MOBILE.test(phone) && !LANDLINE.test(phone)) {
     errors.phone = "invalid";
   }
 

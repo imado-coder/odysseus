@@ -1,0 +1,8 @@
+node_modules/
+build/
+.react-router/
+.cache/
+.env
+.env.local
+.shopify/
+*.log

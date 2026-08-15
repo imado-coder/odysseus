@@ -126,6 +126,10 @@ model Lead {
   shipping   Int
   total      Int
 
+  /// False when Shopify could not be reached to price the variants, so the
+  /// amounts above came from the storefront and must be confirmed on the call.
+  pricesVerified Boolean @default(true)
+
   source     String?  // product page, cart drawer, landing
   userAgent  String?
   ip         String?
