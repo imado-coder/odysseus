@@ -1,0 +1,503 @@
+/* ==========================================================================
+   pdp-mobile.css — phone-specific product page.
+   98% of this market shops on a phone, so the phone layout is designed on its
+   own terms rather than reflowed from the desktop one: the gallery goes
+   full-bleed with floating controls, a tab bar takes over the top on scroll,
+   and the buy box reads as a single continuous column.
+   ========================================================================== */
+
+@media (max-width: 989px) {
+  /* Gutters belong to the blocks, not the page, so the gallery can bleed. */
+  .pdp__inner { padding-inline: 0; }
+  .pdp__crumbs { display: none; }
+  .bb { padding-inline: 16px; }
+  .pdp__details > * { padding-inline: 0; }
+}
+
+/* --------------------------------------------------------------------------
+   Full-bleed gallery with floating controls
+   -------------------------------------------------------------------------- */
+@media (max-width: 989px) {
+  .gallery { display: block; position: relative; }
+
+  .gallery__stage {
+    border-radius: 0;
+    aspect-ratio: 1;
+  }
+
+  /* Thumbs move into the swatch area; the stage is swiped instead. */
+  .gallery__thumbs { display: none; }
+
+  .gallery__float {
+    position: absolute;
+    inset-block-start: 12px;
+    inset-inline: 12px;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    pointer-events: none;
+  }
+
+  .gallery__float-group {
+    display: flex;
+    gap: 8px;
+    pointer-events: auto;
+  }
+
+  .gfab {
+    inline-size: 40px;
+    block-size: 40px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: rgba(16, 20, 24, 0.42);
+    color: #fff;
+    backdrop-filter: blur(6px);
+  }
+
+  .gallery__count {
+    position: absolute;
+    inset-block-end: 12px;
+    inset-inline-end: 12px;
+    z-index: 3;
+    padding: 3px 11px;
+    border-radius: 999px;
+    background: rgba(16, 20, 24, 0.5);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    backdrop-filter: blur(6px);
+  }
+}
+
+@media (min-width: 990px) {
+  .gallery__float,
+  .gallery__count { display: none; }
+}
+
+/* --------------------------------------------------------------------------
+   Section tab bar — takes over the top of the screen once the gallery leaves
+   -------------------------------------------------------------------------- */
+.pdp__tabs {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #fff;
+  border-block-end: 1px solid var(--c-border, #e7eaec);
+}
+
+@media (min-width: 990px) {
+  .pdp__tabs { display: none; }
+}
+
+.pdp__tab {
+  position: relative;
+  padding: 8px 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--c-ink-2, #5b6570);
+  white-space: nowrap;
+}
+
+.pdp__tab[aria-current] {
+  color: var(--c-ink, #101418);
+  font-weight: 800;
+}
+
+.pdp__tab[aria-current]::after {
+  content: "";
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline: 10px;
+  block-size: 3px;
+  border-radius: 2px;
+  background: var(--c-ink, #101418);
+}
+
+.pdp__tabs-end {
+  margin-inline-start: auto;
+  display: flex;
+  gap: 4px;
+}
+
+.pdp__tabs-end a {
+  inline-size: 38px;
+  block-size: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--c-ink, #101418);
+}
+
+/* --------------------------------------------------------------------------
+   Shipping strip above the title
+   -------------------------------------------------------------------------- */
+.ship-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 16px;
+  background: var(--c-peach, #fff3ec);
+  font-size: 14px;
+  font-weight: 600;
+  color: #0b7d14;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.ship-strip::-webkit-scrollbar { display: none; }
+
+.ship-strip__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.ship-strip__item b { color: var(--c-accent-text, #c24e00); font-weight: 700; }
+
+.ship-strip__sep {
+  inline-size: 1px;
+  block-size: 15px;
+  background: rgba(16, 20, 24, 0.16);
+  flex: none;
+}
+
+/* --------------------------------------------------------------------------
+   Collapsible title
+   -------------------------------------------------------------------------- */
+.bb__title-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  inline-size: 100%;
+  text-align: start;
+}
+
+.bb__title--clamped {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.bb__title-caret {
+  flex: none;
+  margin-block-start: 3px;
+  color: var(--c-ink-2, #5b6570);
+  transition: transform 160ms ease;
+}
+
+[aria-expanded="true"] .bb__title-caret { transform: rotate(180deg); }
+
+/* --------------------------------------------------------------------------
+   Option groups: size scale toggle, size pills, fit note
+   -------------------------------------------------------------------------- */
+.opt-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.opt-head__label {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* Two-state scale switch, the way a local size chart is offered next to an
+   international one. */
+.scale {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 6px;
+  background: var(--c-bg, #f4f5f6);
+}
+
+.scale__opt {
+  padding: 5px 13px;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--c-ink-2, #5b6570);
+}
+
+.scale__opt[aria-pressed="true"] {
+  background: var(--c-ink, #101418);
+  color: #fff;
+  font-weight: 700;
+}
+
+.opt-head__guide {
+  margin-inline-start: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-block-size: 40px;
+  padding-inline: 14px;
+  border-radius: 999px;
+  background: var(--c-bg, #f4f5f6);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.sizes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-block-start: 12px;
+}
+
+.size {
+  min-inline-size: 74px;
+  min-block-size: 46px;
+  padding-inline: 14px;
+  border: 1px solid var(--c-border-strong, #d3d8dc);
+  border-radius: 999px;
+  background: #fff;
+  font-size: 15px;
+  color: var(--c-ink, #101418);
+  display: grid;
+  place-items: center;
+  transition: border-color 120ms ease;
+}
+
+.size[aria-pressed="true"] {
+  border-color: var(--c-ink, #101418);
+  border-width: 2px;
+  font-weight: 700;
+}
+
+.size[disabled] {
+  color: var(--c-ink-3, #6e7781);
+  background: var(--c-bg, #f4f5f6);
+  text-decoration: line-through;
+}
+
+.fit-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-block-start: 12px;
+  font-size: 14px;
+  color: var(--c-ink-2, #5b6570);
+}
+
+/* --------------------------------------------------------------------------
+   Quantity stepper — a select is fiddly with a thumb
+   -------------------------------------------------------------------------- */
+.qty {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.qty__label { font-size: 15px; font-weight: 700; }
+
+.qty__control {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--c-border-strong, #d3d8dc);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.qty__btn {
+  inline-size: 46px;
+  block-size: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--c-ink, #101418);
+  font-size: 20px;
+  line-height: 1;
+}
+
+.qty__btn:disabled { color: var(--c-border-strong, #d3d8dc); }
+
+.qty__input {
+  inline-size: 54px;
+  block-size: 44px;
+  border: 0;
+  border-inline: 1px solid var(--c-border-strong, #d3d8dc);
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield;
+}
+
+.qty__input::-webkit-outer-spin-button,
+.qty__input::-webkit-inner-spin-button { appearance: none; margin: 0; }
+
+.qty__sold {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--c-accent-text, #c24e00);
+}
+
+/* --------------------------------------------------------------------------
+   Product details table
+   -------------------------------------------------------------------------- */
+.pdetails {
+  padding: 18px 16px;
+  border-block-start: 8px solid var(--c-bg, #f4f5f6);
+}
+
+.pdetails__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-block-end: 14px;
+}
+
+.pdetails__title { font-size: 19px; font-weight: 800; }
+
+.pdetails__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--c-ink-2, #5b6570);
+}
+
+.pdetails__action:first-of-type { margin-inline-start: auto; }
+
+.pdetails__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--c-border, #e7eaec);
+}
+
+.pdetails__cell {
+  background: #fff;
+  padding: 4px 12px;
+  text-align: center;
+}
+
+.pdetails__key {
+  display: block;
+  font-size: 13px;
+  color: var(--c-ink-2, #5b6570);
+}
+
+.pdetails__val {
+  display: block;
+  margin-block-start: 3px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.pdetails__more {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-block-start: 14px;
+  font-size: 15px;
+  color: var(--c-ink-2, #5b6570);
+}
+
+.pdetails__guide {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  inline-size: 100%;
+  min-block-size: 52px;
+  margin-block-start: 14px;
+  padding-inline: 14px;
+  border: 1px solid var(--c-border-strong, #d3d8dc);
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.pdetails__guide-val {
+  margin-inline-start: auto;
+  color: var(--c-ink-2, #5b6570);
+  font-weight: 500;
+}
+
+/* --------------------------------------------------------------------------
+   Review meta and actions
+   -------------------------------------------------------------------------- */
+.review__purchase {
+  margin-block: 4px 8px;
+  font-size: 13px;
+  color: var(--c-ink-2, #5b6570);
+}
+
+.review__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-block-start: 10px;
+  font-size: 13px;
+  color: var(--c-ink-2, #5b6570);
+}
+
+.review__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-block-size: 36px;
+}
+
+.review__actions .review__sep {
+  inline-size: 1px;
+  block-size: 13px;
+  background: var(--c-border-strong, #d3d8dc);
+}
+
+/* --------------------------------------------------------------------------
+   Floating cart bubble
+   -------------------------------------------------------------------------- */
+.cart-fab {
+  position: fixed;
+  inset-block-end: calc(84px + env(safe-area-inset-bottom));
+  inset-inline-end: 12px;
+  z-index: 55;
+  inline-size: 66px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 4px 6px;
+  border-radius: 16px;
+  background: #0b7d14;
+  color: #fff;
+  text-align: center;
+  box-shadow: 0 6px 18px rgba(11, 125, 20, 0.34);
+}
+
+@media (min-width: 990px) {
+  .cart-fab { display: none; }
+}
+
+.cart-fab__count {
+  position: absolute;
+  inset-block-start: -7px;
+  inset-inline-end: -5px;
+  min-inline-size: 26px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--c-accent, #ff6d00);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  border: 2px solid #fff;
+}
+
+.cart-fab__label {
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.15;
+}

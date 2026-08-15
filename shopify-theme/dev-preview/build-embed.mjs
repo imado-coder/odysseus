@@ -22,6 +22,7 @@ const inlinePhotos = (html) =>
   html.replace(/photos\/prod-(\d+)\.jpg/g, (m) => photos[m] || m);
 
 let heroBand = body("home-hero.html");
+let phoneHome = body("mobile-home.html");
 let header = body("stack-closed.html");
 let collection = body("collection.html");
 let product = body("product.html");
@@ -50,6 +51,8 @@ const doc = `<!doctype html>
 <style>${asset("cod-form.css")}</style>
 <style>${asset("badges.css")}</style>
 <style>${asset("hero.css")}</style>
+<style>${asset("home-mobile.css")}</style>
+<style>${asset("pdp-mobile.css")}</style>
 <style>
   html { scroll-behavior: auto; }
   .surface { scroll-margin-block-start: 0; }
@@ -62,6 +65,8 @@ const doc = `<!doctype html>
 </head>
 <body>
 <div class="surface" id="s-header">${header}${heroBand}</div>
+<div class="surface-sep">Accueil mobile — passez en mode Mobile</div>
+<div class="surface" id="s-phone">${phoneHome}</div>
 <div class="surface-sep">Page collection</div>
 <div class="surface" id="s-collection">${collection}</div>
 <div class="surface-sep">Page produit</div>

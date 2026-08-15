@@ -1,0 +1,130 @@
+/* Dev-only harness for the phone storefront and the phone product page. */
+import { writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { icon } from "./icons.mjs";
+
+const here = dirname(fileURLToPath(import.meta.url));
+const BRAND = "SOUQNA";
+const photo = (i) => `photos/prod-${(i % 10) + 1}.jpg`;
+
+const head = (title, extra = "") => `<!doctype html>
+<html lang="fr" dir="ltr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${title}</title>
+<link rel="stylesheet" href="../assets/base.css">
+<link rel="stylesheet" href="../assets/badges.css">
+<link rel="stylesheet" href="../assets/catalog-system.css">
+<link rel="stylesheet" href="../assets/home-mobile.css">
+<link rel="stylesheet" href="../assets/product-page.css">
+<link rel="stylesheet" href="../assets/pdp-mobile.css">
+<link rel="stylesheet" href="../assets/cod-form.css">
+${extra}
+<script src="../assets/theme.js" defer></script>
+</head><body style="background:#fff">`;
+
+/* --- phone home ---------------------------------------------------------- */
+const departments = ["Tout", "Hommes", "Femmes", "Maison", "Bijoux", "Sport", "Beauté"];
+const sorts = [["", "Tout"], ["star", "Notés 5 étoiles"], ["flame", "Meilleures ventes"], ["gift", "Nouveautés"]];
+
+const items = [
+  ["Ensemble 2 pièces homme t-shirt et short de sport", "1 406", "4 200", "7", true],
+  ["Set de 4 pièces base de maquillage teint parfait", "2 430", "5 690", "2 000+", false],
+  ["Montre connectée étanche IP68 multisport", "4 900", "12 400", "1 200+", false],
+  ["Casque audio sans fil réduction de bruit active", "3 550", "8 350", "3 000+", true],
+  ["Sac à dos imperméable port USB intégré 30L", "2 970", "9 010", "820", false],
+  ["Baskets homme running maille respirante", "5 920", "16 260", "899", false],
+];
+
+const card = (it, i) => {
+  const [t, p, c, sold, ad] = it;
+  return `<article class="pgc">
+  <div class="pgc__media">
+    <a href="#" tabindex="-1" aria-hidden="true">
+      <img class="pgc__img" src="${photo(i)}" alt="" width="700" height="700"
+           loading="${i < 4 ? "eager" : "lazy"}" decoding="async"${i === 0 ? ' fetchpriority="high"' : ""}>
+    </a>
+    ${ad ? '<span class="pgc__ad"><span class="visually-hidden">Annonce : </span>Pub</span>' : ""}
+  </div>
+  <h3 class="pgc__title"><a href="#">${t}</a></h3>
+  <div class="pgc__rating">
+    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
+    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="pgc__sold">${icon("flame", "pgc__flame")} ${sold} ventes</span>
+  </div>
+  <div class="pgc__price-row">
+    <span class="pgc__price-wrap">
+      <span class="pgc__deal">Dernier jour</span>
+      <span class="pgc__price">${p} DA</span>
+      <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>${c} DA</s>
+    </span>
+    <button class="pgc__add" type="button" aria-label="Ajouter au panier : ${t}">${icon("cart")}</button>
+  </div>
+</article>`;
+};
+
+writeFileSync(
+  join(here, "mobile-home.html"),
+  head("Accueil") +
+    `
+<div class="msearch">
+  <form class="msearch__field" role="search" action="/search" method="get">
+    <label class="visually-hidden" for="MSearch">Rechercher</label>
+    <input class="msearch__input" id="MSearch" name="q" type="search" placeholder="ensemble homme">
+    <button class="msearch__lens" type="button" aria-label="Rechercher par image">${icon("tag")}</button>
+    <button class="msearch__go" type="submit" aria-label="Lancer la recherche">${icon("search")}</button>
+  </form>
+</div>
+
+<nav class="deptabs" aria-label="Rayons">
+  ${departments.map((d, i) => `<a class="deptab" href="#"${i === 0 ? ' aria-current="page"' : ""}>${d}</a>`).join("\n  ")}
+</nav>
+
+<div class="promises">
+  <span class="promise">
+    ${icon("check", "promise__icon")}
+    <span class="promise__text">
+      <span class="promise__title">Livraison gratuite</span>
+      <span class="promise__sub">Dès 8 000 DA</span>
+    </span>
+  </span>
+  <span class="promise">
+    ${icon("refresh", "promise__icon")}
+    <span class="promise__text">
+      <span class="promise__title">Retour sous 7 jours</span>
+      <span class="promise__sub">À partir de la livraison</span>
+    </span>
+  </span>
+</div>
+
+<a class="mtrust" href="#">
+  ${icon("shield-check")} <span class="mtrust__label">Pourquoi choisir ${BRAND} ?</span>
+  <span class="mtrust__end">Paiement à la livraison ${icon("chevron", "icon--sm")}</span>
+</a>
+
+<a class="mpartner" href="#">
+  <span class="mpartner__brand">${BRAND} ${icon("truck", "icon--sm")}</span>
+  <span class="mpartner__text"><span>Ensemble pour une meilleure livraison</span>${icon("chevron", "icon--sm")}</span>
+</a>
+
+<nav class="sorttabs" aria-label="Trier les produits">
+  ${sorts.map(([ic, l], i) => `<a class="sorttab" href="#"${i === 0 ? ' aria-current="page"' : ""}>${ic ? icon(ic, "icon--sm") : ""}${l}</a>`).join("\n  ")}
+</nav>
+
+<div class="cgrid">
+  ${items.map(card).join("\n  ")}
+</div>
+
+<div class="mnav-spacer"></div>
+
+<nav class="mnav" aria-label="Navigation principale">
+  <a class="mnav__item" href="#" aria-current="page">${icon("home")}Accueil</a>
+  <a class="mnav__item" href="#">${icon("menu")}Catégories</a>
+  <a class="mnav__item" href="#">${icon("user")}<span class="mnav__badge">99+</span>Vous</a>
+  <a class="mnav__item" href="#">${icon("cart")}<span class="mnav__badge">99+</span>Panier</a>
+  <span class="mnav__promo">Durée limitée<br>Livraison gratuite</span>
+</nav>
+</body></html>`
+);
+
+console.log("wrote mobile-home.html");
