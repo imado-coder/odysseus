@@ -33,36 +33,122 @@
   "name": "Barre de confiance",
   "tag": "section",
   "settings": [
-    { "type": "select", "id": "variant", "label": "Style",
+    {
+      "type": "select",
+      "id": "variant",
+      "label": "Style",
       "options": [
-        { "value": "1", "label": "1 — Vert" },
-        { "value": "2", "label": "2 — Vert foncé" },
-        { "value": "3", "label": "3 — Vert clair, texte foncé" },
-        { "value": "4", "label": "4 — Neutre" },
-        { "value": "5", "label": "5 — Couleur d'accent" }
-      ], "default": "1" },
-    { "type": "text", "id": "lead_icon", "label": "Icône du libellé", "default": "🛡" },
-    { "type": "text", "id": "lead", "label": "Libellé de gauche", "default": "Pourquoi nous choisir ?" },
-    { "type": "text", "id": "aria_label", "label": "Nom de la zone (lecteurs d'écran)", "default": "Garanties" },
-    { "type": "header", "content": "Couleurs" },
-    { "type": "color", "id": "bg", "label": "Fond" },
-    { "type": "color", "id": "fg", "label": "Texte" }
+        {
+          "value": "1",
+          "label": "1 — Vert"
+        },
+        {
+          "value": "2",
+          "label": "2 — Vert foncé"
+        },
+        {
+          "value": "3",
+          "label": "3 — Vert clair, texte foncé"
+        },
+        {
+          "value": "4",
+          "label": "4 — Neutre"
+        },
+        {
+          "value": "5",
+          "label": "5 — Couleur d'accent"
+        }
+      ],
+      "default": "1"
+    },
+    {
+      "type": "text",
+      "id": "lead_icon",
+      "label": "Icône du libellé",
+      "default": "🛡"
+    },
+    {
+      "type": "text",
+      "id": "lead",
+      "label": "Libellé de gauche",
+      "default": "Pourquoi nous choisir ?"
+    },
+    {
+      "type": "text",
+      "id": "aria_label",
+      "label": "Nom de la zone (lecteurs d'écran)",
+      "default": "Garanties"
+    },
+    {
+      "type": "header",
+      "content": "Couleurs"
+    },
+    {
+      "type": "color",
+      "id": "bg",
+      "label": "Fond",
+      "default": "#fff1e6"
+    },
+    {
+      "type": "color",
+      "id": "fg",
+      "label": "Texte",
+      "default": "#8a3d00"
+    }
   ],
   "blocks": [
-    { "type": "item", "name": "Garantie", "limit": 6,
+    {
+      "type": "item",
+      "name": "Garantie",
+      "limit": 6,
       "settings": [
-        { "type": "text", "id": "icon", "label": "Icône", "default": "🔒" },
-        { "type": "text", "id": "label", "label": "Texte", "default": "Paiement sécurisé" },
-        { "type": "url", "id": "link", "label": "Lien" }
-      ] }
+        {
+          "type": "text",
+          "id": "icon",
+          "label": "Icône",
+          "default": "🔒"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Texte",
+          "default": "Paiement sécurisé"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Lien"
+        }
+      ]
+    }
   ],
   "presets": [
-    { "name": "Barre de confiance",
+    {
+      "name": "Barre de confiance",
       "blocks": [
-        { "type": "item", "settings": { "icon": "🔒", "label": "Protection des données" } },
-        { "type": "item", "settings": { "icon": "💳", "label": "Paiement à la livraison" } },
-        { "type": "item", "settings": { "icon": "✅", "label": "Garantie de livraison" } }
-      ] }
+        {
+          "type": "item",
+          "settings": {
+            "icon": "🔒",
+            "label": "Protection des données"
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "icon": "💳",
+            "label": "Paiement à la livraison"
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "icon": "✅",
+            "label": "Garantie de livraison"
+          }
+        }
+      ]
+    }
   ]
 }
 {% endschema %}

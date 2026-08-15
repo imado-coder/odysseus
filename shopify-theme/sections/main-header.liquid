@@ -13,11 +13,11 @@
   <div class="mhead__inner">
     <a class="mhead__logo" href="{{ routes.root_url }}">
       {%- if settings.logo != blank -%}
-        <span class="logo-tile" style="{% if section.settings.logo_bg != blank %}--logo-bg: {{ section.settings.logo_bg }};{% endif %}">
+        <span class="logo-tile" style="{% if section.settings.logo_bg != blank %}--logo-bg: {{ section.settings.logo_bg }};{% endif %}{% if section.settings.logo_fg != blank %}--logo-fg: {{ section.settings.logo_fg }};{% endif %}">
           {{ settings.logo | image_url: width: 92 | image_tag: widths: '46,92,138', alt: shop.name, loading: 'eager' }}
         </span>
       {%- else -%}
-        <span class="logo-tile" style="{% if section.settings.logo_bg != blank %}--logo-bg: {{ section.settings.logo_bg }};{% endif %}">
+        <span class="logo-tile" style="{% if section.settings.logo_bg != blank %}--logo-bg: {{ section.settings.logo_bg }};{% endif %}{% if section.settings.logo_fg != blank %}--logo-fg: {{ section.settings.logo_fg }};{% endif %}">
           {%- if section.settings.logo_mark != blank -%}
             <span class="logo-tile__mark" aria-hidden="true">{{ section.settings.logo_mark }}</span>
           {%- endif -%}
@@ -106,60 +106,268 @@
   "name": "En-tête",
   "tag": "header",
   "settings": [
-    { "type": "select", "id": "variant", "label": "Style",
+    {
+      "type": "select",
+      "id": "variant",
+      "label": "Style",
       "options": [
-        { "value": "1", "label": "1 — Bleu" }, { "value": "2", "label": "2 — Blanc" },
-        { "value": "3", "label": "3 — Noir" }, { "value": "4", "label": "4 — Accent" },
-        { "value": "5", "label": "5 — Compact" }
-      ], "default": "1" },
-    { "type": "header", "content": "Couleurs" },
-    { "type": "color", "id": "bg", "label": "Fond de l'en-tête" },
-    { "type": "color", "id": "fg", "label": "Texte de l'en-tête" },
-    { "type": "color", "id": "logo_bg", "label": "Fond de la tuile du logo" },
-    { "type": "color", "id": "search_btn", "label": "Bouton de recherche" },
-    { "type": "header", "content": "Logo" },
-    { "type": "text", "id": "logo_mark", "label": "Symbole du logo", "info": "Affiché si aucune image n'est chargée", "default": "🛍" },
-    { "type": "checkbox", "id": "show_logo_text", "label": "Afficher le nom à côté du logo", "default": false },
-    { "type": "header", "content": "Recherche" },
-    { "type": "checkbox", "id": "show_search", "label": "Afficher la recherche", "default": true },
-    { "type": "text", "id": "search_placeholder", "label": "Texte indicatif", "default": "Rechercher un produit…" },
-    { "type": "text", "id": "search_label", "label": "Libellé (lecteurs d'écran)", "default": "Rechercher" },
-    { "type": "header", "content": "Menu Catégories" },
-    { "type": "checkbox", "id": "show_mega", "label": "Afficher le menu Catégories", "default": true },
-    { "type": "text", "id": "mega_label", "label": "Libellé du bouton", "default": "Catégories" },
-    { "type": "link_list", "id": "mega_menu", "label": "Menu à afficher", "default": "main-menu" },
-    { "type": "select", "id": "mega_variant", "label": "Style du menu",
+        {
+          "value": "1",
+          "label": "1 — Bleu"
+        },
+        {
+          "value": "2",
+          "label": "2 — Blanc"
+        },
+        {
+          "value": "3",
+          "label": "3 — Noir"
+        },
+        {
+          "value": "4",
+          "label": "4 — Accent"
+        },
+        {
+          "value": "5",
+          "label": "5 — Compact"
+        }
+      ],
+      "default": "1"
+    },
+    {
+      "type": "header",
+      "content": "Couleurs"
+    },
+    {
+      "type": "color",
+      "id": "bg",
+      "label": "Fond de l'en-tête",
+      "default": "#ff6d00"
+    },
+    {
+      "type": "color",
+      "id": "fg",
+      "label": "Texte de l'en-tête",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "logo_bg",
+      "label": "Fond de la tuile du logo",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "logo_fg",
+      "label": "Texte de la tuile du logo",
+      "default": "#ff6d00"
+    },
+    {
+      "type": "color",
+      "id": "search_btn",
+      "label": "Bouton de recherche",
+      "default": "#101418"
+    },
+    {
+      "type": "header",
+      "content": "Logo"
+    },
+    {
+      "type": "text",
+      "id": "logo_mark",
+      "label": "Symbole du logo",
+      "info": "Affiché si aucune image n'est chargée",
+      "default": "🛍"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_logo_text",
+      "label": "Afficher le nom à côté du logo",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Recherche"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_search",
+      "label": "Afficher la recherche",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "search_placeholder",
+      "label": "Texte indicatif",
+      "default": "Rechercher un produit…"
+    },
+    {
+      "type": "text",
+      "id": "search_label",
+      "label": "Libellé (lecteurs d'écran)",
+      "default": "Rechercher"
+    },
+    {
+      "type": "header",
+      "content": "Menu Catégories"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_mega",
+      "label": "Afficher le menu Catégories",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "mega_label",
+      "label": "Libellé du bouton",
+      "default": "Catégories"
+    },
+    {
+      "type": "link_list",
+      "id": "mega_menu",
+      "label": "Menu à afficher",
+      "default": "main-menu"
+    },
+    {
+      "type": "select",
+      "id": "mega_variant",
+      "label": "Style du menu",
       "options": [
-        { "value": "1", "label": "1 — Deux colonnes" }, { "value": "2", "label": "2 — Mur de vignettes" },
-        { "value": "3", "label": "3 — Texte seul (le plus rapide)" }, { "value": "4", "label": "4 — Grandes vignettes" },
-        { "value": "5", "label": "5 — Liste compacte" }
-      ], "default": "1" },
-    { "type": "header", "content": "Compte et aide" },
-    { "type": "checkbox", "id": "show_account", "label": "Afficher le bloc compte", "default": true },
-    { "type": "text", "id": "greeting", "label": "Salutation (client connecté)", "default": "Bonjour" },
-    { "type": "text", "id": "greeting_guest", "label": "Salutation (visiteur)", "default": "Bonjour" },
-    { "type": "text", "id": "account_label", "label": "Libellé du compte", "default": "Commandes et Compte" },
-    { "type": "text", "id": "help_icon", "label": "Icône d'aide", "default": "🎧" },
-    { "type": "text", "id": "help_label", "label": "Libellé d'aide", "default": "Aide" },
-    { "type": "url", "id": "help_url", "label": "Lien d'aide" },
-    { "type": "checkbox", "id": "show_locale", "label": "Afficher le sélecteur de langue", "default": true },
-    { "type": "text", "id": "nav_aria", "label": "Nom de la navigation (lecteurs d'écran)", "default": "Navigation principale" }
+        {
+          "value": "1",
+          "label": "1 — Deux colonnes"
+        },
+        {
+          "value": "2",
+          "label": "2 — Mur de vignettes"
+        },
+        {
+          "value": "3",
+          "label": "3 — Texte seul (le plus rapide)"
+        },
+        {
+          "value": "4",
+          "label": "4 — Grandes vignettes"
+        },
+        {
+          "value": "5",
+          "label": "5 — Liste compacte"
+        }
+      ],
+      "default": "1"
+    },
+    {
+      "type": "header",
+      "content": "Compte et aide"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_account",
+      "label": "Afficher le bloc compte",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "greeting",
+      "label": "Salutation (client connecté)",
+      "default": "Bonjour"
+    },
+    {
+      "type": "text",
+      "id": "greeting_guest",
+      "label": "Salutation (visiteur)",
+      "default": "Bonjour"
+    },
+    {
+      "type": "text",
+      "id": "account_label",
+      "label": "Libellé du compte",
+      "default": "Commandes et Compte"
+    },
+    {
+      "type": "text",
+      "id": "help_icon",
+      "label": "Icône d'aide",
+      "default": "🎧"
+    },
+    {
+      "type": "text",
+      "id": "help_label",
+      "label": "Libellé d'aide",
+      "default": "Aide"
+    },
+    {
+      "type": "url",
+      "id": "help_url",
+      "label": "Lien d'aide"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_locale",
+      "label": "Afficher le sélecteur de langue",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "nav_aria",
+      "label": "Nom de la navigation (lecteurs d'écran)",
+      "default": "Navigation principale"
+    }
   ],
   "blocks": [
-    { "type": "link", "name": "Lien de navigation", "limit": 5,
+    {
+      "type": "link",
+      "name": "Lien de navigation",
+      "limit": 5,
       "settings": [
-        { "type": "text", "id": "icon", "label": "Icône", "default": "👍" },
-        { "type": "text", "id": "label", "label": "Texte", "default": "Meilleures ventes" },
-        { "type": "url", "id": "url", "label": "Lien" }
-      ] }
+        {
+          "type": "text",
+          "id": "icon",
+          "label": "Icône",
+          "default": "👍"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Texte",
+          "default": "Meilleures ventes"
+        },
+        {
+          "type": "url",
+          "id": "url",
+          "label": "Lien"
+        }
+      ]
+    }
   ],
   "presets": [
-    { "name": "En-tête",
+    {
+      "name": "En-tête",
       "blocks": [
-        { "type": "link", "settings": { "icon": "👍", "label": "Meilleures ventes" } },
-        { "type": "link", "settings": { "icon": "⭐", "label": "Notés 5 étoiles" } },
-        { "type": "link", "settings": { "icon": "✨", "label": "Nouveautés" } }
-      ] }
+        {
+          "type": "link",
+          "settings": {
+            "icon": "👍",
+            "label": "Meilleures ventes"
+          }
+        },
+        {
+          "type": "link",
+          "settings": {
+            "icon": "⭐",
+            "label": "Notés 5 étoiles"
+          }
+        },
+        {
+          "type": "link",
+          "settings": {
+            "icon": "✨",
+            "label": "Nouveautés"
+          }
+        }
+      ]
+    }
   ]
 }
 {% endschema %}

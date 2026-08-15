@@ -46,39 +46,146 @@
   "tag": "section",
   "class": "section-ubar",
   "settings": [
-    { "type": "select", "id": "variant", "label": "Style",
+    {
+      "type": "select",
+      "id": "variant",
+      "label": "Style",
       "options": [
-        { "value": "1", "label": "1 — Bandeau sombre" },
-        { "value": "2", "label": "2 — Défilement continu" },
-        { "value": "3", "label": "3 — Bandeau clair" },
-        { "value": "4", "label": "4 — Couleur d'accent" },
-        { "value": "5", "label": "5 — Compact (titres seuls)" }
-      ], "default": "1" },
-    { "type": "header", "content": "Couleurs" },
-    { "type": "color", "id": "bg", "label": "Fond" },
-    { "type": "color", "id": "fg", "label": "Texte" },
-    { "type": "color", "id": "divider", "label": "Séparateurs" },
-    { "type": "header", "content": "Accessibilité" },
-    { "type": "text", "id": "aria_label", "label": "Nom de la zone pour les lecteurs d'écran", "default": "Avantages du magasin" }
+        {
+          "value": "1",
+          "label": "1 — Bandeau sombre"
+        },
+        {
+          "value": "2",
+          "label": "2 — Défilement continu"
+        },
+        {
+          "value": "3",
+          "label": "3 — Bandeau clair"
+        },
+        {
+          "value": "4",
+          "label": "4 — Couleur d'accent"
+        },
+        {
+          "value": "5",
+          "label": "5 — Compact (titres seuls)"
+        }
+      ],
+      "default": "1"
+    },
+    {
+      "type": "header",
+      "content": "Couleurs"
+    },
+    {
+      "type": "color",
+      "id": "bg",
+      "label": "Fond",
+      "default": "#101418"
+    },
+    {
+      "type": "color",
+      "id": "fg",
+      "label": "Texte",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "divider",
+      "label": "Séparateurs",
+      "default": "#2b3138"
+    },
+    {
+      "type": "header",
+      "content": "Accessibilité"
+    },
+    {
+      "type": "text",
+      "id": "aria_label",
+      "label": "Nom de la zone pour les lecteurs d'écran",
+      "default": "Avantages du magasin"
+    }
   ],
   "blocks": [
-    { "type": "item", "name": "Avantage", "limit": 6,
+    {
+      "type": "item",
+      "name": "Avantage",
+      "limit": 6,
       "settings": [
-        { "type": "text", "id": "icon", "label": "Icône", "info": "Un emoji, ex. 🚚", "default": "🚚" },
-        { "type": "text", "id": "title", "label": "Titre", "default": "Livraison gratuite" },
-        { "type": "text", "id": "subtitle", "label": "Sous-titre", "default": "Offre à durée limitée" },
-        { "type": "color", "id": "color", "label": "Couleur du texte", "default": "#ffffff" },
-        { "type": "url", "id": "link", "label": "Lien" },
-        { "type": "checkbox", "id": "show_chevron", "label": "Afficher le chevron", "default": false }
-      ] }
+        {
+          "type": "text",
+          "id": "icon",
+          "label": "Icône",
+          "info": "Un emoji, ex. 🚚",
+          "default": "🚚"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Titre",
+          "default": "Livraison gratuite"
+        },
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": "Sous-titre",
+          "default": "Offre à durée limitée"
+        },
+        {
+          "type": "color",
+          "id": "color",
+          "label": "Couleur du texte",
+          "default": "#ffffff"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Lien"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_chevron",
+          "label": "Afficher le chevron",
+          "default": false
+        }
+      ]
+    }
   ],
   "presets": [
-    { "name": "Barre utilitaire",
+    {
+      "name": "Barre utilitaire",
       "blocks": [
-        { "type": "item", "settings": { "icon": "🚚", "title": "Livraison gratuite sur toutes les commandes", "subtitle": "Offre à durée limitée", "color": "#7ee787", "show_chevron": true } },
-        { "type": "item", "settings": { "icon": "📦", "title": "Garantie de livraison", "subtitle": "Remboursement en cas de problème", "color": "#f7f0c8" } },
-        { "type": "item", "settings": { "icon": "📱", "title": "Commandez plus vite", "subtitle": "Paiement à la livraison", "color": "#ffffff" } }
-      ] }
+        {
+          "type": "item",
+          "settings": {
+            "icon": "🚚",
+            "title": "Livraison gratuite sur toutes les commandes",
+            "subtitle": "Offre à durée limitée",
+            "color": "#7ee787",
+            "show_chevron": true
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "icon": "📦",
+            "title": "Garantie de livraison",
+            "subtitle": "Remboursement en cas de problème",
+            "color": "#f7f0c8"
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "icon": "📱",
+            "title": "Commandez plus vite",
+            "subtitle": "Paiement à la livraison",
+            "color": "#ffffff"
+          }
+        }
+      ]
+    }
   ]
 }
 {% endschema %}

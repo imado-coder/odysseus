@@ -256,7 +256,9 @@
   block-size: 46px;
   border-radius: 12px;
   background: var(--logo-bg, var(--c-accent, #ff6d00));
-  color: #fff;
+  /* Must track --logo-bg: a merchant choosing a light tile would otherwise
+     get white-on-white and an invisible logo. */
+  color: var(--logo-fg, #fff);
   display: flex;
   flex-direction: column;
   align-items: center;
