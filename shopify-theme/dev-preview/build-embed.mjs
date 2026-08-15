@@ -50,6 +50,8 @@ const doc = `<!doctype html>
 <style>${asset("product-page.css")}</style>
 <style>${asset("cod-form.css")}</style>
 <style>${asset("thank-you.css")}</style>
+<style>${asset("cart.css")}</style>
+<style>${asset("motion.css")}</style>
 <style>${asset("badges.css")}</style>
 <style>${asset("home-mobile.css")}</style>
 <style>${asset("pdp-mobile.css")}</style>

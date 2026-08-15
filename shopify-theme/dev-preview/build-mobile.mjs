@@ -3,6 +3,7 @@ import { writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { icon } from "./icons.mjs";
+import { codForm } from "./cod-form.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const BRAND = "SOUQNA";
@@ -20,6 +21,8 @@ const head = (title, extra = "") => `<!doctype html>
 <link rel="stylesheet" href="../assets/product-page.css">
 <link rel="stylesheet" href="../assets/pdp-mobile.css">
 <link rel="stylesheet" href="../assets/cod-form.css">
+<link rel="stylesheet" href="../assets/cart.css">
+<link rel="stylesheet" href="../assets/motion.css">
 ${extra}
 <script src="../assets/theme.js" defer></script>
 </head><body style="background:#fff">`;
@@ -82,7 +85,9 @@ const card = (it, i) => {
       <span class="pgc__price">${p} DA</span>
       <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>${c} DA</s>
     </span>
-    <button class="pgc__add" type="button" aria-label="Ajouter au panier : ${t}">${icon("cart")}</button>
+    <button class="pgc__add" type="button"
+            data-add-to-cart="p${i}" data-title="${t}" data-price="${p.replace(/\s/g, "")}"
+            data-image="${photo(i)}" aria-label="Ajouter au panier : ${t}">${icon("cart")}</button>
   </div>
 </article>`;
 };
@@ -145,9 +150,44 @@ writeFileSync(
   <a class="mnav__item" href="#" aria-current="page">${icon("home")}Accueil</a>
   <a class="mnav__item" href="#">${icon("menu")}Catégories</a>
   <a class="mnav__item" href="#">${icon("user")}<span class="mnav__badge">99+</span>Vous</a>
-  <a class="mnav__item" href="#">${icon("cart")}<span class="mnav__badge">99+</span>Panier</a>
+  <button class="mnav__item" type="button" data-cart-open>${icon("cart")}<span class="mnav__badge" data-cart-count hidden>0</span>Panier</button>
   <span class="mnav__promo">Durée limitée<br>Livraison gratuite</span>
 </nav>
+
+<div class="drawer" id="CartDrawer" data-cart-drawer data-open="false" data-step="cart" data-free-shipping="8000">
+  <div class="drawer__scrim" data-drawer-close></div>
+  <div class="drawer__panel" role="dialog" aria-modal="true" aria-label="Panier">
+    <div class="drawer__head">
+      <span class="drawer__title">Mon panier</span>
+      <span class="drawer__count" data-drawer-count>0 article(s)</span>
+      <button class="drawer__close" type="button" data-drawer-close aria-label="Fermer">${icon("close")}</button>
+    </div>
+    <div class="drawer__body">
+      <div data-cart-items></div>
+      <div class="cod-mount">
+        <button class="drawer__back" type="button" data-cart-back>${icon("chevron")} Retour au panier</button>
+        <div class="cod-recap" data-cod-recap></div>
+        ${codForm({ id: "cod-cart" })}
+      </div>
+    </div>
+    <div class="drawer__foot" data-cart-foot hidden>
+      <dl>
+        <div class="drawer__line"><dt>Sous-total</dt><dd data-cart-sub>—</dd></div>
+        <div class="drawer__line"><dt>Livraison</dt><dd>Calculée à l'étape suivante</dd></div>
+        <div class="drawer__line drawer__line--total"><dt>Total</dt><dd data-cart-total>—</dd></div>
+      </dl>
+      <button class="drawer__cta" type="button" data-cart-checkout>
+        ${icon("cash")} Passer la commande
+      </button>
+      <p class="drawer__note">${icon("lock", "icon--sm")} Paiement à la livraison — aucun paiement en ligne</p>
+    </div>
+  </div>
+</div>
+
+<div class="toast" data-toast data-open="false">
+  <span class="toast__icon">${icon("check")}</span>
+  <span data-toast-text></span>
+</div>
 </body></html>`
 );
 

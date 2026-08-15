@@ -1,0 +1,238 @@
+/* ==========================================================================
+   motion.css — the theme's movement layer.
+   Two rules govern everything here. Motion must explain something: where an
+   item went, that a price is live, that a panel came from the button you
+   pressed. And it must be cheap: transform and opacity only, so the phone
+   compositor handles it without touching layout.
+   Every effect is opt-in through a class or data attribute, so a merchant
+   who wants a still storefront simply does not use them.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Scroll reveal
+   Elements start slightly low and transparent, then settle as they enter.
+   The observer adds .is-in; without JS everything is visible, so the page
+   never depends on script to be readable.
+   -------------------------------------------------------------------------- */
+[data-reveal] {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .js [data-reveal] {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+    transition: opacity 420ms var(--ease, ease), transform 420ms var(--ease, ease);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+
+  .js [data-reveal].is-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Grids stagger by index so a row arrives as a wave, not a block. */
+  .js [data-reveal-stagger] > * {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+    transition: opacity 380ms var(--ease, ease), transform 380ms var(--ease, ease);
+  }
+
+  .js [data-reveal-stagger].is-in > * {
+    opacity: 1;
+    transform: none;
+  }
+
+  .js [data-reveal-stagger].is-in > *:nth-child(1) { transition-delay: 0ms; }
+  .js [data-reveal-stagger].is-in > *:nth-child(2) { transition-delay: 55ms; }
+  .js [data-reveal-stagger].is-in > *:nth-child(3) { transition-delay: 110ms; }
+  .js [data-reveal-stagger].is-in > *:nth-child(4) { transition-delay: 165ms; }
+  .js [data-reveal-stagger].is-in > *:nth-child(5) { transition-delay: 220ms; }
+  .js [data-reveal-stagger].is-in > *:nth-child(n + 6) { transition-delay: 260ms; }
+}
+
+/* --------------------------------------------------------------------------
+   Urgency cues
+   A discount badge that breathes reads as live. Slow and small, or it turns
+   into a distraction the customer learns to ignore.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  .bdg--live {
+    animation: bdg-breathe 2.8s var(--ease, ease) infinite;
+  }
+
+  @keyframes bdg-breathe {
+    0%, 72%, 100% { transform: scale(1); }
+    80% { transform: scale(1.045); }
+  }
+
+  /* A countdown ticking is the one place a colour flash is honest. */
+  .is-ticking {
+    animation: tick-flash 1s steps(1) infinite;
+  }
+
+  @keyframes tick-flash {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0.72; }
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Add to cart
+   A ghost of the product image arcs to the cart, then the cart badge takes
+   the hit. Without it the customer taps and nothing visibly happens, which is
+   the most common reason people tap twice.
+   -------------------------------------------------------------------------- */
+.fly {
+  position: fixed;
+  z-index: 200;
+  inline-size: 74px;
+  block-size: 74px;
+  border-radius: 12px;
+  object-fit: cover;
+  pointer-events: none;
+  box-shadow: 0 8px 24px rgba(16, 20, 24, 0.28);
+  transition: transform 620ms cubic-bezier(0.35, 0, 0.3, 1),
+    opacity 620ms ease, border-radius 620ms ease;
+}
+
+.fly--go {
+  transform: translate3d(var(--fly-x), var(--fly-y), 0) scale(0.18);
+  opacity: 0.35;
+  border-radius: 50%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fly { display: none; }
+}
+
+.cart-hit {
+  animation: cart-hit 420ms var(--ease, ease);
+}
+
+@keyframes cart-hit {
+  0% { transform: scale(1); }
+  38% { transform: scale(1.32); }
+  100% { transform: scale(1); }
+}
+
+/* The quick-add button confirms in place before the panel opens. */
+.pgc__add[data-added="true"],
+.bb__cta[data-added="true"] {
+  animation: add-pop 380ms var(--ease, ease);
+}
+
+@keyframes add-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(0.92); }
+  100% { transform: scale(1); }
+}
+
+/* --------------------------------------------------------------------------
+   Panels
+   Drawers and sheets come from the edge they live on, so their origin is
+   never in doubt.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  .drawer__panel {
+    animation: drawer-in 300ms cubic-bezier(0.2, 0, 0.15, 1);
+  }
+
+  @keyframes drawer-in {
+    from { transform: translate3d(100%, 0, 0); }
+    to { transform: none; }
+  }
+
+  [dir="rtl"] .drawer__panel {
+    animation-name: drawer-in-rtl;
+  }
+
+  @keyframes drawer-in-rtl {
+    from { transform: translate3d(-100%, 0, 0); }
+    to { transform: none; }
+  }
+
+  .drawer__scrim { animation: fade-in 220ms ease; }
+
+  @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+}
+
+/* --------------------------------------------------------------------------
+   Loading
+   A skeleton that shimmers is a promise that something is coming. Masked, so
+   it costs one composited layer rather than repainting the block.
+   -------------------------------------------------------------------------- */
+.skel {
+  position: relative;
+  overflow: hidden;
+  background: var(--c-bg, #f4f5f6);
+  border-radius: var(--r-sm, 8px);
+}
+
+.skel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translate3d(-100%, 0, 0);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.75), transparent);
+  animation: skel-sweep 1.25s ease-in-out infinite;
+}
+
+@keyframes skel-sweep {
+  to { transform: translate3d(100%, 0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skel::after { animation: none; display: none; }
+}
+
+/* --------------------------------------------------------------------------
+   Press feedback
+   Touch has no hover, so the press itself has to answer.
+   -------------------------------------------------------------------------- */
+.btn:active,
+.bb__cta:active,
+.cod__submit:active,
+.order-float__btn:active,
+.hero-w__cta:active,
+.ty__btn:active {
+  transform: scale(0.985);
+}
+
+/* --------------------------------------------------------------------------
+   Toast
+   -------------------------------------------------------------------------- */
+.toast {
+  position: fixed;
+  inset-block-end: calc(88px + env(safe-area-inset-bottom));
+  inset-inline: 16px;
+  z-index: 150;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #101418;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 10px 30px rgba(16, 20, 24, 0.3);
+  transform: translate3d(0, 140%, 0);
+  opacity: 0;
+  transition: transform 280ms var(--ease, ease), opacity 280ms ease;
+}
+
+.toast[data-open="true"] {
+  transform: none;
+  opacity: 1;
+}
+
+.toast__icon { color: #6ee7a8; }
+
+@media (min-width: 750px) {
+  .toast {
+    inset-inline: auto 24px;
+    inset-block-end: 24px;
+    max-inline-size: 340px;
+  }
+}
