@@ -1,0 +1,131 @@
+/* ==========================================================================
+   badges.css — one badge component, many looks.
+   A badge is a colour family plus a shape. The merchant picks both per block,
+   so a store can carry a consistent badge language instead of a pile of
+   one-off pills. Every family is dark enough to carry white text at 4.5:1.
+   ========================================================================== */
+
+.bdg {
+  --bdg-fill: #0b7d14;
+  --bdg-ink: #0b7d14;
+  --bdg-tint: #e8f6e9;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.005em;
+  white-space: nowrap;
+  vertical-align: baseline;
+}
+
+.bdg .icon { inline-size: 1.05em; block-size: 1.05em; }
+
+/* --- colour families ------------------------------------------------------
+   A true green, not the teal-leaning forest green: the reference badges read
+   as unmistakably "green", and a desaturated one looks like a mistake beside
+   an orange price. */
+.bdg--green  { --bdg-fill: #0b7d14; --bdg-ink: #0a6a11; --bdg-tint: #e8f6e9; }
+.bdg--red    { --bdg-fill: #c9271c; --bdg-ink: #b32117; --bdg-tint: #fdeceb; }
+.bdg--orange { --bdg-fill: #c24e00; --bdg-ink: #a84400; --bdg-tint: #fff1e6; }
+.bdg--violet { --bdg-fill: #5b32bd; --bdg-ink: #4d2aa3; --bdg-tint: #efeafc; }
+.bdg--ink    { --bdg-fill: #101418; --bdg-ink: #101418; --bdg-tint: #eef0f1; }
+.bdg--gold   { --bdg-fill: #8a6100; --bdg-ink: #7a5600; --bdg-tint: #fff6e0; }
+.bdg--blue   { --bdg-fill: #1a5fa8; --bdg-ink: #17538f; --bdg-tint: #e9f1fa; }
+
+/* --- shapes --------------------------------------------------------------- */
+.bdg--solid {
+  background: var(--bdg-fill);
+  color: #fff;
+}
+
+.bdg--soft {
+  background: var(--bdg-tint);
+  color: var(--bdg-ink);
+}
+
+.bdg--outline {
+  border: 1px solid var(--bdg-fill);
+  background: #fff;
+  color: var(--bdg-ink);
+  padding: 2px 7px;
+}
+
+/* Angled trailing edge, the way a shelf tag is cut. */
+.bdg--ribbon {
+  background: var(--bdg-fill);
+  color: #fff;
+  padding-inline-end: 14px;
+  border-radius: 3px 0 0 3px;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 7px) 50%, 100% 100%, 0 100%);
+}
+
+[dir="rtl"] .bdg--ribbon {
+  clip-path: polygon(100% 0, 0 0, 7px 50%, 0 100%, 100% 100%);
+}
+
+/* Clipped corner — reads as a sticker rather than a button. */
+.bdg--notch {
+  background: var(--bdg-fill);
+  color: #fff;
+  border-radius: 3px;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%);
+  padding-inline-end: 10px;
+}
+
+.bdg--pill {
+  background: var(--bdg-fill);
+  color: #fff;
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+
+/* Two-tone: a label cell and a value cell, for "SAVE" style tags. */
+.bdg--split {
+  padding: 0;
+  overflow: hidden;
+  background: var(--bdg-tint);
+  color: var(--bdg-ink);
+}
+
+.bdg__lead {
+  padding: 3px 7px;
+  background: var(--bdg-fill);
+  color: #fff;
+}
+
+.bdg__rest { padding: 3px 8px; }
+
+/* --- sizes --- */
+.bdg--sm { font-size: 11px; padding-block: 2px; }
+.bdg--lg { font-size: 13px; padding: 4px 10px; }
+
+/* ==========================================================================
+   Compare-at price
+   The browser default strike is a hairline that all but disappears next to a
+   large price, which is why the discount stops reading as a discount.
+   ========================================================================== */
+.was {
+  color: var(--c-ink-2, #5b6570);
+  text-decoration: line-through;
+  text-decoration-color: var(--c-ink-2, #5b6570);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.was--lg {
+  font-size: 20px;
+  font-weight: 700;
+  text-decoration-thickness: 2.5px;
+}
+
+.was--sm {
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration-thickness: 1.5px;
+}

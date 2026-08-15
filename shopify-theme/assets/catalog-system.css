@@ -270,9 +270,11 @@
 
 .pgc__compare {
   font-size: 12px;
-  color: var(--c-ink-3, #6e7781);
+  color: var(--c-ink-2, #5b6570);
   text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 .pgc__add {

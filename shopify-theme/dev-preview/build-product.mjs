@@ -18,7 +18,6 @@ const enabled = {
   price: true, priceNote: true, priceDrop: true, stock: true,
   shippingBar: true, promo: true, swatches: true, qty: true,
   cta: true, shipping: true, pills: false, cod: true,
-  cod: true,
 };
 
 const B = [];
@@ -305,11 +304,12 @@ block("shipping", `<div class="deliv">
 </div>`);
 
 
-const COD_MODE = "inline"; // "inline" | "button" — exposed as a theme setting
+const COD_MODE = "button"; // "inline" | "button" — exposed as a theme setting
 
 block("cod", `<div class="cod-wrap" data-cod-wrap data-mode="${COD_MODE}" data-open="false" id="cod-anchor">
   <button class="bb__reveal" type="button" data-cod-reveal>
-    ${icon("cash")} Commander — paiement à la livraison
+    <span class="bb__reveal-main">-79% maintenant ! Commander</span>
+    <span class="bb__reveal-sub">Paiement à la livraison — remplissez le formulaire</span>
   </button>
   ${codForm({ id: "cod-desktop" })}
 </div>`);
@@ -458,16 +458,19 @@ const html = `<!doctype html>
     </nav>
 
     <div class="pdp__grid">
-      <div class="pdp__media">
+      <div class="pdp__gallery">
         ${gallery}
-        ${reviewsBlock}
-        ${landing}
-        ${related}
       </div>
       <div class="pdp__buybox" data-sticky-fit>
         <div class="bb">
           ${B.join("\n          ")}
         </div>
+      </div>
+
+      <div class="pdp__details">
+        ${landing}
+        ${reviewsBlock}
+        ${related}
       </div>
     </div>
   </div>

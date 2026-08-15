@@ -40,19 +40,35 @@
   white-space: nowrap;
 }
 
-/* --- two-column frame ---------------------------------------------------- */
+/* --- two-column frame ----------------------------------------------------
+   Three regions, not two, so the reading order can differ between screens:
+
+   mobile   gallery -> buy box -> details (landing, reviews, related)
+   desktop  gallery and details stack in the left column; the buy box takes
+            the right column and spans both rows.
+
+   On a phone the price, delivery and order form have to sit directly under
+   the photos — a shopper who has to scroll past the whole landing page to
+   find the price is a shopper who leaves. */
 .pdp__grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 24px;
   align-items: start;
 }
 
+.pdp__gallery { order: 1; }
+.pdp__buybox  { order: 2; }
+.pdp__details { order: 3; }
+
 @media (min-width: 990px) {
   .pdp__grid {
     grid-template-columns: minmax(0, 1fr) 560px;
-    gap: 40px;
+    gap: 16px 40px;
   }
+  .pdp__gallery { grid-column: 1; grid-row: 1; }
+  .pdp__details { grid-column: 1; grid-row: 2; }
+  .pdp__buybox  { grid-column: 2; grid-row: 1 / span 2; }
 }
 
 /* The buy box tracks the viewport while the left column scrolls past it.
@@ -276,7 +292,7 @@
   align-items: center;
   padding: 3px 7px;
   border-radius: 3px;
-  background: #0f7a3d;
+  background: #0b7d14;
   color: #fff;
   font-size: 12px;
   font-weight: 700;
@@ -293,8 +309,11 @@
 
 .bb__price-was {
   font-size: 20px;
-  color: var(--c-ink-3, #6e7781);
+  font-weight: 700;
+  color: var(--c-ink-2, #5b6570);
   text-decoration: line-through;
+  text-decoration-thickness: 2.5px;
+  font-variant-numeric: tabular-nums;
 }
 
 .bb__price-deal {
@@ -332,7 +351,7 @@
   align-items: center;
   padding: 3px 8px;
   border-radius: 3px;
-  background: #0f7a3d;
+  background: #0b7d14;
   color: #fff;
   font-size: 13px;
   font-weight: 800;
@@ -497,7 +516,7 @@
 }
 
 .bb__trust-row--ship {
-  color: #0f7a3d;
+  color: #0b7d14;
   font-weight: 700;
 }
 
@@ -514,7 +533,7 @@
   flex: none;
   padding: 5px 10px;
   border-radius: 4px;
-  background: #0f7a3d;
+  background: #0b7d14;
   color: #fff;
   font-size: 12px;
   font-weight: 600;
@@ -905,7 +924,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #0f7a3d;
+  color: #0b7d14;
   font-size: 14px;
   font-weight: 700;
 }
@@ -969,7 +988,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #0f7a3d;
+  color: #0b7d14;
   font-size: 14px;
   font-weight: 700;
 }
@@ -1052,7 +1071,7 @@
   color: var(--c-ink, #101418);
 }
 
-.deliv__line .icon { color: #0f7a3d; }
+.deliv__line .icon { color: #0b7d14; }
 
 .deliv__pills {
   display: flex;
@@ -1063,7 +1082,7 @@
 .deliv__pill {
   padding: 4px 9px;
   border-radius: 4px;
-  background: #0f7a3d;
+  background: #0b7d14;
   color: #fff;
   font-size: 11px;
   font-weight: 600;
@@ -1124,3 +1143,32 @@
   transform: none;
   transition: transform 180ms var(--ease, ease);
 }
+
+/* --------------------------------------------------------------------------
+   Order button in reveal mode.
+   Carries the offer, not just the action — "-67% now" converts harder than
+   "Order". The same label drives the sticky bar so the customer sees one
+   promise, twice.
+   -------------------------------------------------------------------------- */
+.bb__reveal {
+  flex-direction: column;
+  gap: 2px;
+  min-block-size: 60px;
+  padding-block: 10px;
+  background: var(--c-accent, #ff6d00);
+  line-height: 1.2;
+  text-align: center;
+}
+
+.bb__reveal-main {
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.bb__reveal-sub {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.92;
+}
+
+.bb__reveal .icon { display: none; }

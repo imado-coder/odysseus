@@ -1,0 +1,153 @@
+/* ==========================================================================
+   hero.css — storefront welcome.
+   The first screen has one job: say whose shop this is, what it promises, and
+   where to start. Built on the theme's own brand colour so it reads as this
+   store rather than as a stock banner.
+   ========================================================================== */
+
+.hero-w {
+  --hero-ink: #ffffff;
+
+  position: relative;
+  overflow: hidden;
+  padding: 40px 16px 34px;
+  background:
+    radial-gradient(120% 90% at 50% -20%,
+      color-mix(in srgb, var(--c-brand, #00806a) 62%, #ffffff) 0%,
+      transparent 62%),
+    linear-gradient(160deg,
+      var(--c-brand-dark, #00614f) 0%,
+      var(--c-brand, #00806a) 58%,
+      color-mix(in srgb, var(--c-brand, #00806a) 74%, #000000) 100%);
+  color: var(--hero-ink);
+  text-align: center;
+}
+
+/* A faint grid keeps a large flat panel from looking like a colour swatch. */
+.hero-w::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.055) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(90% 70% at 50% 0%, #000 20%, transparent 78%);
+  pointer-events: none;
+}
+
+.hero-w__inner {
+  position: relative;
+  max-inline-size: 720px;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.hero-w__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 13px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.hero-w__title {
+  font-size: clamp(30px, 8vw, 54px);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.hero-w__title em {
+  font-style: normal;
+  color: var(--c-amber, #ffb020);
+}
+
+.hero-w__lede {
+  font-size: clamp(14px, 3.6vw, 17px);
+  line-height: 1.5;
+  max-inline-size: 46ch;
+  opacity: 0.94;
+  text-wrap: pretty;
+}
+
+.hero-w__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-block-start: 4px;
+}
+
+.hero-w__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-block-size: 52px;
+  padding-inline: 28px;
+  border-radius: var(--r-pill, 999px);
+  background: var(--c-amber, #ffb020);
+  color: #3a2600;
+  font-size: 16px;
+  font-weight: 800;
+  transition: filter 120ms ease, transform 120ms ease;
+}
+
+.hero-w__cta--ghost {
+  background: transparent;
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  color: var(--hero-ink);
+}
+
+@media (hover: hover) {
+  .hero-w__cta:hover { filter: brightness(0.95); }
+}
+
+.hero-w__cta:active { transform: scale(0.99); }
+
+/* Proof strip — the three promises that decide a cash-on-delivery purchase. */
+.hero-w__proof {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  inline-size: 100%;
+  max-inline-size: 640px;
+  margin-block-start: 22px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+@media (max-width: 460px) {
+  .hero-w__proof { grid-template-columns: 1fr; }
+}
+
+.hero-w__proof-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 10px;
+  background: color-mix(in srgb, var(--c-brand-dark, #00614f) 62%, transparent);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: start;
+}
+
+.hero-w__proof-item .icon {
+  color: var(--c-amber, #ffb020);
+}
+
+@media (min-width: 750px) {
+  .hero-w { padding: 64px 24px 52px; }
+}
