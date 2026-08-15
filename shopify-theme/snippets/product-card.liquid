@@ -72,11 +72,21 @@
       {%- endif -%}
     </span>
     {%- if settings.card_show_quick_add and card.available -%}
+      {%- comment -%}
+        Posts to Shopify without JavaScript; with it, the controller catches
+        the click, animates the item into the cart and opens the drawer.
+      {%- endcomment -%}
       <form action="{{ routes.cart_add_url }}" method="post" enctype="multipart/form-data">
         <input type="hidden" name="id" value="{{ v.id }}">
         <button class="pgc__add" type="submit"
+                data-add-to-cart="{{ v.id }}"
+                data-title="{{ card.title | escape }}"
+                data-price="{{ v.price | divided_by: 100 }}"
+                data-image="{{ card.featured_image | image_url: width: 120 }}"
+                data-option="{{ v.title | escape }}"
+                data-toast="{{ settings.card_add_toast | default: 'Ajouté au panier' | escape }}"
                 aria-label="{{ 'products.product.add_to_cart' | t }} : {{ card.title | escape }}">
-          <span aria-hidden="true">&#128722;</span>
+          {% render 'icon', name: 'cart' %}
         </button>
       </form>
     {%- endif -%}
@@ -91,10 +101,12 @@
     <div class="pgc__rating">
       {%- if settings.card_show_rating and card.metafields.reviews.rating.value != blank -%}
         {%- assign rating = card.metafields.reviews.rating.value.rating -%}
-        {%- assign full = rating | floor -%}
-        <span class="pgc__stars" aria-hidden="true">
-          {%- for i in (1..5) -%}{% if i <= full %}&#9733;{% else %}&#9734;{% endif %}{%- endfor -%}
-        </span>
+        {%- comment -%}
+          Half-star glyphs are missing from most fonts and render as a box, so
+          the stars are a masked shape filled by percentage instead.
+        {%- endcomment -%}
+        {%- assign pct = rating | times: 20.0 | round: 2 -%}
+        <span class="stars pgc__stars" style="--stars-fill: {{ pct }}%" aria-hidden="true"></span>
         <span class="visually-hidden">
           {{ 'products.product.rating' | t }} {{ rating }}/5
         </span>

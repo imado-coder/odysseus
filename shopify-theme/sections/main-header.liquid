@@ -90,12 +90,15 @@
         </a>
       {%- endif -%}
 
-      <a class="mhead__cart" href="{{ routes.cart_url }}"
+      {%- comment -%}
+        A link first, so it still works without JavaScript; the controller
+        intercepts the click and opens the drawer when JS is available. The
+        count is driven by the drawer, not the Liquid cart object.
+      {%- endcomment -%}
+      <a class="mhead__cart" href="{{ routes.cart_url }}" data-cart-open
          aria-label="{{ 'sections.header.cart_count' | t: count: cart.item_count }}">
-        <span aria-hidden="true">&#128722;</span>
-        {%- if cart.item_count > 0 -%}
-          <span class="mhead__cart-count" aria-hidden="true">{{ cart.item_count }}</span>
-        {%- endif -%}
+        {% render 'icon', name: 'cart' %}
+        <span class="mhead__cart-count" data-cart-count hidden>0</span>
       </a>
     </div>
   </div>

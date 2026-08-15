@@ -4,6 +4,7 @@
   product needs, in the order they want, and every string is theirs.
 {%- endcomment -%}
 {{ 'product-page.css' | asset_url | stylesheet_tag }}
+{{ 'pdp-mobile.css' | asset_url | stylesheet_tag }}
 {{ 'cod-form.css' | asset_url | stylesheet_tag }}
 {%- comment -%}
   Filters cannot be used inside an `if` condition, so the count is assigned
@@ -84,10 +85,9 @@
                 <div class="bb__rating" {{ block.shopify_attributes }}>
                   {%- if r != blank -%}
                     <span class="bb__rating-score">{{ r.rating }}</span>
-                    <span class="bb__rating-stars" aria-hidden="true">
-                      {%- assign full = r.rating | floor -%}
-                      {%- for i in (1..5) -%}{% if i <= full %}&#9733;{% else %}&#9734;{% endif %}{%- endfor -%}
-                    </span>
+                    {%- comment -%} Masked shape, filled by percentage — glyph half-stars are unavailable in most fonts. {%- endcomment -%}
+                    {%- assign pct = r.rating | times: 100.0 | divided_by: r.scale_max | round: 2 -%}
+                    <span class="stars bb__rating-stars" style="--stars-fill: {{ pct }}%" aria-hidden="true"></span>
                     <span class="visually-hidden">{{ 'products.product.rating' | t }} {{ r.rating }}/{{ r.scale_max }}</span>
                   {%- endif -%}
                   {%- if block.settings.sold_text != blank -%}

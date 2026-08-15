@@ -17,8 +17,13 @@
     {{ content_for_header }}
 
     {{ 'base.css' | asset_url | stylesheet_tag }}
+    {{ 'components.css' | asset_url | stylesheet_tag }}
     {{ 'header-system.css' | asset_url | stylesheet_tag }}
     {{ 'catalog-system.css' | asset_url | stylesheet_tag }}
+    {{ 'badges.css' | asset_url | stylesheet_tag }}
+    {{ 'home-mobile.css' | asset_url | stylesheet_tag }}
+    {{ 'cart.css' | asset_url | stylesheet_tag }}
+    {{ 'motion.css' | asset_url | stylesheet_tag }}
 
     {%- comment -%}
       Every global token the merchant controls is written once here, so a colour
@@ -42,5 +47,12 @@
     </main>
 
     {% sections 'footer-group' %}
+
+    {%- comment -%}
+      The cart drawer lives outside every section so one instance serves the
+      whole site: add from a card on the homepage, from the product page, or
+      from a collection, and the same drawer opens.
+    {%- endcomment -%}
+    {% render 'cart-drawer' %}
   </body>
 </html>

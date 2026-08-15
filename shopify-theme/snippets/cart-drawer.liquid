@@ -1,0 +1,70 @@
+{%- comment -%}
+  Cart drawer with the two-step cash-on-delivery flow.
+
+  Step one is the cart: lines, quantities, free-shipping meter. Step two is the
+  order form, reached by the merchant's call-to-action rather than shown up
+  front — a long form on first sight is what loses the order. `data-step` on
+  the root switches between them, and theme.js owns the state.
+
+  Rendered once from layout/theme.liquid so a card anywhere on the site opens
+  the same drawer.
+{%- endcomment -%}
+
+<div class="drawer"
+     data-cart-drawer
+     data-open="false"
+     data-step="cart"
+     data-free-shipping="{{ settings.free_shipping_threshold | default: 8000 }}"
+     aria-hidden="true">
+
+  <div class="drawer__scrim" data-drawer-close></div>
+
+  <aside class="drawer__panel" role="dialog" aria-modal="true"
+         aria-label="{{ 'sections.cart.title' | t | default: 'Panier' }}">
+
+    <header class="drawer__head">
+      <button class="drawer__back" type="button" data-cart-back
+              aria-label="{{ settings.cart_back_label | default: 'Retour au panier' }}">
+        {% render 'icon', name: 'chevron' %}
+      </button>
+
+      <p class="drawer__title">
+        {{ settings.cart_title | default: 'Votre panier' }}
+        <span class="drawer__count" data-drawer-count></span>
+      </p>
+
+      <button class="drawer__close" type="button" data-drawer-close
+              aria-label="{{ settings.cart_close_label | default: 'Fermer' }}">
+        {% render 'icon', name: 'close' %}
+      </button>
+    </header>
+
+    <div class="drawer__body" data-cart-items></div>
+
+    <footer class="drawer__foot" data-cart-foot hidden>
+      <p class="drawer__line">
+        <span>{{ settings.cart_subtotal_label | default: 'Sous-total' }}</span>
+        <span data-cart-sub></span>
+      </p>
+      <p class="drawer__line drawer__line--total">
+        <span>{{ settings.cart_total_label | default: 'Total' }}</span>
+        <span data-cart-total></span>
+      </p>
+      <p class="drawer__note">
+        {{ settings.cart_shipping_note | default: 'Les frais de livraison sont calculés à l’étape suivante.' }}
+      </p>
+      <button class="drawer__cta" type="button" data-cart-checkout>
+        {{ settings.cart_cta_label | default: 'Commander — paiement à la livraison' }}
+      </button>
+    </footer>
+
+    {%- comment -%}
+      Step two. The same form snippet the product page uses, so there is one
+      implementation of validation, wilaya/commune and submission.
+    {%- endcomment -%}
+    <div class="drawer__form">
+      <div class="cod-recap" data-cod-recap></div>
+      {% render 'cod-form', id: 'CartCodForm', source: 'cart' %}
+    </div>
+  </aside>
+</div>
