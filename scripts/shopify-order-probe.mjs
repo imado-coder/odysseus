@@ -40,10 +40,19 @@ async function gql(query, variables) {
   return body.data;
 }
 
-/* Any variant will do — this is about the order, not the product. */
-const found = await gql(`
-  query { productVariants(first: 1) { nodes { id title price product { title } } } }
+/* The order currency has to be one the shop actually trades in, so it is read
+   rather than assumed — otherwise a currency rejection masks the province
+   answer this probe exists to get. */
+const info = await gql(`
+  query {
+    shop { currencyCode }
+    productVariants(first: 1) { nodes { id title price product { title } } }
+  }
 `);
+const currency = info.shop.currencyCode;
+console.log("shop currency:", currency);
+
+const found = info;
 const variant = found.productVariants.nodes[0];
 if (!variant) {
   console.error("No products on the store. Add one, then re-run.");
@@ -82,7 +91,7 @@ function draft(addressExtra) {
   };
   return {
     order: {
-      currency: "DZD",
+      currency,
       phone: "0551234567",
       tags: ["MITOS-COD", "MITOS-PROBE"],
       note: "MITOS probe — safe to delete",
@@ -92,7 +101,7 @@ function draft(addressExtra) {
       shippingLines: [
         {
           title: "Livraison",
-          priceSet: { shopMoney: { amount: 350, currencyCode: "DZD" } },
+          priceSet: { shopMoney: { amount: 350, currencyCode: currency } },
         },
       ],
     },

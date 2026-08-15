@@ -5,7 +5,16 @@
 {%- endcomment -%}
 {{ 'product-page.css' | asset_url | stylesheet_tag }}
 {{ 'cod-form.css' | asset_url | stylesheet_tag }}
-{%- if section.blocks | where: 'type', 'cod_form' | size > 0 -%}
+{%- comment -%}
+  Filters cannot be used inside an `if` condition, so the count is assigned
+  first. The wilaya/commune data is 54KB, and only loaded when the merchant
+  has actually placed the order form on the page.
+{%- endcomment -%}
+{%- liquid
+  assign cod_blocks = section.blocks | where: 'type', 'cod_form'
+  assign cod_block_count = cod_blocks | size
+-%}
+{%- if cod_block_count > 0 -%}
   <script src="{{ 'dz-locations.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
 
@@ -242,7 +251,7 @@
       <b>{{ v.price | money }}</b>
       {%- if on_sale -%}<s>{{ v.compare_at_price | money }}</s>{%- endif -%}
     </span>
-    {%- if section.blocks | where: 'type', 'cod_form' | size > 0 -%}
+    {%- if cod_block_count > 0 -%}
       <button class="bb__cta" type="button" data-sheet-open aria-controls="CodSheet-{{ section.id }}">
         {{ section.settings.mobile_cta_label }}
       </button>
@@ -476,8 +485,7 @@
         {
           "type": "text",
           "id": "off_prefix",
-          "label": "Avant le nombre",
-          "default": ""
+          "label": "Avant le nombre"
         },
         {
           "type": "text",
@@ -494,7 +502,7 @@
     },
     {
       "type": "notice",
-      "name": "Alerte (stock, baisse de prix)",
+      "name": "Alerte stock et prix",
       "limit": 3,
       "settings": [
         {
@@ -542,7 +550,6 @@
           "type": "text",
           "id": "deadline",
           "label": "Fin de la promo",
-          "default": "",
           "info": "Format : 2026-12-31 23:59"
         },
         {
@@ -608,8 +615,7 @@
         {
           "type": "text",
           "id": "sold_text",
-          "label": "Texte à côté",
-          "default": ""
+          "label": "Texte à côté"
         }
       ]
     },
@@ -639,7 +645,7 @@
     },
     {
       "type": "cod_form",
-      "name": "Formulaire paiement à la livraison",
+      "name": "Paiement à la livraison",
       "limit": 1,
       "settings": [
         {

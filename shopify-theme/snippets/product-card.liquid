@@ -47,7 +47,11 @@
     {%- if on_sale and settings.card_show_discount -%}
       <span class="pgc__ad">-{{ off }}%</span>
     {%- endif -%}
-    {%- if card.media | where: 'media_type', 'video' | first -%}
+    {%- liquid
+      # Filters are not allowed inside an `if` condition.
+      assign card_videos = card.media | where: 'media_type', 'video'
+    -%}
+    {%- if card_videos.size > 0 -%}
       <span class="pgc__play" aria-hidden="true">&#9654;</span>
     {%- endif -%}
   </div>

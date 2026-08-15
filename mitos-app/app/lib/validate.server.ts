@@ -43,6 +43,19 @@ export function normalizePhone(input: string) {
   return p;
 }
 
+/**
+ * The local form for Shopify.
+ *
+ * Verified against a live store: `orderCreate` rejects `0551234567` with
+ * "Order Phone is invalid" and accepts `+213551234567`. Local numbers are what
+ * the merchant dials, so they stay local in our own records and are converted
+ * only at the Shopify boundary.
+ */
+export function toE164(local: string) {
+  const p = normalizePhone(local);
+  return p.startsWith("0") ? "+213" + p.slice(1) : p;
+}
+
 export function validateLead(raw: RawLead) {
   const errors: Record<string, string> = {};
 

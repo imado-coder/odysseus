@@ -11,6 +11,7 @@
  */
 
 import type { AdminApiContext } from "@shopify/shopify-app-react-router/server";
+import { toE164 } from "./validate.server";
 
 const ORDER_CREATE = `#graphql
   mutation CreateCodOrder($order: OrderCreateOrderInput!, $options: OrderCreateOptionsInput) {
@@ -49,48 +50,38 @@ export type CodOrderDraft = {
 };
 
 /**
- * How the wilaya is written into the address.
+ * How the wilaya reaches the courier.
  *
- * `provinceCode` is the field Shopify wants — `province` is deprecated. But
- * `provinceCode` is only accepted for countries whose subdivisions Shopify
- * actually carries, and a rejected code fails the whole order. So the code is
- * tried first and the free-text name is the fallback: whichever Shopify
- * accepts, the merchant still gets the order.
+ * Measured against a live store rather than guessed:
+ *
+ *   `provinceCode: "16"` is accepted but stored as `province: "16"` with a
+ *   null provinceCode — Shopify carries no subdivisions for Algeria, so the
+ *   ISO code just becomes an unreadable string on the packing slip. The name
+ *   is what belongs in `province`, deprecated field or not.
+ *
+ *   Shopify's DZ address format then drops the province from the formatted
+ *   address entirely — `["Cité 8 Mai 1945", "Bab Ezzouar", "Algeria"]`, no
+ *   wilaya. For an Algerian courier that is the one line they route on, so it
+ *   is repeated into address2, which the formatter does keep.
  */
-type ProvinceStyle = "code" | "name";
-
-function buildAddress(draft: CodOrderDraft, style: ProvinceStyle) {
+function buildAddress(draft: CodOrderDraft) {
   return {
     firstName: draft.firstName,
     lastName: draft.lastName,
     address1: draft.address,
+    address2: `Wilaya ${draft.wilayaCode} — ${draft.wilayaName}`,
     city: draft.commune,
-    ...(style === "code"
-      ? { provinceCode: draft.wilayaCode }
-      : { province: draft.wilayaName }),
+    province: draft.wilayaName,
     countryCode: "DZ",
-    phone: draft.phone,
+    phone: toE164(draft.phone),
   };
-}
-
-function isProvinceError(errors: { field?: string[]; message: string }[]) {
-  return errors.some(
-    (e) =>
-      e.field?.some((f) => /province/i.test(f)) ||
-      /province|region|state/i.test(e.message),
-  );
 }
 
 export async function createCodOrder(
   admin: AdminApiContext,
   draft: CodOrderDraft,
 ) {
-  let result = await attempt(admin, draft, "code");
-
-  /* Shopify does not know this country's subdivisions — send the name. */
-  if (!result.order && isProvinceError(result.userErrors)) {
-    result = await attempt(admin, draft, "name");
-  }
+  const result = await attempt(admin, draft);
 
   if (!result.order || result.userErrors.length) {
     const message =
@@ -103,19 +94,15 @@ export async function createCodOrder(
   return result.order;
 }
 
-async function attempt(
-  admin: AdminApiContext,
-  draft: CodOrderDraft,
-  style: ProvinceStyle,
-) {
-  const address = buildAddress(draft, style);
+async function attempt(admin: AdminApiContext, draft: CodOrderDraft) {
+  const address = buildAddress(draft);
 
   const response = await admin.graphql(ORDER_CREATE, {
     variables: {
       order: {
         currency: draft.currency,
         email: draft.email || undefined,
-        phone: draft.phone,
+        phone: toE164(draft.phone),
         tags: [draft.tag],
         note: draft.note || undefined,
         billingAddress: address,

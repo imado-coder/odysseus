@@ -3,9 +3,9 @@
     "name": "theme_info",
     "theme_name": "Souq — COD Commerce",
     "theme_version": "1.0.0",
-    "theme_author": "",
-    "theme_documentation_url": "",
-    "theme_support_url": ""
+    "theme_author": "Souq",
+    "theme_documentation_url": "https://example.com/souq-theme/docs",
+    "theme_support_url": "https://example.com/souq-theme/support"
   },
   {
     "name": "Identité",

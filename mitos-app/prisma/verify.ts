@@ -10,7 +10,7 @@
  */
 
 import { PrismaClient } from "@prisma/client";
-import { validateLead, toVariantGid } from "../app/lib/validate.server";
+import { validateLead, toVariantGid, toE164 } from "../app/lib/validate.server";
 import { createCodOrder } from "../app/lib/order.server";
 
 const prisma = new PrismaClient();
@@ -103,6 +103,12 @@ console.log("\nvalidateLead");
   eq("00213 is folded too", phoneCase("00213551234567").lead?.phone, "0551234567");
   eq("dots and dashes are stripped", phoneCase("05-51.23.45.67").lead?.phone, "0551234567");
 
+  /* Local for the merchant to dial, E.164 for Shopify — verified against a
+     live store, which rejects the local form outright. */
+  eq("local becomes E.164", toE164("0551234567"), "+213551234567");
+  eq("E.164 stays E.164", toE164("+213551234567"), "+213551234567");
+  eq("a landline converts too", toE164("021634567"), "+21321634567");
+
   const badWilaya = validateLead({
     firstName: "A", lastName: "B", phone: "0551234567",
     wilaya: "59", commune: "c", address: "a", variant_id: "1",
@@ -174,10 +180,17 @@ function stubAdmin(reply: unknown): { admin: any; calls: Captured[] } {
   check("sends no transactions, so Shopify marks it unpaid", !("transactions" in v.order));
   eq("tags the order", v.order.tags, ["MITOS-COD"]);
   eq("country is Algeria", v.order.shippingAddress.countryCode, "DZ");
+  /* A live store rejects the local form with "Order Phone is invalid". */
+  eq("the order phone is E.164", v.order.phone, "+213551234567");
+  eq("the address phone is E.164 too", v.order.shippingAddress.phone, "+213551234567");
   eq("commune becomes the city", v.order.shippingAddress.city, "Bab Ezzouar");
-  eq("wilaya is sent as the ISO subdivision code", v.order.shippingAddress.provinceCode, "16");
-  check("the deprecated province field is not sent", !("province" in v.order.shippingAddress));
-  eq("only one attempt is needed when Shopify accepts the code", calls.length, 1);
+  /* Live-store measured: Shopify has no DZ subdivisions, so the code would be
+     stored as the literal string "16". The name is what the courier reads. */
+  eq("wilaya is sent as its name", v.order.shippingAddress.province, "Alger");
+  check("the ISO code is not sent as provinceCode", !("provinceCode" in v.order.shippingAddress));
+  eq("the wilaya is repeated into address2, which DZ formatting keeps",
+     v.order.shippingAddress.address2, "Wilaya 16 — Alger");
+  eq("one attempt, no fallback dance", calls.length, 1);
   eq("shipping is its own line, not folded into a price", v.order.shippingLines, [
     { title: "Livraison", priceSet: { shopMoney: { amount: 350, currencyCode: "DZD" } } },
   ]);
@@ -224,44 +237,6 @@ function stubAdmin(reply: unknown): { admin: any; calls: Captured[] } {
   check("a non-province error is not retried", true);
 }
 
-{
-  /* Shopify does not carry subdivisions for every country. If provinceCode is
-     rejected, the order must still go through with the wilaya's name. */
-  const calls: Captured[] = [];
-  const admin = {
-    graphql: async (query: string, opts?: { variables?: any }) => {
-      calls.push({ query, variables: opts?.variables });
-      const rejected = calls.length === 1;
-      return new Response(
-        JSON.stringify({
-          data: {
-            orderCreate: rejected
-              ? {
-                  order: null,
-                  userErrors: [
-                    { field: ["order", "shippingAddress", "provinceCode"], message: "Province is not valid" },
-                  ],
-                }
-              : { order: { id: "gid://shopify/Order/9", name: "#1009" }, userErrors: [] },
-          },
-        }),
-        { headers: { "Content-Type": "application/json" } },
-      );
-    },
-  };
-
-  const order = await createCodOrder(admin as any, {
-    phone: "0551234567", firstName: "A", lastName: "B", address: "a",
-    commune: "Bab Ezzouar", wilayaCode: "16", wilayaName: "Alger",
-    items: [{ variantId: "gid://shopify/ProductVariant/1", quantity: 1 }],
-    shipping: 350, currency: "DZD", tag: "T",
-  });
-
-  eq("retries after a rejected provinceCode", calls.length, 2);
-  eq("the retry sends the wilaya name instead", calls[1].variables.order.shippingAddress.province, "Alger");
-  check("the retry drops provinceCode", !("provinceCode" in calls[1].variables.order.shippingAddress));
-  eq("the order is still created", order.name, "#1009");
-}
 
 /* ------------------------------------------------------------------ */
 console.log("\ndatabase — tenancy, idempotency, uninstall");

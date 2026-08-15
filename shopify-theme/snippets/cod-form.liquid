@@ -8,11 +8,20 @@
 {%- liquid
   assign s = block.settings
   assign unit = variant.price | divided_by: 100
+
+  # A literal "{}" inside an output tag closes the tag early — Liquid sees the
+  # "}}" and stops. The defaults are built from characters instead.
+  assign brace_open = '{'
+  assign brace_close = '}'
+  assign empty_object = brace_open | append: brace_close
+
+  assign tariffs = settings.cod_tariffs | default: empty_object
+  assign tariff_fallback = settings.cod_tariff_fallback | default: '[600,350]'
 -%}
 <form class="cod" data-cod-form id="{{ id }}"
       data-unit-price="{{ unit }}"
-      data-tariffs='{{ settings.cod_tariffs | default: "{}" }}'
-      data-tariff-fallback='{{ settings.cod_tariff_fallback | default: "[600,350]" }}'
+      data-tariffs='{{ tariffs }}'
+      data-tariff-fallback='{{ tariff_fallback }}'
       {% if settings.cod_endpoint != blank %}data-endpoint="{{ settings.cod_endpoint }}"{% endif %}
       data-msg-invalid="{{ s.msg_invalid | escape }}"
       data-msg-success="{{ s.msg_success | escape }}"
