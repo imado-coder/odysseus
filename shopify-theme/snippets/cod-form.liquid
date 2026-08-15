@@ -1,0 +1,156 @@
+{%- comment -%}
+  Cash-on-delivery lead form.
+  Wilaya and commune come from assets/dz-locations.js (58 wilayas, 1541
+  communes). Tariffs and the destination endpoint come from theme settings, so
+  the merchant owns pricing and the app owns delivery.
+  Params: id (unique), product, variant, block (for per-product copy).
+{%- endcomment -%}
+{%- liquid
+  assign s = block.settings
+  assign unit = variant.price | divided_by: 100
+-%}
+<form class="cod" data-cod-form id="{{ id }}"
+      data-unit-price="{{ unit }}"
+      data-tariffs='{{ settings.cod_tariffs | default: "{}" }}'
+      data-tariff-fallback='{{ settings.cod_tariff_fallback | default: "[600,350]" }}'
+      {% if settings.cod_endpoint != blank %}data-endpoint="{{ settings.cod_endpoint }}"{% endif %}
+      data-msg-invalid="{{ s.msg_invalid | escape }}"
+      data-msg-success="{{ s.msg_success | escape }}"
+      data-msg-fail="{{ s.msg_fail | escape }}"
+      data-msg-pending="{{ s.msg_pending | escape }}"
+      novalidate>
+  <input type="hidden" name="product_id" value="{{ product.id }}">
+  <input type="hidden" name="variant_id" value="{{ variant.id }}">
+  <input type="hidden" name="product_title" value="{{ product.title | escape }}">
+
+  {%- if s.show_head -%}
+    <div class="cod__head" style="{% if s.head_bg != blank %}background: {{ s.head_bg }};{% endif %}">
+      {%- if s.head_icon != blank -%}
+        <span class="cod__head-icon" aria-hidden="true">{{ s.head_icon }}</span>
+      {%- endif -%}
+      <span class="cod__head-text">
+        <span class="cod__title">{{ s.head_title }}</span>
+        {%- if s.head_subtitle != blank -%}
+          <span class="cod__subtitle">{{ s.head_subtitle }}</span>
+        {%- endif -%}
+      </span>
+    </div>
+  {%- endif -%}
+
+  <div class="cod__body">
+    <div class="cod__row cod__row--2">
+      <div class="field">
+        <label class="field__label" for="{{ id }}-prenom">{{ s.label_first }} <span class="field__req" aria-hidden="true">*</span></label>
+        <input class="field__control" id="{{ id }}-prenom" name="prenom" type="text"
+               autocomplete="given-name" placeholder="{{ s.ph_first | escape }}" data-cod-required>
+        <span class="field__error"><span aria-hidden="true">&#9888;</span> {{ s.msg_required }}</span>
+      </div>
+      <div class="field">
+        <label class="field__label" for="{{ id }}-nom">{{ s.label_last }} <span class="field__req" aria-hidden="true">*</span></label>
+        <input class="field__control" id="{{ id }}-nom" name="nom" type="text"
+               autocomplete="family-name" placeholder="{{ s.ph_last | escape }}" data-cod-required>
+        <span class="field__error"><span aria-hidden="true">&#9888;</span> {{ s.msg_required }}</span>
+      </div>
+    </div>
+
+    <div class="cod__row">
+      <div class="field">
+        <label class="field__label" for="{{ id }}-tel">{{ s.label_phone }} <span class="field__req" aria-hidden="true">*</span></label>
+        <span class="field__affix">
+          <span class="field__affix-label" aria-hidden="true">{{ s.phone_prefix }}</span>
+          <input class="field__control" id="{{ id }}-tel" name="telephone" type="tel"
+                 inputmode="numeric" autocomplete="tel-national" placeholder="{{ s.ph_phone | escape }}"
+                 data-cod-required data-cod-pattern="{{ s.phone_pattern }}">
+        </span>
+        {%- if s.hint_phone != blank -%}<span class="field__hint">{{ s.hint_phone }}</span>{%- endif -%}
+        <span class="field__error"><span aria-hidden="true">&#9888;</span> {{ s.msg_phone }}</span>
+      </div>
+    </div>
+
+    <div class="cod__row cod__row--2">
+      <div class="field">
+        <label class="field__label" for="{{ id }}-wilaya">{{ s.label_wilaya }} <span class="field__req" aria-hidden="true">*</span></label>
+        <select class="field__control" id="{{ id }}-wilaya" name="wilaya"
+                autocomplete="address-level1" data-cod-wilaya data-cod-required>
+          <option value="">{{ s.ph_wilaya }}</option>
+        </select>
+        <span class="field__error"><span aria-hidden="true">&#9888;</span> {{ s.msg_required }}</span>
+      </div>
+      <div class="field">
+        <label class="field__label" for="{{ id }}-commune">{{ s.label_commune }} <span class="field__req" aria-hidden="true">*</span></label>
+        <select class="field__control" id="{{ id }}-commune" name="commune"
+                autocomplete="address-level2" data-cod-commune data-cod-required
+                data-placeholder="{{ s.ph_commune | escape }}"
+                data-placeholder-empty="{{ s.ph_commune_empty | escape }}" disabled>
+          <option value="">{{ s.ph_commune_empty }}</option>
+        </select>
+        <span class="field__error"><span aria-hidden="true">&#9888;</span> {{ s.msg_required }}</span>
+      </div>
+    </div>
+
+    <div class="cod__row">
+      <div class="field">
+        <label class="field__label" for="{{ id }}-adresse">{{ s.label_address }} <span class="field__req" aria-hidden="true">*</span></label>
+        <textarea class="field__control" id="{{ id }}-adresse" name="adresse"
+                  autocomplete="street-address" placeholder="{{ s.ph_address | escape }}" data-cod-required></textarea>
+        {%- if s.hint_address != blank -%}<span class="field__hint">{{ s.hint_address }}</span>{%- endif -%}
+        <span class="field__error"><span aria-hidden="true">&#9888;</span> {{ s.msg_required }}</span>
+      </div>
+    </div>
+
+    {%- if s.show_delivery -%}
+      <fieldset class="cod__fieldset">
+        <legend class="cod__legend">{{ s.label_delivery }}</legend>
+        <div class="cod__delivery">
+          <label class="dopt">
+            <input class="dopt__input" type="radio" name="livraison" value="home" data-cod-delivery checked>
+            <span class="dopt__mark" aria-hidden="true"></span>
+            <span class="dopt__text">
+              <span class="dopt__name">{{ s.label_home }}</span>
+              <span class="dopt__price" data-cod-opt-price data-idle="—">—</span>
+            </span>
+          </label>
+          <label class="dopt">
+            <input class="dopt__input" type="radio" name="livraison" value="desk" data-cod-delivery>
+            <span class="dopt__mark" aria-hidden="true"></span>
+            <span class="dopt__text">
+              <span class="dopt__name">{{ s.label_desk }}</span>
+              <span class="dopt__price" data-cod-opt-price data-idle="—">—</span>
+            </span>
+          </label>
+        </div>
+      </fieldset>
+    {%- endif -%}
+
+    {%- if s.show_qty -%}
+      <div class="cod__row cod__row--2">
+        <div class="field">
+          <label class="field__label" for="{{ id }}-qte">{{ s.label_qty }}</label>
+          <select class="field__control" id="{{ id }}-qte" name="quantite" data-cod-qty>
+            {%- for i in (1..s.qty_max) -%}<option>{{ i }}</option>{%- endfor -%}
+          </select>
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- if s.show_summary -%}
+      <dl class="cod__summary">
+        <div class="cod__line"><dt>{{ s.label_subtotal }}</dt><dd data-cod-out-sub>—</dd></div>
+        <div class="cod__line"><dt>{{ s.label_shipping }}</dt><dd data-cod-out-ship class="cod__muted">—</dd></div>
+        <div class="cod__line cod__line--total"><dt>{{ s.label_total }}</dt><dd data-cod-out-total>—</dd></div>
+      </dl>
+    {%- endif -%}
+
+    <button class="cod__submit" type="submit" data-cod-submit
+            style="{% if s.submit_bg != blank %}background: {{ s.submit_bg }};{% endif %}">
+      <span class="cod__spinner" aria-hidden="true" hidden></span>
+      {{ s.submit_label }}
+    </button>
+
+    {%- if s.reassure != blank -%}
+      <p class="cod__reassure"><span aria-hidden="true">&#128274;</span> {{ s.reassure }}</p>
+    {%- endif -%}
+
+    <p class="cod__status" data-cod-status role="status" aria-live="polite"></p>
+  </div>
+</form>

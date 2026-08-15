@@ -1,0 +1,22 @@
+{
+  "type": "header",
+  "name": "En-tête",
+  "sections": {
+    "utility": { "type": "utility-bar", "blocks": {
+      "b1": { "type": "item", "settings": { "icon": "🚚", "title": "Livraison gratuite sur toutes les commandes", "subtitle": "Offre à durée limitée", "color": "#7ee787", "show_chevron": true } },
+      "b2": { "type": "item", "settings": { "icon": "📦", "title": "Garantie de livraison", "subtitle": "Remboursement en cas de problème", "color": "#f7f0c8" } },
+      "b3": { "type": "item", "settings": { "icon": "💵", "title": "Paiement à la livraison", "subtitle": "Payez à la réception", "color": "#ffffff" } }
+    }, "block_order": ["b1", "b2", "b3"], "settings": { "variant": "1" } },
+    "header": { "type": "main-header", "blocks": {
+      "l1": { "type": "link", "settings": { "icon": "👍", "label": "Meilleures ventes" } },
+      "l2": { "type": "link", "settings": { "icon": "⭐", "label": "Notés 5 étoiles" } },
+      "l3": { "type": "link", "settings": { "icon": "✨", "label": "Nouveautés" } }
+    }, "block_order": ["l1", "l2", "l3"], "settings": { "variant": "1" } },
+    "trust": { "type": "trust-bar", "blocks": {
+      "t1": { "type": "item", "settings": { "icon": "🔒", "label": "Protection des données" } },
+      "t2": { "type": "item", "settings": { "icon": "💳", "label": "Paiement à la livraison" } },
+      "t3": { "type": "item", "settings": { "icon": "✅", "label": "Garantie de livraison" } }
+    }, "block_order": ["t1", "t2", "t3"], "settings": { "variant": "1" } }
+  },
+  "order": ["utility", "header", "trust"]
+}

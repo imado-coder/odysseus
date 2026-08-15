@@ -1,0 +1,119 @@
+{%- comment -%} Part 8 — footer. Columns and payment chips are blocks. {%- endcomment -%}
+<footer class="tfoot" data-variant="{{ section.settings.variant }}"
+  style="
+    {%- if section.settings.bg != blank %}--tfoot-bg: {{ section.settings.bg }};{% endif -%}
+    {%- if section.settings.fg != blank %}--tfoot-fg: {{ section.settings.fg }};{% endif -%}
+    {%- if section.settings.muted != blank %}--tfoot-muted: {{ section.settings.muted }};{% endif -%}
+  ">
+  <div class="tfoot__inner">
+    <div class="tfoot__cols">
+      {%- for block in section.blocks -%}
+        {%- case block.type -%}
+          {%- when 'column' -%}
+            <div {{ block.shopify_attributes }}>
+              <h2 class="tfoot__title">{{ block.settings.title }}</h2>
+              <div class="tfoot__list">
+                {%- assign links = linklists[block.settings.menu].links -%}
+                {%- for link in links -%}
+                  <a class="tfoot__link" href="{{ link.url }}">{{ link.title }}</a>
+                {%- endfor -%}
+                {%- if block.settings.extra != blank -%}
+                  <span class="tfoot__link">{{ block.settings.extra }}</span>
+                {%- endif -%}
+              </div>
+            </div>
+
+          {%- when 'contact' -%}
+            <div {{ block.shopify_attributes }}>
+              <h2 class="tfoot__title">{{ block.settings.title }}</h2>
+              <div class="tfoot__list">
+                {%- if block.settings.phone != blank -%}
+                  <a class="tfoot__link" href="tel:{{ block.settings.phone | remove: ' ' }}">
+                    <span aria-hidden="true">&#128222;</span> {{ block.settings.phone }}
+                  </a>
+                {%- endif -%}
+                {%- if block.settings.email != blank -%}
+                  <a class="tfoot__link" href="mailto:{{ block.settings.email }}">
+                    <span aria-hidden="true">&#9993;</span> {{ block.settings.email }}
+                  </a>
+                {%- endif -%}
+                {%- if settings.social_whatsapp != blank -%}
+                  <a class="tfoot__link" href="https://wa.me/{{ settings.social_whatsapp }}">
+                    <span aria-hidden="true">&#128172;</span> WhatsApp
+                  </a>
+                {%- endif -%}
+                {%- if block.settings.hours != blank -%}
+                  <span class="tfoot__link">{{ block.settings.hours }}</span>
+                {%- endif -%}
+              </div>
+            </div>
+        {%- endcase -%}
+      {%- endfor -%}
+    </div>
+
+    {%- if section.settings.payments != blank -%}
+      <div class="tfoot__badges">
+        <div>
+          <h2 class="tfoot__title">{{ section.settings.payments_title }}</h2>
+          <div class="tfoot__badge-row">
+            {%- assign chips = section.settings.payments | split: ',' -%}
+            {%- for chip in chips -%}
+              <span class="paychip">{{ chip | strip }}</span>
+            {%- endfor -%}
+          </div>
+        </div>
+      </div>
+    {%- endif -%}
+
+    <div class="tfoot__bottom">
+      <span>&copy; {{ 'now' | date: '%Y' }} {{ shop.name }}</span>
+      {%- assign legal = linklists[section.settings.legal_menu].links -%}
+      {%- for link in legal -%}
+        <a href="{{ link.url }}">{{ link.title }}</a>
+      {%- endfor -%}
+    </div>
+  </div>
+</footer>
+
+{% schema %}
+{
+  "name": "Pied de page",
+  "tag": "footer",
+  "settings": [
+    { "type": "select", "id": "variant", "label": "Style",
+      "options": [
+        { "value": "1", "label": "1 — Sombre" }, { "value": "2", "label": "2 — Clair" },
+        { "value": "3", "label": "3 — Couleur de marque" }, { "value": "4", "label": "4 — Gris" },
+        { "value": "5", "label": "5 — Condensé" }
+      ], "default": "1" },
+    { "type": "header", "content": "Couleurs" },
+    { "type": "color", "id": "bg", "label": "Fond" },
+    { "type": "color", "id": "fg", "label": "Texte" },
+    { "type": "color", "id": "muted", "label": "Liens" },
+    { "type": "header", "content": "Moyens de paiement" },
+    { "type": "text", "id": "payments_title", "label": "Titre", "default": "Nous acceptons" },
+    { "type": "text", "id": "payments", "label": "Moyens acceptés",
+      "info": "Séparez par des virgules.", "default": "Paiement à la livraison, CIB, Edahabia" },
+    { "type": "link_list", "id": "legal_menu", "label": "Menu légal", "default": "footer" }
+  ],
+  "blocks": [
+    { "type": "column", "name": "Colonne de liens", "limit": 4,
+      "settings": [
+        { "type": "text", "id": "title", "label": "Titre", "default": "Aide" },
+        { "type": "link_list", "id": "menu", "label": "Menu" },
+        { "type": "text", "id": "extra", "label": "Ligne libre" }
+      ] },
+    { "type": "contact", "name": "Contact", "limit": 1,
+      "settings": [
+        { "type": "text", "id": "title", "label": "Titre", "default": "Contact" },
+        { "type": "text", "id": "phone", "label": "Téléphone", "default": "0555 00 00 00" },
+        { "type": "text", "id": "email", "label": "E-mail" },
+        { "type": "text", "id": "hours", "label": "Horaires", "default": "De 8h00 à 20h00" }
+      ] }
+  ],
+  "presets": [
+    { "name": "Pied de page",
+      "blocks": [ { "type": "column" }, { "type": "column" }, { "type": "column" }, { "type": "contact" } ] }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,21 @@
+{
+  "accessibility": { "skip_to_content": "انتقل إلى المحتوى" },
+  "general": {
+    "breadcrumbs": { "label": "مسار التنقل", "home": "الرئيسية" },
+    "search": { "search": "بحث" }
+  },
+  "sections": {
+    "header": { "cart_count": "السلة، {{ count }} منتج", "all_categories": "كل الفئات" }
+  },
+  "products": {
+    "product": {
+      "add_to_cart": "أضف إلى السلة",
+      "sold_out": "نفدت الكمية",
+      "regular_price": "السعر الأصلي",
+      "rating": "التقييم",
+      "media": { "gallery_viewer": "معرض المنتج", "image_available": "صورة {{ index }}" }
+    },
+    "facets": { "product_count_simple": "{{ count }} منتج" }
+  },
+  "onboarding": { "product_title": "منتج تجريبي" }
+}

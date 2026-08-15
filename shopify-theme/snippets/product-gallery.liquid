@@ -1,0 +1,31 @@
+{%- comment -%} Thumb rail plus stage. Thumbs are buttons so keyboard works. {%- endcomment -%}
+{%- assign featured = variant.featured_media | default: product.featured_media -%}
+<div class="gallery">
+  {%- if product.media.size > 1 -%}
+    <div class="gallery__thumbs" role="group" aria-label="{{ 'products.product.media.gallery_viewer' | t }}">
+      {%- for media in product.media -%}
+        <button class="gallery__thumb" type="button"
+                data-gallery-thumb data-media-id="{{ media.id }}"
+                {% if media.id == featured.id %}aria-current="true"{% endif %}
+                aria-label="{{ 'products.product.media.image_available' | t: index: forloop.index }}">
+          <img src="{{ media | image_url: width: 128 }}" width="64" height="64"
+               alt="" loading="lazy" decoding="async">
+        </button>
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+
+  <div class="gallery__stage" data-gallery-stage>
+    {%- if featured -%}
+      <img src="{{ featured | image_url: width: 800 }}"
+           srcset="{{ featured | image_url: width: 400 }} 400w,
+                   {{ featured | image_url: width: 700 }} 700w,
+                   {{ featured | image_url: width: 1000 }} 1000w"
+           sizes="(min-width: 990px) 46vw, 100vw"
+           width="{{ featured.width }}" height="{{ featured.height }}"
+           alt="{{ featured.alt | escape }}" fetchpriority="high" decoding="async">
+    {%- else -%}
+      {{ 'product-1' | placeholder_svg_tag }}
+    {%- endif -%}
+  </div>
+</div>

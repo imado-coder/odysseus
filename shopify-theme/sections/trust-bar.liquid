@@ -1,0 +1,68 @@
+{%- comment -%} Part 3 — trust bar. Each guarantee is a block. {%- endcomment -%}
+<div class="tbar" data-variant="{{ section.settings.variant }}"
+  style="
+    {%- if section.settings.bg != blank %}--tbar-bg: {{ section.settings.bg }};{% endif -%}
+    {%- if section.settings.fg != blank %}--tbar-fg: {{ section.settings.fg }};{% endif -%}
+  ">
+  <div class="tbar__inner">
+    {%- if section.settings.lead != blank -%}
+      <span class="tbar__lead">
+        {%- if section.settings.lead_icon != blank -%}
+          <span aria-hidden="true">{{ section.settings.lead_icon }}</span>
+        {%- endif -%}
+        {{ section.settings.lead }}
+      </span>
+    {%- endif -%}
+    <div class="tbar__list" role="region" aria-label="{{ section.settings.aria_label | escape }}" tabindex="0">
+      {%- for block in section.blocks -%}
+        <span class="tbar__item" {{ block.shopify_attributes }}>
+          {%- if block.settings.icon != blank -%}
+            <span class="tbar__icon" aria-hidden="true">{{ block.settings.icon }}</span>
+          {%- endif -%}
+          {%- if block.settings.link != blank -%}<a href="{{ block.settings.link }}">{%- endif -%}
+          {{ block.settings.label }}
+          {%- if block.settings.link != blank -%}</a>{%- endif -%}
+        </span>
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Barre de confiance",
+  "tag": "section",
+  "settings": [
+    { "type": "select", "id": "variant", "label": "Style",
+      "options": [
+        { "value": "1", "label": "1 — Vert" },
+        { "value": "2", "label": "2 — Vert foncé" },
+        { "value": "3", "label": "3 — Vert clair, texte foncé" },
+        { "value": "4", "label": "4 — Neutre" },
+        { "value": "5", "label": "5 — Couleur d'accent" }
+      ], "default": "1" },
+    { "type": "text", "id": "lead_icon", "label": "Icône du libellé", "default": "🛡" },
+    { "type": "text", "id": "lead", "label": "Libellé de gauche", "default": "Pourquoi nous choisir ?" },
+    { "type": "text", "id": "aria_label", "label": "Nom de la zone (lecteurs d'écran)", "default": "Garanties" },
+    { "type": "header", "content": "Couleurs" },
+    { "type": "color", "id": "bg", "label": "Fond" },
+    { "type": "color", "id": "fg", "label": "Texte" }
+  ],
+  "blocks": [
+    { "type": "item", "name": "Garantie", "limit": 6,
+      "settings": [
+        { "type": "text", "id": "icon", "label": "Icône", "default": "🔒" },
+        { "type": "text", "id": "label", "label": "Texte", "default": "Paiement sécurisé" },
+        { "type": "url", "id": "link", "label": "Lien" }
+      ] }
+  ],
+  "presets": [
+    { "name": "Barre de confiance",
+      "blocks": [
+        { "type": "item", "settings": { "icon": "🔒", "label": "Protection des données" } },
+        { "type": "item", "settings": { "icon": "💳", "label": "Paiement à la livraison" } },
+        { "type": "item", "settings": { "icon": "✅", "label": "Garantie de livraison" } }
+      ] }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,165 @@
+{%- comment -%}
+  Part 2 + Part 5 — header and categories mega menu.
+  Nav links and mega-menu tiles are blocks. The menu itself is driven by a
+  linklist so the merchant edits it in Navigation, not here.
+{%- endcomment -%}
+{%- assign menu = linklists[section.settings.mega_menu] -%}
+<header class="mhead" data-variant="{{ section.settings.variant }}"
+  style="
+    {%- if section.settings.bg != blank %}--mhead-bg: {{ section.settings.bg }};{% endif -%}
+    {%- if section.settings.fg != blank %}--mhead-fg: {{ section.settings.fg }};{% endif -%}
+    {%- if section.settings.search_btn != blank %}--mhead-search-btn: {{ section.settings.search_btn }};{% endif -%}
+  ">
+  <div class="mhead__inner">
+    <a class="mhead__logo" href="{{ routes.root_url }}">
+      {%- if settings.logo != blank -%}
+        <span class="logo-tile" style="{% if section.settings.logo_bg != blank %}--logo-bg: {{ section.settings.logo_bg }};{% endif %}">
+          {{ settings.logo | image_url: width: 92 | image_tag: widths: '46,92,138', alt: shop.name, loading: 'eager' }}
+        </span>
+      {%- else -%}
+        <span class="logo-tile" style="{% if section.settings.logo_bg != blank %}--logo-bg: {{ section.settings.logo_bg }};{% endif %}">
+          {%- if section.settings.logo_mark != blank -%}
+            <span class="logo-tile__mark" aria-hidden="true">{{ section.settings.logo_mark }}</span>
+          {%- endif -%}
+          <span class="logo-tile__word">{{ settings.logo_text | default: shop.name }}</span>
+        </span>
+      {%- endif -%}
+      {%- if section.settings.show_logo_text -%}
+        <span class="mhead__logo-text">{{ settings.logo_text | default: shop.name }}</span>
+      {%- endif -%}
+    </a>
+
+    <nav class="mhead__nav" aria-label="{{ section.settings.nav_aria | escape }}">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'link' -%}
+          <a class="mhead__nav-link" href="{{ block.settings.url }}" {{ block.shopify_attributes }}>
+            {%- if block.settings.icon != blank -%}<span aria-hidden="true">{{ block.settings.icon }}</span> {% endif -%}
+            {{ block.settings.label }}
+          </a>
+        {%- endif -%}
+      {%- endfor -%}
+
+      {%- if section.settings.show_mega and menu.links.size > 0 -%}
+        <span class="mhead__cat-wrap">
+          <button class="mhead__cat" type="button" data-disclosure
+                  aria-expanded="false" aria-haspopup="true" aria-controls="MegaMenu-{{ section.id }}">
+            {{ section.settings.mega_label }}
+            <span class="mhead__cat-caret" aria-hidden="true">&#9662;</span>
+          </button>
+          {% render 'mega-menu', menu: menu, id: section.id, variant: section.settings.mega_variant %}
+        </span>
+      {%- endif -%}
+    </nav>
+
+    {%- if section.settings.show_search -%}
+      <form class="mhead__search" role="search" action="{{ routes.search_url }}" method="get">
+        <label class="visually-hidden" for="HeaderSearch-{{ section.id }}">{{ section.settings.search_label }}</label>
+        <input class="mhead__search-input" id="HeaderSearch-{{ section.id }}" type="search" name="q"
+               value="{{ search.terms | escape }}" placeholder="{{ section.settings.search_placeholder | escape }}">
+        <button class="mhead__search-btn" type="submit" aria-label="{{ section.settings.search_label | escape }}">
+          <span aria-hidden="true">&#128269;</span>
+        </button>
+      </form>
+    {%- endif -%}
+
+    <div class="mhead__end">
+      {%- if section.settings.show_account -%}
+        <a class="mhead__acct" href="{{ routes.account_url }}">
+          <span class="mhead__avatar" aria-hidden="true">
+            {%- if customer -%}{{ customer.first_name | slice: 0 | upcase }}{%- else -%}&#128100;{%- endif -%}
+          </span>
+          <span class="mhead__acct-lines">
+            <span class="mhead__acct-hi">
+              {%- if customer -%}{{ section.settings.greeting }}, {{ customer.first_name }}{%- else -%}{{ section.settings.greeting_guest }}{%- endif -%}
+            </span>
+            <span class="mhead__acct-main">{{ section.settings.account_label }}</span>
+          </span>
+        </a>
+      {%- endif -%}
+
+      {%- if section.settings.help_label != blank -%}
+        <a class="mhead__util" href="{{ section.settings.help_url }}">
+          <span aria-hidden="true">{{ section.settings.help_icon }}</span> {{ section.settings.help_label }}
+        </a>
+      {%- endif -%}
+
+      {%- if section.settings.show_locale and shop.published_locales.size > 1 -%}
+        <a class="mhead__util" href="#">
+          <span class="mhead__flag" aria-hidden="true">{{ request.locale.iso_code | upcase }}</span>
+          {{ request.locale.endonym_name }}
+        </a>
+      {%- endif -%}
+
+      <a class="mhead__cart" href="{{ routes.cart_url }}"
+         aria-label="{{ 'sections.header.cart_count' | t: count: cart.item_count }}">
+        <span aria-hidden="true">&#128722;</span>
+        {%- if cart.item_count > 0 -%}
+          <span class="mhead__cart-count" aria-hidden="true">{{ cart.item_count }}</span>
+        {%- endif -%}
+      </a>
+    </div>
+  </div>
+</header>
+
+{% schema %}
+{
+  "name": "En-tête",
+  "tag": "header",
+  "settings": [
+    { "type": "select", "id": "variant", "label": "Style",
+      "options": [
+        { "value": "1", "label": "1 — Bleu" }, { "value": "2", "label": "2 — Blanc" },
+        { "value": "3", "label": "3 — Noir" }, { "value": "4", "label": "4 — Accent" },
+        { "value": "5", "label": "5 — Compact" }
+      ], "default": "1" },
+    { "type": "header", "content": "Couleurs" },
+    { "type": "color", "id": "bg", "label": "Fond de l'en-tête" },
+    { "type": "color", "id": "fg", "label": "Texte de l'en-tête" },
+    { "type": "color", "id": "logo_bg", "label": "Fond de la tuile du logo" },
+    { "type": "color", "id": "search_btn", "label": "Bouton de recherche" },
+    { "type": "header", "content": "Logo" },
+    { "type": "text", "id": "logo_mark", "label": "Symbole du logo", "info": "Affiché si aucune image n'est chargée", "default": "🛍" },
+    { "type": "checkbox", "id": "show_logo_text", "label": "Afficher le nom à côté du logo", "default": false },
+    { "type": "header", "content": "Recherche" },
+    { "type": "checkbox", "id": "show_search", "label": "Afficher la recherche", "default": true },
+    { "type": "text", "id": "search_placeholder", "label": "Texte indicatif", "default": "Rechercher un produit…" },
+    { "type": "text", "id": "search_label", "label": "Libellé (lecteurs d'écran)", "default": "Rechercher" },
+    { "type": "header", "content": "Menu Catégories" },
+    { "type": "checkbox", "id": "show_mega", "label": "Afficher le menu Catégories", "default": true },
+    { "type": "text", "id": "mega_label", "label": "Libellé du bouton", "default": "Catégories" },
+    { "type": "link_list", "id": "mega_menu", "label": "Menu à afficher", "default": "main-menu" },
+    { "type": "select", "id": "mega_variant", "label": "Style du menu",
+      "options": [
+        { "value": "1", "label": "1 — Deux colonnes" }, { "value": "2", "label": "2 — Mur de vignettes" },
+        { "value": "3", "label": "3 — Texte seul (le plus rapide)" }, { "value": "4", "label": "4 — Grandes vignettes" },
+        { "value": "5", "label": "5 — Liste compacte" }
+      ], "default": "1" },
+    { "type": "header", "content": "Compte et aide" },
+    { "type": "checkbox", "id": "show_account", "label": "Afficher le bloc compte", "default": true },
+    { "type": "text", "id": "greeting", "label": "Salutation (client connecté)", "default": "Bonjour" },
+    { "type": "text", "id": "greeting_guest", "label": "Salutation (visiteur)", "default": "Bonjour" },
+    { "type": "text", "id": "account_label", "label": "Libellé du compte", "default": "Commandes et Compte" },
+    { "type": "text", "id": "help_icon", "label": "Icône d'aide", "default": "🎧" },
+    { "type": "text", "id": "help_label", "label": "Libellé d'aide", "default": "Aide" },
+    { "type": "url", "id": "help_url", "label": "Lien d'aide" },
+    { "type": "checkbox", "id": "show_locale", "label": "Afficher le sélecteur de langue", "default": true },
+    { "type": "text", "id": "nav_aria", "label": "Nom de la navigation (lecteurs d'écran)", "default": "Navigation principale" }
+  ],
+  "blocks": [
+    { "type": "link", "name": "Lien de navigation", "limit": 5,
+      "settings": [
+        { "type": "text", "id": "icon", "label": "Icône", "default": "👍" },
+        { "type": "text", "id": "label", "label": "Texte", "default": "Meilleures ventes" },
+        { "type": "url", "id": "url", "label": "Lien" }
+      ] }
+  ],
+  "presets": [
+    { "name": "En-tête",
+      "blocks": [
+        { "type": "link", "settings": { "icon": "👍", "label": "Meilleures ventes" } },
+        { "type": "link", "settings": { "icon": "⭐", "label": "Notés 5 étoiles" } },
+        { "type": "link", "settings": { "icon": "✨", "label": "Nouveautés" } }
+      ] }
+  ]
+}
+{% endschema %}

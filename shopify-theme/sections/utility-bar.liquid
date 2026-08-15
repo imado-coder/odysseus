@@ -1,0 +1,84 @@
+{%- comment -%}
+  Part 1 — utility bar. Items are blocks: add, remove and reorder them in the
+  editor. Colours fall back to the section's own tokens when unset.
+{%- endcomment -%}
+<div class="ubar" data-variant="{{ section.settings.variant }}"
+  style="
+    {%- if section.settings.bg != blank %}--ubar-bg: {{ section.settings.bg }};{% endif -%}
+    {%- if section.settings.fg != blank %}--ubar-fg: {{ section.settings.fg }};{% endif -%}
+    {%- if section.settings.divider != blank %}--ubar-divider: {{ section.settings.divider }};{% endif -%}
+  ">
+  <div class="ubar__inner" role="region" aria-label="{{ section.settings.aria_label | escape }}" tabindex="0"
+       {% if section.settings.variant == '2' %}data-scroller-track{% endif %}>
+    <div class="ubar__track">
+      {%- for block in section.blocks -%}
+        {%- capture item -%}
+          <div class="ubar__item" {{ block.shopify_attributes }}>
+            {%- if block.settings.icon != blank -%}
+              <span class="ubar__icon" aria-hidden="true">{{ block.settings.icon }}</span>
+            {%- endif -%}
+            <span class="ubar__text" style="--item-color: {{ block.settings.color }}">
+              <span class="ubar__title">
+                {%- if block.settings.link != blank -%}<a href="{{ block.settings.link }}">{%- endif -%}
+                {{ block.settings.title }}
+                {%- if block.settings.show_chevron %} <span class="ubar__chev" aria-hidden="true">&rsaquo;</span>{% endif -%}
+                {%- if block.settings.link != blank -%}</a>{%- endif -%}
+              </span>
+              {%- if block.settings.subtitle != blank -%}
+                <span class="ubar__sub">{{ block.settings.subtitle }}</span>
+              {%- endif -%}
+            </span>
+          </div>
+        {%- endcapture -%}
+        {{ item }}
+        {%- comment -%} The marquee needs a second run to loop seamlessly. {%- endcomment -%}
+        {%- if section.settings.variant == '2' -%}
+          {{ item | replace: 'class="ubar__item"', 'class="ubar__item ubar__item--dup" aria-hidden="true"' }}
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Barre utilitaire",
+  "tag": "section",
+  "class": "section-ubar",
+  "settings": [
+    { "type": "select", "id": "variant", "label": "Style",
+      "options": [
+        { "value": "1", "label": "1 — Bandeau sombre" },
+        { "value": "2", "label": "2 — Défilement continu" },
+        { "value": "3", "label": "3 — Bandeau clair" },
+        { "value": "4", "label": "4 — Couleur d'accent" },
+        { "value": "5", "label": "5 — Compact (titres seuls)" }
+      ], "default": "1" },
+    { "type": "header", "content": "Couleurs" },
+    { "type": "color", "id": "bg", "label": "Fond" },
+    { "type": "color", "id": "fg", "label": "Texte" },
+    { "type": "color", "id": "divider", "label": "Séparateurs" },
+    { "type": "header", "content": "Accessibilité" },
+    { "type": "text", "id": "aria_label", "label": "Nom de la zone pour les lecteurs d'écran", "default": "Avantages du magasin" }
+  ],
+  "blocks": [
+    { "type": "item", "name": "Avantage", "limit": 6,
+      "settings": [
+        { "type": "text", "id": "icon", "label": "Icône", "info": "Un emoji, ex. 🚚", "default": "🚚" },
+        { "type": "text", "id": "title", "label": "Titre", "default": "Livraison gratuite" },
+        { "type": "text", "id": "subtitle", "label": "Sous-titre", "default": "Offre à durée limitée" },
+        { "type": "color", "id": "color", "label": "Couleur du texte", "default": "#ffffff" },
+        { "type": "url", "id": "link", "label": "Lien" },
+        { "type": "checkbox", "id": "show_chevron", "label": "Afficher le chevron", "default": false }
+      ] }
+  ],
+  "presets": [
+    { "name": "Barre utilitaire",
+      "blocks": [
+        { "type": "item", "settings": { "icon": "🚚", "title": "Livraison gratuite sur toutes les commandes", "subtitle": "Offre à durée limitée", "color": "#7ee787", "show_chevron": true } },
+        { "type": "item", "settings": { "icon": "📦", "title": "Garantie de livraison", "subtitle": "Remboursement en cas de problème", "color": "#f7f0c8" } },
+        { "type": "item", "settings": { "icon": "📱", "title": "Commandez plus vite", "subtitle": "Paiement à la livraison", "color": "#ffffff" } }
+      ] }
+  ]
+}
+{% endschema %}

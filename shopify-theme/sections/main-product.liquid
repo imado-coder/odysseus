@@ -1,0 +1,1077 @@
+{%- comment -%}
+  Product page. The media column scrolls, the buy box sticks.
+  The buy box is a library of blocks: the merchant adds only what a given
+  product needs, in the order they want, and every string is theirs.
+{%- endcomment -%}
+{{ 'product-page.css' | asset_url | stylesheet_tag }}
+{{ 'cod-form.css' | asset_url | stylesheet_tag }}
+{%- if section.blocks | where: 'type', 'cod_form' | size > 0 -%}
+  <script src="{{ 'dz-locations.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+
+{%- liquid
+  assign v = product.selected_or_first_available_variant
+  assign on_sale = false
+  if v.compare_at_price > v.price
+    assign on_sale = true
+    assign off = v.compare_at_price | minus: v.price | times: 100.0 | divided_by: v.compare_at_price | round
+  endif
+-%}
+
+<div class="pdp">
+  <div class="pdp__inner">
+    {%- if section.settings.show_breadcrumbs -%}
+      <nav class="pdp__crumbs" aria-label="{{ 'general.breadcrumbs.label' | t }}">
+        <a href="{{ routes.root_url }}">{{ 'general.breadcrumbs.home' | t }}</a>
+        <span class="pdp__crumb-sep" aria-hidden="true">&rsaquo;</span>
+        {%- if collection -%}
+          <a href="{{ collection.url }}">{{ collection.title }}</a>
+          <span class="pdp__crumb-sep" aria-hidden="true">&rsaquo;</span>
+        {%- endif -%}
+        <span class="pdp__crumb-current">{{ product.title }}</span>
+      </nav>
+    {%- endif -%}
+
+    <div class="pdp__grid">
+      <div class="pdp__media">
+        {% render 'product-gallery', product: product, variant: v %}
+        {%- if section.settings.show_description and product.description != blank -%}
+          <section class="landing" aria-labelledby="Desc-{{ section.id }}">
+            <h2 class="visually-hidden" id="Desc-{{ section.id }}">{{ section.settings.description_title }}</h2>
+            <div class="landing__stack rte">{{ product.description }}</div>
+          </section>
+        {%- endif -%}
+      </div>
+
+      <div class="pdp__buybox" data-sticky-fit>
+        <div class="bb">
+          {%- for block in section.blocks -%}
+            {%- case block.type -%}
+
+              {%- when 'savings' -%}
+                <div class="bb__savings {% if block.settings.style == 'flash' %}bb__savings--flash{% endif %}" {{ block.shopify_attributes }}>
+                  <span class="bb__savings-flag">
+                    {%- if block.settings.icon != blank %}<span aria-hidden="true">{{ block.settings.icon }}</span> {% endif -%}
+                    {{ block.settings.flag }}
+                  </span>
+                  <span class="bb__savings-list">
+                    {%- if block.settings.item_1 != blank -%}<span class="bb__savings-item"><span aria-hidden="true">&#10004;</span> {{ block.settings.item_1 }}</span>{%- endif -%}
+                    {%- if block.settings.item_2 != blank -%}<span class="bb__savings-item"><span aria-hidden="true">&#10004;</span> {{ block.settings.item_2 }}</span>{%- endif -%}
+                  </span>
+                </div>
+
+              {%- when 'title' -%}
+                <div class="bb__title-row" {{ block.shopify_attributes }}>
+                  <h1 class="bb__title">{{ product.title }}</h1>
+                  {%- if block.settings.show_share -%}
+                    <button class="bb__share" type="button" aria-label="{{ block.settings.share_label | escape }}">
+                      <span aria-hidden="true">&#8618;</span>
+                    </button>
+                  {%- endif -%}
+                </div>
+
+              {%- when 'rating' -%}
+                {%- assign r = product.metafields.reviews.rating.value -%}
+                <div class="bb__rating" {{ block.shopify_attributes }}>
+                  {%- if r != blank -%}
+                    <span class="bb__rating-score">{{ r.rating }}</span>
+                    <span class="bb__rating-stars" aria-hidden="true">
+                      {%- assign full = r.rating | floor -%}
+                      {%- for i in (1..5) -%}{% if i <= full %}&#9733;{% else %}&#9734;{% endif %}{%- endfor -%}
+                    </span>
+                    <span class="visually-hidden">{{ 'products.product.rating' | t }} {{ r.rating }}/{{ r.scale_max }}</span>
+                  {%- endif -%}
+                  {%- if block.settings.sold_text != blank -%}
+                    <span class="bb__rating-count">{{ block.settings.sold_text }}</span>
+                  {%- endif -%}
+                  {%- if block.settings.seller_label != blank -%}
+                    <span class="bb__rating-sep" aria-hidden="true">|</span>
+                    <span>{{ block.settings.seller_label }}</span>
+                    {%- if block.settings.seller_badge != blank -%}
+                      <span class="bb__seller-badge"><span aria-hidden="true">&#9733;</span> {{ block.settings.seller_badge }}</span>
+                    {%- endif -%}
+                  {%- endif -%}
+                </div>
+
+              {%- when 'rank' -%}
+                <div class="bb__rank" {{ block.shopify_attributes }}>
+                  <span class="bb__rank-badge" style="{% if block.settings.badge_bg != blank %}background: {{ block.settings.badge_bg }};{% endif %}">{{ block.settings.badge }}</span>
+                  <span>{{ block.settings.text }}</span>
+                </div>
+
+              {%- when 'price' -%}
+                <div class="bb__price-row" {{ block.shopify_attributes }}>
+                  {%- if on_sale and block.settings.show_compare -%}
+                    <s class="bb__price-was">
+                      <span class="visually-hidden">{{ 'products.product.regular_price' | t }} </span>{{ v.compare_at_price | money }}
+                    </s>
+                  {%- endif -%}
+                  <span class="bb__price-deal">
+                    {%- if block.settings.icon != blank -%}<span aria-hidden="true">{{ block.settings.icon }}</span>{%- endif -%}
+                    {%- if block.settings.label != blank -%}<span class="bb__price-label">{{ block.settings.label }}</span>{%- endif -%}
+                    <span class="bb__price-now">{{ v.price | money }}</span>
+                  </span>
+                </div>
+                {%- if block.settings.note != blank or on_sale -%}
+                  <div class="bb__price-note">
+                    {%- if block.settings.note != blank -%}<span>{{ block.settings.note }}</span>{%- endif -%}
+                    {%- if on_sale and block.settings.show_discount -%}
+                      <span class="bb__off" style="{% if block.settings.off_bg != blank %}background: {{ block.settings.off_bg }};{% endif %}">
+                        {{ block.settings.off_prefix }}{{ off }}{{ block.settings.off_suffix }}
+                      </span>
+                    {%- endif -%}
+                  </div>
+                {%- endif -%}
+
+              {%- when 'notice' -%}
+                <span class="bb__notice" {{ block.shopify_attributes }}
+                      style="{% if block.settings.color != blank %}border-color: {{ block.settings.color }}; color: {{ block.settings.color }};{% endif %}">
+                  {{ block.settings.text }}
+                  {%- if block.settings.show_info %} <span aria-hidden="true">&#9432;</span>{% endif -%}
+                </span>
+
+              {%- when 'promo' -%}
+                <div class="bb__promo" {{ block.shopify_attributes }}
+                     style="{% if block.settings.color != blank %}border-color: {{ block.settings.color }};{% endif %}">
+                  <div class="bb__promo-head" style="{% if block.settings.color != blank %}background: {{ block.settings.color }};{% endif %}">
+                    <span class="bb__promo-name">{{ block.settings.name }}</span>
+                    <span class="bb__promo-rule" aria-hidden="true"></span>
+                    {%- if block.settings.deadline != blank -%}
+                      <span class="bb__promo-timer" data-countdown="{{ block.settings.deadline }}">
+                        <span aria-hidden="true">&#9201;</span> {{ block.settings.timer_label }}
+                        <span data-countdown-out>--:--:--</span>
+                      </span>
+                    {%- endif -%}
+                  </div>
+                  {%- if block.settings.body != blank -%}
+                    <div class="bb__promo-body">{{ block.settings.body }}</div>
+                  {%- endif -%}
+                </div>
+
+              {%- when 'variants' -%}
+                {%- unless product.has_only_default_variant -%}
+                  {% render 'variant-picker', product: product, variant: v, block: block %}
+                {%- endunless -%}
+
+              {%- when 'quantity' -%}
+                <div class="bb__qty-row" {{ block.shopify_attributes }}>
+                  <label>{{ block.settings.label }}
+                    <select class="bb__qty-select" name="quantity" form="AddToCart-{{ section.id }}">
+                      {%- for i in (1..block.settings.max) -%}<option>{{ i }}</option>{%- endfor -%}
+                    </select>
+                  </label>
+                  {%- if block.settings.sold_text != blank -%}
+                    <span class="bb__qty-sold"><span aria-hidden="true">&#9670;</span> {{ block.settings.sold_text }}</span>
+                  {%- endif -%}
+                </div>
+
+              {%- when 'cta' -%}
+                {%- form 'product', product, id: 'AddToCart-' | append: section.id -%}
+                  <input type="hidden" name="id" value="{{ v.id }}">
+                  <button class="bb__cta" type="submit" name="add"
+                          {% unless v.available %}disabled{% endunless %}
+                          style="{% if block.settings.bg != blank %}background: {{ block.settings.bg }};{% endif %}"
+                          {{ block.shopify_attributes }}>
+                    {%- if v.available -%}{{ block.settings.label }}{%- else -%}{{ block.settings.sold_out_label }}{%- endif -%}
+                  </button>
+                {%- endform -%}
+
+              {%- when 'cod_form' -%}
+                <div {{ block.shopify_attributes }}>
+                  {% render 'cod-form', id: 'cod-' | append: section.id, product: product, variant: v, block: block %}
+                </div>
+
+              {%- when 'shipping' -%}
+                <div class="bb__trust" {{ block.shopify_attributes }}>
+                  {%- if block.settings.title != blank -%}
+                    <span class="bb__ship-title">
+                      <span aria-hidden="true">{{ block.settings.icon }}</span> {{ block.settings.title }}
+                    </span>
+                  {%- endif -%}
+                  {%- if block.settings.line != blank -%}
+                    <span class="bb__ship-line">{{ block.settings.line }}</span>
+                  {%- endif -%}
+                </div>
+
+              {%- when 'carriers' -%}
+                <div class="bb__carriers" {{ block.shopify_attributes }}>
+                  {%- if block.settings.label != blank -%}
+                    <span class="bb__ship-line">{{ block.settings.label }}</span>
+                  {%- endif -%}
+                  {%- assign names = block.settings.names | split: ',' -%}
+                  {%- for n in names -%}
+                    <span class="bb__carrier">
+                      <span class="bb__carrier-logo">{{ n | strip | slice: 0, 3 | upcase }}</span> {{ n | strip }}
+                    </span>
+                  {%- endfor -%}
+                </div>
+
+              {%- when 'guarantees' -%}
+                <div class="bb__trust" {{ block.shopify_attributes }}>
+                  {%- if block.settings.line_1 != blank -%}
+                    <span class="bb__trust-row"><span aria-hidden="true">{{ block.settings.icon_1 }}</span> {{ block.settings.line_1 }}</span>
+                  {%- endif -%}
+                  {%- if block.settings.line_2 != blank -%}
+                    <span class="bb__trust-row"><span aria-hidden="true">{{ block.settings.icon_2 }}</span> {{ block.settings.line_2 }}</span>
+                  {%- endif -%}
+                </div>
+
+              {%- when 'pills' -%}
+                <div class="bb__pills" {{ block.shopify_attributes }}>
+                  {%- assign pills = block.settings.items | split: ',' -%}
+                  {%- for p in pills -%}
+                    <span class="bb__pill" style="{% if block.settings.bg != blank %}background: {{ block.settings.bg }};{% endif %}">{{ p | strip }}</span>
+                  {%- endfor -%}
+                </div>
+
+              {%- when 'text' -%}
+                <div class="bb__free-text rte" {{ block.shopify_attributes }}>{{ block.settings.content }}</div>
+
+            {%- endcase -%}
+          {%- endfor -%}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{%- comment -%} Mobile: the buy box is far up the page, so keep a bar in reach. {%- endcomment -%}
+{%- if section.settings.show_mobile_bar -%}
+  <div class="pdp__mobile-cta">
+    <span class="pdp__mobile-price">
+      <b>{{ v.price | money }}</b>
+      {%- if on_sale -%}<s>{{ v.compare_at_price | money }}</s>{%- endif -%}
+    </span>
+    {%- if section.blocks | where: 'type', 'cod_form' | size > 0 -%}
+      <button class="bb__cta" type="button" data-sheet-open aria-controls="CodSheet-{{ section.id }}">
+        {{ section.settings.mobile_cta_label }}
+      </button>
+    {%- else -%}
+      <button class="bb__cta" type="submit" form="AddToCart-{{ section.id }}">
+        {{ section.settings.mobile_cta_label }}
+      </button>
+    {%- endif -%}
+  </div>
+
+  {%- for block in section.blocks -%}
+    {%- if block.type == 'cod_form' -%}
+      <div class="cod-sheet" id="CodSheet-{{ section.id }}" data-open="false">
+        <div class="cod-sheet__scrim" data-sheet-close></div>
+        <div class="cod-sheet__panel" role="dialog" aria-modal="true"
+             aria-label="{{ block.settings.head_title | escape }}">
+          <div class="cod-sheet__grip">
+            <span class="cod-sheet__grip-title">{{ block.settings.head_title }}</span>
+            <button class="cod-sheet__close" type="button" data-sheet-close
+                    aria-label="{{ section.settings.close_label | escape }}">&#10005;</button>
+          </div>
+          {% render 'cod-form', id: 'cod-mobile-' | append: section.id, product: product, variant: v, block: block %}
+        </div>
+      </div>
+      {%- break -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Page produit",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_breadcrumbs",
+      "label": "Afficher le fil d'Ariane",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "Afficher la description sous les images",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "description_title",
+      "label": "Titre de la description",
+      "default": "Détails du produit"
+    },
+    {
+      "type": "header",
+      "content": "Barre mobile"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_mobile_bar",
+      "label": "Afficher la barre d'achat sur mobile",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "mobile_cta_label",
+      "label": "Texte du bouton mobile",
+      "default": "Commander maintenant"
+    },
+    {
+      "type": "text",
+      "id": "close_label",
+      "label": "Bouton fermer (lecteurs d'écran)",
+      "default": "Fermer"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "savings",
+      "name": "Bandeau économies",
+      "limit": 2,
+      "settings": [
+        {
+          "type": "select",
+          "id": "style",
+          "label": "Style",
+          "options": [
+            {
+              "value": "normal",
+              "label": "Économies (jaune)"
+            },
+            {
+              "value": "flash",
+              "label": "Ventes flash (orange)"
+            }
+          ],
+          "default": "normal"
+        },
+        {
+          "type": "text",
+          "id": "icon",
+          "label": "Icône du drapeau",
+          "default": "💰"
+        },
+        {
+          "type": "text",
+          "id": "flag",
+          "label": "Texte du drapeau",
+          "default": "ÉCONOMIES"
+        },
+        {
+          "type": "text",
+          "id": "item_1",
+          "label": "Avantage 1",
+          "default": "Livraison gratuite"
+        },
+        {
+          "type": "text",
+          "id": "item_2",
+          "label": "Avantage 2",
+          "default": "Crédit en cas de retard"
+        }
+      ]
+    },
+    {
+      "type": "title",
+      "name": "Titre du produit",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "show_share",
+          "label": "Afficher le bouton partager",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "share_label",
+          "label": "Libellé du partage",
+          "default": "Partager ce produit"
+        }
+      ]
+    },
+    {
+      "type": "rating",
+      "name": "Note et vendeur",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "sold_text",
+          "label": "Texte des ventes",
+          "default": "40 000+ ventes"
+        },
+        {
+          "type": "text",
+          "id": "seller_label",
+          "label": "Libellé du vendeur",
+          "default": "Vendu par"
+        },
+        {
+          "type": "text",
+          "id": "seller_badge",
+          "label": "Badge du vendeur",
+          "default": "Vendeur vedette"
+        }
+      ]
+    },
+    {
+      "type": "rank",
+      "name": "Classement",
+      "limit": 2,
+      "settings": [
+        {
+          "type": "text",
+          "id": "badge",
+          "label": "Badge",
+          "default": "#1 Meilleure vente"
+        },
+        {
+          "type": "color",
+          "id": "badge_bg",
+          "label": "Couleur du badge"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Texte à côté",
+          "default": "dans sa catégorie"
+        }
+      ]
+    },
+    {
+      "type": "price",
+      "name": "Prix",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "show_compare",
+          "label": "Afficher le prix barré",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "icon",
+          "label": "Icône avant le prix",
+          "default": "⏰"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Étiquette avant le prix",
+          "default": "Dernier jour"
+        },
+        {
+          "type": "text",
+          "id": "note",
+          "label": "Note sous le prix",
+          "default": "après remises appliquées"
+        },
+        {
+          "type": "header",
+          "content": "Badge de réduction"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_discount",
+          "label": "Afficher le pourcentage",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "off_prefix",
+          "label": "Avant le nombre",
+          "default": ""
+        },
+        {
+          "type": "text",
+          "id": "off_suffix",
+          "label": "Après le nombre",
+          "default": "% DE RÉDUCTION"
+        },
+        {
+          "type": "color",
+          "id": "off_bg",
+          "label": "Couleur du badge"
+        }
+      ]
+    },
+    {
+      "type": "notice",
+      "name": "Alerte (stock, baisse de prix)",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Texte",
+          "default": "PRESQUE ÉPUISÉ"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_info",
+          "label": "Afficher l'icône info",
+          "default": false
+        },
+        {
+          "type": "color",
+          "id": "color",
+          "label": "Couleur"
+        }
+      ]
+    },
+    {
+      "type": "promo",
+      "name": "Panneau promotion",
+      "limit": 2,
+      "settings": [
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Nom de la promo",
+          "default": "GRANDES PROMOS"
+        },
+        {
+          "type": "color",
+          "id": "color",
+          "label": "Couleur"
+        },
+        {
+          "type": "text",
+          "id": "timer_label",
+          "label": "Texte avant le compte à rebours",
+          "default": "SE TERMINE DANS"
+        },
+        {
+          "type": "text",
+          "id": "deadline",
+          "label": "Fin de la promo",
+          "default": "",
+          "info": "Format : 2026-12-31 23:59"
+        },
+        {
+          "type": "richtext",
+          "id": "body",
+          "label": "Contenu du panneau"
+        }
+      ]
+    },
+    {
+      "type": "variants",
+      "name": "Choix des options",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "select",
+          "id": "style",
+          "label": "Affichage",
+          "options": [
+            {
+              "value": "swatch",
+              "label": "Vignettes images"
+            },
+            {
+              "value": "button",
+              "label": "Boutons texte"
+            },
+            {
+              "value": "select",
+              "label": "Liste déroulante"
+            }
+          ],
+          "default": "swatch"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_name",
+          "label": "Afficher le nom de l'option choisie",
+          "default": true
+        }
+      ]
+    },
+    {
+      "type": "quantity",
+      "name": "Quantité",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Libellé",
+          "default": "Quantité"
+        },
+        {
+          "type": "range",
+          "id": "max",
+          "min": 2,
+          "max": 20,
+          "step": 1,
+          "label": "Quantité maximale",
+          "default": 10
+        },
+        {
+          "type": "text",
+          "id": "sold_text",
+          "label": "Texte à côté",
+          "default": ""
+        }
+      ]
+    },
+    {
+      "type": "cta",
+      "name": "Bouton d'achat",
+      "limit": 2,
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Texte du bouton",
+          "default": "Ajouter au panier"
+        },
+        {
+          "type": "text",
+          "id": "sold_out_label",
+          "label": "Texte si épuisé",
+          "default": "Épuisé"
+        },
+        {
+          "type": "color",
+          "id": "bg",
+          "label": "Couleur du bouton"
+        }
+      ]
+    },
+    {
+      "type": "cod_form",
+      "name": "Formulaire paiement à la livraison",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Toutes les wilayas et communes d'Algérie sont incluses. Les tarifs se règlent dans Paramètres du thème › Paiement à la livraison."
+        },
+        {
+          "type": "header",
+          "content": "En-tête"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_head",
+          "label": "Afficher l'en-tête",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "head_icon",
+          "label": "Icône",
+          "default": "💵"
+        },
+        {
+          "type": "text",
+          "id": "head_title",
+          "label": "Titre",
+          "default": "Commander — paiement à la livraison"
+        },
+        {
+          "type": "text",
+          "id": "head_subtitle",
+          "label": "Sous-titre",
+          "default": "Remplissez le formulaire, payez à la réception"
+        },
+        {
+          "type": "color",
+          "id": "head_bg",
+          "label": "Couleur de l'en-tête"
+        },
+        {
+          "type": "header",
+          "content": "Libellés des champs"
+        },
+        {
+          "type": "text",
+          "id": "label_first",
+          "label": "Prénom",
+          "default": "Prénom"
+        },
+        {
+          "type": "text",
+          "id": "ph_first",
+          "label": "Exemple prénom",
+          "default": "Nassim"
+        },
+        {
+          "type": "text",
+          "id": "label_last",
+          "label": "Nom",
+          "default": "Nom"
+        },
+        {
+          "type": "text",
+          "id": "ph_last",
+          "label": "Exemple nom",
+          "default": "Benali"
+        },
+        {
+          "type": "text",
+          "id": "label_phone",
+          "label": "Téléphone",
+          "default": "Téléphone"
+        },
+        {
+          "type": "text",
+          "id": "phone_prefix",
+          "label": "Préfixe pays",
+          "default": "+213"
+        },
+        {
+          "type": "text",
+          "id": "ph_phone",
+          "label": "Exemple téléphone",
+          "default": "0555 00 00 00"
+        },
+        {
+          "type": "text",
+          "id": "phone_pattern",
+          "label": "Format accepté",
+          "default": "^0[567][0-9]{8}$|^0[1-4][0-9]{7,8}$",
+          "info": "Expression régulière. Par défaut : mobile et fixe algériens."
+        },
+        {
+          "type": "text",
+          "id": "hint_phone",
+          "label": "Aide sous le téléphone",
+          "default": "Nous vous appelons pour confirmer."
+        },
+        {
+          "type": "text",
+          "id": "label_wilaya",
+          "label": "Wilaya",
+          "default": "Wilaya"
+        },
+        {
+          "type": "text",
+          "id": "ph_wilaya",
+          "label": "Invite wilaya",
+          "default": "Choisir la wilaya…"
+        },
+        {
+          "type": "text",
+          "id": "label_commune",
+          "label": "Commune",
+          "default": "Commune"
+        },
+        {
+          "type": "text",
+          "id": "ph_commune",
+          "label": "Invite commune",
+          "default": "Choisir la commune…"
+        },
+        {
+          "type": "text",
+          "id": "ph_commune_empty",
+          "label": "Invite commune (avant wilaya)",
+          "default": "Choisissez d'abord la wilaya"
+        },
+        {
+          "type": "text",
+          "id": "label_address",
+          "label": "Adresse",
+          "default": "Adresse de livraison"
+        },
+        {
+          "type": "text",
+          "id": "ph_address",
+          "label": "Exemple adresse",
+          "default": "Cité, rue, numéro, point de repère…"
+        },
+        {
+          "type": "text",
+          "id": "hint_address",
+          "label": "Aide sous l'adresse",
+          "default": "Plus l'adresse est précise, plus la livraison est rapide."
+        },
+        {
+          "type": "header",
+          "content": "Livraison et quantité"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_delivery",
+          "label": "Proposer le mode de livraison",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "label_delivery",
+          "label": "Libellé",
+          "default": "Mode de livraison"
+        },
+        {
+          "type": "text",
+          "id": "label_home",
+          "label": "À domicile",
+          "default": "À domicile"
+        },
+        {
+          "type": "text",
+          "id": "label_desk",
+          "label": "Au bureau",
+          "default": "Bureau de livraison"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_qty",
+          "label": "Afficher la quantité",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "label_qty",
+          "label": "Libellé quantité",
+          "default": "Quantité"
+        },
+        {
+          "type": "range",
+          "id": "qty_max",
+          "min": 2,
+          "max": 20,
+          "step": 1,
+          "label": "Quantité maximale",
+          "default": 10
+        },
+        {
+          "type": "header",
+          "content": "Récapitulatif"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_summary",
+          "label": "Afficher le récapitulatif",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "label_subtotal",
+          "label": "Sous-total",
+          "default": "Sous-total"
+        },
+        {
+          "type": "text",
+          "id": "label_shipping",
+          "label": "Livraison",
+          "default": "Livraison"
+        },
+        {
+          "type": "text",
+          "id": "label_total",
+          "label": "Total",
+          "default": "Total à payer"
+        },
+        {
+          "type": "header",
+          "content": "Bouton et messages"
+        },
+        {
+          "type": "text",
+          "id": "submit_label",
+          "label": "Texte du bouton",
+          "default": "Confirmer la commande"
+        },
+        {
+          "type": "color",
+          "id": "submit_bg",
+          "label": "Couleur du bouton"
+        },
+        {
+          "type": "text",
+          "id": "reassure",
+          "label": "Texte rassurant",
+          "default": "Aucun paiement en ligne — vous payez à la réception."
+        },
+        {
+          "type": "text",
+          "id": "msg_required",
+          "label": "Champ obligatoire",
+          "default": "Ce champ est obligatoire"
+        },
+        {
+          "type": "text",
+          "id": "msg_phone",
+          "label": "Téléphone invalide",
+          "default": "Numéro invalide. Exemple : 0555 00 00 00"
+        },
+        {
+          "type": "text",
+          "id": "msg_invalid",
+          "label": "Formulaire incomplet",
+          "default": "Merci de corriger les champs signalés en rouge."
+        },
+        {
+          "type": "text",
+          "id": "msg_success",
+          "label": "Commande envoyée",
+          "default": "Commande enregistrée. Nous vous appelons bientôt."
+        },
+        {
+          "type": "text",
+          "id": "msg_fail",
+          "label": "Échec d'envoi",
+          "default": "Envoi impossible. Réessayez ou appelez-nous."
+        },
+        {
+          "type": "text",
+          "id": "msg_pending",
+          "label": "Application non connectée",
+          "default": "Formulaire valide. Connectez l'application COD pour enregistrer la commande."
+        }
+      ]
+    },
+    {
+      "type": "shipping",
+      "name": "Livraison",
+      "limit": 2,
+      "settings": [
+        {
+          "type": "text",
+          "id": "icon",
+          "label": "Icône",
+          "default": "🚚"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Titre",
+          "default": "Livraison gratuite dès 8 000 DA"
+        },
+        {
+          "type": "text",
+          "id": "line",
+          "label": "Détail",
+          "default": "Livraison : 2 à 5 jours ouvrés"
+        }
+      ]
+    },
+    {
+      "type": "carriers",
+      "name": "Transporteurs",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Libellé",
+          "default": "Transporteur :"
+        },
+        {
+          "type": "text",
+          "id": "names",
+          "label": "Transporteurs",
+          "default": "Yalidine, ZR Express, Algérie Poste",
+          "info": "Séparez par des virgules."
+        }
+      ]
+    },
+    {
+      "type": "guarantees",
+      "name": "Garanties",
+      "limit": 2,
+      "settings": [
+        {
+          "type": "text",
+          "id": "icon_1",
+          "label": "Icône 1",
+          "default": "💵"
+        },
+        {
+          "type": "text",
+          "id": "line_1",
+          "label": "Ligne 1",
+          "default": "Paiement à la livraison — payez après vérification"
+        },
+        {
+          "type": "text",
+          "id": "icon_2",
+          "label": "Icône 2",
+          "default": "🛡"
+        },
+        {
+          "type": "text",
+          "id": "line_2",
+          "label": "Ligne 2",
+          "default": "Garantie de commande"
+        }
+      ]
+    },
+    {
+      "type": "pills",
+      "name": "Pastilles d'avantages",
+      "limit": 2,
+      "settings": [
+        {
+          "type": "text",
+          "id": "items",
+          "label": "Pastilles",
+          "default": "Retour sous 7 jours, Échange gratuit, Article endommagé remboursé",
+          "info": "Séparez par des virgules."
+        },
+        {
+          "type": "color",
+          "id": "bg",
+          "label": "Couleur"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Texte libre",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Contenu",
+          "default": "<p>Ajoutez ici n'importe quel texte.</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Page produit",
+      "blocks": [
+        {
+          "type": "savings"
+        },
+        {
+          "type": "title"
+        },
+        {
+          "type": "rating"
+        },
+        {
+          "type": "rank"
+        },
+        {
+          "type": "price"
+        },
+        {
+          "type": "notice"
+        },
+        {
+          "type": "variants"
+        },
+        {
+          "type": "cod_form"
+        },
+        {
+          "type": "shipping"
+        },
+        {
+          "type": "carriers"
+        },
+        {
+          "type": "guarantees"
+        },
+        {
+          "type": "pills"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

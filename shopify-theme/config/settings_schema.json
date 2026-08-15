@@ -1,0 +1,341 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Souq — COD Commerce",
+    "theme_version": "1.0.0",
+    "theme_author": "",
+    "theme_documentation_url": "",
+    "theme_support_url": ""
+  },
+  {
+    "name": "Identité",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "logo",
+        "label": "Logo"
+      },
+      {
+        "type": "range",
+        "id": "logo_width",
+        "min": 40,
+        "max": 260,
+        "step": 10,
+        "unit": "px",
+        "label": "Largeur du logo",
+        "default": 140
+      },
+      {
+        "type": "text",
+        "id": "logo_text",
+        "label": "Texte du logo",
+        "info": "Utilisé quand aucune image n'est chargée",
+        "default": "MA BOUTIQUE"
+      },
+      {
+        "type": "image_picker",
+        "id": "favicon",
+        "label": "Favicon"
+      }
+    ]
+  },
+  {
+    "name": "Couleurs",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Chaque couleur ici se propage à tous les composants du thème."
+      },
+      {
+        "type": "header",
+        "content": "Couleurs principales"
+      },
+      {
+        "type": "color",
+        "id": "color_accent",
+        "label": "Accent (prix, boutons, promos)",
+        "default": "#ff6d00"
+      },
+      {
+        "type": "color",
+        "id": "color_accent_text",
+        "label": "Accent — version texte",
+        "info": "Laissez vide pour la calculer automatiquement. Sert au petit texte sur fond blanc, où l'accent vif ne serait pas assez lisible.",
+        "default": "#c24e00"
+      },
+      {
+        "type": "color",
+        "id": "color_brand",
+        "label": "Marque (confiance, livraison)",
+        "default": "#00806a"
+      },
+      {
+        "type": "color",
+        "id": "color_sale",
+        "label": "Promotion (soldes, urgence)",
+        "default": "#ff4438"
+      },
+      {
+        "type": "header",
+        "content": "Neutres"
+      },
+      {
+        "type": "color",
+        "id": "color_ink",
+        "label": "Texte principal",
+        "default": "#101418"
+      },
+      {
+        "type": "color",
+        "id": "color_surface",
+        "label": "Surface (cartes)",
+        "default": "#ffffff"
+      },
+      {
+        "type": "color",
+        "id": "color_page_bg",
+        "label": "Fond de page",
+        "default": "#f4f5f6"
+      },
+      {
+        "type": "color",
+        "id": "color_border",
+        "label": "Bordures",
+        "default": "#e7eaec"
+      },
+      {
+        "type": "color",
+        "id": "color_success",
+        "label": "Succès",
+        "default": "#12805c"
+      }
+    ]
+  },
+  {
+    "name": "Typographie",
+    "settings": [
+      {
+        "type": "font_picker",
+        "id": "type_body",
+        "label": "Police du texte",
+        "default": "assistant_n4"
+      },
+      {
+        "type": "font_picker",
+        "id": "type_heading",
+        "label": "Police des titres",
+        "default": "assistant_n7"
+      }
+    ]
+  },
+  {
+    "name": "Mise en page",
+    "settings": [
+      {
+        "type": "range",
+        "id": "layout_max_width",
+        "min": 1100,
+        "max": 1700,
+        "step": 20,
+        "unit": "px",
+        "label": "Largeur maximale du contenu",
+        "default": 1440
+      },
+      {
+        "type": "range",
+        "id": "radius_base",
+        "min": 0,
+        "max": 20,
+        "step": 2,
+        "unit": "px",
+        "label": "Arrondi des coins",
+        "default": 8
+      },
+      {
+        "type": "select",
+        "id": "button_shape",
+        "label": "Forme des boutons",
+        "options": [
+          {
+            "value": "pill",
+            "label": "Arrondi complet"
+          },
+          {
+            "value": "square",
+            "label": "Coins légers"
+          }
+        ],
+        "default": "pill"
+      },
+      {
+        "type": "select",
+        "id": "text_direction",
+        "label": "Sens de lecture",
+        "info": "Passez en RTL pour une boutique en arabe. Toute la mise en page se retourne automatiquement.",
+        "options": [
+          {
+            "value": "ltr",
+            "label": "Gauche à droite (français)"
+          },
+          {
+            "value": "rtl",
+            "label": "Droite à gauche (arabe)"
+          }
+        ],
+        "default": "ltr"
+      }
+    ]
+  },
+  {
+    "name": "Fiche produit (carte)",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Ce que chaque carte produit affiche dans les grilles et les carrousels."
+      },
+      {
+        "type": "checkbox",
+        "id": "card_show_vendor",
+        "label": "Afficher le vendeur",
+        "default": false
+      },
+      {
+        "type": "checkbox",
+        "id": "card_show_rating",
+        "label": "Afficher la note",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "card_show_sold",
+        "label": "Afficher le nombre de ventes",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "card_show_compare",
+        "label": "Afficher le prix barré",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "card_show_discount",
+        "label": "Afficher le pourcentage de réduction",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "card_show_quick_add",
+        "label": "Afficher le bouton d'ajout rapide",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "card_show_second_image",
+        "label": "Changer d'image au survol",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "card_deal_label",
+        "label": "Étiquette avant le prix",
+        "info": "Laissez vide pour ne rien afficher",
+        "default": "Dernier jour"
+      },
+      {
+        "type": "select",
+        "id": "card_variant",
+        "label": "Style de carte",
+        "options": [
+          {
+            "value": "1",
+            "label": "1 — Sans cadre (dense)"
+          },
+          {
+            "value": "2",
+            "label": "2 — Avec cadre"
+          },
+          {
+            "value": "3",
+            "label": "3 — Titre sur deux lignes"
+          },
+          {
+            "value": "4",
+            "label": "4 — Prix en couleur marque"
+          },
+          {
+            "value": "5",
+            "label": "5 — Épuré"
+          }
+        ],
+        "default": "1"
+      }
+    ]
+  },
+  {
+    "name": "Paiement à la livraison",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Réglages partagés par tous les formulaires COD du thème."
+      },
+      {
+        "type": "text",
+        "id": "cod_endpoint",
+        "label": "URL de l'application COD",
+        "info": "Laissez vide tant que l'application n'est pas connectée : le formulaire valide les champs sans envoyer."
+      },
+      {
+        "type": "textarea",
+        "id": "cod_tariffs",
+        "label": "Tarifs de livraison par wilaya",
+        "info": "JSON : {\"16\":[400,200], ...} — code wilaya : [domicile, bureau] en DA.",
+        "default": "{}"
+      },
+      {
+        "type": "text",
+        "id": "cod_tariff_fallback",
+        "label": "Tarif par défaut",
+        "info": "[domicile, bureau] pour les wilayas absentes du tableau",
+        "default": "[600,350]"
+      },
+      {
+        "type": "text",
+        "id": "cod_currency_suffix",
+        "label": "Suffixe de devise",
+        "default": "DA"
+      }
+    ]
+  },
+  {
+    "name": "Réseaux sociaux",
+    "settings": [
+      {
+        "type": "text",
+        "id": "social_facebook",
+        "label": "Facebook"
+      },
+      {
+        "type": "text",
+        "id": "social_instagram",
+        "label": "Instagram"
+      },
+      {
+        "type": "text",
+        "id": "social_tiktok",
+        "label": "TikTok"
+      },
+      {
+        "type": "text",
+        "id": "social_youtube",
+        "label": "YouTube"
+      },
+      {
+        "type": "text",
+        "id": "social_whatsapp",
+        "label": "WhatsApp",
+        "info": "Numéro au format international, ex. 213555000000"
+      }
+    ]
+  }
+]

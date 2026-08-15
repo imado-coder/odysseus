@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}" dir="{{ settings.text_direction }}">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="canonical" href="{{ canonical_url }}">
+    {%- if settings.favicon != blank -%}
+      <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
+    {%- endif -%}
+
+    <title>{{ page_title }}{% if current_tags %} &ndash; {{ current_tags | join: ', ' }}{% endif %}{% unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless %}</title>
+    {%- if page_description -%}<meta name="description" content="{{ page_description | escape }}">{%- endif -%}
+
+    {% render 'meta-tags' %}
+
+    {{ content_for_header }}
+
+    {{ 'base.css' | asset_url | stylesheet_tag }}
+    {{ 'header-system.css' | asset_url | stylesheet_tag }}
+    {{ 'catalog-system.css' | asset_url | stylesheet_tag }}
+
+    {%- comment -%}
+      Every global token the merchant controls is written once here, so a colour
+      change in the theme editor reaches every component without touching CSS.
+      Section-level overrides are written onto the section root instead.
+    {%- endcomment -%}
+    {% render 'theme-tokens' %}
+
+    <script src="{{ 'theme.js' | asset_url }}" defer="defer"></script>
+  </head>
+
+  <body class="template-{{ request.page_type | handle }}">
+    <a class="skip-to-content visually-hidden" href="#MainContent">
+      {{ 'accessibility.skip_to_content' | t }}
+    </a>
+
+    {% sections 'header-group' %}
+
+    <main id="MainContent" tabindex="-1" role="main">
+      {{ content_for_layout }}
+    </main>
+
+    {% sections 'footer-group' %}
+  </body>
+</html>

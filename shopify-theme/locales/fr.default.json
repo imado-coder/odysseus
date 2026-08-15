@@ -1,0 +1,21 @@
+{
+  "accessibility": { "skip_to_content": "Aller au contenu" },
+  "general": {
+    "breadcrumbs": { "label": "Fil d'Ariane", "home": "Accueil" },
+    "search": { "search": "Rechercher" }
+  },
+  "sections": {
+    "header": { "cart_count": "Panier, {{ count }} article(s)", "all_categories": "Toutes les catégories" }
+  },
+  "products": {
+    "product": {
+      "add_to_cart": "Ajouter au panier",
+      "sold_out": "Épuisé",
+      "regular_price": "Prix initial",
+      "rating": "Noté",
+      "media": { "gallery_viewer": "Galerie du produit", "image_available": "Image {{ index }}" }
+    },
+    "facets": { "product_count_simple": "{{ count }} produits" }
+  },
+  "onboarding": { "product_title": "Exemple de produit" }
+}

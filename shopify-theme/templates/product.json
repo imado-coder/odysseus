@@ -1,0 +1,25 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-product",
+      "blocks": {
+        "savings":   { "type": "savings",    "settings": {} },
+        "title":     { "type": "title",      "settings": {} },
+        "rating":    { "type": "rating",     "settings": {} },
+        "rank":      { "type": "rank",       "settings": {} },
+        "price":     { "type": "price",      "settings": {} },
+        "notice":    { "type": "notice",     "settings": {} },
+        "variants":  { "type": "variants",   "settings": {} },
+        "cod":       { "type": "cod_form",   "settings": {} },
+        "shipping":  { "type": "shipping",   "settings": {} },
+        "carriers":  { "type": "carriers",   "settings": {} },
+        "guarantee": { "type": "guarantees", "settings": {} },
+        "pills":     { "type": "pills",      "settings": {} }
+      },
+      "block_order": ["savings","title","rating","rank","price","notice","variants","cod","shipping","carriers","guarantee","pills"],
+      "settings": {}
+    },
+    "related": { "type": "product-grid", "settings": { "title": "Produits similaires", "count": 5 } }
+  },
+  "order": ["main", "related"]
+}

@@ -1,0 +1,7 @@
+{
+  "sections": {
+    "pills": { "type": "category-pills", "settings": {} },
+    "grid":  { "type": "product-grid", "settings": { "source": "current", "title": "", "count": 30 } }
+  },
+  "order": ["pills", "grid"]
+}

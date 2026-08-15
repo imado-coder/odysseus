@@ -1,0 +1,13 @@
+{
+  "type": "footer",
+  "name": "Pied de page",
+  "sections": {
+    "footer": { "type": "footer", "blocks": {
+      "c1": { "type": "column", "settings": { "title": "Boutique" } },
+      "c2": { "type": "column", "settings": { "title": "Aide" } },
+      "c3": { "type": "column", "settings": { "title": "À propos" } },
+      "c4": { "type": "contact", "settings": {} }
+    }, "block_order": ["c1", "c2", "c3", "c4"], "settings": { "variant": "1" } }
+  },
+  "order": ["footer"]
+}

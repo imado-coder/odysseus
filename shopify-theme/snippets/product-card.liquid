@@ -1,0 +1,110 @@
+{%- comment -%}
+  Part 7 — catalog product card.
+  Every element obeys a global setting, so one toggle changes every grid on
+  the storefront. Pass `index` so the first row loads eagerly: a lazy LCP image
+  measured 2.6s slower on a slow connection.
+{%- endcomment -%}
+{%- liquid
+  assign v = card.selected_or_first_available_variant
+  assign on_sale = false
+  if v.compare_at_price > v.price
+    assign on_sale = true
+    assign off = v.compare_at_price | minus: v.price | times: 100.0 | divided_by: v.compare_at_price | round
+  endif
+  assign eager = false
+  if index and index < 5
+    assign eager = true
+  endif
+  assign title_id = 'card-' | append: card.id | append: '-' | append: index
+-%}
+<article class="pgc" data-variant="{{ settings.card_variant }}" aria-labelledby="{{ title_id }}">
+  <div class="pgc__media">
+    <a href="{{ card.url }}" tabindex="-1" aria-hidden="true">
+      {%- if card.featured_media -%}
+        <img class="pgc__img pgc__img--main"
+             src="{{ card.featured_media | image_url: width: 400 }}"
+             srcset="{{ card.featured_media | image_url: width: 200 }} 200w,
+                     {{ card.featured_media | image_url: width: 300 }} 300w,
+                     {{ card.featured_media | image_url: width: 400 }} 400w,
+                     {{ card.featured_media | image_url: width: 600 }} 600w,
+                     {{ card.featured_media | image_url: width: 800 }} 800w"
+             sizes="(min-width: 1200px) 20vw, (min-width: 900px) 25vw, (min-width: 600px) 33vw, 50vw"
+             width="{{ card.featured_media.width }}" height="{{ card.featured_media.height }}"
+             alt="" decoding="async"
+             loading="{% if eager %}eager{% else %}lazy{% endif %}"
+             {% if eager %}fetchpriority="high"{% endif %}>
+        {%- if settings.card_show_second_image and card.media[1] -%}
+          <img class="pgc__img pgc__img--hover"
+               src="{{ card.media[1] | image_url: width: 400 }}"
+               width="{{ card.media[1].width }}" height="{{ card.media[1].height }}"
+               alt="" loading="lazy" decoding="async" aria-hidden="true">
+        {%- endif -%}
+      {%- else -%}
+        {{ 'product-1' | placeholder_svg_tag: 'pgc__img' }}
+      {%- endif -%}
+    </a>
+
+    {%- if on_sale and settings.card_show_discount -%}
+      <span class="pgc__ad">-{{ off }}%</span>
+    {%- endif -%}
+    {%- if card.media | where: 'media_type', 'video' | first -%}
+      <span class="pgc__play" aria-hidden="true">&#9654;</span>
+    {%- endif -%}
+  </div>
+
+  <h3 class="pgc__title" id="{{ title_id }}"><a href="{{ card.url }}">{{ card.title }}</a></h3>
+
+  <div class="pgc__price-row">
+    <span class="pgc__price-wrap">
+      {%- if settings.card_deal_label != blank -%}
+        <span class="pgc__deal">{{ settings.card_deal_label }}</span>
+      {%- endif -%}
+      <span class="pgc__price">{{ v.price | money }}</span>
+      {%- if on_sale and settings.card_show_compare -%}
+        <s class="pgc__compare">
+          <span class="visually-hidden">{{ 'products.product.regular_price' | t }} </span>
+          {{ v.compare_at_price | money }}
+        </s>
+      {%- endif -%}
+    </span>
+    {%- if settings.card_show_quick_add and card.available -%}
+      <form action="{{ routes.cart_add_url }}" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="id" value="{{ v.id }}">
+        <button class="pgc__add" type="submit"
+                aria-label="{{ 'products.product.add_to_cart' | t }} : {{ card.title | escape }}">
+          <span aria-hidden="true">&#128722;</span>
+        </button>
+      </form>
+    {%- endif -%}
+  </div>
+
+  {%- assign note = card.metafields.custom.card_note -%}
+  {%- if note != blank -%}
+    <div class="pgc__note">{{ note }}</div>
+  {%- endif -%}
+
+  {%- if settings.card_show_rating or settings.card_show_sold -%}
+    <div class="pgc__rating">
+      {%- if settings.card_show_rating and card.metafields.reviews.rating.value != blank -%}
+        {%- assign rating = card.metafields.reviews.rating.value.rating -%}
+        {%- assign full = rating | floor -%}
+        <span class="pgc__stars" aria-hidden="true">
+          {%- for i in (1..5) -%}{% if i <= full %}&#9733;{% else %}&#9734;{% endif %}{%- endfor -%}
+        </span>
+        <span class="visually-hidden">
+          {{ 'products.product.rating' | t }} {{ rating }}/5
+        </span>
+      {%- endif -%}
+      {%- assign sold = card.metafields.custom.sold_count -%}
+      {%- if settings.card_show_sold and sold != blank -%}
+        <span class="pgc__sold">
+          <span class="pgc__flame" aria-hidden="true">&#9670;</span> {{ sold }}
+        </span>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  {%- if settings.card_show_vendor and card.vendor != blank -%}
+    <span class="pgc__seller">{{ card.vendor }}</span>
+  {%- endif -%}
+</article>

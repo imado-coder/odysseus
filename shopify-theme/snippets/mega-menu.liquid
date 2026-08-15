@@ -1,0 +1,45 @@
+{%- comment -%}
+  Part 5 — categories panel. Driven by a linklist: top level becomes the
+  sidebar, the first entry's children become the tile grid. Tile artwork comes
+  from each linked collection's image, so there is nothing extra to upload.
+{%- endcomment -%}
+{%- assign active = menu.links.first -%}
+<div class="mega" id="MegaMenu-{{ id }}" data-variant="{{ variant | default: '1' }}" data-open="false" hidden>
+  <ul class="mega__aside" role="region" aria-label="{{ 'sections.header.all_categories' | t }}" tabindex="0">
+    {%- for link in menu.links -%}
+      <li>
+        <a class="mega__cat" href="{{ link.url }}" {% if link.active %}aria-current="page"{% endif %}>
+          {{ link.title }}
+          {%- if link.links.size > 0 -%}
+            <span class="mega__cat-chev" aria-hidden="true">&rsaquo;</span>
+          {%- endif -%}
+        </a>
+      </li>
+    {%- endfor -%}
+  </ul>
+
+  <div class="mega__panel">
+    <h2 class="mega__panel-title">
+      <a href="{{ active.url }}">{{ active.title }} <span aria-hidden="true">&rsaquo;</span></a>
+    </h2>
+    <ul class="mega__grid">
+      {%- for child in active.links -%}
+        {%- assign col = collections[child.handle] -%}
+        <li>
+          <a class="mega__tile" href="{{ child.url }}">
+            <span class="mega__tile-media">
+              {%- if col.featured_image -%}
+                {{ col.featured_image | image_url: width: 184 | image_tag:
+                   widths: '92,184', alt: '', loading: 'lazy', class: '', width: 92, height: 92 }}
+              {%- endif -%}
+              {%- if col.metafields.custom.is_hot -%}
+                <span class="mega__hot">HOT</span>
+              {%- endif -%}
+            </span>
+            <span class="mega__tile-label">{{ child.title }}</span>
+          </a>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</div>

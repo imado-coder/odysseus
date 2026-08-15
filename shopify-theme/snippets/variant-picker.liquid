@@ -1,0 +1,49 @@
+{%- comment -%}
+  Real variant selection: each option value is a radio bound to the product
+  form, so choosing one actually changes what gets added to the cart.
+{%- endcomment -%}
+{%- for option in product.options_with_values -%}
+  <div class="bb__option" {{ block.shopify_attributes }}>
+    {%- if block.settings.show_name -%}
+      <div class="bb__opt-label">{{ option.name }} : <b data-opt-out="{{ forloop.index }}">{{ option.selected_value }}</b></div>
+    {%- endif -%}
+
+    {%- if block.settings.style == 'select' -%}
+      <label class="visually-hidden" for="Opt-{{ option.name | handle }}">{{ option.name }}</label>
+      <select class="field__control" id="Opt-{{ option.name | handle }}" data-variant-option="{{ forloop.index }}">
+        {%- for value in option.values -%}
+          <option value="{{ value | escape }}" {% if value == option.selected_value %}selected{% endif %}>{{ value }}</option>
+        {%- endfor -%}
+      </select>
+    {%- else -%}
+      <div class="bb__swatches" role="radiogroup" aria-label="{{ option.name | escape }}">
+        {%- for value in option.values -%}
+          {%- liquid
+            assign swatch_variant = nil
+            for pv in product.variants
+              if pv.options[forloop.parentloop.index0] == value and pv.featured_media
+                assign swatch_variant = pv
+                break
+              endif
+            endfor
+          -%}
+          <label class="bb__swatch">
+            <input class="visually-hidden" type="radio"
+                   name="option-{{ forloop.parentloop.index }}" value="{{ value | escape }}"
+                   data-variant-option="{{ forloop.parentloop.index }}"
+                   {% if value == option.selected_value %}checked{% endif %}>
+            {%- if block.settings.style == 'swatch' and swatch_variant.featured_media -%}
+              <img src="{{ swatch_variant.featured_media | image_url: width: 192 }}"
+                   width="96" height="96" alt="" loading="lazy" decoding="async">
+            {%- endif -%}
+            <span class="bb__swatch-name">{{ value }}</span>
+          </label>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </div>
+{%- endfor -%}
+
+<script type="application/json" data-variant-data>
+  {{ product.variants | json }}
+</script>

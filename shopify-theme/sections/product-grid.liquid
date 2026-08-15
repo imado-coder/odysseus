@@ -1,0 +1,51 @@
+{%- comment -%} Grid of products: a collection, or the current one. {%- endcomment -%}
+{%- liquid
+  assign col = collections[section.settings.collection]
+  if section.settings.source == 'current' and collection
+    assign col = collection
+  endif
+-%}
+<section class="section" aria-labelledby="Grid-{{ section.id }}">
+  {%- if section.settings.title != blank -%}
+    <div class="section__head">
+      <h2 class="section__title" id="Grid-{{ section.id }}">{{ section.settings.title }}</h2>
+      {%- if section.settings.link_label != blank -%}
+        <a class="section__link" href="{{ col.url }}">{{ section.settings.link_label }}</a>
+      {%- endif -%}
+    </div>
+  {%- else -%}
+    <h2 class="visually-hidden" id="Grid-{{ section.id }}">{{ 'products.facets.product_count_simple' | t: count: col.products_count }}</h2>
+  {%- endif -%}
+
+  <div class="cgrid">
+    {%- for product in col.products limit: section.settings.count -%}
+      {% render 'product-card', card: product, index: forloop.index0 %}
+    {%- else -%}
+      {%- for i in (1..section.settings.count) -%}
+        <article class="pgc">
+          <div class="pgc__media">{{ 'product-1' | placeholder_svg_tag: 'pgc__img' }}</div>
+          <h3 class="pgc__title">{{ 'onboarding.product_title' | t }}</h3>
+        </article>
+      {%- endfor -%}
+    {%- endfor -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Grille de produits",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "title", "label": "Titre", "default": "Recommandé pour vous" },
+    { "type": "text", "id": "link_label", "label": "Lien « voir tout »", "default": "Voir tout" },
+    { "type": "select", "id": "source", "label": "Source",
+      "options": [
+        { "value": "pick", "label": "Une collection choisie" },
+        { "value": "current", "label": "La collection en cours" }
+      ], "default": "pick" },
+    { "type": "collection", "id": "collection", "label": "Collection" },
+    { "type": "range", "id": "count", "min": 5, "max": 50, "step": 5, "label": "Nombre de produits", "default": 20 }
+  ],
+  "presets": [{ "name": "Grille de produits" }]
+}
+{% endschema %}

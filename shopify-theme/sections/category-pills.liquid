@@ -1,0 +1,36 @@
+{%- comment -%} Part 6 — category filter row, driven by a linklist. {%- endcomment -%}
+{%- assign menu = linklists[section.settings.menu] -%}
+<nav class="cpills" data-variant="{{ section.settings.variant }}" data-scroller
+     aria-label="{{ section.settings.aria_label | escape }}">
+  <ul class="cpills__track" data-scroller-track>
+    {%- for link in menu.links -%}
+      <li>
+        <a class="cpill" href="{{ link.url }}" data-label="{{ link.title | escape }}"
+           {% if link.active %}aria-current="page"{% endif %}>{{ link.title }}</a>
+      </li>
+    {%- endfor -%}
+  </ul>
+  <button class="cpills__next" type="button" data-scroller-next
+          aria-label="{{ section.settings.next_label | escape }}">
+    <span aria-hidden="true">&rsaquo;</span>
+  </button>
+</nav>
+
+{% schema %}
+{
+  "name": "Filtres catégories",
+  "tag": "section",
+  "settings": [
+    { "type": "link_list", "id": "menu", "label": "Menu", "default": "main-menu" },
+    { "type": "select", "id": "variant", "label": "Style",
+      "options": [
+        { "value": "1", "label": "1 — Contour" }, { "value": "2", "label": "2 — Rempli" },
+        { "value": "3", "label": "3 — Coins carrés" }, { "value": "4", "label": "4 — Actif en accent" },
+        { "value": "5", "label": "5 — Compact" }
+      ], "default": "1" },
+    { "type": "text", "id": "aria_label", "label": "Nom (lecteurs d'écran)", "default": "Filtrer par catégorie" },
+    { "type": "text", "id": "next_label", "label": "Bouton suivant (lecteurs d'écran)", "default": "Catégories suivantes" }
+  ],
+  "presets": [{ "name": "Filtres catégories" }]
+}
+{% endschema %}

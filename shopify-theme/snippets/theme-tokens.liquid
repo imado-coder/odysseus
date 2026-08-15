@@ -1,0 +1,48 @@
+{%- comment -%}
+  Bridges theme settings to the CSS custom properties the stylesheets read.
+  Only emits a property when the merchant set one, so base.css keeps its
+  defaults otherwise.
+
+  The -text variants are derived, not asked for twice: a bright accent is
+  right for fills but fails contrast as small text on white, so the merchant
+  picks one colour and gets a readable text shade automatically. They can
+  still override it explicitly.
+{%- endcomment -%}
+{% style %}
+  :root {
+    {%- if settings.color_accent != blank %}
+      --c-accent: {{ settings.color_accent }};
+      --c-accent-text: {{ settings.color_accent_text | default: settings.color_accent | color_darken: 18 }};
+      --c-accent-dark: {{ settings.color_accent | color_darken: 8 }};
+      --c-accent-light: {{ settings.color_accent | color_lighten: 42 }};
+    {%- endif %}
+    {%- if settings.color_brand != blank %}
+      --c-brand: {{ settings.color_brand }};
+      --c-brand-dark: {{ settings.color_brand | color_darken: 8 }};
+      --c-brand-light: {{ settings.color_brand | color_lighten: 52 }};
+    {%- endif %}
+    {%- if settings.color_sale != blank %}
+      --c-sale: {{ settings.color_sale }};
+      --c-sale-text: {{ settings.color_sale | color_darken: 14 }};
+      --c-sale-dark: {{ settings.color_sale | color_darken: 8 }};
+      --c-sale-light: {{ settings.color_sale | color_lighten: 40 }};
+    {%- endif %}
+    {%- if settings.color_ink != blank %}--c-ink: {{ settings.color_ink }};{% endif %}
+    {%- if settings.color_page_bg != blank %}--c-bg: {{ settings.color_page_bg }};{% endif %}
+    {%- if settings.color_surface != blank %}--c-surface: {{ settings.color_surface }};{% endif %}
+    {%- if settings.color_border != blank %}--c-border: {{ settings.color_border }};{% endif %}
+    {%- if settings.color_success != blank %}--c-success: {{ settings.color_success }};{% endif %}
+
+    {%- if settings.type_body.family %}
+      --f-body: {{ settings.type_body.family }}, {{ settings.type_body.fallback_families }};
+    {%- endif %}
+    {%- if settings.type_heading.family %}
+      --f-heading: {{ settings.type_heading.family }}, {{ settings.type_heading.fallback_families }};
+    {%- endif %}
+
+    --page-max: {{ settings.layout_max_width | default: 1440 }}px;
+    --r-sm: {{ settings.radius_base | default: 8 }}px;
+    --r-md: {{ settings.radius_base | default: 8 | times: 1.5 }}px;
+    --r-pill: {% if settings.button_shape == 'square' %}6px{% else %}999px{% endif %};
+  }
+{% endstyle %}

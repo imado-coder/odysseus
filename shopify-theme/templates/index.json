@@ -1,0 +1,7 @@
+{
+  "sections": {
+    "pills":     { "type": "category-pills", "settings": {} },
+    "recommend": { "type": "product-grid", "settings": { "title": "Recommandé pour vous", "count": 20 } }
+  },
+  "order": ["pills", "recommend"]
+}
