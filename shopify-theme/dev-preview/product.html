@@ -7,6 +7,8 @@
 <link rel="stylesheet" href="../assets/base.css">
 <link rel="stylesheet" href="../assets/catalog-system.css">
 <link rel="stylesheet" href="../assets/product-page.css">
+<link rel="stylesheet" href="../assets/cod-form.css">
+<script src="../assets/dz-locations.js" defer></script>
 <script src="../assets/theme.js" defer></script>
 </head>
 <body>
@@ -370,6 +372,131 @@
   <span class="bb__trust-row"><span aria-hidden="true">💵</span> Paiement à la livraison — payez après vérification</span>
   <span class="bb__trust-row"><span aria-hidden="true">🛡</span> Garantie de commande <span aria-hidden="true">›</span></span>
 </div>
+          <form class="cod" data-cod-form id="cod-desktop"
+      data-unit-price="1530"
+      data-tariffs='{"10":[500,250],"11":[1000,500],"12":[600,300],"13":[500,250],"14":[600,300],"15":[500,250],"16":[400,200],"17":[600,300],"18":[600,300],"19":[600,300],"20":[600,300],"21":[500,250],"22":[500,250],"23":[500,250],"24":[500,250],"25":[500,250],"26":[500,250],"27":[500,250],"28":[600,300],"29":[600,300],"30":[800,400],"31":[500,250],"32":[600,300],"33":[1000,500],"34":[600,300],"35":[500,250],"36":[600,300],"37":[1000,500],"38":[600,300],"39":[800,400],"40":[600,300],"41":[600,300],"42":[500,250],"43":[500,250],"44":[500,250],"45":[600,300],"46":[500,250],"47":[800,400],"48":[500,250],"49":[1000,500],"50":[1000,500],"51":[800,400],"52":[800,400],"53":[1000,500],"54":[1000,500],"55":[800,400],"56":[1000,500],"57":[800,400],"58":[800,400],"01":[1000,500],"02":[500,250],"03":[600,300],"04":[600,300],"05":[600,300],"06":[500,250],"07":[600,300],"08":[800,400],"09":[500,250]}'
+      data-tariff-fallback="[600,350]"
+      data-msg-invalid="Merci de corriger les champs signalés en rouge."
+      data-msg-pending="Formulaire valide. Connectez l'application COD pour enregistrer la commande."
+      novalidate>
+  <div class="cod__head">
+    <span class="cod__head-icon" aria-hidden="true">💵</span>
+    <span class="cod__head-text">
+      <span class="cod__title">Commander — paiement à la livraison</span>
+      <span class="cod__subtitle">Remplissez le formulaire, payez au facteur</span>
+    </span>
+  </div>
+
+  <div class="cod__body">
+    <div class="cod__row cod__row--2">
+      <div class="field">
+        <label class="field__label" for="cod-desktop-prenom">Prénom <span class="field__req" aria-hidden="true">*</span></label>
+        <input class="field__control" id="cod-desktop-prenom" name="prenom" type="text" autocomplete="given-name" placeholder="Nassim" data-cod-required>
+        
+        <span class="field__error"><span aria-hidden="true">⚠</span> Ce champ est obligatoire</span>
+      </div>
+      <div class="field">
+        <label class="field__label" for="cod-desktop-nom">Nom <span class="field__req" aria-hidden="true">*</span></label>
+        <input class="field__control" id="cod-desktop-nom" name="nom" type="text" autocomplete="family-name" placeholder="Benali" data-cod-required>
+        
+        <span class="field__error"><span aria-hidden="true">⚠</span> Ce champ est obligatoire</span>
+      </div>
+    </div>
+
+    <div class="cod__row">
+      <div class="field">
+        <label class="field__label" for="cod-desktop-tel">Téléphone <span class="field__req" aria-hidden="true">*</span></label>
+        <span class="field__affix">
+          <span class="field__affix-label" aria-hidden="true">+213</span>
+          <input class="field__control" id="cod-desktop-tel" name="telephone" type="tel"
+                 inputmode="numeric" autocomplete="tel-national" placeholder="0555 00 00 00"
+                 data-cod-required data-cod-pattern="^0[567][0-9]{8}$|^0[1-4][0-9]{7,8}$">
+        </span>
+        <span class="field__hint">Nous vous appelons sur ce numéro pour confirmer.</span>
+        <span class="field__error"><span aria-hidden="true">⚠</span> Ce champ est obligatoire</span>
+      </div>
+    </div>
+
+    <div class="cod__row cod__row--2">
+      <div class="field">
+        <label class="field__label" for="cod-desktop-wilaya">Wilaya <span class="field__req" aria-hidden="true">*</span></label>
+        <select class="field__control" id="cod-desktop-wilaya" name="wilaya" data-cod-wilaya data-cod-required autocomplete="address-level1">
+          <option value="">Choisir la wilaya…</option>
+        </select>
+        
+        <span class="field__error"><span aria-hidden="true">⚠</span> Ce champ est obligatoire</span>
+      </div>
+      <div class="field">
+        <label class="field__label" for="cod-desktop-commune">Commune <span class="field__req" aria-hidden="true">*</span></label>
+        <select class="field__control" id="cod-desktop-commune" name="commune" data-cod-commune data-cod-required autocomplete="address-level2"
+          data-placeholder="Choisir la commune…" data-placeholder-empty="Choisissez d'abord la wilaya" disabled>
+          <option value="">Choisissez d'abord la wilaya</option>
+        </select>
+        
+        <span class="field__error"><span aria-hidden="true">⚠</span> Ce champ est obligatoire</span>
+      </div>
+    </div>
+
+    <div class="cod__row">
+      <div class="field">
+        <label class="field__label" for="cod-desktop-adresse">Adresse de livraison <span class="field__req" aria-hidden="true">*</span></label>
+        <textarea class="field__control" id="cod-desktop-adresse" name="adresse" autocomplete="street-address"
+           placeholder="Cité, rue, numéro, point de repère…" data-cod-required></textarea>
+        <span class="field__hint">Plus l'adresse est précise, plus la livraison est rapide.</span>
+        <span class="field__error"><span aria-hidden="true">⚠</span> Ce champ est obligatoire</span>
+      </div>
+    </div>
+
+    <fieldset class="cod__fieldset">
+      <legend class="cod__legend">Mode de livraison</legend>
+      <div class="cod__delivery">
+        <label class="dopt">
+          <input class="dopt__input" type="radio" name="livraison" value="home" data-cod-delivery checked>
+          <span class="dopt__mark" aria-hidden="true"></span>
+          <span class="dopt__text">
+            <span class="dopt__name">À domicile</span>
+            <span class="dopt__price" data-cod-opt-price data-idle="—">—</span>
+          </span>
+        </label>
+        <label class="dopt">
+          <input class="dopt__input" type="radio" name="livraison" value="desk" data-cod-delivery>
+          <span class="dopt__mark" aria-hidden="true"></span>
+          <span class="dopt__text">
+            <span class="dopt__name">Bureau de livraison</span>
+            <span class="dopt__price" data-cod-opt-price data-idle="—">—</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+
+    <div class="cod__row cod__row--2">
+      <div class="field">
+        <label class="field__label" for="cod-desktop-qte">Quantité</label>
+        <select class="field__control" id="cod-desktop-qte" name="quantite" data-cod-qty>
+          <option>1</option><option>2</option><option>3</option><option>4</option>
+        </select>
+      </div>
+    </div>
+
+    <dl class="cod__summary">
+      <div class="cod__line"><dt>Sous-total</dt><dd data-cod-out-sub>—</dd></div>
+      <div class="cod__line"><dt>Livraison</dt><dd data-cod-out-ship class="cod__muted">—</dd></div>
+      <div class="cod__line cod__line--total"><dt>Total à payer</dt><dd data-cod-out-total>—</dd></div>
+    </dl>
+
+    <button class="cod__submit" type="submit" data-cod-submit>
+      <span class="cod__spinner" aria-hidden="true" hidden></span>
+      Confirmer la commande
+    </button>
+
+    <p class="cod__reassure">
+      <span aria-hidden="true">🔒</span>
+      Aucun paiement en ligne — vous payez à la réception.
+    </p>
+
+    <p class="cod__status" data-cod-status role="status" aria-live="polite"></p>
+  </div>
+</form>
           <div class="bb__pills">
   <span class="bb__pill">Retour sous 7 jours</span>
   <span class="bb__pill">Échange gratuit</span>
@@ -386,7 +513,142 @@
     <b>1 530 DA</b>
     <s>7 380 DA</s>
   </span>
-  <button class="bb__cta" type="button">Ajouter au panier</button>
+  <button class="bb__cta" type="button" data-sheet-open aria-controls="CodSheet">Commander maintenant</button>
+</div>
+
+<div class="cod-sheet" id="CodSheet" data-open="false">
+  <div class="cod-sheet__scrim" data-sheet-close></div>
+  <div class="cod-sheet__panel" role="dialog" aria-modal="true" aria-label="Formulaire de commande">
+    <div class="cod-sheet__grip">
+      <span class="cod-sheet__grip-title">Commander — paiement à la livraison</span>
+      <button class="cod-sheet__close" type="button" data-sheet-close aria-label="Fermer">✕</button>
+    </div>
+    <form class="cod" data-cod-form id="cod-mobile"
+      data-unit-price="1530"
+      data-tariffs='{"10":[500,250],"11":[1000,500],"12":[600,300],"13":[500,250],"14":[600,300],"15":[500,250],"16":[400,200],"17":[600,300],"18":[600,300],"19":[600,300],"20":[600,300],"21":[500,250],"22":[500,250],"23":[500,250],"24":[500,250],"25":[500,250],"26":[500,250],"27":[500,250],"28":[600,300],"29":[600,300],"30":[800,400],"31":[500,250],"32":[600,300],"33":[1000,500],"34":[600,300],"35":[500,250],"36":[600,300],"37":[1000,500],"38":[600,300],"39":[800,400],"40":[600,300],"41":[600,300],"42":[500,250],"43":[500,250],"44":[500,250],"45":[600,300],"46":[500,250],"47":[800,400],"48":[500,250],"49":[1000,500],"50":[1000,500],"51":[800,400],"52":[800,400],"53":[1000,500],"54":[1000,500],"55":[800,400],"56":[1000,500],"57":[800,400],"58":[800,400],"01":[1000,500],"02":[500,250],"03":[600,300],"04":[600,300],"05":[600,300],"06":[500,250],"07":[600,300],"08":[800,400],"09":[500,250]}'
+      data-tariff-fallback="[600,350]"
+      data-msg-invalid="Merci de corriger les champs signalés en rouge."
+      data-msg-pending="Formulaire valide. Connectez l'application COD pour enregistrer la commande."
+      novalidate>
+  <div class="cod__head">
+    <span class="cod__head-icon" aria-hidden="true">💵</span>
+    <span class="cod__head-text">
+      <span class="cod__title">Commander — paiement à la livraison</span>
+      <span class="cod__subtitle">Remplissez le formulaire, payez au facteur</span>
+    </span>
+  </div>
+
+  <div class="cod__body">
+    <div class="cod__row cod__row--2">
+      <div class="field">
+        <label class="field__label" for="cod-mobile-prenom">Prénom <span class="field__req" aria-hidden="true">*</span></label>
+        <input class="field__control" id="cod-mobile-prenom" name="prenom" type="text" autocomplete="given-name" placeholder="Nassim" data-cod-required>
+        
+        <span class="field__error"><span aria-hidden="true">⚠</span> Ce champ est obligatoire</span>
+      </div>
+      <div class="field">
+        <label class="field__label" for="cod-mobile-nom">Nom <span class="field__req" aria-hidden="true">*</span></label>
+        <input class="field__control" id="cod-mobile-nom" name="nom" type="text" autocomplete="family-name" placeholder="Benali" data-cod-required>
+        
+        <span class="field__error"><span aria-hidden="true">⚠</span> Ce champ est obligatoire</span>
+      </div>
+    </div>
+
+    <div class="cod__row">
+      <div class="field">
+        <label class="field__label" for="cod-mobile-tel">Téléphone <span class="field__req" aria-hidden="true">*</span></label>
+        <span class="field__affix">
+          <span class="field__affix-label" aria-hidden="true">+213</span>
+          <input class="field__control" id="cod-mobile-tel" name="telephone" type="tel"
+                 inputmode="numeric" autocomplete="tel-national" placeholder="0555 00 00 00"
+                 data-cod-required data-cod-pattern="^0[567][0-9]{8}$|^0[1-4][0-9]{7,8}$">
+        </span>
+        <span class="field__hint">Nous vous appelons sur ce numéro pour confirmer.</span>
+        <span class="field__error"><span aria-hidden="true">⚠</span> Ce champ est obligatoire</span>
+      </div>
+    </div>
+
+    <div class="cod__row cod__row--2">
+      <div class="field">
+        <label class="field__label" for="cod-mobile-wilaya">Wilaya <span class="field__req" aria-hidden="true">*</span></label>
+        <select class="field__control" id="cod-mobile-wilaya" name="wilaya" data-cod-wilaya data-cod-required autocomplete="address-level1">
+          <option value="">Choisir la wilaya…</option>
+        </select>
+        
+        <span class="field__error"><span aria-hidden="true">⚠</span> Ce champ est obligatoire</span>
+      </div>
+      <div class="field">
+        <label class="field__label" for="cod-mobile-commune">Commune <span class="field__req" aria-hidden="true">*</span></label>
+        <select class="field__control" id="cod-mobile-commune" name="commune" data-cod-commune data-cod-required autocomplete="address-level2"
+          data-placeholder="Choisir la commune…" data-placeholder-empty="Choisissez d'abord la wilaya" disabled>
+          <option value="">Choisissez d'abord la wilaya</option>
+        </select>
+        
+        <span class="field__error"><span aria-hidden="true">⚠</span> Ce champ est obligatoire</span>
+      </div>
+    </div>
+
+    <div class="cod__row">
+      <div class="field">
+        <label class="field__label" for="cod-mobile-adresse">Adresse de livraison <span class="field__req" aria-hidden="true">*</span></label>
+        <textarea class="field__control" id="cod-mobile-adresse" name="adresse" autocomplete="street-address"
+           placeholder="Cité, rue, numéro, point de repère…" data-cod-required></textarea>
+        <span class="field__hint">Plus l'adresse est précise, plus la livraison est rapide.</span>
+        <span class="field__error"><span aria-hidden="true">⚠</span> Ce champ est obligatoire</span>
+      </div>
+    </div>
+
+    <fieldset class="cod__fieldset">
+      <legend class="cod__legend">Mode de livraison</legend>
+      <div class="cod__delivery">
+        <label class="dopt">
+          <input class="dopt__input" type="radio" name="livraison" value="home" data-cod-delivery checked>
+          <span class="dopt__mark" aria-hidden="true"></span>
+          <span class="dopt__text">
+            <span class="dopt__name">À domicile</span>
+            <span class="dopt__price" data-cod-opt-price data-idle="—">—</span>
+          </span>
+        </label>
+        <label class="dopt">
+          <input class="dopt__input" type="radio" name="livraison" value="desk" data-cod-delivery>
+          <span class="dopt__mark" aria-hidden="true"></span>
+          <span class="dopt__text">
+            <span class="dopt__name">Bureau de livraison</span>
+            <span class="dopt__price" data-cod-opt-price data-idle="—">—</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+
+    <div class="cod__row cod__row--2">
+      <div class="field">
+        <label class="field__label" for="cod-mobile-qte">Quantité</label>
+        <select class="field__control" id="cod-mobile-qte" name="quantite" data-cod-qty>
+          <option>1</option><option>2</option><option>3</option><option>4</option>
+        </select>
+      </div>
+    </div>
+
+    <dl class="cod__summary">
+      <div class="cod__line"><dt>Sous-total</dt><dd data-cod-out-sub>—</dd></div>
+      <div class="cod__line"><dt>Livraison</dt><dd data-cod-out-ship class="cod__muted">—</dd></div>
+      <div class="cod__line cod__line--total"><dt>Total à payer</dt><dd data-cod-out-total>—</dd></div>
+    </dl>
+
+    <button class="cod__submit" type="submit" data-cod-submit>
+      <span class="cod__spinner" aria-hidden="true" hidden></span>
+      Confirmer la commande
+    </button>
+
+    <p class="cod__reassure">
+      <span aria-hidden="true">🔒</span>
+      Aucun paiement en ligne — vous payez à la réception.
+    </p>
+
+    <p class="cod__status" data-cod-status role="status" aria-live="polite"></p>
+  </div>
+</form>
+  </div>
 </div>
 </body>
 </html>

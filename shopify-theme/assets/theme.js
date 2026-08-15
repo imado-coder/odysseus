@@ -126,11 +126,256 @@
     if ("ResizeObserver" in window) new ResizeObserver(measure).observe(el);
   }
 
+
+  /* ----------------------------------------------------------------------
+     Cash-on-delivery lead form.
+
+     Wilaya drives commune; both drive the shipping line; shipping and
+     quantity drive the total. Tariffs come from the form's data-tariffs
+     attribute (JSON keyed by wilaya code, `[home, desk]` in centimes-free
+     dinars) so the merchant — later the app — owns the pricing, not this file.
+     ---------------------------------------------------------------------- */
+  function initCodForm(form) {
+    var wilaya = form.querySelector("[data-cod-wilaya]");
+    var commune = form.querySelector("[data-cod-commune]");
+    var qty = form.querySelector("[data-cod-qty]");
+    var status = form.querySelector("[data-cod-status]");
+    var submit = form.querySelector("[data-cod-submit]");
+    var out = {
+      ship: form.querySelector("[data-cod-out-ship]"),
+      sub: form.querySelector("[data-cod-out-sub]"),
+      total: form.querySelector("[data-cod-out-total]"),
+    };
+    var opts = [].slice.call(form.querySelectorAll("[data-cod-delivery]"));
+    var unit = parseInt(form.dataset.unitPrice || "0", 10);
+    var tariffs = {};
+    try {
+      tariffs = JSON.parse(form.dataset.tariffs || "{}");
+    } catch (e) {
+      tariffs = {};
+    }
+    var fallback = JSON.parse(form.dataset.tariffFallback || "[600,350]");
+    var locations = window.DZ_LOCATIONS || [];
+    var lang = document.documentElement.lang === "ar" ? "ar" : "fr";
+
+    function money(n) {
+      return new Intl.NumberFormat("fr-DZ").format(n) + " DA";
+    }
+
+    function label(entry) {
+      return lang === "ar" ? entry.ar || entry[0] : entry.fr || entry[1];
+    }
+
+    /* Populate wilayas once, from the shared dataset. */
+    if (wilaya && !wilaya.dataset.filled) {
+      locations.forEach(function (w) {
+        var o = document.createElement("option");
+        o.value = w.c;
+        o.textContent = w.c + " — " + label(w);
+        wilaya.appendChild(o);
+      });
+      wilaya.dataset.filled = "1";
+    }
+
+    function fillCommunes() {
+      if (!commune) return;
+      var w = locations.filter(function (x) {
+        return x.c === wilaya.value;
+      })[0];
+      commune.innerHTML = "";
+      var first = document.createElement("option");
+      first.value = "";
+      first.textContent = w
+        ? commune.dataset.placeholder || "Choisir…"
+        : commune.dataset.placeholderEmpty || "Choisissez d'abord la wilaya";
+      commune.appendChild(first);
+      if (w) {
+        w.m.forEach(function (m) {
+          var o = document.createElement("option");
+          o.value = m[1];
+          o.textContent = lang === "ar" ? m[0] : m[1];
+          commune.appendChild(o);
+        });
+      }
+      commune.disabled = !w;
+    }
+
+    function shippingFor() {
+      var t = tariffs[wilaya && wilaya.value] || fallback;
+      var deskChosen = opts.some(function (o) {
+        return o.checked && o.value === "desk";
+      });
+      return deskChosen ? t[1] : t[0];
+    }
+
+    function recalc() {
+      var n = Math.max(1, parseInt((qty && qty.value) || "1", 10));
+      var sub = unit * n;
+      var chosen = wilaya && wilaya.value;
+      var ship = chosen ? shippingFor() : null;
+
+      /* Reflect the per-wilaya price on the two delivery cards too. */
+      var t = tariffs[chosen] || fallback;
+      opts.forEach(function (o) {
+        var priceEl = o.parentNode.querySelector("[data-cod-opt-price]");
+        if (!priceEl) return;
+        priceEl.textContent = chosen
+          ? money(o.value === "desk" ? t[1] : t[0])
+          : priceEl.dataset.idle || "—";
+      });
+
+      if (out.sub) out.sub.textContent = money(sub);
+      if (out.ship) {
+        out.ship.textContent = chosen ? money(ship) : "—";
+        out.ship.classList.toggle("cod__muted", !chosen);
+      }
+      if (out.total) out.total.textContent = money(sub + (ship || 0));
+    }
+
+    function fieldOf(el) {
+      return el.closest(".field") || el.closest(".cod__fieldset");
+    }
+
+    function setInvalid(el, on) {
+      var f = fieldOf(el);
+      if (!f) return;
+      if (on) f.setAttribute("data-invalid", "");
+      else f.removeAttribute("data-invalid");
+      el.setAttribute("aria-invalid", on ? "true" : "false");
+    }
+
+    function validate() {
+      var bad = [];
+      form.querySelectorAll("[data-cod-required]").forEach(function (el) {
+        var v = (el.value || "").trim();
+        var ok = !!v;
+        if (ok && el.dataset.codPattern) {
+          ok = new RegExp(el.dataset.codPattern).test(v.replace(/[\s.-]/g, ""));
+        }
+        setInvalid(el, !ok);
+        if (!ok) bad.push(el);
+      });
+      return bad;
+    }
+
+    if (wilaya) {
+      wilaya.addEventListener("change", function () {
+        fillCommunes();
+        recalc();
+        setInvalid(wilaya, false);
+      });
+    }
+    if (qty) qty.addEventListener("change", recalc);
+    opts.forEach(function (o) {
+      o.addEventListener("change", recalc);
+    });
+
+    form.querySelectorAll("[data-cod-required]").forEach(function (el) {
+      el.addEventListener("input", function () {
+        if (fieldOf(el) && fieldOf(el).hasAttribute("data-invalid")) validate();
+      });
+    });
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var bad = validate();
+      if (bad.length) {
+        status.dataset.state = "error";
+        status.textContent =
+          form.dataset.msgInvalid || "Merci de corriger les champs en rouge.";
+        bad[0].focus();
+        bad[0].scrollIntoView({ block: "center", behavior: "smooth" });
+        return;
+      }
+      status.removeAttribute("data-state");
+      submit.setAttribute("aria-busy", "true");
+
+      var payload = Object.fromEntries(new FormData(form).entries());
+      var endpoint = form.dataset.endpoint;
+
+      /* Without an endpoint the theme has nowhere to send the lead yet; the
+         app supplies it later. Emit the event either way so anything else on
+         the page (pixels, analytics) can observe the submission. */
+      form.dispatchEvent(
+        new CustomEvent("cod:submit", { bubbles: true, detail: payload })
+      );
+
+      if (!endpoint) {
+        submit.removeAttribute("aria-busy");
+        status.dataset.state = "success";
+        status.textContent =
+          form.dataset.msgPending ||
+          "Formulaire valide. En attente de la connexion à l'application COD.";
+        return;
+      }
+
+      fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+        .then(function (r) {
+          if (!r.ok) throw new Error(r.status);
+          status.dataset.state = "success";
+          status.textContent =
+            form.dataset.msgSuccess || "Commande enregistrée. Nous vous appelons bientôt.";
+          form.reset();
+          fillCommunes();
+          recalc();
+        })
+        .catch(function () {
+          status.dataset.state = "error";
+          status.textContent =
+            form.dataset.msgFail || "Envoi impossible. Réessayez ou appelez-nous.";
+        })
+        .then(function () {
+          submit.removeAttribute("aria-busy");
+        });
+    });
+
+    fillCommunes();
+    recalc();
+  }
+
+  /* ----------------------------------------------------------------------
+     Bottom sheet, used by the mobile COD entry point.
+     ---------------------------------------------------------------------- */
+  function initSheet(trigger) {
+    var sheet = document.getElementById(trigger.getAttribute("aria-controls"));
+    if (!sheet) return;
+    var lastFocus = null;
+
+    function open() {
+      lastFocus = document.activeElement;
+      sheet.dataset.open = "true";
+      document.body.style.overflow = "hidden";
+      var first = sheet.querySelector("input, select, textarea, button");
+      if (first) first.focus();
+    }
+
+    function close() {
+      if (sheet.dataset.open !== "true") return;
+      sheet.dataset.open = "false";
+      document.body.style.removeProperty("overflow");
+      if (lastFocus) lastFocus.focus();
+    }
+
+    trigger.addEventListener("click", open);
+    sheet.querySelectorAll("[data-sheet-close]").forEach(function (b) {
+      b.addEventListener("click", close);
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") close();
+    });
+  }
+
   function boot() {
     document.querySelectorAll("[data-sticky-fit]").forEach(initStickyFit);
     document.querySelectorAll("[data-disclosure]").forEach(initDisclosure);
     document.querySelectorAll("[data-scroller]").forEach(initScroller);
     document.querySelectorAll("[data-loadmore]").forEach(initLoadMore);
+    document.querySelectorAll("[data-cod-form]").forEach(initCodForm);
+    document.querySelectorAll("[data-sheet-open]").forEach(initSheet);
   }
 
   if (document.readyState === "loading") {
