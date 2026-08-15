@@ -1,0 +1,219 @@
+// MITOS — cash-on-delivery commerce for Shopify.
+//
+// Multi-tenant from the first table: every row that belongs to a merchant
+// carries shopId, and every query filters on it. Getting this wrong later
+// means one merchant reading another's orders, so it is not deferred.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL") // Supabase pooling: migrations need the direct link
+}
+
+/// Shopify's offline session. The library owns this table's shape.
+model Session {
+  id            String    @id
+  shop          String
+  state         String
+  isOnline      Boolean   @default(false)
+  scope         String?
+  expires       DateTime?
+  accessToken   String
+  userId        BigInt?
+  firstName     String?
+  lastName      String?
+  email         String?
+  accountOwner  Boolean   @default(false)
+  locale        String?
+  collaborator  Boolean?  @default(false)
+  emailVerified Boolean?  @default(false)
+
+  @@index([shop])
+}
+
+/// One row per installed store. Everything else hangs off this.
+model Shop {
+  id           String   @id @default(cuid())
+  domain       String   @unique // my-store.myshopify.com
+  name         String?
+  email        String?
+  currency     String   @default("DZD")
+  installedAt  DateTime @default(now())
+  uninstalledAt DateTime?
+  planName     String?
+
+  settings      ShopSettings?
+  leads         Lead[]
+  orders        CodOrder[]
+  rates         ShippingRate[]
+  offers        Offer[]
+  subscription  Subscription?
+
+  @@index([domain])
+}
+
+model ShopSettings {
+  id                String  @id @default(cuid())
+  shopId            String  @unique
+  shop              Shop    @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  /// Create the Shopify order immediately, or hold the lead for a call first.
+  autoCreateOrder   Boolean @default(true)
+  /// Tag applied to every order this app creates, so merchants can filter.
+  orderTag          String  @default("MITOS-COD")
+  defaultHomeRate   Int     @default(600)
+  defaultDeskRate   Int     @default(350)
+  freeShippingAbove Int?
+  notifyEmail       String?
+  updatedAt         DateTime @updatedAt
+}
+
+/// Shipping price per wilaya. Home and desk are separate columns rather than
+/// a JSON blob so they can be queried, bulk-edited and reported on.
+model ShippingRate {
+  id         String  @id @default(cuid())
+  shopId     String
+  shop       Shop    @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  wilayaCode String  // "01".."58"
+  homeRate   Int
+  deskRate   Int
+  enabled    Boolean @default(true)
+
+  @@unique([shopId, wilayaCode])
+  @@index([shopId])
+}
+
+/// Quantity-break pricing: buy 2 for X, buy 3 for Y.
+model Offer {
+  id        String   @id @default(cuid())
+  shopId    String
+  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  productId String   // Shopify GID
+  quantity  Int
+  price     Int
+  label     String?
+  badge     String?
+  featured  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@unique([shopId, productId, quantity])
+  @@index([shopId, productId])
+}
+
+/// What the customer submitted, exactly as submitted. Kept even when order
+/// creation fails, because a failed order is still a lead worth calling.
+model Lead {
+  id         String   @id @default(cuid())
+  shopId     String
+  shop       Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  firstName  String
+  lastName   String
+  phone      String
+  wilayaCode String
+  wilayaName String
+  commune    String
+  address    String
+  delivery   DeliveryMethod
+  note       String?
+
+  items      Json     // [{ variantId, productId, title, price, qty, option }]
+  subtotal   Int
+  shipping   Int
+  total      Int
+
+  source     String?  // product page, cart drawer, landing
+  userAgent  String?
+  ip         String?
+
+  /// Guards against a double-tap creating two orders.
+  idempotencyKey String?
+  createdAt  DateTime @default(now())
+
+  order      CodOrder?
+
+  @@unique([shopId, idempotencyKey])
+  @@index([shopId, createdAt])
+  @@index([shopId, phone])
+}
+
+/// The MITOS side of an order. The Shopify order is the source of truth for
+/// money; this row is the source of truth for the call-and-deliver workflow,
+/// which Shopify has no concept of.
+model CodOrder {
+  id             String      @id @default(cuid())
+  shopId         String
+  shop           Shop        @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  leadId         String      @unique
+  lead           Lead        @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  shopifyOrderId String?     // gid://shopify/Order/123
+  shopifyName    String?     // #1001
+  createFailed   Boolean     @default(false)
+  createError    String?
+
+  status         CodStatus   @default(PENDING)
+  carrier        String?
+  trackingNumber String?
+  confirmedAt    DateTime?
+  shippedAt      DateTime?
+  deliveredAt    DateTime?
+  cancelledAt    DateTime?
+  cancelReason   String?
+
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@index([shopId, status])
+  @@index([shopId, createdAt])
+  @@index([shopifyOrderId])
+}
+
+model Subscription {
+  id            String   @id @default(cuid())
+  shopId        String   @unique
+  shop          Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  chargeId      String?  // Shopify AppSubscription GID
+  plan          String   @default("trial")
+  status        String   @default("active")
+  trialEndsAt   DateTime?
+  currentPeriodEnd DateTime?
+  updatedAt     DateTime @updatedAt
+}
+
+/// Reference data, shared by every shop — no shopId here on purpose.
+model Wilaya {
+  code     String   @id // "01".."58"
+  nameFr   String
+  nameAr   String
+  communes Commune[]
+}
+
+model Commune {
+  id         Int    @id @default(autoincrement())
+  wilayaCode String
+  wilaya     Wilaya @relation(fields: [wilayaCode], references: [code], onDelete: Cascade)
+  nameFr     String
+  nameAr     String
+
+  @@index([wilayaCode])
+}
+
+enum DeliveryMethod {
+  HOME
+  DESK
+}
+
+enum CodStatus {
+  PENDING     // submitted, not yet called
+  CONFIRMED   // customer confirmed by phone
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURNED
+  NO_ANSWER
+}
