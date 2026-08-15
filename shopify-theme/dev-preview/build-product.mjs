@@ -6,6 +6,8 @@ import { writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { icon } from "./icons.mjs";
+
 const here = dirname(fileURLToPath(import.meta.url));
 const BRAND = "SOUQNA";
 const photo = (i) => `photos/prod-${(i % 10) + 1}.jpg`;
@@ -15,12 +17,30 @@ const enabled = {
   savings: true, flash: false, title: true, rating: true, rank: true,
   price: true, priceNote: true, priceDrop: true, stock: true,
   shippingBar: true, promo: true, swatches: true, qty: true,
-  cta: true, shipping: true, carriers: true, guarantees: true, pills: true,
+  cta: true, shipping: true, pills: false, cod: true,
   cod: true,
 };
 
 const B = [];
 const block = (key, html) => { if (enabled[key]) B.push(html); };
+
+
+/* Carrier marks. In the theme these are image_picker uploads; the harness
+   renders a neutral wordmark so the layout is exercised without shipping
+   anyone else's logo. */
+const carrierMark = (name, bg, fg) => {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 32">
+<rect width="120" height="32" rx="4" fill="${bg}"/>
+<text x="60" y="21" text-anchor="middle" font-family="system-ui,sans-serif"
+      font-size="15" font-weight="800" fill="${fg}">${name}</text></svg>`;
+  return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
+};
+
+const carriers = [
+  { name: "Yalidine", logo: carrierMark("YALIDINE", "#0b3d91", "#ffffff") },
+  { name: "ZR Express", logo: carrierMark("ZR EXPRESS", "#c9271c", "#ffffff") },
+  { name: "Algérie Poste", logo: carrierMark("POSTE DZ", "#f0f2f3", "#0f7a3d") },
+];
 
 /* --- COD lead form -------------------------------------------------------
    Placeholder tariffs: a five-zone model so the preview shows realistic
@@ -47,7 +67,7 @@ function codForm({ id, unit = 1530 }) {
         <label class="field__label" for="${id}-${name}">${label} <span class="field__req" aria-hidden="true">*</span></label>
         ${control}
         ${hint ? `<span class="field__hint">${hint}</span>` : ""}
-        <span class="field__error"><span aria-hidden="true">⚠</span> Ce champ est obligatoire</span>
+        <span class="field__error">${icon("shield", "icon--sm")} Ce champ est obligatoire</span>
       </div>`;
 
   return `<form class="cod" data-cod-form id="${id}"
@@ -159,16 +179,16 @@ function codForm({ id, unit = 1530 }) {
 
 
 block("savings", `<div class="bb__savings">
-  <span class="bb__savings-flag"><span aria-hidden="true">\u{1F4B0}</span> ÉCONOMIES</span>
+  <span class="bb__savings-flag">${icon("tag")} ÉCONOMIES</span>
   <span class="bb__savings-list">
-    <span class="bb__savings-item"><span aria-hidden="true">✔</span> Livraison gratuite</span>
-    <span class="bb__savings-item"><span aria-hidden="true">✔</span> Crédit en cas de retard <span aria-hidden="true">›</span></span>
+    <span class="bb__savings-item">${icon("check", "icon--sm")} Livraison gratuite</span>
+    <span class="bb__savings-item">${icon("check", "icon--sm")} Crédit en cas de retard <span aria-hidden="true">›</span></span>
   </span>
 </div>`);
 
 block("title", `<div class="bb__title-row">
   <h1 class="bb__title">Support téléphone magnétique à ventouse amélioré, verrouillage rotatif réglable, adapté pour voitures, salles de sport et miroirs (noir / blanc)</h1>
-  <button class="bb__share" type="button" aria-label="Partager ce produit"><span aria-hidden="true">↪</span></button>
+  <button class="bb__share" type="button" aria-label="Partager ce produit">${icon("share")}</button>
 </div>`);
 
 block("rating", `<div class="bb__rating">
@@ -178,7 +198,7 @@ block("rating", `<div class="bb__rating">
   <span class="bb__rating-count">40 000+ ventes</span>
   <span class="bb__rating-sep" aria-hidden="true">|</span>
   <span>Vendu par</span>
-  <span class="bb__seller-badge"><span aria-hidden="true">★</span> Vendeur vedette</span>
+  <span class="bb__seller-badge">${icon("star")} Vendeur vedette</span>
 </div>`);
 
 block("rank", `<div class="bb__rank">
@@ -189,7 +209,7 @@ block("rank", `<div class="bb__rank">
 block("price", `<div class="bb__price-row">
   <s class="bb__price-was"><span class="visually-hidden">Prix initial </span>7 380 DA</s>
   <span class="bb__price-deal">
-    <span aria-hidden="true">⏰</span>
+    ${icon("clock")}
     <span class="bb__price-label">Dernier jour</span>
     <span class="bb__price-now">1 530 DA</span>
   </span>
@@ -207,7 +227,7 @@ block("promo", `<div class="bb__promo">
   <div class="bb__promo-head">
     <span class="bb__promo-name">GRANDES PROMOS</span>
     <span class="bb__promo-rule" aria-hidden="true"></span>
-    <span class="bb__promo-timer"><span aria-hidden="true">⏱</span> SE TERMINE DANS 16:04:43</span>
+    <span class="bb__promo-timer">${icon("clock", "icon--sm")} SE TERMINE DANS 16:04:43</span>
     <span class="bb__promo-more" aria-hidden="true">›</span>
   </div>
   <div class="bb__promo-body">
@@ -250,31 +270,49 @@ block("qty", `<div class="bb__qty-row">
       <option>1</option><option>2</option><option>3</option><option>4</option>
     </select>
   </label>
-  <span class="bb__qty-sold"><span class="pgc__flame" aria-hidden="true">◆</span> 40 000+ ventes</span>
+  <span class="bb__qty-sold">${icon("flame")} 40 000+ ventes</span>
 </div>`);
 
 block("cta", `<button class="bb__cta" type="button">
   -79% maintenant ! Ajouter au panier
 </button>`);
 
-block("shipping", `<div class="bb__trust">
-  <span class="bb__ship-title"><span aria-hidden="true">\u{1F69A}</span> Livraison gratuite dès 8 000 DA <span aria-hidden="true">›</span></span>
-  <span class="bb__ship-line">Livraison : <b>2 à 5 jours ouvrés</b></span>
+block("shipping", `<div class="deliv">
+  <span class="deliv__title">${icon("truck")} Livraison gratuite sur toutes les commandes ${icon("chevron", "icon--sm")}</span>
+  <span class="deliv__row">Livraison : <b>2 à 5 jours ouvrés</b></span>
+  <span class="deliv__carriers">
+    <span class="deliv__row">Transporteur :</span>
+    ${carriers
+      .map(
+        (c) => `<span class="deliv__carrier">
+      <img class="deliv__logo" src="${c.logo}" alt="" width="120" height="32" loading="lazy" decoding="async">
+      ${c.name}
+    </span>`
+      )
+      .join("\n    ")}
+  </span>
+  <span class="deliv__partner">
+    <span class="deliv__partner-brand">SOUQNA <span aria-hidden="true">&times;</span> ${icon("truck", "icon--sm")}</span>
+    <span class="deliv__partner-text">Ensemble pour une meilleure livraison</span>
+  </span>
+  <span class="deliv__line">${icon("shield-check")} Paiement à la livraison &middot; Données protégées ${icon("chevron", "icon--sm")}</span>
+  <span class="deliv__line">${icon("box")} Garantie de commande ${icon("chevron", "icon--sm")}</span>
+  <span class="deliv__pills">
+    <span class="deliv__pill">Retour sous 7 jours</span>
+    <span class="deliv__pill">Échange gratuit</span>
+    <span class="deliv__pill">Article endommagé remboursé</span>
+  </span>
 </div>`);
 
-block("carriers", `<div class="bb__carriers">
-  <span class="bb__ship-line">Transporteur :</span>
-  <span class="bb__carrier"><span class="bb__carrier-logo">YAL</span> Yalidine</span>
-  <span class="bb__carrier"><span class="bb__carrier-logo">ZR</span> ZR Express</span>
-  <span class="bb__carrier"><span class="bb__carrier-logo">DZ</span> Algérie Poste</span>
-</div>`);
 
-block("guarantees", `<div class="bb__trust">
-  <span class="bb__trust-row"><span aria-hidden="true">\u{1F4B5}</span> Paiement à la livraison — payez après vérification</span>
-  <span class="bb__trust-row"><span aria-hidden="true">\u{1F6E1}</span> Garantie de commande <span aria-hidden="true">›</span></span>
-</div>`);
+const COD_MODE = "inline"; // "inline" | "button" — exposed as a theme setting
 
-block("cod", codForm({ id: "cod-desktop" }));
+block("cod", `<div class="cod-wrap" data-cod-wrap data-mode="${COD_MODE}" data-open="false" id="cod-anchor">
+  <button class="bb__reveal" type="button" data-cod-reveal>
+    ${icon("cash")} Commander — paiement à la livraison
+  </button>
+  ${codForm({ id: "cod-desktop" })}
+</div>`);
 
 block("pills", `<div class="bb__pills">
   <span class="bb__pill">Retour sous 7 jours</span>
@@ -317,7 +355,7 @@ const reviewsBlock = `<section class="reviews" aria-labelledby="ReviewsTitle">
     <span class="reviews__score">4,6
       <span class="reviews__stars" aria-hidden="true">★★★★⯪</span>
     </span>
-    <span class="reviews__verified"><span aria-hidden="true">✔</span> Tous les avis proviennent d'achats vérifiés</span>
+    <span class="reviews__verified">${icon("check", "icon--sm")} Tous les avis proviennent d'achats vérifiés</span>
   </div>
   <div class="reviews__fit">
     ${fit
@@ -388,7 +426,7 @@ const related = `<section class="related" aria-labelledby="RelatedTitle">
       <div class="pgc__rating">
         <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
         <span class="visually-hidden">Noté 4,5 sur 5.</span>
-        <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 12 000+ ventes</span>
+        <span class="pgc__sold">${icon("flame")} 12 000+ ventes</span>
       </div>
     </article>`
       )
@@ -414,8 +452,8 @@ const html = `<!doctype html>
 <main class="pdp" id="MainContent" tabindex="-1">
   <div class="pdp__inner">
     <nav class="pdp__crumbs" aria-label="Fil d'Ariane">
-      <a href="#">Accueil</a><span class="pdp__crumb-sep" aria-hidden="true">›</span>
-      <a href="#">Auto et Moto</a><span class="pdp__crumb-sep" aria-hidden="true">›</span>
+      <a href="#">Accueil</a><span class="pdp__crumb-sep">${icon("chevron", "icon--sm")}</span>
+      <a href="#">Auto et Moto</a><span class="pdp__crumb-sep">${icon("chevron", "icon--sm")}</span>
       <span class="pdp__crumb-current">Supports de téléphone</span>
     </nav>
 
@@ -435,12 +473,12 @@ const html = `<!doctype html>
   </div>
 </main>
 
-<div class="pdp__mobile-cta">
+<div class="pdp__mobile-cta" data-order-bar>
   <span class="pdp__mobile-price">
     <b>1 530 DA</b>
     <s>7 380 DA</s>
   </span>
-  <button class="bb__cta" type="button" data-sheet-open aria-controls="CodSheet">Commander maintenant</button>
+  <button class="bb__cta" type="button" data-order-jump>Commander maintenant</button>
 </div>
 
 <div class="cod-sheet" id="CodSheet" data-open="false">

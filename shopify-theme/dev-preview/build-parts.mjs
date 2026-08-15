@@ -5,6 +5,8 @@ import { writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { icon } from "./icons.mjs";
+
 const here = dirname(fileURLToPath(import.meta.url));
 
 const BRAND = "SOUQNA"; // stands in for the merchant's own name
@@ -30,9 +32,9 @@ function tileImg(i) {
 
 /* --- PART 1 -------------------------------------------------------------- */
 const ubarItems = [
-  { icon: "🚚", title: "Livraison gratuite sur toutes les commandes", sub: "Offre à durée limitée", color: "#7ee787", chev: true },
-  { icon: "📦", title: "Garantie de livraison", sub: "Remboursement en cas de problèmes", color: "#f7f0c8" },
-  { icon: "📱", title: `Application ${BRAND}`, sub: "Commandez plus vite", color: "#ffffff" },
+  { icon: icon("truck"), title: "Livraison gratuite sur toutes les commandes", sub: "Offre à durée limitée", color: "#7ee787", chev: true },
+  { icon: icon("box"), title: "Garantie de livraison", sub: "Remboursement en cas de problèmes", color: "#f7f0c8" },
+  { icon: icon("phone"), title: `Application ${BRAND}`, sub: "Commandez plus vite", color: "#ffffff" },
 ];
 
 function ubar(v) {
@@ -53,9 +55,9 @@ function ubar(v) {
 
 /* --- PART 2 -------------------------------------------------------------- */
 const navLinks = [
-  ["\ud83d\udc4d", "Meilleures ventes"],
-  ["\u2b50", "Notés 5 étoiles"],
-  ["\u2728", "Nouveautés"],
+  [icon("star"), "Meilleures ventes"],
+  [icon("shield-check"), "Notés 5 étoiles"],
+  [icon("gift"), "Nouveautés"],
 ];
 
 function mhead(v, { open = false, id = "MegaMenu" } = {}) {
@@ -63,7 +65,7 @@ function mhead(v, { open = false, id = "MegaMenu" } = {}) {
   <div class="mhead__inner">
     <a class="mhead__logo" href="#">
       <span class="logo-tile">
-        <span class="logo-tile__mark" aria-hidden="true">\ud83d\udecd</span>
+        <span class="logo-tile__mark" aria-hidden="true">S</span>
         <span class="logo-tile__word">${BRAND}</span>
       </span>
     </a>
@@ -86,9 +88,7 @@ function mhead(v, { open = false, id = "MegaMenu" } = {}) {
       <label class="visually-hidden" for="Search-${v}">Rechercher un produit</label>
       <input class="mhead__search-input" id="Search-${v}" type="search" name="q"
              placeholder="Rechercher un produit…">
-      <button class="mhead__search-btn" type="submit" aria-label="Lancer la recherche">
-        <span aria-hidden="true">\ud83d\udd0d</span>
-      </button>
+      <button class="mhead__search-btn" type="submit" aria-label="Lancer la recherche">${icon("search")}</button>
     </form>
     <div class="mhead__end">
       <a class="mhead__acct" href="#">
@@ -98,10 +98,10 @@ function mhead(v, { open = false, id = "MegaMenu" } = {}) {
           <span class="mhead__acct-main">Commandes et Compte</span>
         </span>
       </a>
-      <a class="mhead__util" href="#"><span aria-hidden="true">\ud83c\udfa7</span> Aide</a>
+      <a class="mhead__util" href="#">${icon("headset")} Aide</a>
       <a class="mhead__util" href="#"><span class="mhead__flag" aria-hidden="true">FR</span> Français</a>
       <a class="mhead__cart" href="#" aria-label="Panier, 3 articles">
-        <span aria-hidden="true">\ud83d\uded2</span>
+        ${icon("cart", "icon--lg")}
         <span class="mhead__cart-count" aria-hidden="true">3</span>
       </a>
     </div>
@@ -111,15 +111,15 @@ function mhead(v, { open = false, id = "MegaMenu" } = {}) {
 
 /* --- PART 3 -------------------------------------------------------------- */
 const tbarItems = [
-  ["🔒", "Protection des données"],
-  ["💳", "Paiement sécurisé"],
-  ["✅", "Garantie de livraison"],
+  [icon("lock"), "Protection des données"],
+  [icon("card"), "Paiement sécurisé"],
+  [icon("shield-check"), "Garantie de livraison"],
 ];
 
 function tbar(v) {
   return `<div class="tbar" data-variant="${v}">
   <div class="tbar__inner">
-    <span class="tbar__lead"><span aria-hidden="true">🛡</span> Pourquoi choisir ${BRAND} ?</span>
+    <span class="tbar__lead">${icon("shield")} Pourquoi choisir ${BRAND} ?</span>
     <div class="tbar__list" role="region" aria-label="Garanties" tabindex="0">
       ${tbarItems
         .map(

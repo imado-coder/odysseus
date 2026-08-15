@@ -954,3 +954,173 @@
 .bb > * {
   min-inline-size: 0;
 }
+
+/* ==========================================================================
+   Delivery block — carriers with merchant-uploaded logos
+   ========================================================================== */
+.deliv {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.deliv__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #0f7a3d;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.deliv__row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  color: var(--c-ink-2, #5b6570);
+}
+
+.deliv__row b { color: var(--c-ink, #101418); font-weight: 600; }
+
+.deliv__carriers {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+}
+
+.deliv__carrier {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--c-ink, #101418);
+}
+
+/* Logos keep their own aspect ratio and cap at a shared height so a tall
+   upload cannot push the row around. */
+.deliv__logo {
+  block-size: 18px;
+  inline-size: auto;
+  max-inline-size: 72px;
+  object-fit: contain;
+}
+
+.deliv__logo--text {
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: 38px;
+  padding-inline: 5px;
+  border-radius: 3px;
+  background: var(--c-bg, #f4f5f6);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+/* Partner strip: two-tone chip, merchant name on the left */
+.deliv__partner {
+  display: inline-flex;
+  align-self: flex-start;
+  border-radius: 3px;
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.deliv__partner-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: #1f6fb0;
+  color: #fff;
+}
+
+.deliv__partner-text {
+  padding: 3px 8px;
+  background: #ffd84d;
+  color: #5a3600;
+}
+
+.deliv__line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--c-ink, #101418);
+}
+
+.deliv__line .icon { color: #0f7a3d; }
+
+.deliv__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.deliv__pill {
+  padding: 4px 9px;
+  border-radius: 4px;
+  background: #0f7a3d;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   Buy box reveal — the form can start as a button instead of a full form
+   ========================================================================== */
+.bb__reveal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  inline-size: 100%;
+  min-block-size: 56px;
+  padding-inline: 20px;
+  border-radius: var(--r-pill, 999px);
+  background: var(--c-accent-text, #c24e00);
+  color: #fff;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+@media (hover: hover) {
+  .bb__reveal:hover { filter: brightness(0.94); }
+}
+
+.cod-wrap[data-mode="button"] > .cod { display: none; }
+.cod-wrap[data-mode="button"][data-open="true"] > .cod { display: block; }
+.cod-wrap[data-mode="button"][data-open="true"] > .bb__reveal { display: none; }
+.cod-wrap[data-mode="inline"] > .bb__reveal { display: none; }
+
+/* ==========================================================================
+   Mobile order bar
+   Follows the customer the whole way down and lands them on the form.
+   ========================================================================== */
+.pdp__mobile-cta {
+  position: fixed;
+  inset-block-end: 0;
+  inset-inline: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+  background: #fff;
+  border-block-start: 1px solid var(--c-border, #e7eaec);
+  box-shadow: 0 -2px 16px rgba(16, 20, 24, 0.12);
+}
+
+/* Hidden while the form itself is on screen — the bar would only cover it. */
+.pdp__mobile-cta[data-hidden="true"] {
+  transform: translateY(110%);
+  transition: transform 180ms var(--ease, ease);
+}
+
+.pdp__mobile-cta:not([data-hidden="true"]) {
+  transform: none;
+  transition: transform 180ms var(--ease, ease);
+}

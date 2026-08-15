@@ -4,6 +4,8 @@ import { writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { icon } from "./icons.mjs";
+
 const here = dirname(fileURLToPath(import.meta.url));
 const BRAND = "SOUQNA";
 
@@ -51,7 +53,7 @@ function cpills(v) {
       .join("\n    ")}
   </ul>
   <button class="cpills__next" type="button" data-scroller-next aria-label="Catégories suivantes">
-    <span aria-hidden="true">\u203a</span>
+    ${icon("chevron")}
   </button>
 </nav>`;
 }
@@ -93,7 +95,7 @@ function pgc(it, i, v, idx) {
       <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>\u20ac${it.c}</s>
     </span>
     <button class="pgc__add" type="button" aria-label="Ajouter au panier : ${it.t}">
-      <span aria-hidden="true">\ud83d\uded2</span>
+      ${icon("cart")}
     </button>
   </div>
   ${
@@ -104,7 +106,7 @@ function pgc(it, i, v, idx) {
   <div class="pgc__rating">
     <span class="pgc__stars" aria-hidden="true">${starStr(it.stars)}</span>
     <span class="visually-hidden">Noté ${String(it.stars).replace(".", ",")} sur 5.</span>
-    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">\u25c6</span> ${it.sold} ventes</span>
+    <span class="pgc__sold">${icon("flame", "pgc__flame")} ${it.sold} ventes</span>
   </div>
   ${it.seller ? '<span class="pgc__seller"><span aria-hidden="true">\u2605</span> Vendeur vedette</span>' : ""}
 </article>`;

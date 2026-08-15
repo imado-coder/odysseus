@@ -350,3 +350,19 @@ ul, ol {
 
 .text-sale { color: var(--c-sale); }
 .text-muted { color: var(--c-ink-2); }
+
+/* --------------------------------------------------------------------------
+   Icons
+   Line icons sized in em so they scale with whatever text they sit beside,
+   and inherit currentColor so a theme colour change carries them along.
+   -------------------------------------------------------------------------- */
+.icon {
+  inline-size: 1.25em;
+  block-size: 1.25em;
+  flex: none;
+  vertical-align: -0.22em;
+}
+
+.icon--lg { inline-size: 1.6em; block-size: 1.6em; }
+.icon--sm { inline-size: 1em; block-size: 1em; }
+.icon--fill { fill: currentColor; stroke: none; }

@@ -156,17 +156,60 @@
   font-size: 12px;
 }
 
-/* Mobile: three columns never fit — keep the first item, scroll the rest */
+/* Mobile: three columns never fit. A scroller left every item visibly clipped
+   at the edges, which reads as broken rather than scrollable. Instead the bar
+   shows one complete item at a time and cycles through them, so nothing is
+   ever cut. Items are stacked in the same cell and faded in turn. */
 @media (max-width: 749px) {
   .ubar__inner {
-    overflow-x: auto;
-    scrollbar-width: none;
+    display: grid;
+    padding-inline: 12px;
+    overflow: hidden;
   }
-  .ubar__inner::-webkit-scrollbar { display: none; }
+
+  .ubar__track {
+    display: grid;
+    grid-template-areas: "slot";
+    inline-size: 100%;
+  }
+
   .ubar__item {
+    grid-area: slot;
     flex: none;
-    padding-inline: 14px;
+    justify-content: center;
+    padding: var(--ubar-pad-y) 0;
+    min-inline-size: 0;
+    opacity: 0;
+    animation: ubar-cycle calc(var(--ubar-slide, 3.6s) * var(--ubar-count, 3))
+      linear infinite;
+    animation-delay: calc(var(--ubar-slide, 3.6s) * var(--ubar-index, 0));
   }
+
+  .ubar__item::before { display: none; }
+
+  /* The duplicate run only exists for the desktop marquee. */
+  .ubar__item--dup { display: none; }
+
+  .ubar__title,
+  .ubar__sub { text-align: center; }
+
+  @keyframes ubar-cycle {
+    0%, 2% { opacity: 0; transform: translateY(4px); }
+    6%, 30% { opacity: 1; transform: none; }
+    34%, 100% { opacity: 0; transform: translateY(-4px); }
+  }
+
+  /* One item: no cycling, just show it. */
+  .ubar__track:has(.ubar__item:only-of-type) .ubar__item {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* Cycling is decorative motion; hold on the first item when it's unwelcome. */
+@media (max-width: 749px) and (prefers-reduced-motion: reduce) {
+  .ubar__item { animation: none; opacity: 0; }
+  .ubar__item:first-child { opacity: 1; }
 }
 
 /* ==========================================================================

@@ -356,6 +356,22 @@ ul, ol {
 
 .text-sale { color: var(--c-sale); }
 .text-muted { color: var(--c-ink-2); }
+
+/* --------------------------------------------------------------------------
+   Icons
+   Line icons sized in em so they scale with whatever text they sit beside,
+   and inherit currentColor so a theme colour change carries them along.
+   -------------------------------------------------------------------------- */
+.icon {
+  inline-size: 1.25em;
+  block-size: 1.25em;
+  flex: none;
+  vertical-align: -0.22em;
+}
+
+.icon--lg { inline-size: 1.6em; block-size: 1.6em; }
+.icon--sm { inline-size: 1em; block-size: 1em; }
+.icon--fill { fill: currentColor; stroke: none; }
 </style>
 <style>/* ==========================================================================
    header-system.css — the five header-stack components.
@@ -515,17 +531,60 @@ ul, ol {
   font-size: 12px;
 }
 
-/* Mobile: three columns never fit — keep the first item, scroll the rest */
+/* Mobile: three columns never fit. A scroller left every item visibly clipped
+   at the edges, which reads as broken rather than scrollable. Instead the bar
+   shows one complete item at a time and cycles through them, so nothing is
+   ever cut. Items are stacked in the same cell and faded in turn. */
 @media (max-width: 749px) {
   .ubar__inner {
-    overflow-x: auto;
-    scrollbar-width: none;
+    display: grid;
+    padding-inline: 12px;
+    overflow: hidden;
   }
-  .ubar__inner::-webkit-scrollbar { display: none; }
+
+  .ubar__track {
+    display: grid;
+    grid-template-areas: "slot";
+    inline-size: 100%;
+  }
+
   .ubar__item {
+    grid-area: slot;
     flex: none;
-    padding-inline: 14px;
+    justify-content: center;
+    padding: var(--ubar-pad-y) 0;
+    min-inline-size: 0;
+    opacity: 0;
+    animation: ubar-cycle calc(var(--ubar-slide, 3.6s) * var(--ubar-count, 3))
+      linear infinite;
+    animation-delay: calc(var(--ubar-slide, 3.6s) * var(--ubar-index, 0));
   }
+
+  .ubar__item::before { display: none; }
+
+  /* The duplicate run only exists for the desktop marquee. */
+  .ubar__item--dup { display: none; }
+
+  .ubar__title,
+  .ubar__sub { text-align: center; }
+
+  @keyframes ubar-cycle {
+    0%, 2% { opacity: 0; transform: translateY(4px); }
+    6%, 30% { opacity: 1; transform: none; }
+    34%, 100% { opacity: 0; transform: translateY(-4px); }
+  }
+
+  /* One item: no cycling, just show it. */
+  .ubar__track:has(.ubar__item:only-of-type) .ubar__item {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* Cycling is decorative motion; hold on the first item when it's unwelcome. */
+@media (max-width: 749px) and (prefers-reduced-motion: reduce) {
+  .ubar__item { animation: none; opacity: 0; }
+  .ubar__item:first-child { opacity: 1; }
 }
 
 /* ==========================================================================
@@ -1982,6 +2041,144 @@ ul, ol {
   display: block;
   block-size: 100%;
 }
+
+/* ==========================================================================
+   Sub-category rail — circular entry points shown inside a category
+   ========================================================================== */
+.subcats {
+  background: #fff;
+  padding-block: 14px 6px;
+  border-block-end: 1px solid var(--c-border, #e7eaec);
+}
+
+.subcats__track {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: inline proximity;
+  scroll-padding-inline-start: 16px;
+  padding-inline: 16px;
+  scrollbar-width: none;
+}
+
+.subcats__track::-webkit-scrollbar { display: none; }
+
+.subcat {
+  flex: none;
+  scroll-snap-align: start;
+  inline-size: 84px;
+  text-align: center;
+}
+
+.subcat__media {
+  inline-size: 76px;
+  block-size: 76px;
+  margin-inline: auto;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--c-bg, #f4f5f6);
+}
+
+.subcat__media img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  transition: transform 220ms ease;
+}
+
+@media (hover: hover) {
+  .subcat:hover .subcat__media img { transform: scale(1.06); }
+}
+
+.subcat__label {
+  display: block;
+  margin-block-start: 7px;
+  font-size: 12px;
+  line-height: 1.25;
+  color: var(--c-ink, #101418);
+}
+
+/* ==========================================================================
+   Filter bar
+   ========================================================================== */
+.filters {
+  position: relative;
+  background: #fff;
+  padding-block: 10px;
+  border-block-end: 1px solid var(--c-border, #e7eaec);
+}
+
+.filters__track {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  scroll-padding-inline-start: 16px;
+  padding-inline: 16px;
+  scrollbar-width: none;
+}
+
+.filters__track::-webkit-scrollbar { display: none; }
+
+.filter {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-block-size: 40px;
+  padding-inline: 14px;
+  border: 1px solid var(--c-border-strong, #d3d8dc);
+  border-radius: var(--r-pill, 999px);
+  background: #fff;
+  color: var(--c-ink, #101418);
+  font-size: 13px;
+  white-space: nowrap;
+  transition: border-color 120ms ease;
+}
+
+.filter:hover { border-color: var(--c-ink, #101418); }
+
+.filter--lead {
+  font-weight: 700;
+  border-color: transparent;
+  padding-inline-start: 4px;
+}
+
+.filter[aria-pressed="true"] {
+  border-color: var(--c-ink, #101418);
+  border-width: 2px;
+  font-weight: 600;
+}
+
+.filters__next {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: 8px;
+  transform: translateY(-50%);
+  z-index: 2;
+  inline-size: 34px;
+  block-size: 34px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(16, 20, 24, 0.22);
+  display: grid;
+  place-items: center;
+  color: var(--c-ink, #101418);
+}
+
+.filters::after {
+  content: "";
+  position: absolute;
+  inset-block: 10px;
+  inset-inline-end: 0;
+  inline-size: 64px;
+  background: linear-gradient(to left, #fff 45%, transparent);
+  pointer-events: none;
+}
+
+[dir="rtl"] .filters::after {
+  background: linear-gradient(to right, #fff 45%, transparent);
+}
 </style>
 <style>/* ==========================================================================
    product-page.css — PDP surface.
@@ -2939,6 +3136,176 @@ ul, ol {
 .bb > * {
   min-inline-size: 0;
 }
+
+/* ==========================================================================
+   Delivery block — carriers with merchant-uploaded logos
+   ========================================================================== */
+.deliv {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.deliv__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #0f7a3d;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.deliv__row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  color: var(--c-ink-2, #5b6570);
+}
+
+.deliv__row b { color: var(--c-ink, #101418); font-weight: 600; }
+
+.deliv__carriers {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+}
+
+.deliv__carrier {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--c-ink, #101418);
+}
+
+/* Logos keep their own aspect ratio and cap at a shared height so a tall
+   upload cannot push the row around. */
+.deliv__logo {
+  block-size: 18px;
+  inline-size: auto;
+  max-inline-size: 72px;
+  object-fit: contain;
+}
+
+.deliv__logo--text {
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: 38px;
+  padding-inline: 5px;
+  border-radius: 3px;
+  background: var(--c-bg, #f4f5f6);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+/* Partner strip: two-tone chip, merchant name on the left */
+.deliv__partner {
+  display: inline-flex;
+  align-self: flex-start;
+  border-radius: 3px;
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.deliv__partner-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: #1f6fb0;
+  color: #fff;
+}
+
+.deliv__partner-text {
+  padding: 3px 8px;
+  background: #ffd84d;
+  color: #5a3600;
+}
+
+.deliv__line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--c-ink, #101418);
+}
+
+.deliv__line .icon { color: #0f7a3d; }
+
+.deliv__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.deliv__pill {
+  padding: 4px 9px;
+  border-radius: 4px;
+  background: #0f7a3d;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   Buy box reveal — the form can start as a button instead of a full form
+   ========================================================================== */
+.bb__reveal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  inline-size: 100%;
+  min-block-size: 56px;
+  padding-inline: 20px;
+  border-radius: var(--r-pill, 999px);
+  background: var(--c-accent-text, #c24e00);
+  color: #fff;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+@media (hover: hover) {
+  .bb__reveal:hover { filter: brightness(0.94); }
+}
+
+.cod-wrap[data-mode="button"] > .cod { display: none; }
+.cod-wrap[data-mode="button"][data-open="true"] > .cod { display: block; }
+.cod-wrap[data-mode="button"][data-open="true"] > .bb__reveal { display: none; }
+.cod-wrap[data-mode="inline"] > .bb__reveal { display: none; }
+
+/* ==========================================================================
+   Mobile order bar
+   Follows the customer the whole way down and lands them on the form.
+   ========================================================================== */
+.pdp__mobile-cta {
+  position: fixed;
+  inset-block-end: 0;
+  inset-inline: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+  background: #fff;
+  border-block-start: 1px solid var(--c-border, #e7eaec);
+  box-shadow: 0 -2px 16px rgba(16, 20, 24, 0.12);
+}
+
+/* Hidden while the form itself is on screen — the bar would only cover it. */
+.pdp__mobile-cta[data-hidden="true"] {
+  transform: translateY(110%);
+  transition: transform 180ms var(--ease, ease);
+}
+
+.pdp__mobile-cta:not([data-hidden="true"]) {
+  transform: none;
+  transition: transform 180ms var(--ease, ease);
+}
 </style>
 <style>/* ==========================================================================
    cod-form.css — cash-on-delivery lead form.
@@ -3451,41 +3818,41 @@ textarea.field__control {
 <div class="ubar" data-variant="1">
   <div class="ubar__inner" data-scroller-track role="region" aria-label="Avantages du magasin" tabindex="0">
     <div class="ubar__track"><div class="ubar__item">
-      <span class="ubar__icon" aria-hidden="true">🚚</span>
+      <span class="ubar__icon" aria-hidden="true"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 6.5h11v9h-11z"/><path d="M13.5 10h4l3 3.2v2.3h-7z"/><circle cx="6.5" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg></span>
       <span class="ubar__text" style="--item-color:#7ee787">
         <span class="ubar__title">Livraison gratuite sur toutes les commandes <span class="ubar__chev" aria-hidden="true">›</span></span>
         <span class="ubar__sub">Offre à durée limitée</span>
       </span>
     </div>
     <div class="ubar__item">
-      <span class="ubar__icon" aria-hidden="true">📦</span>
+      <span class="ubar__icon" aria-hidden="true"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m12 3 8.5 4.5v9L12 21l-8.5-4.5v-9Z"/><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"/></svg></span>
       <span class="ubar__text" style="--item-color:#f7f0c8">
         <span class="ubar__title">Garantie de livraison</span>
         <span class="ubar__sub">Remboursement en cas de problèmes</span>
       </span>
     </div>
     <div class="ubar__item">
-      <span class="ubar__icon" aria-hidden="true">📱</span>
+      <span class="ubar__icon" aria-hidden="true"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg></span>
       <span class="ubar__text" style="--item-color:#ffffff">
         <span class="ubar__title">Application SOUQNA</span>
         <span class="ubar__sub">Commandez plus vite</span>
       </span>
     </div><div class="ubar__item ubar__item--dup" aria-hidden="true">
-      <span class="ubar__icon" aria-hidden="true">🚚</span>
+      <span class="ubar__icon" aria-hidden="true"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 6.5h11v9h-11z"/><path d="M13.5 10h4l3 3.2v2.3h-7z"/><circle cx="6.5" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg></span>
       <span class="ubar__text" style="--item-color:#7ee787">
         <span class="ubar__title">Livraison gratuite sur toutes les commandes <span class="ubar__chev" aria-hidden="true">›</span></span>
         <span class="ubar__sub">Offre à durée limitée</span>
       </span>
     </div>
     <div class="ubar__item ubar__item--dup" aria-hidden="true">
-      <span class="ubar__icon" aria-hidden="true">📦</span>
+      <span class="ubar__icon" aria-hidden="true"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m12 3 8.5 4.5v9L12 21l-8.5-4.5v-9Z"/><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"/></svg></span>
       <span class="ubar__text" style="--item-color:#f7f0c8">
         <span class="ubar__title">Garantie de livraison</span>
         <span class="ubar__sub">Remboursement en cas de problèmes</span>
       </span>
     </div>
     <div class="ubar__item ubar__item--dup" aria-hidden="true">
-      <span class="ubar__icon" aria-hidden="true">📱</span>
+      <span class="ubar__icon" aria-hidden="true"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg></span>
       <span class="ubar__text" style="--item-color:#ffffff">
         <span class="ubar__title">Application SOUQNA</span>
         <span class="ubar__sub">Commandez plus vite</span>
@@ -3497,14 +3864,14 @@ textarea.field__control {
   <div class="mhead__inner">
     <a class="mhead__logo" href="#">
       <span class="logo-tile">
-        <span class="logo-tile__mark" aria-hidden="true">🛍</span>
+        <span class="logo-tile__mark" aria-hidden="true">S</span>
         <span class="logo-tile__word">SOUQNA</span>
       </span>
     </a>
     <nav class="mhead__nav" aria-label="Principal">
-      <a class="mhead__nav-link" href="#"><span aria-hidden="true">👍</span> Meilleures ventes</a>
-      <a class="mhead__nav-link" href="#"><span aria-hidden="true">⭐</span> Notés 5 étoiles</a>
-      <a class="mhead__nav-link" href="#"><span aria-hidden="true">✨</span> Nouveautés</a>
+      <a class="mhead__nav-link" href="#"><span aria-hidden="true"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m12 3.5 2.6 5.4 5.9.8-4.3 4.2 1 5.9-5.2-2.8-5.2 2.8 1-5.9L3.5 9.7l5.9-.8Z"/></svg></span> Meilleures ventes</a>
+      <a class="mhead__nav-link" href="#"><span aria-hidden="true"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3 4.5 6v5.4c0 4.3 3 8.2 7.5 9.6 4.5-1.4 7.5-5.3 7.5-9.6V6Z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg></span> Notés 5 étoiles</a>
+      <a class="mhead__nav-link" href="#"><span aria-hidden="true"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="8.5" width="18" height="12.5" rx="1.5"/><path d="M3 13h18M12 8.5V21"/><path d="M12 8.5S10.5 3 8 3a2.5 2.5 0 0 0 0 5.5ZM12 8.5S13.5 3 16 3a2.5 2.5 0 0 1 0 5.5Z"/></svg></span> Nouveautés</a>
       <span class="mhead__cat-wrap">
         <button class="mhead__cat" type="button" data-disclosure
                 aria-expanded="false" aria-haspopup="true" aria-controls="MegaMenu">
@@ -3644,9 +4011,7 @@ textarea.field__control {
       <label class="visually-hidden" for="Search-1">Rechercher un produit</label>
       <input class="mhead__search-input" id="Search-1" type="search" name="q"
              placeholder="Rechercher un produit…">
-      <button class="mhead__search-btn" type="submit" aria-label="Lancer la recherche">
-        <span aria-hidden="true">🔍</span>
-      </button>
+      <button class="mhead__search-btn" type="submit" aria-label="Lancer la recherche"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg></button>
     </form>
     <div class="mhead__end">
       <a class="mhead__acct" href="#">
@@ -3656,10 +4021,10 @@ textarea.field__control {
           <span class="mhead__acct-main">Commandes et Compte</span>
         </span>
       </a>
-      <a class="mhead__util" href="#"><span aria-hidden="true">🎧</span> Aide</a>
+      <a class="mhead__util" href="#"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.5 15v-3a7.5 7.5 0 0 1 15 0v3"/><rect x="2.8" y="14" width="4" height="6" rx="1.6"/><rect x="17.2" y="14" width="4" height="6" rx="1.6"/></svg> Aide</a>
       <a class="mhead__util" href="#"><span class="mhead__flag" aria-hidden="true">FR</span> Français</a>
       <a class="mhead__cart" href="#" aria-label="Panier, 3 articles">
-        <span aria-hidden="true">🛒</span>
+        <svg class="icon icon--lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 3h2.2l2.2 10.4a2 2 0 0 0 2 1.6h7.5a2 2 0 0 0 2-1.55L20 7H6.2"/><circle cx="9.5" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>
         <span class="mhead__cart-count" aria-hidden="true">3</span>
       </a>
     </div>
@@ -3667,11 +4032,11 @@ textarea.field__control {
 </header>
 <div class="tbar" data-variant="1">
   <div class="tbar__inner">
-    <span class="tbar__lead"><span aria-hidden="true">🛡</span> Pourquoi choisir SOUQNA ?</span>
+    <span class="tbar__lead"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3 4.5 6v5.4c0 4.3 3 8.2 7.5 9.6 4.5-1.4 7.5-5.3 7.5-9.6V6Z"/></svg> Pourquoi choisir SOUQNA ?</span>
     <div class="tbar__list" role="region" aria-label="Garanties" tabindex="0">
-      <span class="tbar__item"><span class="tbar__icon" aria-hidden="true">🔒</span>Protection des données</span>
-      <span class="tbar__item"><span class="tbar__icon" aria-hidden="true">💳</span>Paiement sécurisé</span>
-      <span class="tbar__item"><span class="tbar__icon" aria-hidden="true">✅</span>Garantie de livraison <span aria-hidden="true">›</span></span>
+      <span class="tbar__item"><span class="tbar__icon" aria-hidden="true"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4.5" y="10" width="15" height="10" rx="2"/><path d="M8 10V7.5a4 4 0 0 1 8 0V10"/></svg></span>Protection des données</span>
+      <span class="tbar__item"><span class="tbar__icon" aria-hidden="true"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 9.5h19"/></svg></span>Paiement sécurisé</span>
+      <span class="tbar__item"><span class="tbar__icon" aria-hidden="true"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3 4.5 6v5.4c0 4.3 3 8.2 7.5 9.6 4.5-1.4 7.5-5.3 7.5-9.6V6Z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg></span>Garantie de livraison <span aria-hidden="true">›</span></span>
     </div>
   </div>
 </div>
@@ -3702,7 +4067,7 @@ textarea.field__control {
     <li><a class="cpill" href="#" data-label="Fournitures de bureau et écoles">Fournitures de bureau et écoles</a></li>
   </ul>
   <button class="cpills__next" type="button" data-scroller-next aria-label="Catégories suivantes">
-    <span aria-hidden="true">›</span>
+    <svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 5 7 7-7 7"/></svg>
   </button>
 </nav>
   <h2 class="visually-hidden">Produits</h2>
@@ -3723,14 +4088,14 @@ textarea.field__control {
       <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€7.38</s>
     </span>
     <button class="pgc__add" type="button" aria-label="Ajouter au panier : Montre connectée écran tactile étanche IP68 multisport">
-      <span aria-hidden="true">🛒</span>
+      <svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 3h2.2l2.2 10.4a2 2 0 0 0 2 1.6h7.5a2 2 0 0 0 2-1.55L20 7H6.2"/><circle cx="9.5" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>
     </button>
   </div>
   <div class="pgc__note">À baissé de €0.21</div>
   <div class="pgc__rating">
     <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
     <span class="visually-hidden">Noté 4,5 sur 5.</span>
-    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 40,000+ ventes</span>
+    <span class="pgc__sold"><svg class="icon pgc__flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 40,000+ ventes</span>
   </div>
   <span class="pgc__seller"><span aria-hidden="true">★</span> Vendeur vedette</span>
 </article>
@@ -3750,14 +4115,14 @@ textarea.field__control {
       <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€29.32</s>
     </span>
     <button class="pgc__add" type="button" aria-label="Ajouter au panier : Casque audio sans fil réduction de bruit active 40h">
-      <span aria-hidden="true">🛒</span>
+      <svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 3h2.2l2.2 10.4a2 2 0 0 0 2 1.6h7.5a2 2 0 0 0 2-1.55L20 7H6.2"/><circle cx="9.5" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>
     </button>
   </div>
   <div class="pgc__note">PLUS QUE 12 <span aria-hidden="true">ⓘ</span></div>
   <div class="pgc__rating">
     <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
     <span class="visually-hidden">Noté 4,5 sur 5.</span>
-    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 12,000+ ventes</span>
+    <span class="pgc__sold"><svg class="icon pgc__flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 12,000+ ventes</span>
   </div>
   
 </article>
@@ -3777,14 +4142,14 @@ textarea.field__control {
       <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€105.39</s>
     </span>
     <button class="pgc__add" type="button" aria-label="Ajouter au panier : Sac à dos imperméable avec port USB intégré 30L">
-      <span aria-hidden="true">🛒</span>
+      <svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 3h2.2l2.2 10.4a2 2 0 0 0 2 1.6h7.5a2 2 0 0 0 2-1.55L20 7H6.2"/><circle cx="9.5" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>
     </button>
   </div>
   <div class="pgc__note pgc__note--rank">#5 Le mieux noté dans Bagages et Voyage</div>
   <div class="pgc__rating">
     <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
     <span class="visually-hidden">Noté 4,5 sur 5.</span>
-    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 5,000+ ventes</span>
+    <span class="pgc__sold"><svg class="icon pgc__flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 5,000+ ventes</span>
   </div>
   
 </article>
@@ -3804,14 +4169,14 @@ textarea.field__control {
       <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€19.01</s>
     </span>
     <button class="pgc__add" type="button" aria-label="Ajouter au panier : Baskets homme running maille respirante semelle souple">
-      <span aria-hidden="true">🛒</span>
+      <svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 3h2.2l2.2 10.4a2 2 0 0 0 2 1.6h7.5a2 2 0 0 0 2-1.55L20 7H6.2"/><circle cx="9.5" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>
     </button>
   </div>
   
   <div class="pgc__rating">
     <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
     <span class="visually-hidden">Noté 4,5 sur 5.</span>
-    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 29,000+ ventes</span>
+    <span class="pgc__sold"><svg class="icon pgc__flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 29,000+ ventes</span>
   </div>
   
 </article>
@@ -3831,14 +4196,14 @@ textarea.field__control {
       <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€11.15</s>
     </span>
     <button class="pgc__add" type="button" aria-label="Ajouter au panier : Sac à main cuir texturé anse rigide fermoir doré">
-      <span aria-hidden="true">🛒</span>
+      <svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 3h2.2l2.2 10.4a2 2 0 0 0 2 1.6h7.5a2 2 0 0 0 2-1.55L20 7H6.2"/><circle cx="9.5" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>
     </button>
   </div>
   
   <div class="pgc__rating">
     <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
     <span class="visually-hidden">Noté 4,5 sur 5.</span>
-    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 21,000+ ventes</span>
+    <span class="pgc__sold"><svg class="icon pgc__flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 21,000+ ventes</span>
   </div>
   <span class="pgc__seller"><span aria-hidden="true">★</span> Vendeur vedette</span>
 </article>
@@ -3858,14 +4223,14 @@ textarea.field__control {
       <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€48.54</s>
     </span>
     <button class="pgc__add" type="button" aria-label="Ajouter au panier : Parure bijoux plaqué or pierres naturelles 3 pièces">
-      <span aria-hidden="true">🛒</span>
+      <svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 3h2.2l2.2 10.4a2 2 0 0 0 2 1.6h7.5a2 2 0 0 0 2-1.55L20 7H6.2"/><circle cx="9.5" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>
     </button>
   </div>
   <div class="pgc__note pgc__note--rank">Article meilleure vente dans Bijoux</div>
   <div class="pgc__rating">
     <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
     <span class="visually-hidden">Noté 4,5 sur 5.</span>
-    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 15,000+ ventes</span>
+    <span class="pgc__sold"><svg class="icon pgc__flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 15,000+ ventes</span>
   </div>
   
 </article>
@@ -3885,14 +4250,14 @@ textarea.field__control {
       <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€51.54</s>
     </span>
     <button class="pgc__add" type="button" aria-label="Ajouter au panier : Set 5 pièces ustensiles de cuisine en fonte émaillée">
-      <span aria-hidden="true">🛒</span>
+      <svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 3h2.2l2.2 10.4a2 2 0 0 0 2 1.6h7.5a2 2 0 0 0 2-1.55L20 7H6.2"/><circle cx="9.5" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>
     </button>
   </div>
   <div class="pgc__note">PLUS QUE 3 <span aria-hidden="true">ⓘ</span></div>
   <div class="pgc__rating">
     <span class="pgc__stars" aria-hidden="true">★★★★☆</span>
     <span class="visually-hidden">Noté 4 sur 5.</span>
-    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 6,000+ ventes</span>
+    <span class="pgc__sold"><svg class="icon pgc__flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 6,000+ ventes</span>
   </div>
   
 </article>
@@ -3912,14 +4277,14 @@ textarea.field__control {
       <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€6.48</s>
     </span>
     <button class="pgc__add" type="button" aria-label="Ajouter au panier : Costume 3 pièces homme coupe ajustée laine mélangée">
-      <span aria-hidden="true">🛒</span>
+      <svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 3h2.2l2.2 10.4a2 2 0 0 0 2 1.6h7.5a2 2 0 0 0 2-1.55L20 7H6.2"/><circle cx="9.5" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>
     </button>
   </div>
   <div class="pgc__note pgc__note--rank">#10 DES ARTICLES LES PLUS VENDUS</div>
   <div class="pgc__rating">
     <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
     <span class="visually-hidden">Noté 4,5 sur 5.</span>
-    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 150,000+ ventes</span>
+    <span class="pgc__sold"><svg class="icon pgc__flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 150,000+ ventes</span>
   </div>
   <span class="pgc__seller"><span aria-hidden="true">★</span> Vendeur vedette</span>
 </article>
@@ -3939,14 +4304,14 @@ textarea.field__control {
       <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€6.15</s>
     </span>
     <button class="pgc__add" type="button" aria-label="Ajouter au panier : Horloge murale silencieuse 30 cm cadran minimaliste">
-      <span aria-hidden="true">🛒</span>
+      <svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 3h2.2l2.2 10.4a2 2 0 0 0 2 1.6h7.5a2 2 0 0 0 2-1.55L20 7H6.2"/><circle cx="9.5" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>
     </button>
   </div>
   <div class="pgc__note pgc__note--rank">#2 Article meilleure vente dans Décoration</div>
   <div class="pgc__rating">
     <span class="pgc__stars" aria-hidden="true">★★★★★</span>
     <span class="visually-hidden">Noté 5 sur 5.</span>
-    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 7,000+ ventes</span>
+    <span class="pgc__sold"><svg class="icon pgc__flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 7,000+ ventes</span>
   </div>
   <span class="pgc__seller"><span aria-hidden="true">★</span> Vendeur vedette</span>
 </article>
@@ -3966,14 +4331,14 @@ textarea.field__control {
       <s class="pgc__compare"><span class="visually-hidden">Prix initial </span>€13.34</s>
     </span>
     <button class="pgc__add" type="button" aria-label="Ajouter au panier : Sac à main structuré bandoulière amovible cuir grainé">
-      <span aria-hidden="true">🛒</span>
+      <svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 3h2.2l2.2 10.4a2 2 0 0 0 2 1.6h7.5a2 2 0 0 0 2-1.55L20 7H6.2"/><circle cx="9.5" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>
     </button>
   </div>
   <div class="pgc__note pgc__note--rank">#2 Article meilleure vente dans Sacs</div>
   <div class="pgc__rating">
     <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
     <span class="visually-hidden">Noté 4,5 sur 5.</span>
-    <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 150,000+ ventes</span>
+    <span class="pgc__sold"><svg class="icon pgc__flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 150,000+ ventes</span>
   </div>
   <span class="pgc__seller"><span aria-hidden="true">★</span> Vendeur vedette</span>
 </article>
@@ -3994,8 +4359,8 @@ textarea.field__control {
 <main class="pdp"  >
   <div class="pdp__inner">
     <nav class="pdp__crumbs" aria-label="Fil d'Ariane">
-      <a href="#">Accueil</a><span class="pdp__crumb-sep" aria-hidden="true">›</span>
-      <a href="#">Auto et Moto</a><span class="pdp__crumb-sep" aria-hidden="true">›</span>
+      <a href="#">Accueil</a><span class="pdp__crumb-sep"><svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 5 7 7-7 7"/></svg></span>
+      <a href="#">Auto et Moto</a><span class="pdp__crumb-sep"><svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 5 7 7-7 7"/></svg></span>
       <span class="pdp__crumb-current">Supports de téléphone</span>
     </nav>
 
@@ -4033,7 +4398,7 @@ textarea.field__control {
     <span class="reviews__score">4,6
       <span class="reviews__stars" aria-hidden="true">★★★★⯪</span>
     </span>
-    <span class="reviews__verified"><span aria-hidden="true">✔</span> Tous les avis proviennent d'achats vérifiés</span>
+    <span class="reviews__verified"><svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg> Tous les avis proviennent d'achats vérifiés</span>
   </div>
   <div class="reviews__fit">
     <div class="fitrow">
@@ -4148,7 +4513,7 @@ textarea.field__control {
       <div class="pgc__rating">
         <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
         <span class="visually-hidden">Noté 4,5 sur 5.</span>
-        <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 12 000+ ventes</span>
+        <span class="pgc__sold"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 12 000+ ventes</span>
       </div>
     </article>
     <article class="pgc" aria-labelledby="rel-1">
@@ -4169,7 +4534,7 @@ textarea.field__control {
       <div class="pgc__rating">
         <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
         <span class="visually-hidden">Noté 4,5 sur 5.</span>
-        <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 12 000+ ventes</span>
+        <span class="pgc__sold"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 12 000+ ventes</span>
       </div>
     </article>
     <article class="pgc" aria-labelledby="rel-2">
@@ -4190,7 +4555,7 @@ textarea.field__control {
       <div class="pgc__rating">
         <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
         <span class="visually-hidden">Noté 4,5 sur 5.</span>
-        <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 12 000+ ventes</span>
+        <span class="pgc__sold"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 12 000+ ventes</span>
       </div>
     </article>
     <article class="pgc" aria-labelledby="rel-3">
@@ -4211,7 +4576,7 @@ textarea.field__control {
       <div class="pgc__rating">
         <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
         <span class="visually-hidden">Noté 4,5 sur 5.</span>
-        <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 12 000+ ventes</span>
+        <span class="pgc__sold"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 12 000+ ventes</span>
       </div>
     </article>
     <article class="pgc" aria-labelledby="rel-4">
@@ -4232,7 +4597,7 @@ textarea.field__control {
       <div class="pgc__rating">
         <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
         <span class="visually-hidden">Noté 4,5 sur 5.</span>
-        <span class="pgc__sold"><span class="pgc__flame" aria-hidden="true">◆</span> 12 000+ ventes</span>
+        <span class="pgc__sold"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 12 000+ ventes</span>
       </div>
     </article>
   </div>
@@ -4241,15 +4606,15 @@ textarea.field__control {
       <div class="pdp__buybox" data-sticky-fit>
         <div class="bb">
           <div class="bb__savings">
-  <span class="bb__savings-flag"><span aria-hidden="true">💰</span> ÉCONOMIES</span>
+  <span class="bb__savings-flag"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3.5 11.5v-7a1 1 0 0 1 1-1h7l9 9-8 8Z"/><circle cx="7.8" cy="7.8" r="1.3"/></svg> ÉCONOMIES</span>
   <span class="bb__savings-list">
-    <span class="bb__savings-item"><span aria-hidden="true">✔</span> Livraison gratuite</span>
-    <span class="bb__savings-item"><span aria-hidden="true">✔</span> Crédit en cas de retard <span aria-hidden="true">›</span></span>
+    <span class="bb__savings-item"><svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg> Livraison gratuite</span>
+    <span class="bb__savings-item"><svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg> Crédit en cas de retard <span aria-hidden="true">›</span></span>
   </span>
 </div>
           <div class="bb__title-row">
   <h1 class="bb__title">Support téléphone magnétique à ventouse amélioré, verrouillage rotatif réglable, adapté pour voitures, salles de sport et miroirs (noir / blanc)</h1>
-  <button class="bb__share" type="button" aria-label="Partager ce produit"><span aria-hidden="true">↪</span></button>
+  <button class="bb__share" type="button" aria-label="Partager ce produit"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="m8.3 10.8 7.4-4M8.3 13.2l7.4 4"/></svg></button>
 </div>
           <div class="bb__rating">
   <span class="bb__rating-score">4,5</span>
@@ -4258,7 +4623,7 @@ textarea.field__control {
   <span class="bb__rating-count">40 000+ ventes</span>
   <span class="bb__rating-sep" aria-hidden="true">|</span>
   <span>Vendu par</span>
-  <span class="bb__seller-badge"><span aria-hidden="true">★</span> Vendeur vedette</span>
+  <span class="bb__seller-badge"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m12 3.5 2.6 5.4 5.9.8-4.3 4.2 1 5.9-5.2-2.8-5.2 2.8 1-5.9L3.5 9.7l5.9-.8Z"/></svg> Vendeur vedette</span>
 </div>
           <div class="bb__rank">
   <span class="bb__rank-badge">#1 Meilleure vente</span>
@@ -4267,7 +4632,7 @@ textarea.field__control {
           <div class="bb__price-row">
   <s class="bb__price-was"><span class="visually-hidden">Prix initial </span>7 380 DA</s>
   <span class="bb__price-deal">
-    <span aria-hidden="true">⏰</span>
+    <svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5.3l3.4 2"/></svg>
     <span class="bb__price-label">Dernier jour</span>
     <span class="bb__price-now">1 530 DA</span>
   </span>
@@ -4282,7 +4647,7 @@ textarea.field__control {
   <div class="bb__promo-head">
     <span class="bb__promo-name">GRANDES PROMOS</span>
     <span class="bb__promo-rule" aria-hidden="true"></span>
-    <span class="bb__promo-timer"><span aria-hidden="true">⏱</span> SE TERMINE DANS 16:04:43</span>
+    <span class="bb__promo-timer"><svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5.3l3.4 2"/></svg> SE TERMINE DANS 16:04:43</span>
     <span class="bb__promo-more" aria-hidden="true">›</span>
   </div>
   <div class="bb__promo-body">
@@ -4331,26 +4696,46 @@ textarea.field__control {
       <option>1</option><option>2</option><option>3</option><option>4</option>
     </select>
   </label>
-  <span class="bb__qty-sold"><span class="pgc__flame" aria-hidden="true">◆</span> 40 000+ ventes</span>
+  <span class="bb__qty-sold"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 40 000+ ventes</span>
 </div>
           <button class="bb__cta" type="button">
   -79% maintenant ! Ajouter au panier
 </button>
-          <div class="bb__trust">
-  <span class="bb__ship-title"><span aria-hidden="true">🚚</span> Livraison gratuite dès 8 000 DA <span aria-hidden="true">›</span></span>
-  <span class="bb__ship-line">Livraison : <b>2 à 5 jours ouvrés</b></span>
+          <div class="deliv">
+  <span class="deliv__title"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 6.5h11v9h-11z"/><path d="M13.5 10h4l3 3.2v2.3h-7z"/><circle cx="6.5" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg> Livraison gratuite sur toutes les commandes <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 5 7 7-7 7"/></svg></span>
+  <span class="deliv__row">Livraison : <b>2 à 5 jours ouvrés</b></span>
+  <span class="deliv__carriers">
+    <span class="deliv__row">Transporteur :</span>
+    <span class="deliv__carrier">
+      <img class="deliv__logo" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%2032%22%3E%0A%3Crect%20width%3D%22120%22%20height%3D%2232%22%20rx%3D%224%22%20fill%3D%22%230b3d91%22%2F%3E%0A%3Ctext%20x%3D%2260%22%20y%3D%2221%22%20text-anchor%3D%22middle%22%20font-family%3D%22system-ui%2Csans-serif%22%0A%20%20%20%20%20%20font-size%3D%2215%22%20font-weight%3D%22800%22%20fill%3D%22%23ffffff%22%3EYALIDINE%3C%2Ftext%3E%3C%2Fsvg%3E" alt="" width="120" height="32" loading="lazy" decoding="async">
+      Yalidine
+    </span>
+    <span class="deliv__carrier">
+      <img class="deliv__logo" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%2032%22%3E%0A%3Crect%20width%3D%22120%22%20height%3D%2232%22%20rx%3D%224%22%20fill%3D%22%23c9271c%22%2F%3E%0A%3Ctext%20x%3D%2260%22%20y%3D%2221%22%20text-anchor%3D%22middle%22%20font-family%3D%22system-ui%2Csans-serif%22%0A%20%20%20%20%20%20font-size%3D%2215%22%20font-weight%3D%22800%22%20fill%3D%22%23ffffff%22%3EZR%20EXPRESS%3C%2Ftext%3E%3C%2Fsvg%3E" alt="" width="120" height="32" loading="lazy" decoding="async">
+      ZR Express
+    </span>
+    <span class="deliv__carrier">
+      <img class="deliv__logo" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%2032%22%3E%0A%3Crect%20width%3D%22120%22%20height%3D%2232%22%20rx%3D%224%22%20fill%3D%22%23f0f2f3%22%2F%3E%0A%3Ctext%20x%3D%2260%22%20y%3D%2221%22%20text-anchor%3D%22middle%22%20font-family%3D%22system-ui%2Csans-serif%22%0A%20%20%20%20%20%20font-size%3D%2215%22%20font-weight%3D%22800%22%20fill%3D%22%230f7a3d%22%3EPOSTE%20DZ%3C%2Ftext%3E%3C%2Fsvg%3E" alt="" width="120" height="32" loading="lazy" decoding="async">
+      Algérie Poste
+    </span>
+  </span>
+  <span class="deliv__partner">
+    <span class="deliv__partner-brand">SOUQNA <span aria-hidden="true">&times;</span> <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 6.5h11v9h-11z"/><path d="M13.5 10h4l3 3.2v2.3h-7z"/><circle cx="6.5" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg></span>
+    <span class="deliv__partner-text">Ensemble pour une meilleure livraison</span>
+  </span>
+  <span class="deliv__line"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3 4.5 6v5.4c0 4.3 3 8.2 7.5 9.6 4.5-1.4 7.5-5.3 7.5-9.6V6Z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg> Paiement à la livraison &middot; Données protégées <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 5 7 7-7 7"/></svg></span>
+  <span class="deliv__line"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m12 3 8.5 4.5v9L12 21l-8.5-4.5v-9Z"/><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"/></svg> Garantie de commande <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 5 7 7-7 7"/></svg></span>
+  <span class="deliv__pills">
+    <span class="deliv__pill">Retour sous 7 jours</span>
+    <span class="deliv__pill">Échange gratuit</span>
+    <span class="deliv__pill">Article endommagé remboursé</span>
+  </span>
 </div>
-          <div class="bb__carriers">
-  <span class="bb__ship-line">Transporteur :</span>
-  <span class="bb__carrier"><span class="bb__carrier-logo">YAL</span> Yalidine</span>
-  <span class="bb__carrier"><span class="bb__carrier-logo">ZR</span> ZR Express</span>
-  <span class="bb__carrier"><span class="bb__carrier-logo">DZ</span> Algérie Poste</span>
-</div>
-          <div class="bb__trust">
-  <span class="bb__trust-row"><span aria-hidden="true">💵</span> Paiement à la livraison — payez après vérification</span>
-  <span class="bb__trust-row"><span aria-hidden="true">🛡</span> Garantie de commande <span aria-hidden="true">›</span></span>
-</div>
-          <form class="cod" data-cod-form id="cod-desktop"
+          <div class="cod-wrap" data-cod-wrap data-mode="inline" data-open="false" id="cod-anchor">
+  <button class="bb__reveal" type="button" data-cod-reveal>
+    <svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/></svg> Commander — paiement à la livraison
+  </button>
+  <form class="cod" data-cod-form id="cod-desktop"
       data-unit-price="1530"
       data-tariffs='{"10":[500,250],"11":[1000,500],"12":[600,300],"13":[500,250],"14":[600,300],"15":[500,250],"16":[400,200],"17":[600,300],"18":[600,300],"19":[600,300],"20":[600,300],"21":[500,250],"22":[500,250],"23":[500,250],"24":[500,250],"25":[500,250],"26":[500,250],"27":[500,250],"28":[600,300],"29":[600,300],"30":[800,400],"31":[500,250],"32":[600,300],"33":[1000,500],"34":[600,300],"35":[500,250],"36":[600,300],"37":[1000,500],"38":[600,300],"39":[800,400],"40":[600,300],"41":[600,300],"42":[500,250],"43":[500,250],"44":[500,250],"45":[600,300],"46":[500,250],"47":[800,400],"48":[500,250],"49":[1000,500],"50":[1000,500],"51":[800,400],"52":[800,400],"53":[1000,500],"54":[1000,500],"55":[800,400],"56":[1000,500],"57":[800,400],"58":[800,400],"01":[1000,500],"02":[500,250],"03":[600,300],"04":[600,300],"05":[600,300],"06":[500,250],"07":[600,300],"08":[800,400],"09":[500,250]}'
       data-tariff-fallback="[600,350]"
@@ -4371,13 +4756,13 @@ textarea.field__control {
         <label class="field__label" for="cod-desktop-prenom">Prénom <span class="field__req" aria-hidden="true">*</span></label>
         <input class="field__control" id="cod-desktop-prenom" name="prenom" type="text" autocomplete="given-name" placeholder="Nassim" data-cod-required>
         
-        <span class="field__error"><span aria-hidden="true">⚠</span> Ce champ est obligatoire</span>
+        <span class="field__error"><svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3 4.5 6v5.4c0 4.3 3 8.2 7.5 9.6 4.5-1.4 7.5-5.3 7.5-9.6V6Z"/></svg> Ce champ est obligatoire</span>
       </div>
       <div class="field">
         <label class="field__label" for="cod-desktop-nom">Nom <span class="field__req" aria-hidden="true">*</span></label>
         <input class="field__control" id="cod-desktop-nom" name="nom" type="text" autocomplete="family-name" placeholder="Benali" data-cod-required>
         
-        <span class="field__error"><span aria-hidden="true">⚠</span> Ce champ est obligatoire</span>
+        <span class="field__error"><svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3 4.5 6v5.4c0 4.3 3 8.2 7.5 9.6 4.5-1.4 7.5-5.3 7.5-9.6V6Z"/></svg> Ce champ est obligatoire</span>
       </div>
     </div>
 
@@ -4391,7 +4776,7 @@ textarea.field__control {
                  data-cod-required data-cod-pattern="^0[567][0-9]{8}$|^0[1-4][0-9]{7,8}$">
         </span>
         <span class="field__hint">Nous vous appelons sur ce numéro pour confirmer.</span>
-        <span class="field__error"><span aria-hidden="true">⚠</span> Ce champ est obligatoire</span>
+        <span class="field__error"><svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3 4.5 6v5.4c0 4.3 3 8.2 7.5 9.6 4.5-1.4 7.5-5.3 7.5-9.6V6Z"/></svg> Ce champ est obligatoire</span>
       </div>
     </div>
 
@@ -4402,7 +4787,7 @@ textarea.field__control {
           <option value="">Choisir la wilaya…</option>
         </select>
         
-        <span class="field__error"><span aria-hidden="true">⚠</span> Ce champ est obligatoire</span>
+        <span class="field__error"><svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3 4.5 6v5.4c0 4.3 3 8.2 7.5 9.6 4.5-1.4 7.5-5.3 7.5-9.6V6Z"/></svg> Ce champ est obligatoire</span>
       </div>
       <div class="field">
         <label class="field__label" for="cod-desktop-commune">Commune <span class="field__req" aria-hidden="true">*</span></label>
@@ -4411,7 +4796,7 @@ textarea.field__control {
           <option value="">Choisissez d'abord la wilaya</option>
         </select>
         
-        <span class="field__error"><span aria-hidden="true">⚠</span> Ce champ est obligatoire</span>
+        <span class="field__error"><svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3 4.5 6v5.4c0 4.3 3 8.2 7.5 9.6 4.5-1.4 7.5-5.3 7.5-9.6V6Z"/></svg> Ce champ est obligatoire</span>
       </div>
     </div>
 
@@ -4421,7 +4806,7 @@ textarea.field__control {
         <textarea class="field__control" id="cod-desktop-adresse" name="adresse" autocomplete="street-address"
            placeholder="Cité, rue, numéro, point de repère…" data-cod-required></textarea>
         <span class="field__hint">Plus l'adresse est précise, plus la livraison est rapide.</span>
-        <span class="field__error"><span aria-hidden="true">⚠</span> Ce champ est obligatoire</span>
+        <span class="field__error"><svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3 4.5 6v5.4c0 4.3 3 8.2 7.5 9.6 4.5-1.4 7.5-5.3 7.5-9.6V6Z"/></svg> Ce champ est obligatoire</span>
       </div>
     </div>
 
@@ -4475,10 +4860,6 @@ textarea.field__control {
     <p class="cod__status" data-cod-status role="status" aria-live="polite"></p>
   </div>
 </form>
-          <div class="bb__pills">
-  <span class="bb__pill">Retour sous 7 jours</span>
-  <span class="bb__pill">Échange gratuit</span>
-  <span class="bb__pill">Article endommagé remboursé</span>
 </div>
         </div>
       </div>
@@ -4486,12 +4867,12 @@ textarea.field__control {
   </div>
 </main>
 
-<div class="pdp__mobile-cta">
+<div class="pdp__mobile-cta" data-order-bar>
   <span class="pdp__mobile-price">
     <b>1 530 DA</b>
     <s>7 380 DA</s>
   </span>
-  <button class="bb__cta" type="button" data-sheet-open aria-controls="CodSheet">Commander maintenant</button>
+  <button class="bb__cta" type="button" data-order-jump>Commander maintenant</button>
 </div>
 
 <div class="cod-sheet" id="CodSheet" data-open="false">
@@ -4522,13 +4903,13 @@ textarea.field__control {
         <label class="field__label" for="cod-mobile-prenom">Prénom <span class="field__req" aria-hidden="true">*</span></label>
         <input class="field__control" id="cod-mobile-prenom" name="prenom" type="text" autocomplete="given-name" placeholder="Nassim" data-cod-required>
         
-        <span class="field__error"><span aria-hidden="true">⚠</span> Ce champ est obligatoire</span>
+        <span class="field__error"><svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3 4.5 6v5.4c0 4.3 3 8.2 7.5 9.6 4.5-1.4 7.5-5.3 7.5-9.6V6Z"/></svg> Ce champ est obligatoire</span>
       </div>
       <div class="field">
         <label class="field__label" for="cod-mobile-nom">Nom <span class="field__req" aria-hidden="true">*</span></label>
         <input class="field__control" id="cod-mobile-nom" name="nom" type="text" autocomplete="family-name" placeholder="Benali" data-cod-required>
         
-        <span class="field__error"><span aria-hidden="true">⚠</span> Ce champ est obligatoire</span>
+        <span class="field__error"><svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3 4.5 6v5.4c0 4.3 3 8.2 7.5 9.6 4.5-1.4 7.5-5.3 7.5-9.6V6Z"/></svg> Ce champ est obligatoire</span>
       </div>
     </div>
 
@@ -4542,7 +4923,7 @@ textarea.field__control {
                  data-cod-required data-cod-pattern="^0[567][0-9]{8}$|^0[1-4][0-9]{7,8}$">
         </span>
         <span class="field__hint">Nous vous appelons sur ce numéro pour confirmer.</span>
-        <span class="field__error"><span aria-hidden="true">⚠</span> Ce champ est obligatoire</span>
+        <span class="field__error"><svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3 4.5 6v5.4c0 4.3 3 8.2 7.5 9.6 4.5-1.4 7.5-5.3 7.5-9.6V6Z"/></svg> Ce champ est obligatoire</span>
       </div>
     </div>
 
@@ -4553,7 +4934,7 @@ textarea.field__control {
           <option value="">Choisir la wilaya…</option>
         </select>
         
-        <span class="field__error"><span aria-hidden="true">⚠</span> Ce champ est obligatoire</span>
+        <span class="field__error"><svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3 4.5 6v5.4c0 4.3 3 8.2 7.5 9.6 4.5-1.4 7.5-5.3 7.5-9.6V6Z"/></svg> Ce champ est obligatoire</span>
       </div>
       <div class="field">
         <label class="field__label" for="cod-mobile-commune">Commune <span class="field__req" aria-hidden="true">*</span></label>
@@ -4562,7 +4943,7 @@ textarea.field__control {
           <option value="">Choisissez d'abord la wilaya</option>
         </select>
         
-        <span class="field__error"><span aria-hidden="true">⚠</span> Ce champ est obligatoire</span>
+        <span class="field__error"><svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3 4.5 6v5.4c0 4.3 3 8.2 7.5 9.6 4.5-1.4 7.5-5.3 7.5-9.6V6Z"/></svg> Ce champ est obligatoire</span>
       </div>
     </div>
 
@@ -4572,7 +4953,7 @@ textarea.field__control {
         <textarea class="field__control" id="cod-mobile-adresse" name="adresse" autocomplete="street-address"
            placeholder="Cité, rue, numéro, point de repère…" data-cod-required></textarea>
         <span class="field__hint">Plus l'adresse est précise, plus la livraison est rapide.</span>
-        <span class="field__error"><span aria-hidden="true">⚠</span> Ce champ est obligatoire</span>
+        <span class="field__error"><svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3 4.5 6v5.4c0 4.3 3 8.2 7.5 9.6 4.5-1.4 7.5-5.3 7.5-9.6V6Z"/></svg> Ce champ est obligatoire</span>
       </div>
     </div>
 
@@ -5006,6 +5387,58 @@ window.DZ_LOCATIONS=[{"c":"01","ar":"أدرار","fr":"Adrar","m":[["أدرار"
     });
   }
 
+
+  /* ----------------------------------------------------------------------
+     COD form reveal.
+     The merchant chooses whether the form is on the page from the start or
+     sits behind an order button. Either way the mobile bar can open it.
+     ---------------------------------------------------------------------- */
+  function initCodReveal(wrap) {
+    var btn = wrap.querySelector("[data-cod-reveal]");
+    if (!btn) return;
+    btn.addEventListener("click", function () {
+      openCod(wrap);
+    });
+  }
+
+  function openCod(wrap) {
+    wrap.dataset.open = "true";
+    var first = wrap.querySelector("input, select, textarea");
+    if (first) {
+      first.scrollIntoView({ block: "center", behavior: "smooth" });
+      // Focusing immediately fights the smooth scroll on iOS.
+      setTimeout(function () {
+        first.focus({ preventScroll: true });
+      }, 380);
+    }
+  }
+
+  /* ----------------------------------------------------------------------
+     Mobile order bar.
+     Follows the customer down the page, jumps them to the form, and gets out
+     of the way once the form is actually on screen.
+     ---------------------------------------------------------------------- */
+  function initOrderBar(bar) {
+    var wrap = document.querySelector("[data-cod-wrap]");
+    var btn = bar.querySelector("[data-order-jump]");
+
+    if (btn && wrap) {
+      btn.addEventListener("click", function () {
+        openCod(wrap);
+      });
+    }
+
+    if (!wrap || !("IntersectionObserver" in window)) return;
+
+    var io = new IntersectionObserver(
+      function (entries) {
+        bar.dataset.hidden = String(entries[0].isIntersecting);
+      },
+      { rootMargin: "-40% 0px -20% 0px" }
+    );
+    io.observe(wrap);
+  }
+
   function boot() {
     document.querySelectorAll("[data-sticky-fit]").forEach(initStickyFit);
     document.querySelectorAll("[data-disclosure]").forEach(initDisclosure);
@@ -5013,6 +5446,8 @@ window.DZ_LOCATIONS=[{"c":"01","ar":"أدرار","fr":"Adrar","m":[["أدرار"
     document.querySelectorAll("[data-loadmore]").forEach(initLoadMore);
     document.querySelectorAll("[data-cod-form]").forEach(initCodForm);
     document.querySelectorAll("[data-sheet-open]").forEach(initSheet);
+    document.querySelectorAll("[data-cod-wrap]").forEach(initCodReveal);
+    document.querySelectorAll("[data-order-bar]").forEach(initOrderBar);
   }
 
   if (document.readyState === "loading") {

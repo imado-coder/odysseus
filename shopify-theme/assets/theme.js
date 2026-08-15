@@ -369,6 +369,58 @@
     });
   }
 
+
+  /* ----------------------------------------------------------------------
+     COD form reveal.
+     The merchant chooses whether the form is on the page from the start or
+     sits behind an order button. Either way the mobile bar can open it.
+     ---------------------------------------------------------------------- */
+  function initCodReveal(wrap) {
+    var btn = wrap.querySelector("[data-cod-reveal]");
+    if (!btn) return;
+    btn.addEventListener("click", function () {
+      openCod(wrap);
+    });
+  }
+
+  function openCod(wrap) {
+    wrap.dataset.open = "true";
+    var first = wrap.querySelector("input, select, textarea");
+    if (first) {
+      first.scrollIntoView({ block: "center", behavior: "smooth" });
+      // Focusing immediately fights the smooth scroll on iOS.
+      setTimeout(function () {
+        first.focus({ preventScroll: true });
+      }, 380);
+    }
+  }
+
+  /* ----------------------------------------------------------------------
+     Mobile order bar.
+     Follows the customer down the page, jumps them to the form, and gets out
+     of the way once the form is actually on screen.
+     ---------------------------------------------------------------------- */
+  function initOrderBar(bar) {
+    var wrap = document.querySelector("[data-cod-wrap]");
+    var btn = bar.querySelector("[data-order-jump]");
+
+    if (btn && wrap) {
+      btn.addEventListener("click", function () {
+        openCod(wrap);
+      });
+    }
+
+    if (!wrap || !("IntersectionObserver" in window)) return;
+
+    var io = new IntersectionObserver(
+      function (entries) {
+        bar.dataset.hidden = String(entries[0].isIntersecting);
+      },
+      { rootMargin: "-40% 0px -20% 0px" }
+    );
+    io.observe(wrap);
+  }
+
   function boot() {
     document.querySelectorAll("[data-sticky-fit]").forEach(initStickyFit);
     document.querySelectorAll("[data-disclosure]").forEach(initDisclosure);
@@ -376,6 +428,8 @@
     document.querySelectorAll("[data-loadmore]").forEach(initLoadMore);
     document.querySelectorAll("[data-cod-form]").forEach(initCodForm);
     document.querySelectorAll("[data-sheet-open]").forEach(initSheet);
+    document.querySelectorAll("[data-cod-wrap]").forEach(initCodReveal);
+    document.querySelectorAll("[data-order-bar]").forEach(initOrderBar);
   }
 
   if (document.readyState === "loading") {
