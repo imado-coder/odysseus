@@ -80,3 +80,42 @@ The theme already posts the payload; nothing in the theme changes.
   own stores does not.
 - Verify the API version pinned in `shopify.app.toml` against the current
   release before launch.
+
+## Seeding reference data
+
+```bash
+npx prisma db seed
+```
+
+Loads all 58 wilayas and 1,541 communes. Run it once per environment before
+the first order — the endpoint looks up the wilaya name from these rows.
+
+Add to `package.json`:
+
+```json
+"prisma": { "seed": "tsx prisma/seed.ts" }
+```
+
+## What exists so far
+
+| Piece | File |
+|---|---|
+| Data model | `prisma/schema.prisma` |
+| Reference data seed | `prisma/seed.ts` |
+| App config, install hook | `app/shopify.server.ts` |
+| Prisma client | `app/db.server.ts` |
+| Uninstall webhook | `app/routes/webhooks.tsx` |
+| Public order endpoint | `app/routes/api.cod.tsx` |
+| Order creation | `app/lib/order.server.ts` |
+| Payload validation | `app/lib/validate.server.ts` |
+| Orders dashboard | `app/routes/app._index.tsx` |
+
+Installation creates the shop, its settings and a shipping rate for all 58
+wilayas, so the merchant edits numbers instead of facing an empty table.
+
+## Still to build
+
+- Shipping rates editor
+- Offer builder
+- Billing through the Shopify Billing API
+- Analytics

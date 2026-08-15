@@ -1,0 +1,29 @@
+# MITOS — cash-on-delivery commerce
+# client_id is filled in by `shopify app config link`.
+
+name = "MITOS COD"
+handle = "mitos-cod"
+application_url = "https://example.com"
+embedded = true
+
+[access_scopes]
+# write_orders is what orderCreate needs. Customer name, phone and address are
+# protected customer data — a public app needs Shopify's approval for that
+# access, and approval is not instant.
+scopes = "write_orders,read_orders,read_products"
+
+[auth]
+redirect_urls = [
+  "https://example.com/auth/callback",
+  "https://example.com/auth/shopify/callback",
+]
+
+[webhooks]
+api_version = "2026-01"
+
+  [[webhooks.subscriptions]]
+  topics = [ "app/uninstalled" ]
+  uri = "/webhooks"
+
+[pos]
+embedded = false
