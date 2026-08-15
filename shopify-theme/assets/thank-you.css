@@ -1,0 +1,221 @@
+/* ==========================================================================
+   thank-you.css — order confirmation.
+   The moment after a cash-on-delivery order is where doubt creeps in: nothing
+   was paid, so nothing feels settled. This page's job is to say the order
+   exists, that a human will call, and roughly when.
+   ========================================================================== */
+
+.ty {
+  min-block-size: 70vh;
+  padding: 32px 16px 48px;
+  background: var(--c-bg, #f4f5f6);
+}
+
+.ty__card {
+  max-inline-size: 560px;
+  margin-inline: auto;
+  padding: 28px 20px 24px;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 2px 14px rgba(16, 20, 24, 0.07);
+  text-align: center;
+}
+
+/* The mark draws itself once, so the confirmation feels like it happened
+   rather than like it was already there. */
+.ty__mark {
+  inline-size: 74px;
+  block-size: 74px;
+  margin-inline: auto;
+  border-radius: 50%;
+  background: #e8f6e9;
+  display: grid;
+  place-items: center;
+  color: #0b7d14;
+}
+
+.ty__mark .icon { inline-size: 40px; block-size: 40px; }
+
+.ty__mark path {
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  animation: ty-draw 460ms 120ms ease forwards;
+}
+
+@keyframes ty-draw { to { stroke-dashoffset: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .ty__mark path { animation: none; stroke-dashoffset: 0; }
+}
+
+.ty__title {
+  margin-block-start: 16px;
+  font-size: clamp(22px, 5.5vw, 28px);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.ty__lede {
+  margin-block-start: 10px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--c-ink-2, #5b6570);
+  text-wrap: pretty;
+}
+
+.ty__ref {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-block-start: 16px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--c-bg, #f4f5f6);
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- what happens next --- */
+.ty__steps {
+  margin-block-start: 26px;
+  text-align: start;
+  display: grid;
+  gap: 2px;
+}
+
+.ty__step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 12px;
+  padding-block: 12px;
+}
+
+/* The connector runs between the dots, not past the last one. */
+.ty__step:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  inset-block: 40px 0;
+  inset-inline-start: 16px;
+  inline-size: 2px;
+  background: var(--c-border, #e7eaec);
+}
+
+.ty__step-dot {
+  inline-size: 34px;
+  block-size: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--c-accent-light, #fff1e6);
+  color: var(--c-accent-text, #c24e00);
+  z-index: 1;
+}
+
+.ty__step--done .ty__step-dot { background: #e8f6e9; color: #0b7d14; }
+
+.ty__step-title,
+.ty__step-text { display: block; }
+
+.ty__step-title {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.ty__step-text {
+  margin-block-start: 3px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--c-ink-2, #5b6570);
+}
+
+/* --- order summary --- */
+.ty__summary {
+  margin-block-start: 22px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--c-border, #e7eaec);
+  text-align: start;
+}
+
+.ty__line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-block: 5px;
+  font-size: 14px;
+}
+
+.ty__line dt { color: var(--c-ink-2, #5b6570); margin: 0; }
+.ty__line dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.ty__line--total {
+  margin-block-start: 6px;
+  padding-block-start: 10px;
+  border-block-start: 1px solid var(--c-border, #e7eaec);
+}
+
+.ty__line--total dt { color: var(--c-ink, #101418); font-weight: 700; }
+
+.ty__line--total dd {
+  font-size: 19px;
+  font-weight: 900;
+  color: var(--c-accent-text, #c24e00);
+}
+
+.ty__paynote {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-block-start: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #e8f6e9;
+  color: #0a6a11;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: start;
+}
+
+/* --- actions --- */
+.ty__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-block-start: 22px;
+}
+
+@media (min-width: 480px) {
+  .ty__actions { flex-direction: row; justify-content: center; }
+}
+
+.ty__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-block-size: 52px;
+  padding-inline: 24px;
+  border-radius: var(--r-pill, 999px);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.ty__btn--primary { background: var(--c-accent-text, #c24e00); color: #fff; }
+
+.ty__btn--ghost {
+  border: 1.5px solid var(--c-border-strong, #d3d8dc);
+  color: var(--c-ink, #101418);
+}
+
+.ty__help {
+  margin-block-start: 20px;
+  font-size: 13px;
+  color: var(--c-ink-2, #5b6570);
+}
+
+.ty__help a { font-weight: 700; text-decoration: underline; }

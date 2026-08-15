@@ -104,8 +104,7 @@ function pgc(it, i, v, idx) {
       : ""
   }
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">${starStr(it.stars)}</span>
-    <span class="visually-hidden">Noté ${String(it.stars).replace(".", ",")} sur 5.</span>
+    <span class="stars stars--sm" style="--stars-fill:${(it.stars / 5) * 100}%" role="img" aria-label="Noté ${String(it.stars).replace(".", ",")} sur 5"></span>
     <span class="pgc__sold">${icon("flame", "pgc__flame")} ${it.sold} ventes</span>
   </div>
   ${it.seller ? '<span class="pgc__seller"><span aria-hidden="true">\u2605</span> Vendeur vedette</span>' : ""}

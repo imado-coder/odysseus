@@ -117,8 +117,7 @@
 </div>
           <div class="bb__rating">
   <span class="bb__rating-score">4,5</span>
-  <span class="bb__rating-stars" aria-hidden="true">★★★★⯪</span>
-  <span class="visually-hidden">Noté 4,5 sur 5.</span>
+  <span class="stars stars--accent" style="--stars-fill:90%" role="img" aria-label="Noté 4,5 sur 5"></span>
   <span class="bb__rating-count">40 000+ ventes</span>
   <span class="bb__rating-sep" aria-hidden="true">|</span>
   <span>Vendu par</span>
@@ -388,7 +387,7 @@
     <h2 class="reviews__count" id="ReviewsTitle">739 avis</h2>
     <span class="reviews__sep" aria-hidden="true">|</span>
     <span class="reviews__score">4,6
-      <span class="reviews__stars" aria-hidden="true">★★★★⯪</span>
+      <span class="stars stars--lg" style="--stars-fill:92%" role="img" aria-label="Noté 4,6 sur 5"></span>
     </span>
     <span class="reviews__verified"><svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg> Tous les avis proviennent d'achats vérifiés</span>
   </div>
@@ -417,8 +416,7 @@
       <span class="review__meta">le 18 juil. 2026</span>
     </div>
     <div class="review__rating">
-      <span class="review__stars" aria-hidden="true">★★★★★</span>
-      <span class="visually-hidden">Noté 5 sur 5.</span>
+      <span class="stars" style="--stars-fill:100%" role="img" aria-label="Noté 5 sur 5"></span>
       <span class="review__tag">Excellent</span>
     </div>
     <p class="review__text">Très léger et super confortable. La couleur correspond bien à celle de la photo.</p>
@@ -431,8 +429,7 @@
       <span class="review__meta">le 29 juil. 2026</span>
     </div>
     <div class="review__rating">
-      <span class="review__stars" aria-hidden="true">★★★★★</span>
-      <span class="visually-hidden">Noté 5 sur 5.</span>
+      <span class="stars" style="--stars-fill:100%" role="img" aria-label="Noté 5 sur 5"></span>
       <span class="review__tag">Excellent</span>
     </div>
     <p class="review__text">Très bonne qualité pour le prix. La fixation tient parfaitement même sur route dégradée.</p>
@@ -445,8 +442,7 @@
       <span class="review__meta">le 9 mai 2026</span>
     </div>
     <div class="review__rating">
-      <span class="review__stars" aria-hidden="true">★★★★★</span>
-      <span class="visually-hidden">Noté 5 sur 5.</span>
+      <span class="stars" style="--stars-fill:100%" role="img" aria-label="Noté 5 sur 5"></span>
       <span class="review__tag">Excellent</span>
     </div>
     <p class="review__text">Produit conforme, livraison rapide. Je recommande vivement.</p>
@@ -459,8 +455,7 @@
       <span class="review__meta">le 30 juin 2026</span>
     </div>
     <div class="review__rating">
-      <span class="review__stars" aria-hidden="true">★★★★☆</span>
-      <span class="visually-hidden">Noté 4 sur 5.</span>
+      <span class="stars" style="--stars-fill:80%" role="img" aria-label="Noté 4 sur 5"></span>
       
     </div>
     <p class="review__text">Bon rapport qualité-prix, mais la notice est en anglais uniquement.</p>
@@ -581,12 +576,15 @@
   </div>
 </main>
 
-<div class="pdp__mobile-cta" data-order-bar>
-  <span class="pdp__mobile-price">
-    <b>1 530 DA</b>
-    <s>7 380 DA</s>
+<div class="order-float" data-order-bar>
+  <span class="order-float__price">
+    <span class="order-float__now">1 530 DA</span>
+    <s class="order-float__was">7 380 DA</s>
   </span>
-  <button class="bb__cta" type="button" data-order-jump>Commander maintenant</button>
+  <button class="order-float__btn" type="button" data-order-jump>
+    <span class="order-float__main">Commander</span>
+    <span class="order-float__sub">Paiement à la livraison</span>
+  </button>
 </div>
 
 <div class="cod-sheet" id="CodSheet" data-open="false">

@@ -129,3 +129,80 @@
   font-weight: 500;
   text-decoration-thickness: 1.5px;
 }
+
+/* ==========================================================================
+   Star rating
+   Glyph stars were the problem: ★ and ☆ come from whatever font the device
+   happens to have, and the half-star codepoint (U+2BEA) is missing from most
+   of them, so it rendered as a box. This draws the row from one masked shape
+   instead — the fill is a percentage, so 4.3 of 5 is exactly 86% of the row,
+   at any size, in any font, in any colour.
+   ========================================================================== */
+.stars {
+  --star-size: 14px;
+  --star-gap: 1px;
+  --stars-on: #101418;
+  --stars-off: #d3d8dc;
+  --stars-fill: 100%;
+  --star-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path d='M10 1.6l2.47 5.01 5.53.8-4 3.9.94 5.5L10 14.21l-4.94 2.6.94-5.5-4-3.9 5.53-.8z'/></svg>")
+    0 0 / calc(var(--star-size) + var(--star-gap)) var(--star-size) repeat-x;
+
+  position: relative;
+  display: inline-block;
+  vertical-align: -0.16em;
+  inline-size: calc((var(--star-size) + var(--star-gap)) * 5);
+  block-size: var(--star-size);
+  flex: none;
+}
+
+.stars::before,
+.stars::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  -webkit-mask: var(--star-mask);
+  mask: var(--star-mask);
+}
+
+.stars::before {
+  inline-size: 100%;
+  background: var(--stars-off);
+}
+
+.stars::after {
+  inline-size: var(--stars-fill);
+  background: var(--stars-on);
+}
+
+/* RTL keeps stars filling from the same physical edge as the numeral. */
+[dir="rtl"] .stars::before,
+[dir="rtl"] .stars::after {
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+}
+
+.stars--sm { --star-size: 12px; }
+.stars--lg { --star-size: 17px; --star-gap: 2px; }
+.stars--accent { --stars-on: var(--c-accent, #ff6d00); }
+.stars--gold { --stars-on: #f5a623; }
+
+/* ==========================================================================
+   Compare-at price, retuned
+   A 2.5px rule read as a correction mark rather than a former price. The
+   reference strike is a thin line through a grey number — quieter than the
+   live price in both weight and colour, so the eye lands on what to pay.
+   ========================================================================== */
+.was,
+.was--lg,
+.was--sm {
+  color: var(--c-ink-2, #5b6570);
+  font-weight: 400;
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--c-ink-2, #5b6570) 78%, transparent);
+  text-decoration-thickness: 1px;
+  font-variant-numeric: tabular-nums;
+}
+
+.was--lg { font-size: 18px; }
+.was--sm { font-size: 12px; }

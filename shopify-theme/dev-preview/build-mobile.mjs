@@ -73,8 +73,7 @@ const card = (it, i) => {
   </div>
   <h3 class="pgc__title"><a href="#">${t}</a></h3>
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
-    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="stars stars--sm" style="--stars-fill:90%" role="img" aria-label="Noté 4,5 sur 5"></span>
     <span class="pgc__sold">${icon("flame", "pgc__flame")} ${sold} ventes</span>
   </div>
   <div class="pgc__price-row">

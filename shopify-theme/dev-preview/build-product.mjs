@@ -192,8 +192,7 @@ block("title", `<div class="bb__title-row">
 
 block("rating", `<div class="bb__rating">
   <span class="bb__rating-score">4,5</span>
-  <span class="bb__rating-stars" aria-hidden="true">★★★★⯪</span>
-  <span class="visually-hidden">Noté 4,5 sur 5.</span>
+  <span class="stars stars--accent" style="--stars-fill:90%" role="img" aria-label="Noté 4,5 sur 5"></span>
   <span class="bb__rating-count">40 000+ ventes</span>
   <span class="bb__rating-sep" aria-hidden="true">|</span>
   <span>Vendu par</span>
@@ -387,7 +386,7 @@ const reviewsBlock = `<section class="reviews" aria-labelledby="ReviewsTitle">
     <h2 class="reviews__count" id="ReviewsTitle">739 avis</h2>
     <span class="reviews__sep" aria-hidden="true">|</span>
     <span class="reviews__score">4,6
-      <span class="reviews__stars" aria-hidden="true">★★★★⯪</span>
+      <span class="stars stars--lg" style="--stars-fill:92%" role="img" aria-label="Noté 4,6 sur 5"></span>
     </span>
     <span class="reviews__verified">${icon("check", "icon--sm")} Tous les avis proviennent d'achats vérifiés</span>
   </div>
@@ -412,8 +411,7 @@ const reviewsBlock = `<section class="reviews" aria-labelledby="ReviewsTitle">
       <span class="review__meta">le ${date}</span>
     </div>
     <div class="review__rating">
-      <span class="review__stars" aria-hidden="true">${"★".repeat(stars)}${"☆".repeat(5 - stars)}</span>
-      <span class="visually-hidden">Noté ${stars} sur 5.</span>
+      <span class="stars" style="--stars-fill:${(stars / 5) * 100}%" role="img" aria-label="Noté ${stars} sur 5"></span>
       ${stars >= 5 ? '<span class="review__tag">Excellent</span>' : ""}
     </div>
     <p class="review__text">${text}</p>
@@ -512,12 +510,15 @@ const html = `<!doctype html>
   </div>
 </main>
 
-<div class="pdp__mobile-cta" data-order-bar>
-  <span class="pdp__mobile-price">
-    <b>1 530 DA</b>
-    <s>7 380 DA</s>
+<div class="order-float" data-order-bar>
+  <span class="order-float__price">
+    <span class="order-float__now">1 530 DA</span>
+    <s class="order-float__was">7 380 DA</s>
   </span>
-  <button class="bb__cta" type="button" data-order-jump>Commander maintenant</button>
+  <button class="order-float__btn" type="button" data-order-jump>
+    <span class="order-float__main">Commander</span>
+    <span class="order-float__sub">Paiement à la livraison</span>
+  </button>
 </div>
 
 <div class="cod-sheet" id="CodSheet" data-open="false">

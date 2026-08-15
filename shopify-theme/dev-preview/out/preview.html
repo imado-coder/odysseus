@@ -156,6 +156,7 @@
       <button type="button" data-goto="s-phone" aria-pressed="false">Accueil mobile</button>
       <button type="button" data-goto="s-collection" aria-pressed="false">Collection</button>
       <button type="button" data-goto="s-product" aria-pressed="false">Produit</button>
+      <button type="button" data-goto="s-thanks" aria-pressed="false">Merci</button>
     </span>
   </span>
 
@@ -1824,7 +1825,8 @@ ul, ol {
   font-size: 12px;
   color: var(--c-ink-2, #5b6570);
   text-decoration: line-through;
-  text-decoration-thickness: 1.5px;
+  text-decoration-color: color-mix(in srgb, var(--c-ink-2, #5b6570) 78%, transparent);
+  text-decoration-thickness: 1px;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
@@ -2679,11 +2681,12 @@ ul, ol {
 }
 
 .bb__price-was {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 400;
   color: var(--c-ink-2, #5b6570);
   text-decoration: line-through;
-  text-decoration-thickness: 2.5px;
+  text-decoration-color: color-mix(in srgb, var(--c-ink-2, #5b6570) 78%, transparent);
+  text-decoration-thickness: 1px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -3551,6 +3554,88 @@ ul, ol {
   inset-inline: 0;
   inline-size: auto;
 }
+
+/* --------------------------------------------------------------------------
+   Floating order button
+   A full-width bar pinned to the bottom edge reads as chrome and gets
+   ignored. A pill that rides along the scroll stays legible as a button and
+   keeps the offer next to it, ready the moment the customer decides.
+   -------------------------------------------------------------------------- */
+.order-float {
+  position: fixed;
+  inset-block-end: calc(16px + env(safe-area-inset-bottom));
+  inset-inline: 12px;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 8px 8px 16px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 8px 26px rgba(16, 20, 24, 0.2);
+  transition: transform 200ms var(--ease, ease), opacity 200ms var(--ease, ease);
+}
+
+@media (min-width: 990px) {
+  .order-float { display: none; }
+}
+
+/* Steps aside only while the form itself is on screen — it would cover it. */
+.order-float[data-hidden="true"] {
+  transform: translateY(140%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.order-float__price {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  min-inline-size: 0;
+}
+
+.order-float__now {
+  font-size: 17px;
+  font-weight: 900;
+  color: var(--c-accent-text, #c24e00);
+  font-variant-numeric: tabular-nums;
+}
+
+.order-float__was {
+  font-size: 11px;
+  color: var(--c-ink-2, #5b6570);
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+}
+
+.order-float__btn {
+  flex: 1;
+  min-inline-size: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  min-block-size: 50px;
+  padding-inline: 16px;
+  border-radius: 999px;
+  background: var(--c-accent, #ff6d00);
+  color: #fff;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.order-float__main { font-size: 15px; font-weight: 800; }
+
+.order-float__sub {
+  font-size: 10px;
+  font-weight: 600;
+  opacity: 0.94;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-inline-size: 100%;
+}
 </style>
 <style>/* ==========================================================================
    cod-form.css — cash-on-delivery lead form.
@@ -4048,6 +4133,228 @@ textarea.field__control {
 }
 </style>
 <style>/* ==========================================================================
+   thank-you.css — order confirmation.
+   The moment after a cash-on-delivery order is where doubt creeps in: nothing
+   was paid, so nothing feels settled. This page's job is to say the order
+   exists, that a human will call, and roughly when.
+   ========================================================================== */
+
+.ty {
+  min-block-size: 70vh;
+  padding: 32px 16px 48px;
+  background: var(--c-bg, #f4f5f6);
+}
+
+.ty__card {
+  max-inline-size: 560px;
+  margin-inline: auto;
+  padding: 28px 20px 24px;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 2px 14px rgba(16, 20, 24, 0.07);
+  text-align: center;
+}
+
+/* The mark draws itself once, so the confirmation feels like it happened
+   rather than like it was already there. */
+.ty__mark {
+  inline-size: 74px;
+  block-size: 74px;
+  margin-inline: auto;
+  border-radius: 50%;
+  background: #e8f6e9;
+  display: grid;
+  place-items: center;
+  color: #0b7d14;
+}
+
+.ty__mark .icon { inline-size: 40px; block-size: 40px; }
+
+.ty__mark path {
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  animation: ty-draw 460ms 120ms ease forwards;
+}
+
+@keyframes ty-draw { to { stroke-dashoffset: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .ty__mark path { animation: none; stroke-dashoffset: 0; }
+}
+
+.ty__title {
+  margin-block-start: 16px;
+  font-size: clamp(22px, 5.5vw, 28px);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.ty__lede {
+  margin-block-start: 10px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--c-ink-2, #5b6570);
+  text-wrap: pretty;
+}
+
+.ty__ref {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-block-start: 16px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--c-bg, #f4f5f6);
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- what happens next --- */
+.ty__steps {
+  margin-block-start: 26px;
+  text-align: start;
+  display: grid;
+  gap: 2px;
+}
+
+.ty__step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 12px;
+  padding-block: 12px;
+}
+
+/* The connector runs between the dots, not past the last one. */
+.ty__step:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  inset-block: 40px 0;
+  inset-inline-start: 16px;
+  inline-size: 2px;
+  background: var(--c-border, #e7eaec);
+}
+
+.ty__step-dot {
+  inline-size: 34px;
+  block-size: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--c-accent-light, #fff1e6);
+  color: var(--c-accent-text, #c24e00);
+  z-index: 1;
+}
+
+.ty__step--done .ty__step-dot { background: #e8f6e9; color: #0b7d14; }
+
+.ty__step-title,
+.ty__step-text { display: block; }
+
+.ty__step-title {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.ty__step-text {
+  margin-block-start: 3px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--c-ink-2, #5b6570);
+}
+
+/* --- order summary --- */
+.ty__summary {
+  margin-block-start: 22px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--c-border, #e7eaec);
+  text-align: start;
+}
+
+.ty__line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-block: 5px;
+  font-size: 14px;
+}
+
+.ty__line dt { color: var(--c-ink-2, #5b6570); margin: 0; }
+.ty__line dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.ty__line--total {
+  margin-block-start: 6px;
+  padding-block-start: 10px;
+  border-block-start: 1px solid var(--c-border, #e7eaec);
+}
+
+.ty__line--total dt { color: var(--c-ink, #101418); font-weight: 700; }
+
+.ty__line--total dd {
+  font-size: 19px;
+  font-weight: 900;
+  color: var(--c-accent-text, #c24e00);
+}
+
+.ty__paynote {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-block-start: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #e8f6e9;
+  color: #0a6a11;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: start;
+}
+
+/* --- actions --- */
+.ty__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-block-start: 22px;
+}
+
+@media (min-width: 480px) {
+  .ty__actions { flex-direction: row; justify-content: center; }
+}
+
+.ty__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-block-size: 52px;
+  padding-inline: 24px;
+  border-radius: var(--r-pill, 999px);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.ty__btn--primary { background: var(--c-accent-text, #c24e00); color: #fff; }
+
+.ty__btn--ghost {
+  border: 1.5px solid var(--c-border-strong, #d3d8dc);
+  color: var(--c-ink, #101418);
+}
+
+.ty__help {
+  margin-block-start: 20px;
+  font-size: 13px;
+  color: var(--c-ink-2, #5b6570);
+}
+
+.ty__help a { font-weight: 700; text-decoration: underline; }
+</style>
+<style>/* ==========================================================================
    badges.css — one badge component, many looks.
    A badge is a colour family plus a shape. The merchant picks both per block,
    so a store can carry a consistent badge language instead of a pile of
@@ -4178,6 +4485,83 @@ textarea.field__control {
   font-weight: 500;
   text-decoration-thickness: 1.5px;
 }
+
+/* ==========================================================================
+   Star rating
+   Glyph stars were the problem: ★ and ☆ come from whatever font the device
+   happens to have, and the half-star codepoint (U+2BEA) is missing from most
+   of them, so it rendered as a box. This draws the row from one masked shape
+   instead — the fill is a percentage, so 4.3 of 5 is exactly 86% of the row,
+   at any size, in any font, in any colour.
+   ========================================================================== */
+.stars {
+  --star-size: 14px;
+  --star-gap: 1px;
+  --stars-on: #101418;
+  --stars-off: #d3d8dc;
+  --stars-fill: 100%;
+  --star-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path d='M10 1.6l2.47 5.01 5.53.8-4 3.9.94 5.5L10 14.21l-4.94 2.6.94-5.5-4-3.9 5.53-.8z'/></svg>")
+    0 0 / calc(var(--star-size) + var(--star-gap)) var(--star-size) repeat-x;
+
+  position: relative;
+  display: inline-block;
+  vertical-align: -0.16em;
+  inline-size: calc((var(--star-size) + var(--star-gap)) * 5);
+  block-size: var(--star-size);
+  flex: none;
+}
+
+.stars::before,
+.stars::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  -webkit-mask: var(--star-mask);
+  mask: var(--star-mask);
+}
+
+.stars::before {
+  inline-size: 100%;
+  background: var(--stars-off);
+}
+
+.stars::after {
+  inline-size: var(--stars-fill);
+  background: var(--stars-on);
+}
+
+/* RTL keeps stars filling from the same physical edge as the numeral. */
+[dir="rtl"] .stars::before,
+[dir="rtl"] .stars::after {
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+}
+
+.stars--sm { --star-size: 12px; }
+.stars--lg { --star-size: 17px; --star-gap: 2px; }
+.stars--accent { --stars-on: var(--c-accent, #ff6d00); }
+.stars--gold { --stars-on: #f5a623; }
+
+/* ==========================================================================
+   Compare-at price, retuned
+   A 2.5px rule read as a correction mark rather than a former price. The
+   reference strike is a thin line through a grey number — quieter than the
+   live price in both weight and colour, so the eye lands on what to pay.
+   ========================================================================== */
+.was,
+.was--lg,
+.was--sm {
+  color: var(--c-ink-2, #5b6570);
+  font-weight: 400;
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--c-ink-2, #5b6570) 78%, transparent);
+  text-decoration-thickness: 1px;
+  font-variant-numeric: tabular-nums;
+}
+
+.was--lg { font-size: 18px; }
+.was--sm { font-size: 12px; }
 </style>
 <style>/* ==========================================================================
    home-mobile.css — phone storefront.
@@ -5484,8 +5868,7 @@ textarea.field__control {
   </div>
   <h3 class="pgc__title"><a href="#">Ensemble 2 pièces homme t-shirt et short de sport</a></h3>
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
-    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="stars stars--sm" style="--stars-fill:90%" role="img" aria-label="Noté 4,5 sur 5"></span>
     <span class="pgc__sold"><svg class="icon pgc__flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 7 ventes</span>
   </div>
   <div class="pgc__price-row">
@@ -5507,8 +5890,7 @@ textarea.field__control {
   </div>
   <h3 class="pgc__title"><a href="#">Set de 4 pièces base de maquillage teint parfait</a></h3>
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
-    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="stars stars--sm" style="--stars-fill:90%" role="img" aria-label="Noté 4,5 sur 5"></span>
     <span class="pgc__sold"><svg class="icon pgc__flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 2 000+ ventes</span>
   </div>
   <div class="pgc__price-row">
@@ -5530,8 +5912,7 @@ textarea.field__control {
   </div>
   <h3 class="pgc__title"><a href="#">Montre connectée étanche IP68 multisport</a></h3>
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
-    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="stars stars--sm" style="--stars-fill:90%" role="img" aria-label="Noté 4,5 sur 5"></span>
     <span class="pgc__sold"><svg class="icon pgc__flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 1 200+ ventes</span>
   </div>
   <div class="pgc__price-row">
@@ -5553,8 +5934,7 @@ textarea.field__control {
   </div>
   <h3 class="pgc__title"><a href="#">Casque audio sans fil réduction de bruit active</a></h3>
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
-    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="stars stars--sm" style="--stars-fill:90%" role="img" aria-label="Noté 4,5 sur 5"></span>
     <span class="pgc__sold"><svg class="icon pgc__flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 3 000+ ventes</span>
   </div>
   <div class="pgc__price-row">
@@ -5576,8 +5956,7 @@ textarea.field__control {
   </div>
   <h3 class="pgc__title"><a href="#">Sac à dos imperméable port USB intégré 30L</a></h3>
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
-    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="stars stars--sm" style="--stars-fill:90%" role="img" aria-label="Noté 4,5 sur 5"></span>
     <span class="pgc__sold"><svg class="icon pgc__flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 820 ventes</span>
   </div>
   <div class="pgc__price-row">
@@ -5599,8 +5978,7 @@ textarea.field__control {
   </div>
   <h3 class="pgc__title"><a href="#">Baskets homme running maille respirante</a></h3>
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
-    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="stars stars--sm" style="--stars-fill:90%" role="img" aria-label="Noté 4,5 sur 5"></span>
     <span class="pgc__sold"><svg class="icon pgc__flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 899 ventes</span>
   </div>
   <div class="pgc__price-row">
@@ -5668,8 +6046,7 @@ textarea.field__control {
   </div>
   <div class="pgc__note">À baissé de €0.21</div>
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
-    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="stars stars--sm" style="--stars-fill:90%" role="img" aria-label="Noté 4,5 sur 5"></span>
     <span class="pgc__sold"><svg class="icon pgc__flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 40,000+ ventes</span>
   </div>
   <span class="pgc__seller"><span aria-hidden="true">★</span> Vendeur vedette</span>
@@ -5695,8 +6072,7 @@ textarea.field__control {
   </div>
   <div class="pgc__note">PLUS QUE 12 <span aria-hidden="true">ⓘ</span></div>
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
-    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="stars stars--sm" style="--stars-fill:90%" role="img" aria-label="Noté 4,5 sur 5"></span>
     <span class="pgc__sold"><svg class="icon pgc__flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 12,000+ ventes</span>
   </div>
   
@@ -5722,8 +6098,7 @@ textarea.field__control {
   </div>
   <div class="pgc__note pgc__note--rank">#5 Le mieux noté dans Bagages et Voyage</div>
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
-    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="stars stars--sm" style="--stars-fill:90%" role="img" aria-label="Noté 4,5 sur 5"></span>
     <span class="pgc__sold"><svg class="icon pgc__flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 5,000+ ventes</span>
   </div>
   
@@ -5749,8 +6124,7 @@ textarea.field__control {
   </div>
   
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
-    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="stars stars--sm" style="--stars-fill:90%" role="img" aria-label="Noté 4,5 sur 5"></span>
     <span class="pgc__sold"><svg class="icon pgc__flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 29,000+ ventes</span>
   </div>
   
@@ -5776,8 +6150,7 @@ textarea.field__control {
   </div>
   
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
-    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="stars stars--sm" style="--stars-fill:90%" role="img" aria-label="Noté 4,5 sur 5"></span>
     <span class="pgc__sold"><svg class="icon pgc__flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 21,000+ ventes</span>
   </div>
   <span class="pgc__seller"><span aria-hidden="true">★</span> Vendeur vedette</span>
@@ -5803,8 +6176,7 @@ textarea.field__control {
   </div>
   <div class="pgc__note pgc__note--rank">Article meilleure vente dans Bijoux</div>
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
-    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="stars stars--sm" style="--stars-fill:90%" role="img" aria-label="Noté 4,5 sur 5"></span>
     <span class="pgc__sold"><svg class="icon pgc__flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 15,000+ ventes</span>
   </div>
   
@@ -5830,8 +6202,7 @@ textarea.field__control {
   </div>
   <div class="pgc__note">PLUS QUE 3 <span aria-hidden="true">ⓘ</span></div>
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★☆</span>
-    <span class="visually-hidden">Noté 4 sur 5.</span>
+    <span class="stars stars--sm" style="--stars-fill:80%" role="img" aria-label="Noté 4 sur 5"></span>
     <span class="pgc__sold"><svg class="icon pgc__flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 6,000+ ventes</span>
   </div>
   
@@ -5857,8 +6228,7 @@ textarea.field__control {
   </div>
   <div class="pgc__note pgc__note--rank">#10 DES ARTICLES LES PLUS VENDUS</div>
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
-    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="stars stars--sm" style="--stars-fill:90%" role="img" aria-label="Noté 4,5 sur 5"></span>
     <span class="pgc__sold"><svg class="icon pgc__flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 150,000+ ventes</span>
   </div>
   <span class="pgc__seller"><span aria-hidden="true">★</span> Vendeur vedette</span>
@@ -5884,8 +6254,7 @@ textarea.field__control {
   </div>
   <div class="pgc__note pgc__note--rank">#2 Article meilleure vente dans Décoration</div>
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★★</span>
-    <span class="visually-hidden">Noté 5 sur 5.</span>
+    <span class="stars stars--sm" style="--stars-fill:100%" role="img" aria-label="Noté 5 sur 5"></span>
     <span class="pgc__sold"><svg class="icon pgc__flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 7,000+ ventes</span>
   </div>
   <span class="pgc__seller"><span aria-hidden="true">★</span> Vendeur vedette</span>
@@ -5911,8 +6280,7 @@ textarea.field__control {
   </div>
   <div class="pgc__note pgc__note--rank">#2 Article meilleure vente dans Sacs</div>
   <div class="pgc__rating">
-    <span class="pgc__stars" aria-hidden="true">★★★★⯪</span>
-    <span class="visually-hidden">Noté 4,5 sur 5.</span>
+    <span class="stars stars--sm" style="--stars-fill:90%" role="img" aria-label="Noté 4,5 sur 5"></span>
     <span class="pgc__sold"><svg class="icon pgc__flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3s4.5 3.6 4.5 8a4.5 4.5 0 0 1-9 0c0-1.5.6-2.7 1.3-3.6.2 1.4 1 2.3 1.9 2.3 1.3 0 1.3-1.7 1.3-6.7Z"/></svg> 150,000+ ventes</span>
   </div>
   <span class="pgc__seller"><span aria-hidden="true">★</span> Vendeur vedette</span>
@@ -6033,8 +6401,7 @@ textarea.field__control {
 </div>
           <div class="bb__rating">
   <span class="bb__rating-score">4,5</span>
-  <span class="bb__rating-stars" aria-hidden="true">★★★★⯪</span>
-  <span class="visually-hidden">Noté 4,5 sur 5.</span>
+  <span class="stars stars--accent" style="--stars-fill:90%" role="img" aria-label="Noté 4,5 sur 5"></span>
   <span class="bb__rating-count">40 000+ ventes</span>
   <span class="bb__rating-sep" aria-hidden="true">|</span>
   <span>Vendu par</span>
@@ -6304,7 +6671,7 @@ textarea.field__control {
     <h2 class="reviews__count" id="ReviewsTitle">739 avis</h2>
     <span class="reviews__sep" aria-hidden="true">|</span>
     <span class="reviews__score">4,6
-      <span class="reviews__stars" aria-hidden="true">★★★★⯪</span>
+      <span class="stars stars--lg" style="--stars-fill:92%" role="img" aria-label="Noté 4,6 sur 5"></span>
     </span>
     <span class="reviews__verified"><svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg> Tous les avis proviennent d'achats vérifiés</span>
   </div>
@@ -6333,8 +6700,7 @@ textarea.field__control {
       <span class="review__meta">le 18 juil. 2026</span>
     </div>
     <div class="review__rating">
-      <span class="review__stars" aria-hidden="true">★★★★★</span>
-      <span class="visually-hidden">Noté 5 sur 5.</span>
+      <span class="stars" style="--stars-fill:100%" role="img" aria-label="Noté 5 sur 5"></span>
       <span class="review__tag">Excellent</span>
     </div>
     <p class="review__text">Très léger et super confortable. La couleur correspond bien à celle de la photo.</p>
@@ -6347,8 +6713,7 @@ textarea.field__control {
       <span class="review__meta">le 29 juil. 2026</span>
     </div>
     <div class="review__rating">
-      <span class="review__stars" aria-hidden="true">★★★★★</span>
-      <span class="visually-hidden">Noté 5 sur 5.</span>
+      <span class="stars" style="--stars-fill:100%" role="img" aria-label="Noté 5 sur 5"></span>
       <span class="review__tag">Excellent</span>
     </div>
     <p class="review__text">Très bonne qualité pour le prix. La fixation tient parfaitement même sur route dégradée.</p>
@@ -6361,8 +6726,7 @@ textarea.field__control {
       <span class="review__meta">le 9 mai 2026</span>
     </div>
     <div class="review__rating">
-      <span class="review__stars" aria-hidden="true">★★★★★</span>
-      <span class="visually-hidden">Noté 5 sur 5.</span>
+      <span class="stars" style="--stars-fill:100%" role="img" aria-label="Noté 5 sur 5"></span>
       <span class="review__tag">Excellent</span>
     </div>
     <p class="review__text">Produit conforme, livraison rapide. Je recommande vivement.</p>
@@ -6375,8 +6739,7 @@ textarea.field__control {
       <span class="review__meta">le 30 juin 2026</span>
     </div>
     <div class="review__rating">
-      <span class="review__stars" aria-hidden="true">★★★★☆</span>
-      <span class="visually-hidden">Noté 4 sur 5.</span>
+      <span class="stars" style="--stars-fill:80%" role="img" aria-label="Noté 4 sur 5"></span>
       
     </div>
     <p class="review__text">Bon rapport qualité-prix, mais la notice est en anglais uniquement.</p>
@@ -6497,12 +6860,15 @@ textarea.field__control {
   </div>
 </main>
 
-<div class="pdp__mobile-cta" data-order-bar>
-  <span class="pdp__mobile-price">
-    <b>1 530 DA</b>
-    <s>7 380 DA</s>
+<div class="order-float" data-order-bar>
+  <span class="order-float__price">
+    <span class="order-float__now">1 530 DA</span>
+    <s class="order-float__was">7 380 DA</s>
   </span>
-  <button class="bb__cta" type="button" data-order-jump>Commander maintenant</button>
+  <button class="order-float__btn" type="button" data-order-jump>
+    <span class="order-float__main">Commander</span>
+    <span class="order-float__sub">Paiement à la livraison</span>
+  </button>
 </div>
 
 <div class="cod-sheet" id="CodSheet" data-open="false">
@@ -6640,6 +7006,67 @@ textarea.field__control {
   </div>
 </div>
 </div>
+<div class="surface-sep">Page de remerciement</div>
+<div class="surface" id="s-thanks"><section class="ty">
+  <div class="ty__card">
+    <span class="ty__mark"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
+    <h1 class="ty__title">Merci ! Votre commande est enregistrée</h1>
+    <p class="ty__lede">
+      Nous vous appelons très vite pour confirmer votre commande, puis nous
+      l'expédions immédiatement. Vous ne payez rien avant de recevoir le colis.
+    </p>
+    <span class="ty__ref"><svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3.5 11.5v-7a1 1 0 0 1 1-1h7l9 9-8 8Z"/><circle cx="7.8" cy="7.8" r="1.3"/></svg> Commande n° <b>DZ-10428</b></span>
+
+    <div class="ty__steps">
+      <div class="ty__step ty__step--done">
+        <span class="ty__step-dot"><svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
+        <span>
+          <span class="ty__step-title">Commande reçue</span>
+          <span class="ty__step-text">Nous avons bien enregistré votre commande.</span>
+        </span>
+      </div>
+      <div class="ty__step">
+        <span class="ty__step-dot"><svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.5 15v-3a7.5 7.5 0 0 1 15 0v3"/><rect x="2.8" y="14" width="4" height="6" rx="1.6"/><rect x="17.2" y="14" width="4" height="6" rx="1.6"/></svg></span>
+        <span>
+          <span class="ty__step-title">Appel de confirmation</span>
+          <span class="ty__step-text">Un conseiller vous appelle sous 24 h pour confirmer l'adresse et la taille.</span>
+        </span>
+      </div>
+      <div class="ty__step">
+        <span class="ty__step-dot"><svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m12 3 8.5 4.5v9L12 21l-8.5-4.5v-9Z"/><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"/></svg></span>
+        <span>
+          <span class="ty__step-title">Préparation et expédition</span>
+          <span class="ty__step-text">Votre colis part le jour même de la confirmation.</span>
+        </span>
+      </div>
+      <div class="ty__step">
+        <span class="ty__step-dot"><svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 6.5h11v9h-11z"/><path d="M13.5 10h4l3 3.2v2.3h-7z"/><circle cx="6.5" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg></span>
+        <span>
+          <span class="ty__step-title">Livraison et paiement</span>
+          <span class="ty__step-text">Vous payez au livreur, après avoir vérifié le colis.</span>
+        </span>
+      </div>
+    </div>
+
+    <dl class="ty__summary">
+      <div class="ty__line"><dt>Produit</dt><dd>Support téléphone magnétique</dd></div>
+      <div class="ty__line"><dt>Quantité</dt><dd>1</dd></div>
+      <div class="ty__line"><dt>Livraison — Alger, Bab Ezzouar</dt><dd>400 DA</dd></div>
+      <div class="ty__line ty__line--total"><dt>À payer à la livraison</dt><dd>1 930 DA</dd></div>
+    </dl>
+
+    <p class="ty__paynote"><svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/></svg> Aucun paiement en ligne. Vous réglez au livreur.</p>
+
+    <div class="ty__actions">
+      <a class="ty__btn ty__btn--primary" href="#"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3.5 11.5v-7a1 1 0 0 1 1-1h7l9 9-8 8Z"/><circle cx="7.8" cy="7.8" r="1.3"/></svg> Continuer mes achats</a>
+      <a class="ty__btn ty__btn--ghost" href="#"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.5 15v-3a7.5 7.5 0 0 1 15 0v3"/><rect x="2.8" y="14" width="4" height="6" rx="1.6"/><rect x="17.2" y="14" width="4" height="6" rx="1.6"/></svg> Nous contacter</a>
+    </div>
+
+    <p class="ty__help">
+      Un problème avec votre commande ? Appelez-nous au <a href="tel:0555000000">0555 00 00 00</a>.
+    </p>
+  </div>
+</section></div>
 <script>/* Algerian administrative divisions: 58 wilayas, 1541 communes.
    Source: the `algeria-wilayas` package (MIT). Shipped as a plain global so
    the COD form works without a build step or a network round trip.
@@ -7060,11 +7487,15 @@ window.DZ_LOCATIONS=[{"c":"01","ar":"أدرار","fr":"Adrar","m":[["أدرار"
 
     if (!wrap || !("IntersectionObserver" in window)) return;
 
+    /* Only step aside once the form is actually open and on screen. While it
+       is still collapsed behind the order button, the bar is the only way in
+       and must stay put. */
     var io = new IntersectionObserver(
       function (entries) {
-        bar.dataset.hidden = String(entries[0].isIntersecting);
+        var formOpen = wrap.dataset.mode !== "button" || wrap.dataset.open === "true";
+        bar.dataset.hidden = String(entries[0].isIntersecting && formOpen);
       },
-      { rootMargin: "-40% 0px -20% 0px" }
+      { rootMargin: "-30% 0px -15% 0px" }
     );
     io.observe(wrap);
   }

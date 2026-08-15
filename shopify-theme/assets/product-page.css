@@ -308,11 +308,12 @@
 }
 
 .bb__price-was {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 400;
   color: var(--c-ink-2, #5b6570);
   text-decoration: line-through;
-  text-decoration-thickness: 2.5px;
+  text-decoration-color: color-mix(in srgb, var(--c-ink-2, #5b6570) 78%, transparent);
+  text-decoration-thickness: 1px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -1179,4 +1180,86 @@
 .pdp__mobile-cta {
   inset-inline: 0;
   inline-size: auto;
+}
+
+/* --------------------------------------------------------------------------
+   Floating order button
+   A full-width bar pinned to the bottom edge reads as chrome and gets
+   ignored. A pill that rides along the scroll stays legible as a button and
+   keeps the offer next to it, ready the moment the customer decides.
+   -------------------------------------------------------------------------- */
+.order-float {
+  position: fixed;
+  inset-block-end: calc(16px + env(safe-area-inset-bottom));
+  inset-inline: 12px;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 8px 8px 16px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 8px 26px rgba(16, 20, 24, 0.2);
+  transition: transform 200ms var(--ease, ease), opacity 200ms var(--ease, ease);
+}
+
+@media (min-width: 990px) {
+  .order-float { display: none; }
+}
+
+/* Steps aside only while the form itself is on screen — it would cover it. */
+.order-float[data-hidden="true"] {
+  transform: translateY(140%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.order-float__price {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  min-inline-size: 0;
+}
+
+.order-float__now {
+  font-size: 17px;
+  font-weight: 900;
+  color: var(--c-accent-text, #c24e00);
+  font-variant-numeric: tabular-nums;
+}
+
+.order-float__was {
+  font-size: 11px;
+  color: var(--c-ink-2, #5b6570);
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+}
+
+.order-float__btn {
+  flex: 1;
+  min-inline-size: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  min-block-size: 50px;
+  padding-inline: 16px;
+  border-radius: 999px;
+  background: var(--c-accent, #ff6d00);
+  color: #fff;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.order-float__main { font-size: 15px; font-weight: 800; }
+
+.order-float__sub {
+  font-size: 10px;
+  font-weight: 600;
+  opacity: 0.94;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-inline-size: 100%;
 }

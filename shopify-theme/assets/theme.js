@@ -412,11 +412,15 @@
 
     if (!wrap || !("IntersectionObserver" in window)) return;
 
+    /* Only step aside once the form is actually open and on screen. While it
+       is still collapsed behind the order button, the bar is the only way in
+       and must stay put. */
     var io = new IntersectionObserver(
       function (entries) {
-        bar.dataset.hidden = String(entries[0].isIntersecting);
+        var formOpen = wrap.dataset.mode !== "button" || wrap.dataset.open === "true";
+        bar.dataset.hidden = String(entries[0].isIntersecting && formOpen);
       },
-      { rootMargin: "-40% 0px -20% 0px" }
+      { rootMargin: "-30% 0px -15% 0px" }
     );
     io.observe(wrap);
   }

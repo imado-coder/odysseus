@@ -22,6 +22,7 @@ const inlinePhotos = (html) =>
   html.replace(/photos\/prod-(\d+)\.jpg/g, (m) => photos[m] || m);
 
 let phoneHome = body("mobile-home.html");
+let thanksPage = body("thanks.html");
 let header = body("stack-closed.html");
 let collection = body("collection.html");
 let product = body("product.html");
@@ -48,6 +49,7 @@ const doc = `<!doctype html>
 <style>${asset("catalog-system.css")}</style>
 <style>${asset("product-page.css")}</style>
 <style>${asset("cod-form.css")}</style>
+<style>${asset("thank-you.css")}</style>
 <style>${asset("badges.css")}</style>
 <style>${asset("home-mobile.css")}</style>
 <style>${asset("pdp-mobile.css")}</style>
@@ -72,6 +74,8 @@ const doc = `<!doctype html>
 <div class="surface" id="s-collection">${collection}</div>
 <div class="surface-sep">Page produit</div>
 <div class="surface" id="s-product">${product}</div>
+<div class="surface-sep">Page de remerciement</div>
+<div class="surface" id="s-thanks">${thanksPage}</div>
 <script>${asset("dz-locations.js")}<\/script>
 <script>${asset("theme.js")}<\/script>
 </body>
