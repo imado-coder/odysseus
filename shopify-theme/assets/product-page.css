@@ -1172,3 +1172,11 @@
 }
 
 .bb__reveal .icon { display: none; }
+
+/* 100vw includes the classic scrollbar, so the bar rendered wider than the
+   content area and pushed the document sideways. Anchoring both edges lets it
+   measure against the viewport's content box instead. */
+.pdp__mobile-cta {
+  inset-inline: 0;
+  inline-size: auto;
+}

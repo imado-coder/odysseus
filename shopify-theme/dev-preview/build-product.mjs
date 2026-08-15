@@ -324,7 +324,7 @@ block("pills", `<div class="bb__pills">
 /* --- left column --------------------------------------------------------- */
 const thumbs = Array.from({ length: 6 }, (_, i) => i);
 
-const gallery = `<div class="gallery">
+const gallery = `<div class="gallery" data-gallery>
   <div class="gallery__thumbs" role="group" aria-label="Miniatures du produit">
     ${thumbs
       .map(
@@ -334,9 +334,43 @@ const gallery = `<div class="gallery">
       )
       .join("\n    ")}
   </div>
+
   <div class="gallery__stage">
-    <img src="${photo(0)}" alt="Support téléphone magnétique, vue principale" width="700" height="875" fetchpriority="high" decoding="async">
+    <img src="${photo(0)}" alt="Vue principale du produit" width="700" height="875"
+         fetchpriority="high" decoding="async">
   </div>
+
+  <div class="gallery__slider" data-gallery-slider tabindex="0"
+       role="region" aria-label="Photos du produit">
+    ${thumbs
+      .map(
+        (i) => `<div class="gallery__slide">
+      <img src="${photo(i)}" alt="Photo ${i + 1} du produit" width="700" height="700"
+           ${i === 0 ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">
+    </div>`
+      )
+      .join("\n    ")}
+  </div>
+
+  <div class="gallery__float">
+    <span class="gallery__float-group">
+      <a class="gfab" href="#" aria-label="Retour">${icon("chevron")}</a>
+    </span>
+    <span class="gallery__float-group">
+      <a class="gfab" href="#" aria-label="Rechercher">${icon("search")}</a>
+      <button class="gfab" type="button" aria-label="Partager">${icon("share")}</button>
+    </span>
+  </div>
+
+  <div class="gallery__dots" role="tablist" aria-label="Choisir une photo">
+    ${thumbs
+      .map(
+        (i) => `<button class="gallery__dot" type="button" data-gallery-dot${i === 0 ? ' aria-current="true"' : ""} aria-label="Photo ${i + 1}"></button>`
+      )
+      .join("\n    ")}
+  </div>
+
+  <span class="gallery__count"><span data-gallery-index>1</span>/${thumbs.length}</span>
 </div>`;
 
 const reviews = [
@@ -443,6 +477,8 @@ const html = `<!doctype html>
 <link rel="stylesheet" href="../assets/base.css">
 <link rel="stylesheet" href="../assets/catalog-system.css">
 <link rel="stylesheet" href="../assets/product-page.css">
+<link rel="stylesheet" href="../assets/badges.css">
+<link rel="stylesheet" href="../assets/pdp-mobile.css">
 <link rel="stylesheet" href="../assets/cod-form.css">
 <script src="../assets/dz-locations.js" defer></script>
 <script src="../assets/theme.js" defer></script>

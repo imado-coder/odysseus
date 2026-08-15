@@ -21,7 +21,6 @@ for (let i = 1; i <= 10; i++) {
 const inlinePhotos = (html) =>
   html.replace(/photos\/prod-(\d+)\.jpg/g, (m) => photos[m] || m);
 
-let heroBand = body("home-hero.html");
 let phoneHome = body("mobile-home.html");
 let header = body("stack-closed.html");
 let collection = body("collection.html");
@@ -50,12 +49,14 @@ const doc = `<!doctype html>
 <style>${asset("product-page.css")}</style>
 <style>${asset("cod-form.css")}</style>
 <style>${asset("badges.css")}</style>
-<style>${asset("hero.css")}</style>
 <style>${asset("home-mobile.css")}</style>
 <style>${asset("pdp-mobile.css")}</style>
 <style>
   html { scroll-behavior: auto; }
-  .surface { scroll-margin-block-start: 0; }
+  /* Each surface becomes a containing block for its own fixed elements, so
+     the product page's order bar does not float over the storefront in this
+     stitched preview. In the theme each bar lives inside its own section. */
+  .surface { scroll-margin-block-start: 0; transform: translateZ(0); }
   .surface-sep {
     padding: 10px 16px; font: 700 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
     letter-spacing: .12em; text-transform: uppercase;
@@ -64,7 +65,7 @@ const doc = `<!doctype html>
 </style>
 </head>
 <body>
-<div class="surface" id="s-header">${header}${heroBand}</div>
+<div class="surface" id="s-header">${header}</div>
 <div class="surface-sep">Accueil mobile — passez en mode Mobile</div>
 <div class="surface" id="s-phone">${phoneHome}</div>
 <div class="surface-sep">Page collection</div>

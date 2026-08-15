@@ -421,6 +421,40 @@
     io.observe(wrap);
   }
 
+
+  /* ----------------------------------------------------------------------
+     Gallery slider counter. Scrolling and snapping are the browser's job;
+     this only reports which image is showing.
+     ---------------------------------------------------------------------- */
+  function initGallery(root) {
+    var slider = root.querySelector("[data-gallery-slider]");
+    var out = root.querySelector("[data-gallery-index]");
+    var dots = [].slice.call(root.querySelectorAll("[data-gallery-dot]"));
+    if (!slider) return;
+
+    function sync() {
+      var i = Math.round(Math.abs(slider.scrollLeft) / slider.clientWidth);
+      if (out) out.textContent = i + 1;
+      dots.forEach(function (d, n) {
+        if (n === i) d.setAttribute("aria-current", "true");
+        else d.removeAttribute("aria-current");
+      });
+    }
+
+    slider.addEventListener("scroll", function () {
+      clearTimeout(slider._t);
+      slider._t = setTimeout(sync, 60);
+    }, { passive: true });
+
+    dots.forEach(function (d, n) {
+      d.addEventListener("click", function () {
+        slider.scrollTo({ left: n * slider.clientWidth, behavior: "smooth" });
+      });
+    });
+
+    sync();
+  }
+
   function boot() {
     document.querySelectorAll("[data-sticky-fit]").forEach(initStickyFit);
     document.querySelectorAll("[data-disclosure]").forEach(initDisclosure);
@@ -430,6 +464,7 @@
     document.querySelectorAll("[data-sheet-open]").forEach(initSheet);
     document.querySelectorAll("[data-cod-wrap]").forEach(initCodReveal);
     document.querySelectorAll("[data-order-bar]").forEach(initOrderBar);
+    document.querySelectorAll("[data-gallery]").forEach(initGallery);
   }
 
   if (document.readyState === "loading") {

@@ -187,6 +187,10 @@
 
   .ubar__item::before { display: none; }
 
+  /* Brand marks add nothing at this size and make the strip look busy; the
+     rotating sentence is the whole point of the bar on a phone. */
+  .ubar__icon { display: none; }
+
   /* The duplicate run only exists for the desktop marquee. */
   .ubar__item--dup { display: none; }
 

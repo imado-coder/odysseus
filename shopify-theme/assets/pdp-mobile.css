@@ -17,16 +17,72 @@
 /* --------------------------------------------------------------------------
    Full-bleed gallery with floating controls
    -------------------------------------------------------------------------- */
+/* Desktop keeps the thumb rail and a single stage; the slider and its dots
+   only exist on phones, so they must not render as a stack of full-size
+   images at wide widths. */
+.gallery__slider,
+.gallery__dots { display: none; }
+
 @media (max-width: 989px) {
   .gallery { display: block; position: relative; }
 
-  .gallery__stage {
-    border-radius: 0;
-    aspect-ratio: 1;
-  }
-
   /* Thumbs move into the swatch area; the stage is swiped instead. */
   .gallery__thumbs { display: none; }
+  .gallery__stage { display: none; }
+
+  /* Swipeable slider: one image per screen, snapped, no script needed to
+     move between them — the counter is the only thing JS updates. */
+  .gallery__slider {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .gallery__slider::-webkit-scrollbar { display: none; }
+
+  .gallery__slide {
+    flex: 0 0 100%;
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+    aspect-ratio: 1;
+    background: var(--c-surface-2, #fafbfb);
+  }
+
+  .gallery__slide img {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+
+  /* Dots sit above the counter for a quick sense of position. */
+  .gallery__dots {
+    position: absolute;
+    inset-block-end: 14px;
+    inset-inline-start: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    display: flex;
+    gap: 5px;
+  }
+
+  .gallery__dot {
+    inline-size: 6px;
+    block-size: 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.55);
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.35);
+    transition: inline-size 160ms ease, background-color 160ms ease;
+  }
+
+  .gallery__dot[aria-current] {
+    inline-size: 18px;
+    border-radius: 3px;
+    background: #fff;
+  }
 
   .gallery__float {
     position: absolute;
@@ -501,3 +557,32 @@
   font-weight: 700;
   line-height: 1.15;
 }
+
+/* --------------------------------------------------------------------------
+   Horizontal scrollers inside the buy box
+   A flex scroller only contains its children if it is itself bounded. Inside
+   a block that is fine, but once the buy box became a grid item the intrinsic
+   width of the swatch row won, and the page gained a few pixels of sideways
+   scroll. Bounding them explicitly settles it at every width.
+   -------------------------------------------------------------------------- */
+.bb__swatches,
+.bb__pills,
+.deliv__carriers,
+.ship-strip,
+.sizes {
+  max-inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.bb__swatches,
+.bb__pills {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.bb__swatches::-webkit-scrollbar,
+.bb__pills::-webkit-scrollbar { display: none; }
+
+.bb,
+.bb > *,
+.pdp__buybox { min-inline-size: 0; max-inline-size: 100%; }

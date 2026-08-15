@@ -7,6 +7,8 @@
 <link rel="stylesheet" href="../assets/base.css">
 <link rel="stylesheet" href="../assets/catalog-system.css">
 <link rel="stylesheet" href="../assets/product-page.css">
+<link rel="stylesheet" href="../assets/badges.css">
+<link rel="stylesheet" href="../assets/pdp-mobile.css">
 <link rel="stylesheet" href="../assets/cod-form.css">
 <script src="../assets/dz-locations.js" defer></script>
 <script src="../assets/theme.js" defer></script>
@@ -23,7 +25,7 @@
 
     <div class="pdp__grid">
       <div class="pdp__gallery">
-        <div class="gallery">
+        <div class="gallery" data-gallery>
   <div class="gallery__thumbs" role="group" aria-label="Miniatures du produit">
     <button class="gallery__thumb" type="button" aria-current="true" aria-label="Image 1">
       <img src="photos/prod-1.jpg" alt="" width="64" height="64" loading="lazy" decoding="async">
@@ -44,9 +46,60 @@
       <img src="photos/prod-6.jpg" alt="" width="64" height="64" loading="lazy" decoding="async">
     </button>
   </div>
+
   <div class="gallery__stage">
-    <img src="photos/prod-1.jpg" alt="Support téléphone magnétique, vue principale" width="700" height="875" fetchpriority="high" decoding="async">
+    <img src="photos/prod-1.jpg" alt="Vue principale du produit" width="700" height="875"
+         fetchpriority="high" decoding="async">
   </div>
+
+  <div class="gallery__slider" data-gallery-slider tabindex="0"
+       role="region" aria-label="Photos du produit">
+    <div class="gallery__slide">
+      <img src="photos/prod-1.jpg" alt="Photo 1 du produit" width="700" height="700"
+           fetchpriority="high" decoding="async">
+    </div>
+    <div class="gallery__slide">
+      <img src="photos/prod-2.jpg" alt="Photo 2 du produit" width="700" height="700"
+           loading="lazy" decoding="async">
+    </div>
+    <div class="gallery__slide">
+      <img src="photos/prod-3.jpg" alt="Photo 3 du produit" width="700" height="700"
+           loading="lazy" decoding="async">
+    </div>
+    <div class="gallery__slide">
+      <img src="photos/prod-4.jpg" alt="Photo 4 du produit" width="700" height="700"
+           loading="lazy" decoding="async">
+    </div>
+    <div class="gallery__slide">
+      <img src="photos/prod-5.jpg" alt="Photo 5 du produit" width="700" height="700"
+           loading="lazy" decoding="async">
+    </div>
+    <div class="gallery__slide">
+      <img src="photos/prod-6.jpg" alt="Photo 6 du produit" width="700" height="700"
+           loading="lazy" decoding="async">
+    </div>
+  </div>
+
+  <div class="gallery__float">
+    <span class="gallery__float-group">
+      <a class="gfab" href="#" aria-label="Retour"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 5 7 7-7 7"/></svg></a>
+    </span>
+    <span class="gallery__float-group">
+      <a class="gfab" href="#" aria-label="Rechercher"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg></a>
+      <button class="gfab" type="button" aria-label="Partager"><svg class="icon " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="m8.3 10.8 7.4-4M8.3 13.2l7.4 4"/></svg></button>
+    </span>
+  </div>
+
+  <div class="gallery__dots" role="tablist" aria-label="Choisir une photo">
+    <button class="gallery__dot" type="button" data-gallery-dot aria-current="true" aria-label="Photo 1"></button>
+    <button class="gallery__dot" type="button" data-gallery-dot aria-label="Photo 2"></button>
+    <button class="gallery__dot" type="button" data-gallery-dot aria-label="Photo 3"></button>
+    <button class="gallery__dot" type="button" data-gallery-dot aria-label="Photo 4"></button>
+    <button class="gallery__dot" type="button" data-gallery-dot aria-label="Photo 5"></button>
+    <button class="gallery__dot" type="button" data-gallery-dot aria-label="Photo 6"></button>
+  </div>
+
+  <span class="gallery__count"><span data-gallery-index>1</span>/6</span>
 </div>
       </div>
       <div class="pdp__buybox" data-sticky-fit>

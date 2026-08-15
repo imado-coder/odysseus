@@ -15,6 +15,7 @@ const head = (title, extra = "") => `<!doctype html>
 <link rel="stylesheet" href="../assets/base.css">
 <link rel="stylesheet" href="../assets/badges.css">
 <link rel="stylesheet" href="../assets/catalog-system.css">
+<link rel="stylesheet" href="../assets/header-system.css">
 <link rel="stylesheet" href="../assets/home-mobile.css">
 <link rel="stylesheet" href="../assets/product-page.css">
 <link rel="stylesheet" href="../assets/pdp-mobile.css">
@@ -22,6 +23,30 @@ const head = (title, extra = "") => `<!doctype html>
 ${extra}
 <script src="../assets/theme.js" defer></script>
 </head><body style="background:#fff">`;
+
+
+const promos = [
+  ["Livraison gratuite dès 8 000 DA", "Dans les 58 wilayas", "#7ee787"],
+  ["Paiement à la livraison", "Vous payez à la réception", "#f7f0c8"],
+  ["Retour sous 7 jours", "Sans justificatif", "#ffffff"],
+];
+
+const strip = () => `<div class="ubar" data-variant="1">
+  <div class="ubar__inner" role="region" aria-label="Offres du magasin">
+    <div class="ubar__track" style="--ubar-count:${promos.length}">
+      ${promos
+        .map(
+          ([t, s, c], i) => `<div class="ubar__item" style="--ubar-index:${i}">
+        <span class="ubar__text" style="--item-color:${c}">
+          <span class="ubar__title">${t}</span>
+          <span class="ubar__sub">${s}</span>
+        </span>
+      </div>`
+        )
+        .join("\n      ")}
+    </div>
+  </div>
+</div>`;
 
 /* --- phone home ---------------------------------------------------------- */
 const departments = ["Tout", "Hommes", "Femmes", "Maison", "Bijoux", "Sport", "Beauté"];
@@ -66,7 +91,7 @@ const card = (it, i) => {
 writeFileSync(
   join(here, "mobile-home.html"),
   head("Accueil") +
-    `
+    strip() + `
 <div class="msearch">
   <form class="msearch__field" role="search" action="/search" method="get">
     <label class="visually-hidden" for="MSearch">Rechercher</label>
