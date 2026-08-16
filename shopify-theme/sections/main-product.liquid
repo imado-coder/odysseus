@@ -150,7 +150,7 @@
                 {%- endif -%}
 
               {%- when 'notice' -%}
-                <span class="bb__notice" {{ block.shopify_attributes }}
+                <span class="bb__notice bb__notice--inline" {{ block.shopify_attributes }}
                       style="{% if block.settings.color != blank %}border-color: {{ block.settings.color }}; color: {{ block.settings.color }};{% endif %}">
                   {{ block.settings.text }}
                   {%- if block.settings.show_info %} <span aria-hidden="true">&#9432;</span>{% endif -%}

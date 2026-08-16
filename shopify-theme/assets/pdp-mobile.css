@@ -651,8 +651,9 @@
   .pdp--immersive .pdp__inner { padding-inline: 0; }
   .pdp--immersive .pdp__crumbs { display: none; }
 
-  /* Everything below the gallery gets its padding back. */
-  .pdp--immersive .pdp__buybox,
+  /* Everything below the gallery gets its padding back — but .bb already
+     carries 16px of its own, so adding it to .pdp__buybox too would double
+     the inset and stop any full-bleed child from reaching the screen edge. */
   .pdp--immersive .pdp__details { padding-inline: 16px; }
 
   .bb__title-more {
@@ -720,4 +721,111 @@ html:not(.js) .bb__title-more { grid-template-rows: 1fr; }
   align-items: baseline;
   gap: 6px;
   min-inline-size: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Buy box density on phones
+
+   Matching the reference layout directly under the photo: one thin promise
+   strip, then the title, then a compact rating line, then the price, then the
+   badges on a single row. Every one of these was taking a block of its own
+   and pushing the price off the first screen.
+   -------------------------------------------------------------------------- */
+@media (max-width: 989px) {
+  /* The promise strip: one line, no flag panel. The two promises sit side by
+     side with a rule between them, as on the reference. */
+  .bb__savings {
+    align-items: center;
+    gap: 0;
+    padding: 9px 14px;
+    border-radius: 0;
+    margin-inline: -16px;
+    font-size: 13px;
+  }
+
+  .bb__savings-flag { display: none; }
+
+  .bb__savings-list {
+    flex-wrap: nowrap;
+    gap: 0;
+    padding: 0;
+    inline-size: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    color: var(--c-ink, #101418);
+  }
+
+  .bb__savings-list::-webkit-scrollbar { display: none; }
+
+  .bb__savings-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding-inline: 10px;
+    font-weight: 600;
+  }
+
+  .bb__savings-item:first-child { padding-inline-start: 0; color: var(--c-trust, #067d3d); }
+
+  .bb__savings-item + .bb__savings-item {
+    border-inline-start: 1px solid color-mix(in srgb, var(--c-ink-3, #6e7781) 35%, transparent);
+  }
+
+  /* One star, not five. The reference states the score and a single mark —
+     five stars at this size is a row of specks that reads as noise. */
+  .bb__rating {
+    gap: 5px;
+    font-size: 13.5px;
+  }
+
+  .bb__rating-stars {
+    --star-size: 13px;
+    --stars-fill: 100%;
+    inline-size: calc(var(--star-size) + var(--star-gap));
+  }
+
+  /* The seller badge and the rank badge belong on the rating line, not each
+     on a line of its own. */
+  .bb__seller-badge,
+  .bb__rank { display: inline-flex; margin-block-start: 0; }
+  .bb__rank { font-size: 13px; gap: 5px; }
+
+  /* Discount and stock warning share one row. */
+  .bb__price-note { gap: 8px; row-gap: 6px; }
+  .bb__notice { margin-block-start: 0; }
+}
+
+@media (max-width: 989px) {
+  /* Full-bleed promise strip. The buy box carries 16px of padding in
+     immersive mode, so the strip cancels it on both sides to reach the
+     screen edges as on the reference. */
+  .pdp--immersive .bb__savings {
+    margin-inline: -16px;
+    border-radius: 0;
+    inline-size: calc(100% + 32px);
+    max-inline-size: none;
+  }
+
+  /* "9 800,00 DA" beside a 32px "4 900,00 DA" cannot share a 390px line, so
+     the type steps down on phones rather than wrapping — was and now read as
+     one statement or the discount does not land. */
+  .bb__price-row { flex-wrap: nowrap; align-items: baseline; }
+
+  .bb__price-was { font-size: 14px; flex: none; }
+
+  .bb__price-now {
+    font-size: 25px;
+    letter-spacing: -0.03em;
+  }
+
+  .bb__price-label { font-size: 14px; }
+
+  .bb__price-deal {
+    min-inline-size: 0;
+    flex: 1;
+    justify-content: flex-start;
+  }
+
+  /* Longest currency strings still get to shrink rather than overflow. */
+  .bb__price-row > * { min-inline-size: 0; }
 }
