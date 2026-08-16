@@ -413,10 +413,112 @@
         if has_desc or media_blocks.size > 0 or has_auto_landing
           assign has_landing = true
         endif
+
+        assign spec_block = section.blocks | where: 'type', 'specs' | first
       -%}
 
-      {%- if has_landing or review_blocks.size > 0 -%}
+      {%- if has_landing or review_blocks.size > 0 or spec_block -%}
         <div class="pdp__details pdp__details--{{ section.settings.description_column | default: 'buybox' }}">
+
+          {%- comment -%}
+            Product details.
+
+            A spec grid, not a paragraph: the shopper is checking one fact —
+            the material, the capacity, the warranty — and a sentence buries
+            it. Three columns because two reads as a form and four squeezes
+            the values onto a second line at 360px.
+
+            The merchant types the rows, but a shop that has typed none still
+            gets a table: the product's own type, vendor and SKU are real
+            Shopify fields, and its option names are the facts the shopper is
+            choosing between anyway.
+          {%- endcomment -%}
+          {%- if spec_block -%}
+            {%- liquid
+              assign spec_keys = ''
+              assign spec_vals = ''
+              for i in (1..9)
+                assign kk = 'k' | append: i
+                assign vk = 'v' | append: i
+                assign k = spec_block.settings[kk]
+                assign v = spec_block.settings[vk]
+                if k != blank and v != blank
+                  assign spec_keys = spec_keys | append: '|' | append: k
+                  assign spec_vals = spec_vals | append: '|' | append: v
+                endif
+              endfor
+
+              if spec_keys == blank and spec_block.settings.auto_fill
+                if product.type != blank
+                  assign spec_keys = spec_keys | append: '|' | append: spec_block.settings.auto_type_label
+                  assign spec_vals = spec_vals | append: '|' | append: product.type
+                endif
+                if product.vendor != blank
+                  assign spec_keys = spec_keys | append: '|' | append: spec_block.settings.auto_vendor_label
+                  assign spec_vals = spec_vals | append: '|' | append: product.vendor
+                endif
+                if v.sku != blank
+                  assign spec_keys = spec_keys | append: '|' | append: spec_block.settings.auto_sku_label
+                  assign spec_vals = spec_vals | append: '|' | append: v.sku
+                endif
+                for option in product.options_with_values
+                  assign opt_values = option.values | join: ', '
+                  assign spec_keys = spec_keys | append: '|' | append: option.name
+                  assign spec_vals = spec_vals | append: '|' | append: opt_values
+                endfor
+              endif
+
+              assign spec_k = spec_keys | remove_first: '|' | split: '|'
+              assign spec_v = spec_vals | remove_first: '|' | split: '|'
+            -%}
+
+            {%- if spec_k.size > 0 -%}
+              <section class="pdetails" {{ spec_block.shopify_attributes }}>
+                <div class="pdetails__head">
+                  <h2 class="pdetails__title">{{ spec_block.settings.title }}</h2>
+                  {%- if spec_block.settings.action_label != blank -%}
+                    <button class="pdetails__action" type="button"
+                            data-sheet-open aria-controls="SpecSheet-{{ spec_block.id }}">
+                      {{ spec_block.settings.action_label }}
+                      {% render 'icon', name: 'chevron' %}
+                    </button>
+                  {%- endif -%}
+                </div>
+
+                {%- comment -%}
+                  Three per row, so the grid only fills the cells it has —
+                  a trailing gap is the background showing through, which is
+                  what the 1px gap over a border-coloured backdrop draws.
+                {%- endcomment -%}
+                <div class="pdetails__grid">
+                  {%- for k in spec_k limit: 9 -%}
+                    <div class="pdetails__cell">
+                      <span class="pdetails__key">{{ k }}</span>
+                      <span class="pdetails__val">{{ spec_v[forloop.index0] }}</span>
+                    </div>
+                  {%- endfor -%}
+                </div>
+
+                {%- if spec_block.settings.more_label != blank -%}
+                  <button class="pdetails__more" type="button"
+                          data-sheet-open aria-controls="SpecSheet-{{ spec_block.id }}">
+                    {{ spec_block.settings.more_label }}
+                    {% render 'icon', name: 'chevron' %}
+                  </button>
+                {%- endif -%}
+
+                {%- if spec_block.settings.guide_label != blank -%}
+                  <button class="pdetails__guide" type="button"
+                          data-sheet-open aria-controls="GuideSheet-{{ spec_block.id }}">
+                    {% render 'icon', name: 'tag' %}
+                    {{ spec_block.settings.guide_label }}
+                    <span class="pdetails__guide-val">{{ spec_block.settings.guide_value }}</span>
+                    {% render 'icon', name: 'chevron' %}
+                  </button>
+                {%- endif -%}
+              </section>
+            {%- endif -%}
+          {%- endif -%}
 
           {%- if has_landing -%}
             <section class="landing" aria-labelledby="Desc-{{ section.id }}">
@@ -509,6 +611,54 @@
           {%- endif -%}
 
           {%- comment -%}
+            Related products.
+
+            A shopper who has read this far and not ordered is about to
+            leave; the only thing worth showing them is another product. The
+            source is the merchant's choice because "related" means different
+            things per shop: a collection they curate, or — with nothing
+            chosen — whatever else is in the collection this product was
+            reached through, which needs no setup at all.
+
+            Reuses the catalog card, so one card setting still governs every
+            grid on the storefront.
+          {%- endcomment -%}
+          {%- if section.settings.show_related -%}
+            {%- liquid
+              assign related_source = collections[section.settings.related_collection]
+              if related_source == blank or related_source.products.size == 0
+                assign related_source = collection
+              endif
+              if related_source == blank or related_source.products.size == 0
+                assign related_source = collections.all
+              endif
+              assign related_limit = section.settings.related_count | default: 6
+              # One extra is fetched because this product is filtered back out
+              # of its own list, which would otherwise leave a short last row.
+              assign related_fetch = related_limit | plus: 1
+              assign related_shown = 0
+            -%}
+
+            {%- capture related_cards -%}
+              {%- for other in related_source.products limit: related_fetch -%}
+                {%- if other.id != product.id and related_shown < related_limit -%}
+                  {%- assign related_shown = related_shown | plus: 1 -%}
+                  {% render 'product-card', card: other, index: forloop.index0 %}
+                {%- endif -%}
+              {%- endfor -%}
+            {%- endcapture -%}
+
+            {%- if related_shown > 0 -%}
+              <section class="related" aria-labelledby="Rel-{{ section.id }}">
+                <h2 class="related__title" id="Rel-{{ section.id }}">
+                  {{ section.settings.related_title }}
+                </h2>
+                <div class="cgrid">{{ related_cards }}</div>
+              </section>
+            {%- endif -%}
+          {%- endif -%}
+
+          {%- comment -%}
             Reviews. Shopify has no review object of its own, so these are
             blocks the merchant fills in — which also means they must never be
             presented as verified by anyone but the merchant.
@@ -596,6 +746,76 @@
   {%- endcomment -%}
   {%- for block in section.blocks -%}
     {%- case block.type -%}
+
+      {%- when 'specs' -%}
+        {%- capture spec_content -%}
+          <table class="tsheet__table">
+            {%- for i in (1..9) -%}
+              {%- liquid
+                assign kk = 'k' | append: i
+                assign vk = 'v' | append: i
+                assign sk = block.settings[kk]
+                assign sv = block.settings[vk]
+              -%}
+              {%- if sk != blank and sv != blank -%}
+                <tr><th scope="row">{{ sk }}</th><td>{{ sv }}</td></tr>
+              {%- endif -%}
+            {%- endfor -%}
+            {%- comment -%}
+              The product's own fields go in the sheet whether or not the grid
+              above fell back to them — the sheet is the full record, and a
+              merchant who typed three rows still has a type and a vendor.
+            {%- endcomment -%}
+            {%- if block.settings.auto_fill -%}
+              {%- if product.type != blank -%}
+                <tr><th scope="row">{{ block.settings.auto_type_label }}</th><td>{{ product.type }}</td></tr>
+              {%- endif -%}
+              {%- if product.vendor != blank -%}
+                <tr><th scope="row">{{ block.settings.auto_vendor_label }}</th><td>{{ product.vendor }}</td></tr>
+              {%- endif -%}
+              {%- if v.sku != blank -%}
+                <tr><th scope="row">{{ block.settings.auto_sku_label }}</th><td>{{ v.sku }}</td></tr>
+              {%- endif -%}
+              {%- for option in product.options_with_values -%}
+                {%- assign opt_all = option.values | join: ', ' -%}
+                <tr><th scope="row">{{ option.name }}</th><td>{{ opt_all }}</td></tr>
+              {%- endfor -%}
+            {%- endif -%}
+          </table>
+          {%- if block.settings.sheet_note != blank -%}
+            <p class="tsheet__note">
+              {% render 'icon', name: 'check' %} {{ block.settings.sheet_note }}
+            </p>
+          {%- endif -%}
+        {%- endcapture -%}
+        {%- assign spec_sheet_id = 'SpecSheet-' | append: block.id -%}
+        {% render 'trust-sheet',
+           id: spec_sheet_id,
+           title: block.settings.title,
+           icon: 'box-fill',
+           close_label: section.settings.close_label,
+           content: spec_content %}
+
+        {%- if block.settings.guide_label != blank -%}
+          {%- capture guide_content -%}
+            {%- if block.settings.guide_table != blank -%}
+              <div class="tsheet__rich rte">{{ block.settings.guide_table }}</div>
+            {%- endif -%}
+            {%- if block.settings.guide_image != blank -%}
+              {%- assign guide_alt = block.settings.guide_label -%}
+              {{ block.settings.guide_image
+                 | image_url: width: 900
+                 | image_tag: widths: '400,700,900', alt: guide_alt, loading: 'lazy' }}
+            {%- endif -%}
+          {%- endcapture -%}
+          {%- assign guide_sheet_id = 'GuideSheet-' | append: block.id -%}
+          {% render 'trust-sheet',
+             id: guide_sheet_id,
+             title: block.settings.guide_label,
+             icon: 'tag',
+             close_label: section.settings.close_label,
+             content: guide_content %}
+        {%- endif -%}
 
       {%- when 'rank' -%}
         {%- capture rank_content -%}
@@ -983,6 +1203,37 @@
       "id": "reviews_count_label",
       "label": "Mot après le nombre",
       "default": "avis"
+    },
+    {
+      "type": "header",
+      "content": "Produits similaires"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_related",
+      "label": "Afficher les produits similaires",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "related_title",
+      "label": "Titre",
+      "default": "Vous aimerez aussi"
+    },
+    {
+      "type": "collection",
+      "id": "related_collection",
+      "label": "Collection à afficher",
+      "info": "Laissez vide pour reprendre la collection depuis laquelle le produit a été ouvert."
+    },
+    {
+      "type": "range",
+      "id": "related_count",
+      "label": "Nombre de produits",
+      "min": 2,
+      "max": 12,
+      "step": 2,
+      "default": 6
     }
   ],
   "blocks": [
@@ -2286,6 +2537,190 @@
           "id": "content",
           "label": "Contenu",
           "default": "<p>Ajoutez ici n'importe quel texte.</p>"
+        }
+      ]
+    },
+    {
+      "type": "specs",
+      "name": "Détails du produit",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Tableau de caractéristiques affiché au-dessus de la description. Laissez les lignes vides pour reprendre automatiquement le type, le fournisseur, la référence et les options du produit."
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Titre",
+          "default": "Détails du produit"
+        },
+        {
+          "type": "text",
+          "id": "action_label",
+          "label": "Lien en haut à droite",
+          "default": "Tout voir"
+        },
+        {
+          "type": "text",
+          "id": "more_label",
+          "label": "Lien sous le tableau",
+          "default": "Voir toutes les caractéristiques"
+        },
+        {
+          "type": "checkbox",
+          "id": "auto_fill",
+          "label": "Compléter avec les données du produit",
+          "info": "Type, fournisseur, référence et options. Utilisé seulement si vous n'avez saisi aucune ligne ci-dessous.",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "auto_type_label",
+          "label": "Intitulé — type",
+          "default": "Catégorie"
+        },
+        {
+          "type": "text",
+          "id": "auto_vendor_label",
+          "label": "Intitulé — fournisseur",
+          "default": "Marque"
+        },
+        {
+          "type": "text",
+          "id": "auto_sku_label",
+          "label": "Intitulé — référence",
+          "default": "Référence"
+        },
+        {
+          "type": "header",
+          "content": "Lignes saisies"
+        },
+        {
+          "type": "text",
+          "id": "k1",
+          "label": "Ligne 1 — intitulé"
+        },
+        {
+          "type": "text",
+          "id": "v1",
+          "label": "Ligne 1 — valeur"
+        },
+        {
+          "type": "text",
+          "id": "k2",
+          "label": "Ligne 2 — intitulé"
+        },
+        {
+          "type": "text",
+          "id": "v2",
+          "label": "Ligne 2 — valeur"
+        },
+        {
+          "type": "text",
+          "id": "k3",
+          "label": "Ligne 3 — intitulé"
+        },
+        {
+          "type": "text",
+          "id": "v3",
+          "label": "Ligne 3 — valeur"
+        },
+        {
+          "type": "text",
+          "id": "k4",
+          "label": "Ligne 4 — intitulé"
+        },
+        {
+          "type": "text",
+          "id": "v4",
+          "label": "Ligne 4 — valeur"
+        },
+        {
+          "type": "text",
+          "id": "k5",
+          "label": "Ligne 5 — intitulé"
+        },
+        {
+          "type": "text",
+          "id": "v5",
+          "label": "Ligne 5 — valeur"
+        },
+        {
+          "type": "text",
+          "id": "k6",
+          "label": "Ligne 6 — intitulé"
+        },
+        {
+          "type": "text",
+          "id": "v6",
+          "label": "Ligne 6 — valeur"
+        },
+        {
+          "type": "text",
+          "id": "k7",
+          "label": "Ligne 7 — intitulé"
+        },
+        {
+          "type": "text",
+          "id": "v7",
+          "label": "Ligne 7 — valeur"
+        },
+        {
+          "type": "text",
+          "id": "k8",
+          "label": "Ligne 8 — intitulé"
+        },
+        {
+          "type": "text",
+          "id": "v8",
+          "label": "Ligne 8 — valeur"
+        },
+        {
+          "type": "text",
+          "id": "k9",
+          "label": "Ligne 9 — intitulé"
+        },
+        {
+          "type": "text",
+          "id": "v9",
+          "label": "Ligne 9 — valeur"
+        },
+        {
+          "type": "header",
+          "content": "Fiche détaillée"
+        },
+        {
+          "type": "text",
+          "id": "sheet_note",
+          "label": "Note en bas de la fiche",
+          "default": "Paiement à la livraison — vous vérifiez le produit avant de payer."
+        },
+        {
+          "type": "header",
+          "content": "Guide des tailles"
+        },
+        {
+          "type": "text",
+          "id": "guide_label",
+          "label": "Libellé",
+          "info": "Laissez vide pour masquer la ligne."
+        },
+        {
+          "type": "text",
+          "id": "guide_value",
+          "label": "Valeur à droite",
+          "default": "Standard"
+        },
+        {
+          "type": "richtext",
+          "id": "guide_table",
+          "label": "Contenu du guide"
+        },
+        {
+          "type": "image_picker",
+          "id": "guide_image",
+          "label": "Image du guide"
         }
       ]
     },

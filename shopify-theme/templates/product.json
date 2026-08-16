@@ -107,6 +107,10 @@
             "max": 10,
             "sold_text": "40 000+ vendus"
           }
+        },
+        "specs": {
+          "type": "specs",
+          "settings": {}
         }
       },
       "block_order": [
@@ -124,6 +128,7 @@
         "carriers",
         "guarantee",
         "pills",
+        "specs",
         "rev1",
         "rev2",
         "rev3",

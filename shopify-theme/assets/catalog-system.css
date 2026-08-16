@@ -244,10 +244,15 @@
   overflow: hidden;
 }
 
-/* Price row: deal label, price, compare, and the quick-add on the far edge */
+/* Price row: deal label, price, compare, and the quick-add on the far edge.
+
+   Bottom-aligned, not centred. Below 480px the label takes a line of its own
+   and the compare price often takes a third, so a centred button floated in
+   the middle of a three-line stack with white space above and below it. The
+   button belongs on the line the price is on. */
 .pgc__price-row {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 6px;
   flex-wrap: nowrap;
   min-inline-size: 0;
@@ -360,6 +365,11 @@
   gap: 2px;
   min-inline-size: 0;
   color: #5b6570;
+}
+
+/* The ellipsis belongs on the text, not on the flex box around it. */
+.pgc__sold-n {
+  min-inline-size: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

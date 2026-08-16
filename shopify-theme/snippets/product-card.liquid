@@ -113,8 +113,14 @@
       {%- endif -%}
       {%- assign sold = card.metafields.custom.sold_count -%}
       {%- if settings.card_show_sold and sold != blank -%}
+        {%- comment -%}
+          The count is wrapped so it can truncate. As a bare text node inside
+          an inline-flex box, text-overflow had nothing to apply to and the
+          number was sliced mid-character at the card edge instead.
+        {%- endcomment -%}
         <span class="pgc__sold">
-          <span class="pgc__flame" aria-hidden="true">&#9670;</span> {{ sold }}
+          <span class="pgc__flame" aria-hidden="true">&#9670;</span>
+          <span class="pgc__sold-n">{{ sold }}</span>
         </span>
       {%- endif -%}
     </div>

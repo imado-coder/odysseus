@@ -520,49 +520,14 @@
 }
 
 /* --------------------------------------------------------------------------
-   Floating cart bubble
+   Floating cart bubble — see .cartbub in this file.
+
+   .cart-fab was the first version of this component. It was never rendered:
+   the markup that shipped uses .cartbub, and these rules sat here looking
+   like a live component for anyone reading the stylesheet. Dead CSS that
+   still describes a real feature is worse than none — it is what a later
+   change gets written against.
    -------------------------------------------------------------------------- */
-.cart-fab {
-  position: fixed;
-  inset-block-end: calc(84px + env(safe-area-inset-bottom));
-  inset-inline-end: 12px;
-  z-index: 55;
-  inline-size: 66px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 8px 4px 6px;
-  border-radius: 16px;
-  background: var(--c-trust-solid, #0a8800);
-  color: #fff;
-  text-align: center;
-  box-shadow: 0 6px 18px rgba(11, 125, 20, 0.34);
-}
-
-@media (min-width: 990px) {
-  .cart-fab { display: none; }
-}
-
-.cart-fab__count {
-  position: absolute;
-  inset-block-start: -7px;
-  inset-inline-end: -5px;
-  min-inline-size: 26px;
-  padding: 2px 6px;
-  border-radius: 999px;
-  background: var(--c-accent, #ff6d00);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 800;
-  border: 2px solid #fff;
-}
-
-.cart-fab__label {
-  font-size: 10px;
-  font-weight: 700;
-  line-height: 1.15;
-}
 
 /* --------------------------------------------------------------------------
    Horizontal scrollers inside the buy box
@@ -1306,9 +1271,14 @@ html:not(.js) .bb__title-more { grid-template-rows: 1fr; }
      viewport. Nothing to escape any more, so nothing to pull. */
   .pdp__details::before { margin-inline: 0; }
 
+  /* .pdp__details > * sets padding-inline: 0 at the top of this file, and it
+     is a child selector at the same specificity — so anything giving the
+     gutter back has to live HERE, after it. The same rule written in
+     product-page.css looks right in the source and loses in the browser. */
   .landing__title,
   .landing__stack,
   .landing__caption,
+  .pdp__details > .related,
   .pdp__details > .reviews { padding-inline: 16px; }
 
   .landing { gap: 0; }
@@ -1317,3 +1287,36 @@ html:not(.js) .bb__title-more { grid-template-rows: 1fr; }
   /* A caption sits on the image it describes, not adrift below the next one. */
   .landing__caption { padding-block: 8px 14px; }
 }
+
+/* The details grid keeps its 3-up rhythm on wide screens too — the CSS was
+   written inside the phone stylesheet but the section is not phone-only, and
+   without a desktop rule the cells lost their frame above 990px. */
+.pdetails__action,
+.pdetails__more,
+.pdetails__guide { cursor: pointer; }
+
+/* Both are buttons now rather than links, so they inherit the UA's centred
+   button text and its font. */
+.pdetails__action,
+.pdetails__more {
+  font: inherit;
+  font-size: 14px;
+  text-align: start;
+  background: none;
+}
+
+.pdetails__guide { font: inherit; font-size: 15px; font-weight: 600; text-align: start; background: none; }
+
+/* 44px, like every other target in the theme. */
+.pdetails__action { min-block-size: 44px; }
+.pdetails__more { min-block-size: 44px; }
+
+.pdetails__action .icon,
+.pdetails__more .icon { inline-size: 14px; block-size: 14px; }
+.pdetails__guide .icon { inline-size: 17px; block-size: 17px; flex: none; }
+.pdetails__guide .icon:last-child { color: var(--c-ink-3, #6e7781); inline-size: 15px; block-size: 15px; }
+
+/* A value long enough to wrap breaks the row rhythm; the key is short by
+   nature, the merchant's value is not. */
+.pdetails__cell { min-inline-size: 0; padding-block: 10px; }
+.pdetails__val { overflow-wrap: anywhere; }
