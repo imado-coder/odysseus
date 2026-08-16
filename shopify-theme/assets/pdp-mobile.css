@@ -872,3 +872,39 @@ html:not(.js) .bb__title-more { grid-template-rows: 1fr; }
   .bb__carriers + .bb__trust,
   .bb__trust + .bb__pills { margin-block-start: 6px; }
 }
+
+@media (max-width: 989px) {
+  /* The 24px row gap between the page regions is a desktop measure: on a
+     phone it draws a white band between the photo and the promise strip,
+     which is exactly the seam the reference has none of. The buy box carries
+     its own rhythm, so the grid contributes nothing.
+
+     This gap sat outside .bb, which is why measuring inside the buy box kept
+     reporting tight spacing while the page still looked loose. */
+  .pdp--immersive .pdp__grid { row-gap: 0; }
+  .pdp--immersive .pdp__buybox { padding-block-start: 0; }
+  .pdp--immersive .pdp__details { margin-block-start: 16px; }
+
+  /* The discount and the stock warning are separate blocks so either can be
+     removed, but they are one statement to the eye. Making both inline-level
+     lets them share a line without nesting one inside the other. */
+  .bb__price-note {
+    display: block;
+    /* A <p> brings the browser's own block margin with it, which reopened the
+       gap the rhythm scale had just closed. */
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.4;
+    color: var(--c-ink-3, #6e7781);
+  }
+
+  .bb__price-note + * { margin-block-start: 3px; }
+
+  .bb__off--chip,
+  .bb__notice--inline {
+    display: inline-flex;
+    vertical-align: middle;
+  }
+
+  .bb__notice--inline { margin-inline-start: 6px; }
+}

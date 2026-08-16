@@ -138,15 +138,19 @@
                     <span class="bb__price-now">{{ v.price | money }}</span>
                   </span>
                 </div>
-                {%- if block.settings.note != blank or on_sale -%}
-                  <div class="bb__price-note">
-                    {%- if block.settings.note != blank -%}<span>{{ block.settings.note }}</span>{%- endif -%}
-                    {%- if on_sale and block.settings.show_discount -%}
-                      <span class="bb__off" style="{% if block.settings.off_bg != blank %}background: {{ block.settings.off_bg }};{% endif %}">
-                        {{ block.settings.off_prefix }}{{ off }}{{ block.settings.off_suffix }}
-                      </span>
-                    {%- endif -%}
-                  </div>
+                {%- comment -%}
+                  The explanatory line and the discount badge are separated so
+                  the badge can share a row with the stock warning, as on the
+                  reference. Kept together they were too wide for 390px and the
+                  warning fell to a line of its own.
+                {%- endcomment -%}
+                {%- if block.settings.note != blank -%}
+                  <p class="bb__price-note">{{ block.settings.note }}</p>
+                {%- endif -%}
+                {%- if on_sale and block.settings.show_discount -%}
+                  <span class="bb__off bb__off--chip" style="{% if block.settings.off_bg != blank %}background: {{ block.settings.off_bg }};{% endif %}">
+                    {{ block.settings.off_prefix }}{{ off }}{{ block.settings.off_suffix }}
+                  </span>
                 {%- endif -%}
 
               {%- when 'notice' -%}
