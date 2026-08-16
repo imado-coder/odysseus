@@ -99,6 +99,14 @@
             "tag": "Achat vérifié",
             "text": "Deuxième commande chez eux. Emballage soigné, rien de cassé."
           }
+        },
+        "qty": {
+          "type": "quantity",
+          "settings": {
+            "label": "Qté",
+            "max": 10,
+            "sold_text": "40 000+ vendus"
+          }
         }
       },
       "block_order": [
@@ -110,6 +118,7 @@
         "notice",
         "promo",
         "variants",
+        "qty",
         "cod",
         "shipping",
         "carriers",

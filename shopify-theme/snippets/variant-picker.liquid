@@ -1,12 +1,59 @@
 {%- comment -%}
-  Real variant selection: each option value is a radio bound to the product
-  form, so choosing one actually changes what gets added to the cart.
+  Variant selection.
+
+  Each option value is a radio bound to the product form, so choosing one
+  actually changes what gets added to the cart — a picker that only looks
+  selected is worse than none.
+
+  Two presentations, chosen by what the option is rather than by a setting:
+  a size-like option gets the pill row with its scale switch and size guide,
+  anything else gets swatches. The merchant names their options; matching on
+  the name is what lets one theme serve a clothing shop and an electronics
+  shop without either configuring anything.
 {%- endcomment -%}
+
+{%- assign size_names = 'taille,size,pointure,مقاس,المقاس' | split: ',' -%}
+
 {%- for option in product.options_with_values -%}
+  {%- liquid
+    assign oname = option.name | downcase | strip
+    assign is_size = false
+    for n in size_names
+      if oname contains n
+        assign is_size = true
+        break
+      endif
+    endfor
+  -%}
+
   <div class="bb__option" {{ block.shopify_attributes }}>
-    {%- if block.settings.show_name -%}
-      <div class="bb__opt-label">{{ option.name }} : <b data-opt-out="{{ forloop.index }}">{{ option.selected_value }}</b></div>
-    {%- endif -%}
+
+    {%- comment -%} Label, and for sizes the scale switch and the guide. {%- endcomment -%}
+    <div class="opt-head">
+      {%- if block.settings.show_name -%}
+        <span class="opt-head__label">
+          {{ option.name }} :
+          <b data-opt-out="{{ forloop.index }}">{{ option.selected_value }}</b>
+        </span>
+      {%- endif -%}
+
+      {%- if is_size -%}
+        {%- if block.settings.scale_a != blank -%}
+          <span class="scale" role="group" aria-label="{{ block.settings.scale_aria | default: 'Système de tailles' | escape }}">
+            <button class="scale__opt" type="button" aria-pressed="true">{{ block.settings.scale_a }}</button>
+            {%- if block.settings.scale_b != blank -%}
+              <button class="scale__opt" type="button" aria-pressed="false">{{ block.settings.scale_b }}</button>
+            {%- endif -%}
+          </span>
+        {%- endif -%}
+
+        {%- if block.settings.guide_label != blank -%}
+          <a class="opt-head__guide" href="{{ block.settings.guide_url | default: '#' }}">
+            {% render 'icon', name: 'tag' %} {{ block.settings.guide_label }}
+          </a>
+        {%- endif -%}
+      {%- endif -%}
+    </div>
 
     {%- if block.settings.style == 'select' -%}
       <label class="visually-hidden" for="Opt-{{ option.name | handle }}">{{ option.name }}</label>
@@ -15,6 +62,20 @@
           <option value="{{ value | escape }}" {% if value == option.selected_value %}selected{% endif %}>{{ value }}</option>
         {%- endfor -%}
       </select>
+
+    {%- elsif is_size -%}
+      <div class="sizes" role="radiogroup" aria-label="{{ option.name | escape }}">
+        {%- for value in option.values -%}
+          <label class="size">
+            <input class="visually-hidden" type="radio"
+                   name="option-{{ forloop.parentloop.index }}" value="{{ value | escape }}"
+                   data-variant-option="{{ forloop.parentloop.index }}"
+                   {% if value == option.selected_value %}checked{% endif %}>
+            <span>{{ value }}</span>
+          </label>
+        {%- endfor -%}
+      </div>
+
     {%- else -%}
       <div class="bb__swatches" role="radiogroup" aria-label="{{ option.name | escape }}">
         {%- for value in option.values -%}
@@ -27,19 +88,36 @@
               endif
             endfor
           -%}
-          <label class="bb__swatch">
+          <label class="bb__swatch{% if forloop.first and block.settings.hot_label != blank %} bb__swatch--hot{% endif %}">
             <input class="visually-hidden" type="radio"
                    name="option-{{ forloop.parentloop.index }}" value="{{ value | escape }}"
                    data-variant-option="{{ forloop.parentloop.index }}"
                    {% if value == option.selected_value %}checked{% endif %}>
-            {%- if block.settings.style == 'swatch' and swatch_variant.featured_media -%}
+            {%- comment -%}
+              The flag belongs to the choice, not to the picture: a colour
+              with no per-variant photo still deserves it.
+            {%- endcomment -%}
+            {%- if forloop.first and block.settings.hot_label != blank -%}
+              <span class="bb__swatch-hot">{{ block.settings.hot_label }}</span>
+            {%- endif -%}
+            {%- if swatch_variant.featured_media -%}
               <img src="{{ swatch_variant.featured_media | image_url: width: 192 }}"
                    width="96" height="96" alt="" loading="lazy" decoding="async">
+            {%- else -%}
+              <span class="bb__swatch-name">{{ value }}</span>
             {%- endif -%}
-            <span class="bb__swatch-name">{{ value }}</span>
           </label>
         {%- endfor -%}
       </div>
+    {%- endif -%}
+
+    {%- comment -%}
+      Fit note. Merchant-written: only they know what their returns say.
+    {%- endcomment -%}
+    {%- if is_size and block.settings.fit_note != blank -%}
+      <p class="fitrow__val">
+        {% render 'icon', name: 'check' %} {{ block.settings.fit_note }}
+      </p>
     {%- endif -%}
   </div>
 {%- endfor -%}

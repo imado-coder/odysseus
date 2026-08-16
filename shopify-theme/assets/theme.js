@@ -762,6 +762,40 @@
     tick();
   }
 
+
+  /* Quantity stepper. The input stays a real number field so a keyboard or a
+     paste still works; the buttons only nudge it and keep it inside the
+     min/max the merchant set. */
+  function initQty(root) {
+    var input = root.querySelector(".qty__input");
+    if (!input) return;
+
+    function step(by) {
+      var min = parseInt(input.min, 10) || 1;
+      var max = parseInt(input.max, 10) || 99;
+      var now = parseInt(input.value, 10) || min;
+      var next = Math.min(max, Math.max(min, now + by));
+      if (next === now) return;
+      input.value = String(next);
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+
+    var minus = root.querySelector("[data-qty-minus]");
+    var plus = root.querySelector("[data-qty-plus]");
+    if (minus) minus.addEventListener("click", function () { step(-1); });
+    if (plus) plus.addEventListener("click", function () { step(1); });
+
+    /* Typing 0 or a negative by hand is corrected on the way out. */
+    input.addEventListener("change", function () {
+      var min = parseInt(input.min, 10) || 1;
+      var max = parseInt(input.max, 10) || 99;
+      var n = parseInt(input.value, 10);
+      if (!n || n < min) n = min;
+      if (n > max) n = max;
+      input.value = String(n);
+    });
+  }
+
   function boot() {
     document.querySelectorAll("[data-sticky-fit]").forEach(initStickyFit);
     document.querySelectorAll("[data-disclosure]").forEach(initDisclosure);
@@ -771,6 +805,7 @@
     document.querySelectorAll("[data-sheet-open]").forEach(initSheet);
     document.querySelectorAll("[data-cod-wrap]").forEach(initCodReveal);
     document.querySelectorAll("[data-countdown]").forEach(initCountdown);
+    document.querySelectorAll("[data-qty]").forEach(initQty);
     document.querySelectorAll("[data-order-bar]").forEach(initOrderBar);
     document.querySelectorAll("[data-gallery]").forEach(initGallery);
     initReveal();

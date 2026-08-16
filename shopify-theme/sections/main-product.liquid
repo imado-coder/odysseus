@@ -185,14 +185,30 @@
                 {%- endunless -%}
 
               {%- when 'quantity' -%}
-                <div class="bb__qty-row" {{ block.shopify_attributes }}>
-                  <label>{{ block.settings.label }}
-                    <select class="bb__qty-select" name="quantity" form="AddToCart-{{ section.id }}">
-                      {%- for i in (1..block.settings.max) -%}<option>{{ i }}</option>{%- endfor -%}
-                    </select>
-                  </label>
+                {%- comment -%}
+                  A stepper, not a dropdown. Picking "2" from a select on a
+                  phone opens a full-screen wheel for a number the shopper
+                  wanted to nudge by one.
+                {%- endcomment -%}
+                <div class="qty" {{ block.shopify_attributes }}>
+                  <span class="qty__label" id="QtyLabel-{{ section.id }}">{{ block.settings.label }}</span>
+
+                  <span class="qty__control" data-qty>
+                    <button class="qty__btn" type="button" data-qty-minus
+                            aria-label="{{ block.settings.minus_label | default: 'Retirer un' | escape }}">&minus;</button>
+                    <input class="qty__input" type="number" name="quantity"
+                           form="AddToCart-{{ section.id }}"
+                           value="1" min="1" max="{{ block.settings.max }}" step="1"
+                           inputmode="numeric"
+                           aria-labelledby="QtyLabel-{{ section.id }}">
+                    <button class="qty__btn" type="button" data-qty-plus
+                            aria-label="{{ block.settings.plus_label | default: 'Ajouter un' | escape }}">+</button>
+                  </span>
+
                   {%- if block.settings.sold_text != blank -%}
-                    <span class="bb__qty-sold"><span aria-hidden="true">&#9670;</span> {{ block.settings.sold_text }}</span>
+                    <span class="qty__sold">
+                      {% render 'icon', name: 'flame' %} {{ block.settings.sold_text }}
+                    </span>
                   {%- endif -%}
                 </div>
 
@@ -839,6 +855,49 @@
           "id": "show_name",
           "label": "Afficher le nom de l'option choisie",
           "default": true
+        },
+        {
+          "type": "header",
+          "content": "Tailles"
+        },
+        {
+          "type": "text",
+          "id": "scale_a",
+          "label": "Système de tailles A",
+          "default": "Standard"
+        },
+        {
+          "type": "text",
+          "id": "scale_b",
+          "label": "Système de tailles B",
+          "default": "DZ"
+        },
+        {
+          "type": "text",
+          "id": "guide_label",
+          "label": "Bouton guide des tailles",
+          "default": "Guide des tailles"
+        },
+        {
+          "type": "url",
+          "id": "guide_url",
+          "label": "Lien du guide"
+        },
+        {
+          "type": "text",
+          "id": "fit_note",
+          "label": "Note sur la taille",
+          "default": "94% des clients trouvent que cet article taille juste"
+        },
+        {
+          "type": "header",
+          "content": "Couleurs"
+        },
+        {
+          "type": "text",
+          "id": "hot_label",
+          "label": "Étiquette sur le 1er choix",
+          "default": "HOT"
         }
       ]
     },
@@ -866,6 +925,18 @@
           "type": "text",
           "id": "sold_text",
           "label": "Texte à côté"
+        },
+        {
+          "type": "text",
+          "id": "minus_label",
+          "label": "Libellé « retirer un »",
+          "default": "Retirer un"
+        },
+        {
+          "type": "text",
+          "id": "plus_label",
+          "label": "Libellé « ajouter un »",
+          "default": "Ajouter un"
         }
       ]
     },
