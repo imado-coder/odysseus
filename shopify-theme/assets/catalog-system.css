@@ -817,3 +817,29 @@
 [dir="rtl"] .filters::after {
   background: linear-gradient(to right, #fff 45%, transparent);
 }
+
+@media (max-width: 749px) {
+  /* 9px and 10px labels in the catalogue were unreadable on a phone. */
+  .store-btn__small,
+  .pgc__meta,
+  .pgc__sold { font-size: 12px; }
+}
+
+@media (max-width: 749px) {
+  /* Payment chips and deal labels were 9px and 11px — legible on a 27"
+     monitor, not in a hand. Nothing on a phone goes under 12px. */
+  .paychip { font-size: 12px; block-size: auto; padding-block: 3px; }
+  .pgc__deal { font-size: 12px; }
+
+  /* Thumb targets. 30px and 34px are misses as often as hits. */
+  .pgc__add { inline-size: 40px; block-size: 40px; }
+  .cpills__next { inline-size: 40px; block-size: 40px; }
+
+  /* Footer links are text, so the target is grown with padding rather than
+     a fixed box that would break the column rhythm. */
+  .tfoot__link { display: inline-block; padding-block: 11px; }
+}
+
+@media (max-width: 749px) {
+  .tfoot__bottom a { display: inline-block; padding-block: 11px; min-inline-size: 44px; text-align: center; }
+}

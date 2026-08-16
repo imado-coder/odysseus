@@ -586,3 +586,46 @@
 .bb,
 .bb > *,
 .pdp__buybox { min-inline-size: 0; max-inline-size: 100%; }
+
+@media (max-width: 989px) {
+  /* The button is the target, the dot is only what is drawn. A 6px button is
+     a miss; a 6px mark inside a 32px button is a hit. */
+  .gallery__dot {
+    /* flex: none, or the flex container shrinks the button back under the
+       thumb minimum and only the drawn dot survives. */
+    flex: none;
+    inline-size: 40px;
+    block-size: 40px;
+    background: none;
+    border: 0;
+    display: grid;
+    place-items: center;
+    padding: 0;
+  }
+
+  .gallery__dot::before {
+    content: "";
+    inline-size: 6px;
+    block-size: 6px;
+    border-radius: 50%;
+    background: rgb(255 255 255 / .6);
+    box-shadow: 0 0 0 1px rgb(16 20 24 / .18);
+    transition: inline-size .18s ease, background .18s ease;
+  }
+
+  /* Must also carry [aria-current] (0,2,0), or the earlier
+     `.gallery__dot[aria-current] { inline-size: 18px }` wins and the active
+     dot's button shrinks back under the thumb minimum. */
+  .gallery__dot[aria-current] {
+    inline-size: 40px;
+    block-size: 40px;
+  }
+
+  .gallery__dot[aria-current]::before {
+    inline-size: 16px;
+    border-radius: 999px;
+    background: #fff;
+  }
+
+  .gallery__dots { gap: 0; }
+}

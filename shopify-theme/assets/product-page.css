@@ -1389,3 +1389,18 @@
   letter-spacing: -0.01em;
   color: var(--c-ink, #101418);
 }
+
+@media (max-width: 749px) {
+  .cod-cta__note { font-size: 12px; }
+  .bb__share { inline-size: 40px; block-size: 40px; }
+
+  /* The dots stay 6px visually; the hit area around each is grown to 40px
+     with a transparent pseudo-element so a thumb can land on them. */
+  .gallery__dot { position: relative; }
+  .gallery__dot::after {
+    content: "";
+    position: absolute;
+    inset: -17px;
+    /* Purely a touch target — nothing is drawn. */
+  }
+}

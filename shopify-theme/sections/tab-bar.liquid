@@ -1,0 +1,90 @@
+{%- comment -%}
+  Bottom navigation for phones.
+
+  98% of this market shops on a phone, and a thumb does not reach a header.
+  Five destinations, fixed to the bottom, hidden from 750px up where the
+  header is already in reach. Each tab is a block so the merchant chooses
+  what belongs there.
+
+  The cart tab opens the same drawer as the header, and carries the same
+  live count.
+{%- endcomment -%}
+
+{%- if section.blocks.size > 0 -%}
+  <nav class="tabbar" aria-label="{{ section.settings.aria | default: 'Navigation principale' | escape }}">
+    {%- for block in section.blocks -%}
+      {%- liquid
+        assign is_cart = false
+        if block.settings.action == 'cart'
+          assign is_cart = true
+        endif
+      -%}
+      <a class="tab"
+         href="{% if is_cart %}{{ routes.cart_url }}{% else %}{{ block.settings.url | default: routes.root_url }}{% endif %}"
+         {% if is_cart %}data-cart-open{% endif %}
+         {{ block.shopify_attributes }}>
+        <span class="tab__icon" aria-hidden="true">
+          {% render 'icon', name: block.settings.icon %}
+          {%- if is_cart -%}
+            <span class="tab__count" data-cart-count hidden>0</span>
+          {%- endif -%}
+        </span>
+        <span class="tab__label">{{ block.settings.label }}</span>
+      </a>
+    {%- endfor -%}
+  </nav>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Barre mobile",
+  "settings": [
+    { "type": "paragraph", "content": "Visible uniquement sur mobile. Ajoutez jusqu'à 5 onglets." },
+    { "type": "text", "id": "aria", "label": "Libellé d'accessibilité", "default": "Navigation principale" }
+  ],
+  "max_blocks": 5,
+  "blocks": [
+    {
+      "type": "tab",
+      "name": "Onglet",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Texte", "default": "Accueil" },
+        {
+          "type": "select", "id": "icon", "label": "Icône", "default": "home",
+          "options": [
+            { "value": "home", "label": "Accueil" },
+            { "value": "search", "label": "Recherche" },
+            { "value": "tag", "label": "Catégories" },
+            { "value": "heart", "label": "Favoris" },
+            { "value": "cart", "label": "Panier" },
+            { "value": "user", "label": "Compte" },
+            { "value": "truck", "label": "Suivi" },
+            { "value": "gift", "label": "Offres" },
+            { "value": "phone", "label": "Contact" }
+          ]
+        },
+        {
+          "type": "select", "id": "action", "label": "Action", "default": "link",
+          "options": [
+            { "value": "link", "label": "Ouvrir un lien" },
+            { "value": "cart", "label": "Ouvrir le panier" }
+          ]
+        },
+        { "type": "url", "id": "url", "label": "Lien" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Barre mobile",
+      "blocks": [
+        { "type": "tab", "settings": { "label": "Accueil", "icon": "home" } },
+        { "type": "tab", "settings": { "label": "Catégories", "icon": "tag" } },
+        { "type": "tab", "settings": { "label": "Recherche", "icon": "search" } },
+        { "type": "tab", "settings": { "label": "Panier", "icon": "cart", "action": "cart" } },
+        { "type": "tab", "settings": { "label": "Compte", "icon": "user" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

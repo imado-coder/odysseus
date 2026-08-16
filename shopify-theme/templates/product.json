@@ -3,23 +3,135 @@
     "main": {
       "type": "main-product",
       "blocks": {
-        "savings":   { "type": "savings",    "settings": {} },
-        "title":     { "type": "title",      "settings": {} },
-        "rating":    { "type": "rating",     "settings": {} },
-        "rank":      { "type": "rank",       "settings": {} },
-        "price":     { "type": "price",      "settings": {} },
-        "notice":    { "type": "notice",     "settings": {} },
-        "variants":  { "type": "variants",   "settings": {} },
-        "cod":       { "type": "cod_form",   "settings": {} },
-        "shipping":  { "type": "shipping",   "settings": {} },
-        "carriers":  { "type": "carriers",   "settings": {} },
-        "guarantee": { "type": "guarantees", "settings": {} },
-        "pills":     { "type": "pills",      "settings": {} }
+        "savings": {
+          "type": "savings",
+          "settings": {}
+        },
+        "title": {
+          "type": "title",
+          "settings": {}
+        },
+        "rating": {
+          "type": "rating",
+          "settings": {}
+        },
+        "rank": {
+          "type": "rank",
+          "settings": {}
+        },
+        "price": {
+          "type": "price",
+          "settings": {}
+        },
+        "notice": {
+          "type": "notice",
+          "settings": {}
+        },
+        "variants": {
+          "type": "variants",
+          "settings": {}
+        },
+        "cod": {
+          "type": "cod_form",
+          "settings": {}
+        },
+        "shipping": {
+          "type": "shipping",
+          "settings": {}
+        },
+        "carriers": {
+          "type": "carriers",
+          "settings": {}
+        },
+        "guarantee": {
+          "type": "guarantees",
+          "settings": {}
+        },
+        "pills": {
+          "type": "pills",
+          "settings": {}
+        },
+        "promo": {
+          "type": "promo",
+          "settings": {
+            "name": "GRANDES PROMOS",
+            "timer_label": "Se termine dans",
+            "deadline": "2026-08-19 04:22",
+            "body": "<p>Prix réduit pendant l'offre. Payez à la réception.</p>"
+          }
+        },
+        "rev1": {
+          "type": "review",
+          "settings": {
+            "author": "Amine B.",
+            "rating": 5,
+            "date": "il y a 2 jours",
+            "tag": "Achat vérifié",
+            "text": "Produit conforme à la description. Livraison à Alger en 2 jours, j'ai payé à la réception sans problème."
+          }
+        },
+        "rev2": {
+          "type": "review",
+          "settings": {
+            "author": "Yasmine K.",
+            "rating": 5,
+            "date": "il y a 5 jours",
+            "tag": "Achat vérifié",
+            "text": "Très bonne qualité pour le prix. Le livreur a appelé avant de venir, service impeccable."
+          }
+        },
+        "rev3": {
+          "type": "review",
+          "settings": {
+            "author": "Sofiane M.",
+            "rating": 4,
+            "date": "il y a 1 semaine",
+            "tag": "Achat vérifié",
+            "text": "Bon rapport qualité-prix. J'ai commandé au bureau, récupéré le lendemain."
+          }
+        },
+        "rev4": {
+          "type": "review",
+          "settings": {
+            "author": "Nadia L.",
+            "rating": 5,
+            "date": "il y a 2 semaines",
+            "tag": "Achat vérifié",
+            "text": "Deuxième commande chez eux. Emballage soigné, rien de cassé."
+          }
+        }
       },
-      "block_order": ["savings","title","rating","rank","price","notice","variants","cod","shipping","carriers","guarantee","pills"],
+      "block_order": [
+        "savings",
+        "title",
+        "rating",
+        "rank",
+        "price",
+        "notice",
+        "promo",
+        "variants",
+        "cod",
+        "shipping",
+        "carriers",
+        "guarantee",
+        "pills",
+        "rev1",
+        "rev2",
+        "rev3",
+        "rev4"
+      ],
       "settings": {}
     },
-    "related": { "type": "product-grid", "settings": { "title": "Produits similaires", "count": 5 } }
+    "related": {
+      "type": "product-grid",
+      "settings": {
+        "title": "Produits similaires",
+        "count": 5
+      }
+    }
   },
-  "order": ["main", "related"]
+  "order": [
+    "main",
+    "related"
+  ]
 }

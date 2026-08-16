@@ -567,3 +567,9 @@ textarea.field__control {
   opacity: .9;
   line-height: 1.25;
 }
+
+@media (max-width: 749px) {
+  /* cod-form.css loads after product-page.css on the product page, so the
+     phone type floor belongs here to win. */
+  .cod-cta__note { font-size: 12px; }
+}

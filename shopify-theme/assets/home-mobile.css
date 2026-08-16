@@ -360,3 +360,15 @@
   .mtrust { font-size: 13px; }
   .mtrust__end { font-size: 12px; }
 }
+
+@media (max-width: 749px) {
+  /* Loaded after catalog-system.css, so the phone floor has to be restated
+     here or the 11px rule above wins. It must also match the specificity of
+     `.cgrid .pgc__deal` (0,2,0) — a bare class loses to it. */
+  .cgrid .pgc__deal,
+  .pgc__deal { font-size: 12px; }
+
+  /* A card title is the second target after the image; 33px was short of
+     the thumb minimum. Padding grows it without disturbing the grid. */
+  .pgc__title a { display: block; padding-block: 4px; min-block-size: 40px; }
+}

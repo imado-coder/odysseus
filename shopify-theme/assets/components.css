@@ -959,3 +959,48 @@
   font-size: 13px;
   line-height: 1.45;
 }
+
+/* Room for the fixed bottom bar so it never covers the last row of content
+   or the sticky order bar on a product page. */
+@media (max-width: 749px) {
+  body { padding-block-end: calc(58px + env(safe-area-inset-bottom)); }
+}
+
+.tab__icon { position: relative; display: grid; place-items: center; }
+
+.tab__count {
+  position: absolute;
+  inset-block-start: -4px;
+  inset-inline-end: -8px;
+  min-inline-size: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--c-sale, #ff4438);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+
+.landing__caption {
+  padding: 8px 2px 0;
+  font-size: 13px;
+  color: var(--c-ink-3, #6e7781);
+}
+
+.landing__embed iframe { inline-size: 100%; aspect-ratio: 16 / 9; block-size: auto; border: 0; }
+
+.review__photo {
+  margin-block-start: 10px;
+  inline-size: 96px;
+  block-size: 96px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+@media (max-width: 749px) {
+  /* Same floor applies to the cards and the tab bar. */
+  .tab__label { font-size: 12px; }
+  .tab { min-block-size: 52px; }
+}

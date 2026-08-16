@@ -2,12 +2,97 @@
   "type": "footer",
   "name": "Pied de page",
   "sections": {
-    "footer": { "type": "footer", "blocks": {
-      "c1": { "type": "column", "settings": { "title": "Boutique" } },
-      "c2": { "type": "column", "settings": { "title": "Aide" } },
-      "c3": { "type": "column", "settings": { "title": "À propos" } },
-      "c4": { "type": "contact", "settings": {} }
-    }, "block_order": ["c1", "c2", "c3", "c4"], "settings": { "variant": "1" } }
+    "footer": {
+      "type": "footer",
+      "blocks": {
+        "c1": {
+          "type": "column",
+          "settings": {
+            "title": "Boutique"
+          }
+        },
+        "c2": {
+          "type": "column",
+          "settings": {
+            "title": "Aide"
+          }
+        },
+        "c3": {
+          "type": "column",
+          "settings": {
+            "title": "À propos"
+          }
+        },
+        "c4": {
+          "type": "contact",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "c1",
+        "c2",
+        "c3",
+        "c4"
+      ],
+      "settings": {
+        "variant": "1"
+      }
+    },
+    "tabbar": {
+      "type": "tab-bar",
+      "blocks": {
+        "t1": {
+          "type": "tab",
+          "settings": {
+            "label": "Accueil",
+            "icon": "home",
+            "action": "link"
+          }
+        },
+        "t2": {
+          "type": "tab",
+          "settings": {
+            "label": "Catégories",
+            "icon": "tag",
+            "action": "link"
+          }
+        },
+        "t3": {
+          "type": "tab",
+          "settings": {
+            "label": "Recherche",
+            "icon": "search",
+            "action": "link"
+          }
+        },
+        "t4": {
+          "type": "tab",
+          "settings": {
+            "label": "Panier",
+            "icon": "cart",
+            "action": "cart"
+          }
+        },
+        "t5": {
+          "type": "tab",
+          "settings": {
+            "label": "Compte",
+            "icon": "user",
+            "action": "link"
+          }
+        }
+      },
+      "block_order": [
+        "t1",
+        "t2",
+        "t3",
+        "t4",
+        "t5"
+      ]
+    }
   },
-  "order": ["footer"]
+  "order": [
+    "footer",
+    "tabbar"
+  ]
 }

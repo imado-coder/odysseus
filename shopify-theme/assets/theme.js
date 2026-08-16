@@ -721,6 +721,47 @@
     render();
   }
 
+
+  /* Countdown on a promo panel.
+     The deadline is a merchant-typed local datetime ("2026-12-31 23:59"),
+     which Safari refuses to parse in that form — so it is parsed by hand.
+     A promo whose deadline has passed hides itself rather than sitting at
+     zero, which reads as a broken page. */
+  function initCountdown(el) {
+    var raw = (el.dataset.countdown || "").trim();
+    var m = raw.match(/^(\d{4})-(\d{2})-(\d{2})[T ]?(\d{2})?:?(\d{2})?/);
+    if (!m) return;
+
+    var end = new Date(
+      +m[1], +m[2] - 1, +m[3], +(m[4] || 23), +(m[5] || 59), 0
+    ).getTime();
+
+    var out = el.querySelector("[data-countdown-out]");
+    if (!out) return;
+
+    function pad(n) { return n < 10 ? "0" + n : String(n); }
+
+    function tick() {
+      var left = end - Date.now();
+      if (left <= 0) {
+        var panel = el.closest(".bb__promo");
+        if (panel) panel.hidden = true;
+        else el.hidden = true;
+        clearInterval(timer);
+        return;
+      }
+      var s = Math.floor(left / 1000);
+      var d = Math.floor(s / 86400);
+      var h = Math.floor((s % 86400) / 3600);
+      var mi = Math.floor((s % 3600) / 60);
+      var se = s % 60;
+      out.textContent = (d > 0 ? d + ":" : "") + pad(h) + ":" + pad(mi) + ":" + pad(se);
+    }
+
+    var timer = setInterval(tick, 1000);
+    tick();
+  }
+
   function boot() {
     document.querySelectorAll("[data-sticky-fit]").forEach(initStickyFit);
     document.querySelectorAll("[data-disclosure]").forEach(initDisclosure);
@@ -729,6 +770,7 @@
     document.querySelectorAll("[data-cod-form]").forEach(initCodForm);
     document.querySelectorAll("[data-sheet-open]").forEach(initSheet);
     document.querySelectorAll("[data-cod-wrap]").forEach(initCodReveal);
+    document.querySelectorAll("[data-countdown]").forEach(initCountdown);
     document.querySelectorAll("[data-order-bar]").forEach(initOrderBar);
     document.querySelectorAll("[data-gallery]").forEach(initGallery);
     initReveal();

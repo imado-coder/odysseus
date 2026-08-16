@@ -1071,3 +1071,45 @@
   .mhead__logo-word { font-size: min(var(--name-size, 22px), 19px); }
   .mhead__logo-text { display: none; }
 }
+
+/* ==========================================================================
+   Mobile ergonomics
+   98% of this market shops on a phone. Below 750px every control the thumb
+   has to hit is at least 44px, and no line of text drops under 12px — the
+   header was shipping a 24px-tall search field and 9px legal type.
+   ========================================================================== */
+@media (max-width: 749px) {
+  .mhead__search { min-block-size: 44px; }
+
+  .mhead__search-input {
+    min-block-size: 44px;
+    padding-block: 0;
+    font-size: 16px; /* under 16px iOS zooms the page on focus */
+  }
+
+  .mhead__search-btn {
+    inline-size: 44px;
+    block-size: 44px;
+  }
+
+  .mhead__cart,
+  .mhead__acct {
+    min-inline-size: 44px;
+    min-block-size: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mhead__logo {
+    min-block-size: 44px;
+    align-items: center;
+  }
+
+  /* Nothing below 12px: small print that cannot be read is not small print,
+     it is missing. */
+  .ubar__sub,
+  .ubar__line,
+  .mhead__acct-hi,
+  .mhead__flag { font-size: 12px; }
+}
