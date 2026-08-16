@@ -835,17 +835,43 @@
   margin-block-start: 16px;
 }
 
+/* The landing page is a column that scrolls, so it is declared as one — the
+   figures were relying on default <figure> margins, which give an inconsistent
+   rhythm and an indent inherited from the UA stylesheet. */
+.landing {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .landing__item {
   position: relative;
+  margin: 0;
   border-radius: 6px;
   overflow: hidden;
   background: var(--c-surface-2, #fafbfb);
 }
 
-.landing__item img {
+.landing__item img,
+.landing__item video {
+  display: block;
   inline-size: 100%;
   block-size: auto;
 }
+
+/* Video embeds arrive with the host's own aspect ratio and no width. */
+.landing__embed { position: relative; aspect-ratio: 16 / 9; }
+.landing__embed iframe {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  border: 0;
+}
+
+/* Full-bleed on phones is done in pdp-mobile.css, by removing the column's
+   gutter and giving it back to the text — never with a negative margin, which
+   overflows the moment the gutter it assumes is not there. */
 
 .landing__play {
   position: absolute;

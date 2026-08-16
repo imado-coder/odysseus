@@ -155,7 +155,16 @@
       tariffs = {};
     }
     var fallback = JSON.parse(form.dataset.tariffFallback || "[600,350]");
-    var locations = window.DZ_LOCATIONS || [];
+    /* Read live, never captured.
+
+       theme.js is linked from <head> and dz-locations.js from the product
+       section, and deferred scripts run in document order — so this form
+       initialises about ten scripts BEFORE the dataset exists. Capturing the
+       global here left `locations` permanently [], which meant no wilayas, no
+       communes, and no order could be placed at all. The dataset arrives
+       later and announces itself; see the listener at the end of this
+       function. */
+    function locations() { return window.DZ_LOCATIONS || []; }
     var lang = document.documentElement.lang === "ar" ? "ar" : "fr";
 
     function money(n) {
@@ -166,9 +175,13 @@
       return lang === "ar" ? entry.ar || entry[0] : entry.fr || entry[1];
     }
 
-    /* Populate wilayas once, from the shared dataset. */
-    if (wilaya && !wilaya.dataset.filled) {
-      locations.forEach(function (w) {
+    /* Populate wilayas once — but only once there is something to populate
+       from, so an empty dataset does not get recorded as "filled". */
+    function fillWilayas() {
+      if (!wilaya || wilaya.dataset.filled) return;
+      var all = locations();
+      if (!all.length) return;
+      all.forEach(function (w) {
         var o = document.createElement("option");
         o.value = w.c;
         o.textContent = w.c + " — " + label(w);
@@ -177,9 +190,11 @@
       wilaya.dataset.filled = "1";
     }
 
+    fillWilayas();
+
     function fillCommunes() {
       if (!commune) return;
-      var w = locations.filter(function (x) {
+      var w = locations().filter(function (x) {
         return x.c === wilaya.value;
       })[0];
       commune.innerHTML = "";
@@ -264,6 +279,12 @@
         recalc();
         setInvalid(wilaya, false);
       });
+
+      /* The dataset lands after this form is wired up. It says so when it
+         does; `load` is the fallback for a cached or reordered page where
+         the announcement was already made before this listener existed. */
+      document.addEventListener("dz:locations", fillWilayas);
+      window.addEventListener("load", fillWilayas);
     }
     if (qty) qty.addEventListener("change", recalc);
     opts.forEach(function (o) {
@@ -500,28 +521,93 @@
      shape is fed by Shopify's /cart.js; the contract below is what the
      drawer renders either way.
      ---------------------------------------------------------------------- */
-  var KEY = "souq:cart";
+  /* Shopify's cart is the cart.
 
-  function readCart() {
-    try { return JSON.parse(localStorage.getItem(KEY)) || []; }
-    catch (e) { return []; }
+     This drawer used to keep its own basket in localStorage under
+     "souq:cart". Nothing else on a Shopify storefront knows about that key,
+     so the two never met: anything added through a normal product form went
+     into Shopify's cart and the drawer showed empty, while the header count
+     came from Liquid and reported the real number. One cart, two answers.
+
+     Everything below talks to the Cart AJAX API instead. CART is a cache of
+     the last response so render() can stay synchronous; refreshCart() is the
+     only thing that fills it. */
+  var CART = { items: [], count: 0, total: 0 };
+
+  function cartRoot() {
+    return (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || "/";
   }
 
-  function writeCart(items) {
-    localStorage.setItem(KEY, JSON.stringify(items));
-    document.dispatchEvent(new CustomEvent("cart:change", { detail: items }));
+  /* Shopify serves money in the currency's minor unit. Dinar is quoted whole,
+     so this is the one place the division happens. */
+  function fromMinor(n) { return n / 100; }
+
+  function refreshCart() {
+    return fetch(cartRoot() + "cart.js", {
+      headers: { Accept: "application/json" },
+      credentials: "same-origin",
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (c) {
+        CART.items = (c.items || []).map(function (i) {
+          return {
+            /* The line key, not the variant id: a variant can legitimately
+               appear on two lines with different properties, and quantity
+               changes address the line. */
+            id: i.key,
+            title: i.product_title || i.title,
+            option: i.variant_title && i.variant_title !== "Default Title" ? i.variant_title : "",
+            qty: i.quantity,
+            line: fromMinor(i.final_line_price),
+            image: i.image || "",
+          };
+        });
+        CART.count = c.item_count || 0;
+        CART.total = fromMinor(c.items_subtotal_price || 0);
+        document.dispatchEvent(new CustomEvent("cart:change", { detail: CART }));
+        return CART;
+      })
+      .catch(function () { return CART; });
   }
 
-  function cartCount(items) {
-    return items.reduce(function (n, i) { return n + i.qty; }, 0);
+  /* quantity 0 removes the line — that is the API's own contract, so there is
+     no separate remove call. */
+  function changeLine(key, quantity) {
+    return fetch(cartRoot() + "cart/change.js", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ id: key, quantity: quantity }),
+    }).then(refreshCart);
   }
 
-  function cartTotal(items) {
-    return items.reduce(function (n, i) { return n + i.price * i.qty; }, 0);
+  function addLine(variantId, quantity) {
+    return fetch(cartRoot() + "cart/add.js", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ id: variantId, quantity: quantity || 1 }),
+    }).then(refreshCart);
+  }
+
+  /* The suffix is the merchant's setting, carried on the drawer, so a shop
+     that is not pricing in dinars does not get "DA" appended to its totals. */
+  function moneySuffix() {
+    var d = document.querySelector("[data-cart-drawer]");
+    return (d && d.dataset.currencySuffix) || "DA";
   }
 
   function money(n) {
-    return new Intl.NumberFormat("fr-DZ").format(n) + " DA";
+    return new Intl.NumberFormat("fr-DZ").format(Math.round(n)) + " " + moneySuffix();
+  }
+
+  /* /cart.js hands back the full-size image URL. Rendering a 2000px file into
+     a 72px box is most of the drawer's weight for none of its quality, and on
+     a phone connection it is the reason the drawer looks broken before it
+     looks right. Shopify's CDN resizes from the same URL. */
+  function thumb(url, px) {
+    if (!url) return "";
+    return url.replace(/(\.(?:jpe?g|png|webp|gif))(\?|$)/i, "_" + px + "x$1$2");
   }
 
   /* The ghost image that arcs to the cart. Purely decorative — if anything
@@ -564,29 +650,20 @@
       var btn = e.target.closest("[data-add-to-cart]");
       if (!btn) return;
       e.preventDefault();
+      if (btn.dataset.busy) return;
 
-      var items = readCart();
-      var id = btn.dataset.addToCart;
-      var found = items.filter(function (i) { return i.id === id; })[0];
-
-      if (found) {
-        found.qty += 1;
-      } else {
-        items.push({
-          id: id,
-          title: btn.dataset.title || "",
-          price: parseInt(btn.dataset.price || "0", 10),
-          image: btn.dataset.image || "",
-          option: btn.dataset.option || "",
-          qty: 1,
-        });
-      }
-
-      writeCart(items);
+      /* The animation and the confirmation run immediately; the shopper
+         should not wait on a round trip to learn the tap registered. If the
+         request fails the toast says so and the count stays where it was. */
       flyToCart(btn);
+      btn.dataset.busy = "1";
       btn.dataset.added = "true";
       setTimeout(function () { delete btn.dataset.added; }, 400);
-      toast(btn.dataset.toast || "Ajouté au panier");
+
+      addLine(btn.dataset.addToCart, 1)
+        .then(function () { toast(btn.dataset.toast || "Ajouté au panier"); })
+        .catch(function () { toast(btn.dataset.toastFail || "Échec de l'ajout"); })
+        .then(function () { delete btn.dataset.busy; });
     });
   }
 
@@ -600,17 +677,23 @@
     var lastFocus = null;
 
     function render() {
-      var items = readCart();
-      var total = cartTotal(items);
+      var items = CART.items;
+      var total = CART.total;
 
-      document.querySelectorAll("[data-cart-count]").forEach(function (el) {
-        var n = cartCount(items);
-        el.textContent = n;
-        el.hidden = n === 0;
-      });
+      /* Liquid rendered these counts from the cart as it was when the page
+         was served. Every AJAX change makes them stale, and a header saying
+         2 above a drawer saying 3 is the bug the shopper actually reports. */
+      document.querySelectorAll("[data-cart-count], .mhead__cart-count, .cartbub__count")
+        .forEach(function (el) {
+          el.textContent = CART.count;
+          el.hidden = CART.count === 0;
+        });
+
+      var bubble = document.querySelector(".cartbub");
+      if (bubble) bubble.hidden = CART.count === 0;
 
       var countEl = drawer.querySelector("[data-drawer-count]");
-      if (countEl) countEl.textContent = cartCount(items) + " article(s)";
+      if (countEl) countEl.textContent = CART.count + " article(s)";
 
       if (!items.length) {
         body.innerHTML =
@@ -640,14 +723,14 @@
             return (
               '<div class="citem" data-line="' + i.id + '">' +
               '<span class="citem__media">' +
-              (i.image ? '<img src="' + i.image + '" alt="" width="72" height="72">' : "") +
+              (i.image ? '<img src="' + thumb(i.image, 144) + '" alt="" width="72" height="72" loading="lazy">' : "") +
               "</span><div><p class=\"citem__title\">" + i.title + "</p>" +
               (i.option ? '<p class="citem__opt">' + i.option + "</p>" : "") +
               '<div class="citem__row">' +
               '<span class="qty__control"><button class="qty__btn" type="button" data-line-minus="' + i.id + '" aria-label="Retirer un">&minus;</button>' +
               '<input class="qty__input" type="number" value="' + i.qty + '" min="1" data-line-qty="' + i.id + '" aria-label="Quantité">' +
               '<button class="qty__btn" type="button" data-line-plus="' + i.id + '" aria-label="Ajouter un">+</button></span>' +
-              '<span class="citem__price">' + money(i.price * i.qty) + "</span>" +
+              '<span class="citem__price">' + money(i.line) + "</span>" +
               '<button class="citem__remove" type="button" data-line-remove="' + i.id + '" aria-label="Supprimer">' +
               '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>' +
               "</button></div></div></div>"
@@ -668,9 +751,9 @@
         recap.innerHTML =
           '<span class="cod-recap__thumbs">' +
           items.slice(0, 3).map(function (i) {
-            return i.image ? '<img src="' + i.image + '" alt="" width="34" height="34">' : "";
+            return i.image ? '<img src="' + thumb(i.image, 68) + '" alt="" width="34" height="34" loading="lazy">' : "";
           }).join("") +
-          "</span><span>" + cartCount(items) + " article(s)</span>" +
+          "</span><span>" + CART.count + " article(s)</span>" +
           '<span class="cod-recap__total">' + money(total) + "</span>";
       }
     }
@@ -705,21 +788,19 @@
       var id = (minus || plus || rm).dataset.lineMinus ||
         (minus || plus || rm).dataset.linePlus ||
         (minus || plus || rm).dataset.lineRemove;
-      var items = readCart();
+      var current = CART.items.filter(function (i) { return i.id === id; })[0];
+      if (!current) return;
 
       if (rm) {
+        /* Let the row finish collapsing before the re-render replaces the
+           list under it — quantity 0 is how the API removes a line. */
         var row = drawer.querySelector('[data-line="' + id + '"]');
         if (row) row.dataset.removing = "true";
-        items = items.filter(function (i) { return i.id !== id; });
-        setTimeout(function () { writeCart(items); }, 180);
+        setTimeout(function () { changeLine(id, 0); }, 180);
         return;
       }
 
-      items.forEach(function (i) {
-        if (i.id !== id) return;
-        i.qty = Math.max(1, i.qty + (plus ? 1 : -1));
-      });
-      writeCart(items);
+      changeLine(id, Math.max(1, current.qty + (plus ? 1 : -1)));
     });
 
     document.addEventListener("keydown", function (e) {
@@ -727,7 +808,10 @@
     });
 
     document.addEventListener("cart:change", render);
+    /* First paint from Liquid's numbers, then correct it against the server —
+       the cart may have changed in another tab since this page was served. */
     render();
+    refreshCart();
   }
 
 

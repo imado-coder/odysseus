@@ -1284,3 +1284,28 @@ html:not(.js) .bb__title-more { grid-template-rows: 1fr; }
   .bb__swatch-hot,
   .carrier__mark { font-size: 12px; }
 }
+
+/* ==========================================================================
+   Landing page, phones
+   The images below the fold are the sales pitch — they take the whole screen
+   the way the gallery does, not the text gutter.
+
+   The gutter is removed from the column and given back to the text instead of
+   pulling the images out with a negative margin. A negative margin assumes a
+   padding that is only there in immersive mode; without it the images hang
+   off the edge and the whole page gains a horizontal scrollbar.
+   ========================================================================== */
+@media (max-width: 989px) {
+  .pdp--immersive .pdp__details { padding-inline: 0; }
+
+  .landing__title,
+  .landing__stack,
+  .landing__caption,
+  .pdp__details > .reviews { padding-inline: 16px; }
+
+  .landing { gap: 0; }
+  .landing__item { border-radius: 0; }
+
+  /* A caption sits on the image it describes, not adrift below the next one. */
+  .landing__caption { padding-block: 8px 14px; }
+}

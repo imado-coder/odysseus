@@ -396,16 +396,29 @@
       {%- liquid
         assign media_blocks = section.blocks | where: 'type', 'landing_media'
         assign review_blocks = section.blocks | where: 'type', 'review'
+        assign media_alt_default = product.title
         assign has_desc = false
         if section.settings.show_description and product.description != blank
           assign has_desc = true
         endif
+
+        # The auto landing page needs a second photo to be worth a section:
+        # with one image the gallery has already shown everything there is.
+        assign has_auto_landing = false
+        if media_blocks.size == 0 and section.settings.landing_from_media and product.media.size > 1
+          assign has_auto_landing = true
+        endif
+
+        assign has_landing = false
+        if has_desc or media_blocks.size > 0 or has_auto_landing
+          assign has_landing = true
+        endif
       -%}
 
-      {%- if has_desc or media_blocks.size > 0 or review_blocks.size > 0 -%}
+      {%- if has_landing or review_blocks.size > 0 -%}
         <div class="pdp__details pdp__details--{{ section.settings.description_column | default: 'buybox' }}">
 
-          {%- if has_desc or media_blocks.size > 0 -%}
+          {%- if has_landing -%}
             <section class="landing" aria-labelledby="Desc-{{ section.id }}">
               <h2 class="landing__title" id="Desc-{{ section.id }}">
                 {{ section.settings.description_title }}
@@ -421,6 +434,14 @@
                 so it is theirs to build, not a fixed template.
               {%- endcomment -%}
               {%- for block in media_blocks -%}
+                {%- comment -%}
+                  A filter cannot appear inside a filter's argument. Written
+                  as `alt: block.settings.alt | default: product.title` the
+                  whole image_tag fails to parse and the image never renders
+                  — which is why this section was showing its heading and
+                  nothing else. Resolve first, pass a finished value.
+                {%- endcomment -%}
+                {%- assign media_alt = block.settings.alt | default: product.title -%}
                 <figure class="landing__item" {{ block.shopify_attributes }}>
                   {%- if block.settings.video != blank -%}
                     {{ block.settings.video
@@ -439,7 +460,7 @@
                        | image_tag:
                            widths: '400,700,1000,1200',
                            sizes: '(min-width: 990px) 46vw, 100vw',
-                           alt: block.settings.alt | default: product.title,
+                           alt: media_alt,
                            loading: 'lazy' }}
                   {%- endif -%}
 
@@ -448,6 +469,42 @@
                   {%- endif -%}
                 </figure>
               {%- endfor -%}
+
+              {%- comment -%}
+                Fallback landing page.
+
+                A merchant who has not built one still has product photos, and
+                a description that ends after two lines of text is the version
+                of this page that does not sell. So when there are no media
+                blocks the product's own media runs full width down the page,
+                large, in the order the merchant arranged it in the admin —
+                the same images as the gallery, read rather than swiped.
+
+                The first is skipped: it is already the photo filling the top
+                of the screen, and repeating it immediately reads as a fault.
+                Merchant blocks always win — the moment one exists, this stops.
+              {%- endcomment -%}
+              {%- if has_auto_landing -%}
+                {%- assign landing_cap = section.settings.landing_media_count | default: 8 -%}
+                {%- for media in product.media offset: 1 limit: landing_cap -%}
+                  <figure class="landing__item landing__item--auto">
+                    {%- case media.media_type -%}
+                      {%- when 'video' -%}
+                        {{ media | video_tag: image_size: '1000x', controls: true, playsinline: true, preload: 'none' }}
+                      {%- when 'external_video' -%}
+                        <div class="landing__embed">{{ media | external_video_tag: loading: 'lazy' }}</div>
+                      {%- when 'image' -%}
+                        {{ media
+                           | image_url: width: 1200
+                           | image_tag:
+                               widths: '400,700,1000,1200',
+                               sizes: '(min-width: 990px) 46vw, 100vw',
+                               alt: media_alt_default,
+                               loading: 'lazy' }}
+                    {%- endcase -%}
+                  </figure>
+                {%- endfor -%}
+              {%- endif -%}
             </section>
           {%- endif -%}
 
@@ -822,6 +879,22 @@
       "id": "show_description",
       "label": "Afficher la description sous les images",
       "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "landing_from_media",
+      "label": "Page d'atterrissage à partir des photos du produit",
+      "info": "Si vous n'avez ajouté aucun bloc « Média », les photos et vidéos du produit se déroulent en pleine largeur sous la description. Dès que vous ajoutez un bloc « Média », ce sont vos blocs qui s'affichent.",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "landing_media_count",
+      "label": "Nombre de médias repris",
+      "min": 2,
+      "max": 20,
+      "step": 1,
+      "default": 8
     },
     {
       "type": "text",
