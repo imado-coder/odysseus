@@ -267,14 +267,15 @@
               {%- when 'shipping' -%}
                 <div class="trow" {{ block.shopify_attributes }}>
                   {%- if block.settings.title != blank -%}
-                    <a class="trow__head" href="{{ block.settings.url | default: '#' }}">
-                      <span class="trow__icon">{% render 'icon', name: block.settings.icon_name | default: 'truck' %}</span>
+                    <button class="trow__head" type="button"
+                            data-sheet-open aria-controls="ShipSheet-{{ block.id }}">
+                      <span class="trow__icon">{% render 'icon', name: block.settings.icon_name | default: 'truck-fast' %}</span>
                       <span class="trow__title">{{ block.settings.title }}</span>
                       {%- if block.settings.trailing != blank -%}
                         <span class="trow__trail">{{ block.settings.trailing }}</span>
                       {%- endif -%}
                       <span class="trow__chev" aria-hidden="true">{% render 'icon', name: 'chevron' %}</span>
-                    </a>
+                    </button>
                   {%- endif -%}
                   {%- if block.settings.line != blank -%}
                     <span class="trow__sub">{{ block.settings.line }}</span>
@@ -312,23 +313,25 @@
                 <div {{ block.shopify_attributes }}>
                   {%- if block.settings.line_1 != blank -%}
                     <div class="trow">
-                      <a class="trow__head" href="{{ block.settings.url_1 | default: '#' }}">
-                        <span class="trow__icon">{% render 'icon', name: block.settings.icon_name_1 | default: 'shield-check' %}</span>
+                      <button class="trow__head" type="button"
+                              data-sheet-open aria-controls="SecSheet-{{ block.id }}">
+                        <span class="trow__icon">{% render 'icon', name: block.settings.icon_name_1 | default: 'shield-fill' %}</span>
                         <span class="trow__title">{{ block.settings.line_1 }}</span>
                         <span class="trow__chev" aria-hidden="true">{% render 'icon', name: 'chevron' %}</span>
-                      </a>
+                      </button>
                     </div>
                   {%- endif -%}
                   {%- if block.settings.line_2 != blank -%}
                     <div class="trow">
-                      <a class="trow__head" href="{{ block.settings.url_2 | default: '#' }}">
-                        <span class="trow__icon">{% render 'icon', name: block.settings.icon_name_2 | default: 'refresh' %}</span>
+                      <button class="trow__head" type="button"
+                              data-sheet-open aria-controls="GuarSheet-{{ block.id }}">
+                        <span class="trow__icon">{% render 'icon', name: block.settings.icon_name_2 | default: 'guarantee' %}</span>
                         <span class="trow__title">{{ block.settings.line_2 }}</span>
                         {%- if block.settings.trailing_2 != blank -%}
                           <span class="trow__trail">{{ block.settings.trailing_2 }}</span>
                         {%- endif -%}
                         <span class="trow__chev" aria-hidden="true">{% render 'icon', name: 'chevron' %}</span>
-                      </a>
+                      </button>
                     </div>
                   {%- endif -%}
                 </div>
@@ -481,6 +484,128 @@
     </div>
   </div>
 </div>
+
+  {%- comment -%}
+    Detail sheets. One per promise row, rendered outside the buy box so the
+    sticky column never traps them, and only for blocks the merchant actually
+    placed.
+  {%- endcomment -%}
+  {%- for block in section.blocks -%}
+    {%- case block.type -%}
+
+      {%- when 'shipping' -%}
+        {%- capture ship_content -%}
+          <table class="tsheet__table">
+            {%- if block.settings.row1_label != blank -%}
+              <tr>
+                <th scope="row">{{ block.settings.row1_label }}</th>
+                <td>
+                  {%- assign carriers_block = section.blocks | where: 'type', 'carriers' | first -%}
+                  {%- if carriers_block -%}
+                    {%- assign cnames = carriers_block.settings.names | split: ',' -%}
+                    <span class="tsheet__carriers">
+                      {%- for n in cnames -%}
+                        {%- liquid
+                          assign lk = 'logo_' | append: forloop.index
+                          assign lg = carriers_block.settings[lk]
+                          assign cname = n | strip
+                        -%}
+                        <span class="carrier">
+                          {%- if lg != blank -%}
+                            {{ lg | image_url: height: 20 | image_tag: class: 'carrier__logo', alt: cname, loading: 'lazy' }}
+                          {%- endif -%}
+                          <span class="carrier__name">{{ cname }}</span>
+                        </span>
+                      {%- endfor -%}
+                    </span>
+                  {%- else -%}
+                    {{ block.settings.row1_value }}
+                  {%- endif -%}
+                </td>
+              </tr>
+            {%- endif -%}
+            {%- if block.settings.row2_label != blank -%}
+              <tr><th scope="row">{{ block.settings.row2_label }}</th><td>{{ block.settings.row2_value }}</td></tr>
+            {%- endif -%}
+            {%- if block.settings.row3_label != blank -%}
+              <tr><th scope="row">{{ block.settings.row3_label }}</th><td>{{ block.settings.row3_value }}</td></tr>
+            {%- endif -%}
+          </table>
+          {%- if block.settings.sheet_note != blank -%}
+            <p class="tsheet__note">
+              {% render 'icon', name: 'check' %} {{ block.settings.sheet_note }}
+            </p>
+          {%- endif -%}
+        {%- endcapture -%}
+        {%- assign ship_sheet_id = 'ShipSheet-' | append: block.id -%}
+        {% render 'trust-sheet',
+           id: ship_sheet_id,
+           title: block.settings.sheet_title | default: block.settings.title,
+           icon: block.settings.icon_name | default: 'truck-fast',
+           close_label: section.settings.close_label,
+           content: ship_content %}
+
+      {%- when 'guarantees' -%}
+        {%- capture sec_content -%}
+          <ol class="tnum">
+            {%- for i in (1..6) -%}
+              {%- liquid
+                assign tk = 'sec' | append: i | append: '_title'
+                assign bk = 'sec' | append: i | append: '_body'
+                assign st = block.settings[tk]
+                assign sb = block.settings[bk]
+              -%}
+              {%- if st != blank -%}
+                <li class="tnum__item">
+                  <span class="tnum__n">{{ forloop.index }}</span>
+                  <div>
+                    <p class="tnum__title">{{ st }}</p>
+                    {%- if sb != blank -%}<p class="tnum__body">{{ sb }}</p>{%- endif -%}
+                  </div>
+                </li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ol>
+        {%- endcapture -%}
+        {%- assign sec_sheet_id = 'SecSheet-' | append: block.id -%}
+        {% render 'trust-sheet',
+           id: sec_sheet_id,
+           title: block.settings.line_1,
+           icon: block.settings.icon_name_1 | default: 'shield-fill',
+           close_label: section.settings.close_label,
+           content: sec_content %}
+
+        {%- capture guar_content -%}
+          <ol class="tnum">
+            {%- for i in (1..6) -%}
+              {%- liquid
+                assign tk = 'guar' | append: i | append: '_title'
+                assign bk = 'guar' | append: i | append: '_body'
+                assign gt = block.settings[tk]
+                assign gb = block.settings[bk]
+              -%}
+              {%- if gt != blank -%}
+                <li class="tnum__item">
+                  <span class="tnum__n">{{ forloop.index }}</span>
+                  <div>
+                    <p class="tnum__title">{{ gt }}</p>
+                    {%- if gb != blank -%}<p class="tnum__body">{{ gb }}</p>{%- endif -%}
+                  </div>
+                </li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ol>
+        {%- endcapture -%}
+        {%- assign guar_sheet_id = 'GuarSheet-' | append: block.id -%}
+        {% render 'trust-sheet',
+           id: guar_sheet_id,
+           title: block.settings.line_2,
+           icon: block.settings.icon_name_2 | default: 'guarantee',
+           close_label: section.settings.close_label,
+           content: guar_content %}
+
+    {%- endcase -%}
+  {%- endfor -%}
 
 {%- comment -%} Mobile: the buy box is far up the page, so keep a bar in reach. {%- endcomment -%}
 {%- if section.settings.show_mobile_bar -%}
@@ -1419,6 +1544,58 @@
           "type": "url",
           "id": "url",
           "label": "Lien"
+        },
+        {
+          "type": "header",
+          "content": "Détails (fiche)"
+        },
+        {
+          "type": "text",
+          "id": "sheet_title",
+          "label": "Titre de la fiche",
+          "default": "Livraison"
+        },
+        {
+          "type": "text",
+          "id": "row1_label",
+          "label": "Ligne 1 — intitulé",
+          "default": "Transporteurs"
+        },
+        {
+          "type": "text",
+          "id": "row1_value",
+          "label": "Ligne 1 — valeur",
+          "default": "Yalidine, ZR Express, Algérie Poste"
+        },
+        {
+          "type": "text",
+          "id": "row2_label",
+          "label": "Ligne 2 — intitulé",
+          "default": "Délai de livraison"
+        },
+        {
+          "type": "text",
+          "id": "row2_value",
+          "label": "Ligne 2 — valeur",
+          "default": "2 à 5 jours ouvrés"
+        },
+        {
+          "type": "text",
+          "id": "row3_label",
+          "label": "Ligne 3 — intitulé",
+          "default": "Frais"
+        },
+        {
+          "type": "text",
+          "id": "row3_value",
+          "label": "Ligne 3 — valeur",
+          "default": "Gratuit dès 8 000 DA — sinon selon la wilaya"
+        },
+        {
+          "type": "textarea",
+          "id": "sheet_note",
+          "label": "Note en bas",
+          "default": "Vous ne payez qu'à la réception, après avoir vérifié le colis."
         }
       ]
     },
@@ -1626,6 +1803,110 @@
           "type": "url",
           "id": "url_2",
           "label": "Lien 2"
+        },
+        {
+          "type": "header",
+          "content": "Fiche « sécurité »"
+        },
+        {
+          "type": "text",
+          "id": "sec1_title",
+          "label": "Point 1 — titre",
+          "default": "Paiement à la livraison, sans avance"
+        },
+        {
+          "type": "textarea",
+          "id": "sec1_body",
+          "label": "Point 1 — texte",
+          "default": "Vous ne payez rien avant de recevoir. Le livreur encaisse le montant exact affiché sur votre commande, en espèces, à la remise du colis."
+        },
+        {
+          "type": "text",
+          "id": "sec2_title",
+          "label": "Point 2 — titre",
+          "default": "Vos données restent chez nous"
+        },
+        {
+          "type": "textarea",
+          "id": "sec2_body",
+          "label": "Point 2 — texte",
+          "default": "Nom, téléphone et adresse servent uniquement à préparer et livrer votre commande. Ils ne sont ni vendus ni transmis à des tiers."
+        },
+        {
+          "type": "text",
+          "id": "sec3_title",
+          "label": "Point 3 — titre",
+          "default": "Vérifiez avant de payer"
+        },
+        {
+          "type": "textarea",
+          "id": "sec3_body",
+          "label": "Point 3 — texte",
+          "default": "Vous pouvez ouvrir le colis devant le livreur et vérifier le produit avant de régler."
+        },
+        {
+          "type": "header",
+          "content": "Fiche « garantie »"
+        },
+        {
+          "type": "text",
+          "id": "guar1_title",
+          "label": "Garantie 1 — titre",
+          "default": "Retour sous 7 jours"
+        },
+        {
+          "type": "textarea",
+          "id": "guar1_body",
+          "label": "Garantie 1 — texte",
+          "default": "Le produit peut être retourné dans les 7 jours suivant la réception, dans son état d'origine et son emballage."
+        },
+        {
+          "type": "text",
+          "id": "guar2_title",
+          "label": "Garantie 2 — titre",
+          "default": "Échange gratuit"
+        },
+        {
+          "type": "textarea",
+          "id": "guar2_body",
+          "label": "Garantie 2 — texte",
+          "default": "Mauvaise taille ou mauvaise couleur : l'échange est pris en charge, une fois par commande."
+        },
+        {
+          "type": "text",
+          "id": "guar3_title",
+          "label": "Garantie 3 — titre",
+          "default": "Article endommagé remboursé"
+        },
+        {
+          "type": "textarea",
+          "id": "guar3_body",
+          "label": "Garantie 3 — texte",
+          "default": "Si le colis arrive abîmé, signalez-le à la réception : il est remplacé ou remboursé intégralement."
+        },
+        {
+          "type": "text",
+          "id": "guar4_title",
+          "label": "Garantie 4 — titre",
+          "default": "Commande non livrée"
+        },
+        {
+          "type": "textarea",
+          "id": "guar4_body",
+          "label": "Garantie 4 — texte",
+          "default": "Si le colis ne vous parvient pas, vous ne payez rien — le paiement se fait uniquement à la remise."
+        },
+        {
+          "type": "text",
+          "id": "guar5_title",
+          "label": "Garantie 5 — titre",
+          "default": "Service client"
+        },
+        {
+          "type": "textarea",
+          "id": "guar5_body",
+          "label": "Garantie 5 — texte",
+          "default": "Une question sur votre commande ? Appelez-nous, nous répondons du samedi au jeudi."
         }
       ]
     },

@@ -975,3 +975,209 @@ html:not(.js) .bb__title-more { grid-template-rows: 1fr; }
     background: var(--c-bg, #f4f5f6);
   }
 }
+
+/* ==========================================================================
+   Trust detail sheets
+
+   A promise the shopper cannot inspect is a slogan. Each delivery and
+   guarantee row opens the full terms — a table for delivery, a numbered list
+   for guarantees — in a sheet that rises from the bottom on a phone and
+   centres on a desktop.
+   ========================================================================== */
+.tsheet {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: none;
+}
+
+.tsheet[data-open="true"] { display: block; }
+
+.tsheet__scrim {
+  position: absolute;
+  inset: 0;
+  background: rgb(16 20 24 / .45);
+  animation: tsheet-fade .2s ease;
+}
+
+.tsheet__panel {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  max-block-size: 86vh;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-start-start-radius: 16px;
+  border-start-end-radius: 16px;
+  animation: tsheet-rise .26s cubic-bezier(.2, .8, .3, 1);
+  /* Home-indicator safe area, or the last line sits under it. */
+  padding-block-end: env(safe-area-inset-bottom);
+}
+
+@keyframes tsheet-fade { from { opacity: 0 } }
+@keyframes tsheet-rise { from { transform: translateY(14px); opacity: .6 } }
+
+@media (prefers-reduced-motion: reduce) {
+  .tsheet__scrim, .tsheet__panel { animation: none; }
+}
+
+.tsheet__head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 16px 16px 12px;
+  border-block-end: 1px solid var(--c-border, #e7eaec);
+}
+
+.tsheet__icon { display: grid; place-items: center; color: var(--c-trust, #067d3d); }
+.tsheet__icon .icon { inline-size: 21px; block-size: 21px; }
+
+.tsheet__title {
+  flex: 1;
+  min-inline-size: 0;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--c-ink, #101418);
+}
+
+.tsheet__close {
+  flex: none;
+  inline-size: 40px;
+  block-size: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--c-ink-2, #5b6570);
+  background: none;
+  border: 0;
+}
+
+.tsheet__close:hover { background: var(--c-bg, #f4f5f6); }
+
+.tsheet__body {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 14px 16px 20px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* --- delivery table --- */
+.tsheet__table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--c-border, #e7eaec);
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 13.5px;
+}
+
+.tsheet__table th,
+.tsheet__table td {
+  padding: 11px 12px;
+  text-align: start;
+  vertical-align: top;
+  border-block-end: 1px solid var(--c-border, #e7eaec);
+}
+
+.tsheet__table tr:last-child th,
+.tsheet__table tr:last-child td { border-block-end: 0; }
+
+.tsheet__table th {
+  inline-size: 38%;
+  background: var(--c-bg, #f4f5f6);
+  color: var(--c-ink-2, #5b6570);
+  font-weight: 600;
+}
+
+.tsheet__table td { color: var(--c-ink, #101418); }
+
+.tsheet__carriers { display: flex; flex-wrap: wrap; gap: 6px 12px; }
+
+.tsheet__note {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin: 14px 0 0;
+  color: var(--c-ink-2, #5b6570);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.tsheet__note .icon {
+  flex: none;
+  inline-size: 1.1em;
+  block-size: 1.1em;
+  margin-block-start: 2px;
+  color: var(--c-trust, #067d3d);
+}
+
+/* --- numbered terms --- */
+.tnum { margin: 0; padding: 0; list-style: none; }
+
+.tnum__item {
+  display: flex;
+  gap: 10px;
+  padding-block: 14px;
+  border-block-start: 1px solid var(--c-border, #e7eaec);
+}
+
+.tnum__item:first-child { border-block-start: 0; padding-block-start: 0; }
+
+.tnum__n {
+  flex: none;
+  inline-size: 21px;
+  block-size: 21px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--c-trust-solid, #0a8a3f);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  margin-block-start: 1px;
+}
+
+.tnum__title {
+  margin: 0 0 4px;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--c-ink, #101418);
+}
+
+.tnum__body {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--c-ink-2, #5b6570);
+}
+
+@media (min-width: 750px) {
+  /* On a wide screen a bottom sheet is a phone gesture in the wrong place. */
+  .tsheet__panel {
+    inset: 50% auto auto 50%;
+    transform: translate(-50%, -50%);
+    inline-size: min(560px, calc(100vw - 48px));
+    border-radius: 14px;
+    max-block-size: 80vh;
+  }
+}
+
+@media (max-width: 749px) {
+  /* Two fixed bars were sharing the bottom of the screen at the same z-index:
+     the tab bar and the product page's order bar. The tab bar won on DOM
+     order and buried the button the page exists to get tapped.
+
+     On a product page the order bar owns the bottom — which is also what the
+     reference does; its product page carries no tab bar at all. */
+  body:has(.pdp__mobile-cta) .tabbar { display: none; }
+
+  /* With the tab bar gone, the page's bottom padding has to come from the
+     order bar instead, or the last row hides under it. */
+  body:has(.pdp__mobile-cta) { padding-block-end: calc(72px + env(safe-area-inset-bottom)); }
+
+  /* Above the order bar and the tab bar alike. */
+  .tsheet { z-index: 90; }
+}

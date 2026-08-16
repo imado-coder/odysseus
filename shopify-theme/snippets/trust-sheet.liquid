@@ -1,0 +1,33 @@
+{%- comment -%}
+  Detail sheet behind a delivery or guarantee row.
+
+  A promise the shopper cannot inspect is a slogan. Tapping the row opens the
+  full terms: for delivery a small table (who carries it, how long, what it
+  costs), for guarantees a numbered list the merchant writes themselves.
+
+  Everything here is the merchant's own text. This theme is sold to shops that
+  each have different couriers and different return terms, and a policy we
+  invented for them would be a promise they never made.
+
+  Params: id, title, icon, rows (table), items (numbered), note
+{%- endcomment -%}
+
+<div class="tsheet" id="{{ id }}" data-open="false" aria-hidden="true">
+  <div class="tsheet__scrim" data-sheet-close></div>
+
+  <div class="tsheet__panel" role="dialog" aria-modal="true"
+       aria-labelledby="{{ id }}-title">
+    <div class="tsheet__head">
+      <span class="tsheet__icon">{% render 'icon', name: icon %}</span>
+      <h2 class="tsheet__title" id="{{ id }}-title">{{ title }}</h2>
+      <button class="tsheet__close" type="button" data-sheet-close
+              aria-label="{{ close_label | default: 'Fermer' | escape }}">
+        {% render 'icon', name: 'close' %}
+      </button>
+    </div>
+
+    <div class="tsheet__body">
+      {{ content }}
+    </div>
+  </div>
+</div>
