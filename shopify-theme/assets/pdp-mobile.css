@@ -104,9 +104,12 @@
     pointer-events: auto;
   }
 
+  /* Back is the most-used control on this page after the order button — the
+     shopper came from a list and goes back to it. 44px, like everything else
+     that gets tapped. */
   .gfab {
-    inline-size: 40px;
-    block-size: 40px;
+    inline-size: 44px;
+    block-size: 44px;
     border-radius: 50%;
     display: grid;
     place-items: center;
@@ -1262,4 +1265,22 @@ html:not(.js) .bb__title-more { grid-template-rows: 1fr; }
 
 @media (min-width: 750px) {
   .cartbub { display: none; }
+}
+
+/* ==========================================================================
+   Phone type floor
+   The theme's own rule is nothing under 12px in a hand; these were the last
+   places still breaking it. They are dense labels by design, so the fix is
+   12px, not a size that would break the density the layout depends on.
+
+   .bb__swatch-name is a value the shopper picks and .pgc__compare is the
+   price they are comparing against — both are reading text, not decoration.
+   .carrier__mark is the courier's initials and .bb__swatch-hot a flag, but
+   they sit inline with real text and reading as smaller makes them look
+   broken rather than quiet.
+   ========================================================================== */
+@media (max-width: 749px) {
+  .bb__swatch-name,
+  .bb__swatch-hot,
+  .carrier__mark { font-size: 12px; }
 }

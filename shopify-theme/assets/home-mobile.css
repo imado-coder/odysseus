@@ -323,12 +323,15 @@
    letter, which is worse than not showing it, and the trust bar wrapped to two
    lines. Both are size problems, not layout problems.
    -------------------------------------------------------------------------- */
+/* 12px is the floor, not 11px. This block is the last override in the load
+   order, so whatever it sets is what ships — a 12px rule written anywhere
+   else loses to it at equal specificity, silently. */
 @media (max-width: 480px) {
-  .cgrid .pgc__deal { font-size: 11px; font-weight: 700; }
+  .cgrid .pgc__deal { font-size: 12px; font-weight: 700; }
   .cgrid .pgc__price { font-size: 15px; }
-  .cgrid .pgc__compare { font-size: 11px; }
+  .cgrid .pgc__compare { font-size: 12px; }
   .cgrid .pgc__title { font-size: 13px; }
-  .cgrid .pgc__rating { font-size: 11px; }
+  .cgrid .pgc__rating { font-size: 12px; }
 
   /* A ~173px cell cannot hold "Dernier jour" plus two dinar prices on one
      line, and dinar amounts are long. The label takes its own line rather

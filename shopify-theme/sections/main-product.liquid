@@ -751,8 +751,14 @@
         <div class="cod-sheet__scrim" data-sheet-close></div>
         <div class="cod-sheet__panel" role="dialog" aria-modal="true"
              aria-label="{{ block.settings.head_title | escape }}">
+          {%- comment -%}
+            No title here. The form's own banner sits directly below with the
+            same sentence, plus an icon and the line about paying on delivery
+            — it is the better of the two, so this bar keeps only the close
+            button and gives the duplicate's height back to the fields. The
+            dialog is still named, by aria-label on the panel above.
+          {%- endcomment -%}
           <div class="cod-sheet__grip">
-            <span class="cod-sheet__grip-title">{{ block.settings.head_title }}</span>
             <button class="cod-sheet__close" type="button" data-sheet-close
                     aria-label="{{ section.settings.close_label | escape }}">&#10005;</button>
           </div>

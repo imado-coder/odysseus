@@ -337,8 +337,10 @@
   background: rgba(255, 255, 255, 0.32);
 }
 
+/* A glyph, not prose — but it is rendered as text, so its size is what says
+   whether the category row can be opened. At 10px that hint was invisible. */
 .mhead__cat-caret {
-  font-size: 10px;
+  font-size: 12px;
   transition: transform 160ms ease;
 }
 
@@ -492,18 +494,22 @@
   font-size: 22px;
 }
 
+/* The count is a number the shopper reads, not a dot — at 10px in a 18px
+   disc a two-digit cart is a smudge. The disc grows with the type so a
+   three-digit count still fits on one line. */
 .mhead__cart-count {
   position: absolute;
-  inset-block-start: -2px;
-  inset-inline-end: -2px;
-  min-inline-size: 18px;
-  block-size: 18px;
-  padding-inline: 4px;
+  inset-block-start: -3px;
+  inset-inline-end: -3px;
+  min-inline-size: 20px;
+  block-size: 20px;
+  padding-inline: 5px;
   border-radius: 999px;
   background: #ff3b30;
   color: #fff;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
+  line-height: 1;
   display: grid;
   place-items: center;
 }

@@ -95,7 +95,12 @@
   border: 1.5px solid var(--c-border-strong, #d3d8dc);
   border-radius: 8px;
   background: #fff;
-  font-size: 15px;
+  /* 16px is not a style choice here. Safari on iOS zooms the page whenever a
+     focused field is under 16px, and it does not zoom back out — so on a
+     seven-field order form the shopper is fighting a magnified, sideways-
+     scrolling page from the first tap to the last. That is the form this
+     whole theme exists to get completed. */
+  font-size: 16px;
   color: var(--c-ink, #101418);
   transition: border-color 120ms ease, box-shadow 120ms ease;
 }
@@ -453,27 +458,24 @@ textarea.field__control {
   to { transform: none; opacity: 1; }
 }
 
+/* Close only — the form's banner names the sheet. Stays sticky so the way
+   out is reachable from anywhere in a seven-field form, and keeps its border
+   so the fields scrolling under it do not touch the panel's rounded top. */
 .cod-sheet__grip {
   position: sticky;
   inset-block-start: 0;
   z-index: 1;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
+  justify-content: flex-end;
+  padding: 6px 10px;
   background: #fff;
   border-block-end: 1px solid var(--c-border, #e7eaec);
 }
 
-.cod-sheet__grip-title {
-  font-size: 15px;
-  font-weight: 800;
-}
-
 .cod-sheet__close {
-  margin-inline-start: auto;
-  inline-size: 36px;
-  block-size: 36px;
+  inline-size: 44px;
+  block-size: 44px;
   border-radius: 50%;
   display: grid;
   place-items: center;

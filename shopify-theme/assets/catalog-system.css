@@ -171,7 +171,22 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  /* A grid track sized minmax(0, 1fr) cannot be widened by its contents, but
+     a card CAN paint outside its own track — and anything painting past the
+     last column widens the document and gives the whole page a horizontal
+     scrollbar. On a phone that means the storefront can be dragged sideways,
+     and the fixed bottom bar loses 9px to the scrollbar gutter.
+
+     The merchant's text is the variable here: a sold count, a vendor name, a
+     title in a language with long words. So the guard is structural rather
+     than a width picked per field — no descendant of a card gets an
+     automatic minimum size large enough to escape it. */
+  min-inline-size: 0;
 }
+
+.pgc > *,
+.pgc__rating,
+.pgc__price-row { min-inline-size: 0; }
 
 .pgc__media {
   position: relative;
@@ -327,19 +342,30 @@
   color: #5b6570;
 }
 
+/* The star strip is a fixed-width mask; squeezing it just cuts stars off, so
+   it never gives ground. */
 .pgc__stars {
+  flex: none;
   color: #101418;
   font-size: 12px;
   letter-spacing: -0.5px;
 }
 
+/* The sold count is the part of this row whose length the theme cannot know,
+   so it is the part that gives. Truncating it costs a digit; wrapping it
+   would make one card in a row taller than its neighbours. */
 .pgc__sold {
   display: inline-flex;
   align-items: center;
   gap: 2px;
+  min-inline-size: 0;
   color: #5b6570;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
+.pgc__flame { flex: none; }
 
 .pgc__flame { color: var(--pgc-price); }
 
@@ -831,9 +857,12 @@
   .paychip { font-size: 12px; block-size: auto; padding-block: 3px; }
   .pgc__deal { font-size: 12px; }
 
-  /* Thumb targets. 30px and 34px are misses as often as hits. */
-  .pgc__add { inline-size: 40px; block-size: 40px; }
-  .cpills__next { inline-size: 40px; block-size: 40px; }
+  /* Thumb targets. 30px and 34px are misses as often as hits — and 40px,
+     which these were, is still under the 44px floor everything else in the
+     theme is held to. A quick-add that misses adds nothing and scrolls the
+     grid instead, which reads to the shopper as the button not working. */
+  .pgc__add { inline-size: 44px; block-size: 44px; }
+  .cpills__next { inline-size: 44px; block-size: 44px; }
 
   /* Footer links are text, so the target is grown with padding rather than
      a fixed box that would break the column rhythm. */
@@ -842,4 +871,12 @@
 
 @media (max-width: 749px) {
   .tfoot__bottom a { display: inline-block; padding-block: 11px; min-inline-size: 44px; text-align: center; }
+}
+
+/* The ad disclosure was under the 12px phone floor. It is text the shopper
+   reads to decide, not ornament. The compare price is handled in
+   home-mobile.css, which is the last stylesheet in the load order — setting
+   it here too would look right and do nothing. */
+@media (max-width: 749px) {
+  .pgc__ad { font-size: 12px; }
 }
