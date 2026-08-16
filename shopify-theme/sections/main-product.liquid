@@ -186,9 +186,36 @@
                 {%- endform -%}
 
               {%- when 'cod_form' -%}
-                <div {{ block.shopify_attributes }}>
-                  {% render 'cod-form', id: 'cod-' | append: section.id, product: product, variant: v, block: block %}
-                </div>
+                {%- comment -%}
+                  A form that is already open on arrival is a wall of fields
+                  before the shopper has decided anything. Default is the
+                  call-to-action: one button carrying the offer, the form
+                  revealed on the tap that means "I want this". Merchants who
+                  prefer the form in view can switch to `inline`.
+                {%- endcomment -%}
+                {%- if block.settings.display == 'inline' -%}
+                  <div {{ block.shopify_attributes }}>
+                    {% render 'cod-form', id: 'cod-' | append: section.id, product: product, variant: v, block: block %}
+                  </div>
+                {%- else -%}
+                  <div class="cod-wrap" data-cod-wrap data-open="false" {{ block.shopify_attributes }}>
+                    <button class="cod-cta" type="button" data-cod-reveal>
+                      <span class="cod-cta__main">
+                        {%- if on_sale and block.settings.cta_show_discount -%}
+                          <span class="cod-cta__off">-{{ off }}%</span>
+                        {%- endif -%}
+                        {{ block.settings.cta_label | default: 'Commander — paiement à la livraison' }}
+                      </span>
+                      {%- if block.settings.cta_note != blank -%}
+                        <span class="cod-cta__note">{{ block.settings.cta_note }}</span>
+                      {%- endif -%}
+                    </button>
+
+                    <div class="cod-wrap__panel">
+                      {% render 'cod-form', id: 'cod-' | append: section.id, product: product, variant: v, block: block %}
+                    </div>
+                  </div>
+                {%- endif -%}
 
               {%- when 'shipping' -%}
                 <div class="bb__trust" {{ block.shopify_attributes }}>
@@ -648,6 +675,41 @@
       "name": "Paiement à la livraison",
       "limit": 1,
       "settings": [
+        {
+          "type": "select",
+          "id": "display",
+          "label": "Affichage du formulaire",
+          "options": [
+            {
+              "value": "button",
+              "label": "Derrière un bouton (recommandé)"
+            },
+            {
+              "value": "inline",
+              "label": "Toujours visible"
+            }
+          ],
+          "default": "button",
+          "info": "Un formulaire déjà ouvert fait fuir : le bouton convertit mieux."
+        },
+        {
+          "type": "text",
+          "id": "cta_label",
+          "label": "Texte du bouton",
+          "default": "Commander — paiement à la livraison"
+        },
+        {
+          "type": "text",
+          "id": "cta_note",
+          "label": "Message marketing sous le bouton",
+          "default": "Payez à la réception · Livraison 58 wilayas"
+        },
+        {
+          "type": "checkbox",
+          "id": "cta_show_discount",
+          "label": "Afficher la remise sur le bouton",
+          "default": true
+        },
         {
           "type": "paragraph",
           "content": "Toutes les wilayas et communes d'Algérie sont incluses. Les tarifs se règlent dans Paramètres du thème › Paiement à la livraison."

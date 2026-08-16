@@ -366,3 +366,15 @@ ul, ol {
 .icon--lg { inline-size: 1.6em; block-size: 1.6em; }
 .icon--sm { inline-size: 1em; block-size: 1em; }
 .icon--fill { fill: currentColor; stroke: none; }
+
+/* Delivery and trust green.
+   A saturated green reads as a system alert, not as reassurance. These are
+   deep enough to carry weight next to the orange accent and still pass
+   contrast: --c-trust 5.2:1 on white, --c-trust-solid 4.5:1 behind white. */
+:root {
+  --c-trust: #067d3d;
+  --c-trust-solid: #0a8a3f;
+  --c-trust-tint: #eefaf933;
+  --c-partner: #ffd44d;
+  --c-partner-ink: #4a3600;
+}

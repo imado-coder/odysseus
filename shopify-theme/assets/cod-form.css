@@ -492,3 +492,73 @@ textarea.field__control {
 @media (min-width: 990px) {
   .cod-sheet { display: none !important; }
 }
+
+/* --- order call-to-action ---------------------------------------------
+   The form starts closed. What the shopper sees first is one button
+   carrying the offer; the fields arrive on the tap that means "I want
+   this". An open form on arrival is a wall of work before any decision. */
+
+.cod-wrap__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows .32s cubic-bezier(.2, .8, .3, 1);
+}
+
+.cod-wrap__panel > * {
+  overflow: hidden;
+  min-block-size: 0;
+}
+
+.cod-wrap[data-open="true"] .cod-wrap__panel { grid-template-rows: 1fr; }
+.cod-wrap[data-open="true"] .cod-cta { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cod-wrap__panel { transition: none; }
+}
+
+.cod-cta {
+  inline-size: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 14px 18px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--c-accent, #ff6d00);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+  /* 44px minimum touch target, with room to spare. */
+  min-block-size: 56px;
+  box-shadow: 0 2px 10px rgb(255 109 0 / .28);
+  transition: transform .12s ease, box-shadow .2s ease, filter .2s ease;
+}
+
+.cod-cta:hover { filter: brightness(1.04); box-shadow: 0 4px 16px rgb(255 109 0 / .34); }
+.cod-cta:active { transform: translateY(1px); }
+
+.cod-cta__main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-align: center;
+}
+
+.cod-cta__off {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgb(0 0 0 / .22);
+  font-size: 14px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.cod-cta__note {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: .92;
+}
