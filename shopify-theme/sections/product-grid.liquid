@@ -1,51 +1,123 @@
-{%- comment -%} Grid of products: a collection, or the current one. {%- endcomment -%}
+{%- comment -%}
+  Grid of products: a collection, or the current one.
+
+  A shop with three products shows three cards — never three cards and
+  seventeen invented ones. Fake products on a live storefront read as an
+  abandoned store and cost the sale, so placeholders appear only inside the
+  theme editor, where the merchant needs to see the layout while choosing a
+  collection. With nothing to show and nobody editing, the section renders
+  nothing at all rather than an empty heading.
+{%- endcomment -%}
 {%- liquid
   assign col = collections[section.settings.collection]
   if section.settings.source == 'current' and collection
     assign col = collection
   endif
--%}
-<section class="section" aria-labelledby="Grid-{{ section.id }}">
-  {%- if section.settings.title != blank -%}
-    <div class="section__head">
-      <h2 class="section__title" id="Grid-{{ section.id }}">{{ section.settings.title }}</h2>
-      {%- if section.settings.link_label != blank -%}
-        <a class="section__link" href="{{ col.url }}">{{ section.settings.link_label }}</a>
-      {%- endif -%}
-    </div>
-  {%- else -%}
-    <h2 class="visually-hidden" id="Grid-{{ section.id }}">{{ 'products.facets.product_count_simple' | t: count: col.products_count }}</h2>
-  {%- endif -%}
 
-  <div class="cgrid">
-    {%- for product in col.products limit: section.settings.count -%}
-      {% render 'product-card', card: product, index: forloop.index0 %}
+  assign shown = col.products.size
+  if shown > section.settings.count
+    assign shown = section.settings.count
+  endif
+-%}
+
+{%- if shown > 0 -%}
+  <section class="section" aria-labelledby="Grid-{{ section.id }}">
+    {%- if section.settings.title != blank -%}
+      <div class="section__head">
+        <h2 class="section__title" id="Grid-{{ section.id }}">{{ section.settings.title }}</h2>
+        {%- if section.settings.link_label != blank and col.url != blank -%}
+          <a class="section__link" href="{{ col.url }}">{{ section.settings.link_label }}</a>
+        {%- endif -%}
+      </div>
     {%- else -%}
+      <h2 class="visually-hidden" id="Grid-{{ section.id }}">{{ 'products.facets.product_count_simple' | t: count: col.products_count }}</h2>
+    {%- endif -%}
+
+    <div class="cgrid">
+      {%- for product in col.products limit: section.settings.count -%}
+        {% render 'product-card', card: product, index: forloop.index0 %}
+      {%- endfor -%}
+    </div>
+  </section>
+
+{%- elsif request.design_mode -%}
+  {%- comment -%} Editor only — never served to a customer. {%- endcomment -%}
+  <section class="section" aria-labelledby="Grid-{{ section.id }}">
+    <div class="section__head">
+      <h2 class="section__title" id="Grid-{{ section.id }}">
+        {{ section.settings.title | default: 'Grille de produits' }}
+      </h2>
+    </div>
+    <p class="section__empty-note">
+      {{ section.settings.empty_note | default: "Choisissez une collection contenant des produits. Cet aperçu n'apparaît que dans l'éditeur — la section reste invisible pour vos clients tant qu'elle est vide." }}
+    </p>
+    <div class="cgrid">
       {%- for i in (1..section.settings.count) -%}
-        <article class="pgc">
+        <article class="pgc pgc--ghost" aria-hidden="true">
           <div class="pgc__media">{{ 'product-1' | placeholder_svg_tag: 'pgc__img' }}</div>
           <h3 class="pgc__title">{{ 'onboarding.product_title' | t }}</h3>
         </article>
       {%- endfor -%}
-    {%- endfor -%}
-  </div>
-</section>
+    </div>
+  </section>
+{%- endif -%}
 
 {% schema %}
 {
   "name": "Grille de produits",
   "tag": "section",
   "settings": [
-    { "type": "text", "id": "title", "label": "Titre", "default": "Recommandé pour vous" },
-    { "type": "text", "id": "link_label", "label": "Lien « voir tout »", "default": "Voir tout" },
-    { "type": "select", "id": "source", "label": "Source",
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Titre",
+      "default": "Recommandé pour vous"
+    },
+    {
+      "type": "text",
+      "id": "link_label",
+      "label": "Lien « voir tout »",
+      "default": "Voir tout"
+    },
+    {
+      "type": "select",
+      "id": "source",
+      "label": "Source",
       "options": [
-        { "value": "pick", "label": "Une collection choisie" },
-        { "value": "current", "label": "La collection en cours" }
-      ], "default": "pick" },
-    { "type": "collection", "id": "collection", "label": "Collection" },
-    { "type": "range", "id": "count", "min": 5, "max": 50, "step": 5, "label": "Nombre de produits", "default": 20 }
+        {
+          "value": "pick",
+          "label": "Une collection choisie"
+        },
+        {
+          "value": "current",
+          "label": "La collection en cours"
+        }
+      ],
+      "default": "pick"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "range",
+      "id": "count",
+      "min": 5,
+      "max": 50,
+      "step": 5,
+      "label": "Nombre de produits",
+      "default": 20
+    },
+    {
+      "type": "paragraph",
+      "content": "Si la collection est vide, cette section n'apparaît pas sur votre boutique. Les produits d'exemple ci-dessus ne sont visibles que dans l'éditeur."
+    }
   ],
-  "presets": [{ "name": "Grille de produits" }]
+  "presets": [
+    {
+      "name": "Grille de produits"
+    }
+  ]
 }
 {% endschema %}

@@ -945,3 +945,17 @@
 .tab--active {
   color: var(--c-brand);
 }
+
+/* Editor-only preview of an empty product grid. Ghosted so it cannot be
+   mistaken for real inventory while the merchant configures the section. */
+.pgc--ghost { opacity: .45; pointer-events: none; }
+
+.section__empty-note {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px dashed var(--c-border, #e7eaec);
+  border-radius: 10px;
+  color: var(--c-ink-3, #6e7781);
+  font-size: 13px;
+  line-height: 1.45;
+}
