@@ -1298,6 +1298,14 @@ html:not(.js) .bb__title-more { grid-template-rows: 1fr; }
 @media (max-width: 989px) {
   .pdp--immersive .pdp__details { padding-inline: 0; }
 
+  /* The separator band above this column is a ::before pulled out with
+     margin-inline: -16px to escape the column's padding. That padding is
+     gone now, so the pull is 16px hanging off each edge — and the right-hand
+     16px widens the document, which is what gave the page a horizontal
+     scrollbar and stretched the fixed cart drawer to 406px in a 390px
+     viewport. Nothing to escape any more, so nothing to pull. */
+  .pdp__details::before { margin-inline: 0; }
+
   .landing__title,
   .landing__stack,
   .landing__caption,

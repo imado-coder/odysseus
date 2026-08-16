@@ -133,10 +133,15 @@
   color: var(--c-ink-2, #5b6570);
 }
 
+/* Stepper, price and remove on one line. A dinar line total is long — five
+   digits plus a suffix — and at 390px it was breaking after the thousands
+   separator, so the price sat on two lines next to a one-line stepper. The
+   price never wraps; the row wraps as a whole if it truly cannot fit. */
 .citem__row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 8px 10px;
   margin-block-start: 8px;
 }
 
@@ -145,12 +150,13 @@
   font-weight: 800;
   color: var(--c-accent-text, #c24e00);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .citem__remove {
   margin-inline-start: auto;
-  inline-size: 36px;
-  block-size: 36px;
+  inline-size: 44px;
+  block-size: 44px;
   display: grid;
   place-items: center;
   border-radius: 8px;
@@ -239,15 +245,27 @@
   color: var(--c-ink-2, #5b6570);
 }
 
-/* --- checkout step: the cart hands its basket to the order form --- */
-.drawer[data-step="form"] .drawer__body > :not(.cod-mount) { display: none; }
+/* --- checkout step: the cart hands its basket to the order form ---
+   These keyed on .cod-mount, which is not in the markup — the element is
+   .drawer__form, a sibling of .drawer__body rather than a child of it. So
+   nothing was ever hidden and both steps rendered at once: an empty-cart
+   message with a full order form stacked underneath it. */
+.drawer[data-step="cart"] .drawer__form { display: none; }
+.drawer[data-step="cart"] .drawer__back { display: none; }
+
+.drawer[data-step="form"] .drawer__body,
 .drawer[data-step="form"] .drawer__foot { display: none; }
-.drawer[data-step="cart"] .cod-mount { display: none; }
 
-.cod-mount { padding-block: 8px; }
+.drawer__form {
+  flex: 1;
+  min-block-size: 0;
+  overflow-y: auto;
+  padding-block: 8px;
+  -webkit-overflow-scrolling: touch;
+}
 
-.cod-mount .cod { border: 0; border-radius: 0; }
-.cod-mount .cod__head { border-radius: 10px; }
+.drawer__form .cod { border: 0; border-radius: 0; }
+.drawer__form .cod__head { border-radius: 10px; }
 
 .drawer__back {
   display: inline-flex;
@@ -290,3 +308,9 @@
   color: var(--c-accent-text, #c24e00);
   font-variant-numeric: tabular-nums;
 }
+
+/* The stepper in a cart line is narrower than the one on the product page:
+   there it is the only control on its row, here it shares the row with a
+   five-digit total and a remove button inside a 318px column. */
+.citem .qty__btn { inline-size: 38px; block-size: 40px; font-size: 18px; }
+.citem .qty__input { inline-size: 40px; block-size: 40px; font-size: 15px; }
