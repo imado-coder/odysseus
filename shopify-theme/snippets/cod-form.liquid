@@ -47,10 +47,10 @@
   assign f_ph_wilaya = s.ph_wilaya | default: 'Choisir la wilaya…'
   assign f_label_commune = s.label_commune | default: 'Commune'
   assign f_ph_commune = s.ph_commune | default: 'Choisir la commune…'
-  assign f_ph_commune_empty = s.ph_commune_empty | default: 'Choisissez d\'abord la wilaya'
+  assign f_ph_commune_empty = s.ph_commune_empty | default: "Choisissez d'abord la wilaya"
   assign f_label_address = s.label_address | default: 'Adresse de livraison'
   assign f_ph_address = s.ph_address | default: 'Cité, rue, numéro, point de repère…'
-  assign f_hint_address = s.hint_address | default: 'Plus l\'adresse est précise, plus la livraison est rapide.'
+  assign f_hint_address = s.hint_address | default: "Plus l'adresse est précise, plus la livraison est rapide."
   assign f_label_delivery = s.label_delivery | default: 'Mode de livraison'
   assign f_label_home = s.label_home | default: 'À domicile'
   assign f_label_desk = s.label_desk | default: 'Bureau de livraison'
@@ -65,7 +65,7 @@
   assign f_msg_invalid = s.msg_invalid | default: 'Merci de corriger les champs signalés en rouge.'
   assign f_msg_success = s.msg_success | default: 'Commande enregistrée. Nous vous appelons bientôt.'
   assign f_msg_fail = s.msg_fail | default: 'Envoi impossible. Réessayez ou appelez-nous.'
-  assign f_msg_pending = s.msg_pending | default: 'Formulaire valide. Connectez l\'application COD pour enregistrer la commande.'
+  assign f_msg_pending = s.msg_pending | default: "Formulaire valide. Connectez l'application COD pour enregistrer la commande."
   assign f_head_bg = s.head_bg
   assign f_submit_bg = s.submit_bg
   assign f_qty_max = s.qty_max | default: 10

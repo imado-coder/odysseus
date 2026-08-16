@@ -400,3 +400,138 @@ ul, ol {
   --c-partner: #ffd44d;
   --c-partner-ink: #4a3600;
 }
+
+/* ==========================================================================
+   Bidirectional text
+
+   A shop in this market is bilingual in practice: Arabic labels, product
+   names in French, Latin numerals everywhere. When the store direction is
+   RTL, a Latin string that begins with a number gets reordered by the bidi
+   algorithm — "40 000+ ventes" renders as "ventes +000 40", "#1 Meilleure
+   vente" as "Meilleure vente #1", "45% DE RÉDUCTION" as "DE RÉDUCTION 45%".
+   The number is directionally neutral, so it takes the paragraph's direction
+   rather than the direction of the words it belongs to.
+
+   `unicode-bidi: plaintext` is the CSS form of dir="auto": each of these
+   resolves its own direction from its first strong character. An Arabic
+   string still reads right-to-left, a French one left-to-right, and neither
+   depends on which the merchant chose for the store. Applied to the leaves
+   that carry merchant or product text — never to layout containers, whose
+   direction must stay the store's.
+   ========================================================================== */
+.bb__title,
+/* unicode-bidi is NOT inherited, so naming a flex container does nothing for
+   the items inside it — each child needs the property itself. The sold count
+   lives in a child of .bb__rating and stayed reversed until this was added. */
+.bb__rating,
+.bb__rating > *,
+.bb__rank-text,
+.bb__rank-badge,
+.bb__off,
+.bb__notice,
+.bb__pill,
+.bb__price-label,
+.bb__savings-item,
+.pgc__title,
+.pgc__sold,
+.pgc__deal,
+.pgc__ad,
+.trow__title,
+.trow__sub,
+.trow__trail,
+.carrier__name,
+.pdetails__key,
+.pdetails__val,
+.tsheet__title,
+.tnum__title,
+.tnum__body,
+.paychip,
+.hero-w__title,
+.hero-w__lede,
+.hero-w__proof-item,
+.hero-w__eyebrow,
+.ty__title,
+.ty__lede,
+.ty__step-title,
+.ty__step-text,
+.review__text,
+.review__name,
+.citem__title,
+.citem__opt,
+.cod__title,
+.cod__subtitle,
+.field__label,
+.field__hint,
+.landing__caption,
+.related__title,
+.reviews__verified,
+.cpill,
+.ship-strip__item,
+.freeship,
+.drawer__title,
+.pdetails__title,
+.bb__seller-badge,
+.bb__swatch-name {
+  unicode-bidi: plaintext;
+}
+
+/* Form controls carry the shopper's own text and the merchant's placeholder,
+   and neither is necessarily in the store's language. A placeholder written
+   in French inside an Arabic store was rendering its trailing ellipsis at the
+   front — "…Choisir la wilaya" — and its apostrophe mid-string was splitting
+   the run in two. plaintext makes each of them read in its own direction. */
+.field__control,
+.field__hint,
+.field__error,
+.field__label,
+.cod__legend,
+.cod__muted,
+.cod__reassure,
+.cod__status,
+.dopt__name,
+.dopt__price,
+.cod__line,
+.cod__line > * {
+  unicode-bidi: plaintext;
+}
+
+/* A dialling code is left-to-right in every language that uses one. It leads
+   with "+", which is directionally neutral, so in an RTL store it was taking
+   the store's direction and rendering as "213+". This is the one place the
+   direction is a fact about the content rather than about the shop. */
+.field__affix-label,
+.field__affix > span:first-child {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+/* Amounts.
+
+   isolate was not enough here: it stops the text AROUND an amount from
+   reordering it, but the amount still inherits the store's direction, so
+   "10 800 DA" kept coming out as "DA 10 800" in an RTL shop. plaintext is
+   what resolves it — the direction comes from the amount's own first strong
+   character. A Latin suffix gives left-to-right, an Arabic one gives
+   right-to-left, and a bare number with no strong character at all falls
+   back to left-to-right, which is how every numeral system writes digits.
+
+   The result is a merchant who prices in "DA", in "دج" or in "€" gets the
+   order right without the theme knowing which they chose. */
+.bb__price-now,
+.bb__price-was,
+.bb__price-deal,
+.citem__price,
+.cod__line dt,
+.cod__line dd,
+.cod-recap__total,
+.drawer__line > span,
+.dopt__price,
+.freeship,
+.ty__line dd,
+.order-float__now,
+.order-float__was,
+.pdp__mobile-price,
+.pgc__price,
+.pgc__compare {
+  unicode-bidi: plaintext;
+}

@@ -21,6 +21,10 @@
 
 {%- liquid
   assign v = product.selected_or_first_available_variant
+  # render arguments are plain values, never expressions: a filter here is
+  # a parse error and the whole form is silently dropped.
+  assign cod_form_id = 'cod-' | append: section.id
+  assign cod_mobile_id = 'cod-mobile-' | append: section.id
   assign on_sale = false
   if v.compare_at_price > v.price
     assign on_sale = true
@@ -270,7 +274,7 @@
                 {%- endcomment -%}
                 {%- if block.settings.display == 'inline' -%}
                   <div {{ block.shopify_attributes }}>
-                    {% render 'cod-form', id: 'cod-' | append: section.id, product: product, variant: v, block: block %}
+                    {% render 'cod-form', id: cod_form_id, product: product, variant: v, block: block %}
                   </div>
                 {%- else -%}
                   <div class="cod-wrap" data-cod-wrap data-open="false" {{ block.shopify_attributes }}>
@@ -287,7 +291,7 @@
                     </button>
 
                     <div class="cod-wrap__panel">
-                      {% render 'cod-form', id: 'cod-' | append: section.id, product: product, variant: v, block: block %}
+                      {% render 'cod-form', id: cod_form_id, product: product, variant: v, block: block %}
                     </div>
                   </div>
                 {%- endif -%}
@@ -1087,7 +1091,7 @@
             <button class="cod-sheet__close" type="button" data-sheet-close
                     aria-label="{{ section.settings.close_label | escape }}">&#10005;</button>
           </div>
-          {% render 'cod-form', id: 'cod-mobile-' | append: section.id, product: product, variant: v, block: block %}
+          {% render 'cod-form', id: cod_mobile_id, product: product, variant: v, block: block %}
         </div>
       </div>
       {%- break -%}
