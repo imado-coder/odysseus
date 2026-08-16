@@ -10,10 +10,16 @@
   ">
   <div class="ubar__inner" role="region" aria-label="{{ section.settings.aria_label | escape }}" tabindex="0"
        {% if section.settings.variant == '2' %}data-scroller-track{% endif %}>
-    <div class="ubar__track">
+    {%- comment -%}
+      On a phone the strip shows one message at a time. The CSS staggers them
+      with --ubar-index and needs --ubar-count to know the cycle length; with
+      neither set every item animated at index 0 and all three were drawn on
+      top of each other.
+    {%- endcomment -%}
+    <div class="ubar__track" style="--ubar-count: {{ section.blocks.size }};">
       {%- for block in section.blocks -%}
         {%- capture item -%}
-          <div class="ubar__item" {{ block.shopify_attributes }}>
+          <div class="ubar__item" style="--ubar-index: {{ forloop.index0 }};" {{ block.shopify_attributes }}>
             {%- if block.settings.icon != blank -%}
               <span class="ubar__icon" aria-hidden="true">{{ block.settings.icon }}</span>
             {%- endif -%}

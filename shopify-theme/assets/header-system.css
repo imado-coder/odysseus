@@ -1113,3 +1113,12 @@
   .mhead__acct-hi,
   .mhead__flag { font-size: 12px; }
 }
+
+@media (max-width: 749px) {
+  /* Without motion there is no cycle, so only the first message is shown
+     rather than three stacked in one slot. */
+  @media (prefers-reduced-motion: reduce) {
+    .ubar__item { animation: none; opacity: 0; }
+    .ubar__item:first-child { opacity: 1; }
+  }
+}

@@ -629,3 +629,31 @@
 
   .gallery__dots { gap: 0; }
 }
+
+@media (max-width: 989px) {
+  /* The dots were sitting as three large pale discs across the middle of the
+     photo — they covered the product, which is the one thing the page exists
+     to show. A marketplace gallery states position with a small counter in
+     the corner instead, and lets the swipe be the interaction. */
+  .gallery__dots { display: none; }
+
+  .gallery__counter {
+    position: absolute;
+    inset-block-end: 12px;
+    inset-inline-end: 12px;
+    z-index: 3;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgb(16 20 24 / .55);
+    /* Readable over a white product shot or a dark one alike. */
+    backdrop-filter: blur(4px);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.5;
+    pointer-events: none;
+  }
+
+  .gallery__counter b { font-weight: 700; }
+}
