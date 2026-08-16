@@ -28,7 +28,7 @@
   endif
 -%}
 
-<div class="pdp">
+<div class="pdp{% if section.settings.mobile_immersive %} pdp--immersive{% endif %}">
   <div class="pdp__inner">
     {%- if section.settings.show_breadcrumbs -%}
       <nav class="pdp__crumbs" aria-label="{{ 'general.breadcrumbs.label' | t }}">
@@ -71,12 +71,29 @@
                 </div>
 
               {%- when 'title' -%}
+                {%- comment -%}
+                  On a phone the title is clamped to two lines with a caret
+                  that opens the rest of it and the description — a long title
+                  pushing the price below the fold costs the sale. Without
+                  JavaScript the disclosure is simply open, so nothing is
+                  hidden from a shopper whose script failed.
+                {%- endcomment -%}
                 <div class="bb__title-row" {{ block.shopify_attributes }}>
-                  <h1 class="bb__title">{{ product.title }}</h1>
-                  {%- if block.settings.show_share -%}
-                    <button class="bb__share" type="button" aria-label="{{ block.settings.share_label | escape }}">
-                      <span aria-hidden="true">&#8618;</span>
-                    </button>
+                  <button class="bb__title-toggle" type="button"
+                          data-disclosure
+                          aria-expanded="false"
+                          aria-controls="TitleMore-{{ section.id }}">
+                    <h1 class="bb__title bb__title--clamped">{{ product.title }}</h1>
+                    <span class="bb__title-caret icon-wrap" aria-hidden="true">
+                      {% render 'icon', name: 'chevron-down' %}
+                    </span>
+                    <span class="visually-hidden">{{ block.settings.more_label | default: 'Voir plus' }}</span>
+                  </button>
+                </div>
+
+                <div class="bb__title-more" id="TitleMore-{{ section.id }}" data-open="false">
+                  {%- if product.description != blank -%}
+                    <div class="bb__title-desc rte">{{ product.description | strip_html | truncatewords: 60 }}</div>
                   {%- endif -%}
                 </div>
 
@@ -440,6 +457,17 @@
   "tag": "section",
   "settings": [
     {
+      "type": "header",
+      "content": "Mobile"
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_immersive",
+      "label": "Image plein écran en haut (mobile)",
+      "default": true,
+      "info": "Masque l'en-tête au-dessus des photos sur mobile. Retour, recherche et panier flottent sur l'image."
+    },
+    {
       "type": "checkbox",
       "id": "show_breadcrumbs",
       "label": "Afficher le fil d'Ariane",
@@ -577,6 +605,12 @@
           "id": "share_label",
           "label": "Libellé du partage",
           "default": "Partager ce produit"
+        },
+        {
+          "type": "text",
+          "id": "more_label",
+          "label": "Libellé « voir plus »",
+          "default": "Voir plus"
         }
       ]
     },

@@ -64,16 +64,32 @@
       {%- endfor -%}
     </div>
 
-    {%- if media_count > 1 -%}
-      <div class="gallery__dots">
-        {%- for media in product.media -%}
-          <button class="gallery__dot" type="button" data-gallery-dot
-                  {% if forloop.first %}aria-current="true"{% endif %}
-                  aria-label="{{ 'products.product.media.image_available' | t: index: forloop.index }}"></button>
-        {%- endfor -%}
+    {%- comment -%}
+      Controls float over the photo instead of sitting in a bar above it, so
+      the image starts at the top of the screen. Back first, because on a
+      phone this page is usually reached from a list the shopper wants back.
+    {%- endcomment -%}
+    <div class="gallery__float">
+      <div class="gallery__float-group">
+        <a class="gfab gfab--back" href="{{ collection.url | default: routes.all_products_collection_url }}"
+           aria-label="{{ 'general.breadcrumbs.home' | t }}">
+          {% render 'icon', name: 'chevron' %}
+        </a>
       </div>
+      <div class="gallery__float-group">
+        <a class="gfab" href="{{ routes.search_url }}"
+           aria-label="{{ 'general.search.search' | t }}">
+          {% render 'icon', name: 'search' %}
+        </a>
+        <a class="gfab" href="{{ routes.cart_url }}" data-cart-open
+           aria-label="{{ 'sections.header.cart_count' | t: count: cart.item_count }}">
+          {% render 'icon', name: 'cart' %}
+        </a>
+      </div>
+    </div>
 
-      <span class="gallery__counter" aria-hidden="true">
+    {%- if media_count > 1 -%}
+      <span class="gallery__count" aria-hidden="true">
         <b data-gallery-index>1</b>/{{ media_count }}
       </span>
     {%- endif -%}

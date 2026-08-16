@@ -311,10 +311,14 @@
   gap: 8px;
 }
 
+/* The old price is a reference, not an offer: it should read as a quiet
+   annotation beside the real one. At 18px against a 28px price the two
+   competed; the gap is now wide enough that the eye lands on what is being
+   charged today. */
 .bb__price-was {
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 400;
-  color: var(--c-ink-2, #5b6570);
+  color: var(--c-ink-3, #6e7781);
   text-decoration: line-through;
   text-decoration-color: color-mix(in srgb, var(--c-ink-2, #5b6570) 78%, transparent);
   text-decoration-thickness: 1px;
@@ -335,8 +339,10 @@
 }
 
 .bb__price-now {
-  font-size: 28px;
-  line-height: 1.1;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
   font-variant-numeric: tabular-nums;
 }
 

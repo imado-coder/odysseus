@@ -631,29 +631,93 @@
 }
 
 @media (max-width: 989px) {
-  /* The dots were sitting as three large pale discs across the middle of the
-     photo — they covered the product, which is the one thing the page exists
-     to show. A marketplace gallery states position with a small counter in
-     the corner instead, and lets the swipe be the interaction. */
+  /* The dots covered the middle of the photo — the one thing the page exists
+     to show. Position is stated by .gallery__count in the corner instead, and
+     the swipe is the interaction. */
   .gallery__dots { display: none; }
+}
 
-  .gallery__counter {
-    position: absolute;
-    inset-block-end: 12px;
-    inset-inline-end: 12px;
-    z-index: 3;
-    padding: 3px 10px;
-    border-radius: 999px;
-    background: rgb(16 20 24 / .55);
-    /* Readable over a white product shot or a dark one alike. */
-    backdrop-filter: blur(4px);
-    color: #fff;
-    font-size: 12px;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-    line-height: 1.5;
-    pointer-events: none;
+/* --------------------------------------------------------------------------
+   Immersive product media on phones
+
+   The photo starts at the top of the screen: on a phone the header, search
+   row and trust strip pushed it 450px down, so the shopper met chrome instead
+   of the product. Back, search and cart float over the image instead. The
+   merchant can switch this off.
+   -------------------------------------------------------------------------- */
+@media (max-width: 989px) {
+  body:has(.pdp--immersive) .shopify-section-group-header-group { display: none; }
+
+  .pdp--immersive .pdp__inner { padding-inline: 0; }
+  .pdp--immersive .pdp__crumbs { display: none; }
+
+  /* Everything below the gallery gets its padding back. */
+  .pdp--immersive .pdp__buybox,
+  .pdp--immersive .pdp__details { padding-inline: 16px; }
+
+  .bb__title-more {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 200ms ease;
   }
 
-  .gallery__counter b { font-weight: 700; }
+  .bb__title-more > * { overflow: hidden; min-block-size: 0; }
+  .bb__title-more[data-open="true"] { grid-template-rows: 1fr; }
+  [aria-expanded="true"] .bb__title--clamped { -webkit-line-clamp: unset; }
+}
+
+/* Without JavaScript there is no toggle, so nothing may be hidden behind it. */
+html:not(.js) .bb__title--clamped { -webkit-line-clamp: unset; }
+html:not(.js) .bb__title-more { grid-template-rows: 1fr; }
+
+.bb__title-desc {
+  padding-block-start: 8px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--c-ink-2, #5b6570);
+}
+
+@media (min-width: 990px) {
+  /* Desktop has room for the whole title and the full description below. */
+  .bb__title--clamped { -webkit-line-clamp: unset; }
+  .bb__title-more { display: none; }
+  .bb__title-toggle { cursor: default; }
+  .bb__title-caret { display: none; }
+}
+
+@media (max-width: 989px) {
+  /* The title toggle is the disclosure for the description, so it is a real
+     control and needs a real target — 23px was the text's own height. */
+  .bb__title-toggle { min-block-size: 44px; align-items: center; padding-block: 4px; }
+}
+
+@media (max-width: 989px) {
+  /* The chevron icon points forward; back is the same shape reversed. Using
+     a logical rotation keeps it correct in Arabic, where back is the other
+     way round. */
+  .gfab--back .icon { transform: rotate(180deg); }
+  :dir(rtl) .gfab--back .icon { transform: none; }
+
+  /* Closed, the disclosure must take no room at all — the collapsed grid row
+     still inherited the buy box's 12px stack margin and left a gap under the
+     title. */
+  .bb__title-more[data-open="false"] { margin-block-start: 0; }
+  .bb__title-more[data-open="false"] > * { padding-block: 0; }
+}
+
+/* The old price, the deal label and the price belong on one line: reading
+   "was / now" as a single statement is what makes the discount land. It wraps
+   only when the numbers genuinely cannot fit. */
+.bb__price-row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+
+.bb__price-deal {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  min-inline-size: 0;
 }
