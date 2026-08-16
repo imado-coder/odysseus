@@ -97,6 +97,10 @@
   align-items: start;
 }
 
+/* One image means no thumb rail, so the stage takes the whole width instead
+   of being squeezed into the 72px column meant for thumbnails. */
+.gallery--single { grid-template-columns: minmax(0, 1fr); }
+
 @media (max-width: 749px) {
   .gallery {
     grid-template-columns: minmax(0, 1fr);

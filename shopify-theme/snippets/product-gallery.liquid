@@ -1,6 +1,12 @@
-{%- comment -%} Thumb rail plus stage. Thumbs are buttons so keyboard works. {%- endcomment -%}
+{%- comment -%}
+  Thumb rail plus stage. Thumbs are buttons so keyboard works.
+
+  The rail only exists when there is more than one image, so the grid has to
+  drop its column too — otherwise a product with a single photo renders that
+  photo into the 72px thumb column and it appears as a thumbnail.
+{%- endcomment -%}
 {%- assign featured = variant.featured_media | default: product.featured_media -%}
-<div class="gallery">
+<div class="gallery{% if product.media.size <= 1 %} gallery--single{% endif %}">
   {%- if product.media.size > 1 -%}
     <div class="gallery__thumbs" role="group" aria-label="{{ 'products.product.media.gallery_viewer' | t }}">
       {%- for media in product.media -%}
