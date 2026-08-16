@@ -829,3 +829,46 @@ html:not(.js) .bb__title-more { grid-template-rows: 1fr; }
   /* Longest currency strings still get to shrink rather than overflow. */
   .bb__price-row > * { min-inline-size: 0; }
 }
+
+/* --------------------------------------------------------------------------
+   Buy box rhythm on phones
+
+   A flat 12px between every block spaced the page like a form. Related facts
+   should touch: the score belongs to the title, the rank badge to the score,
+   the discount to the price. Only genuinely separate groups get air.
+
+   Measured before: 12px everywhere, and a collapsed disclosure with zero
+   height still claiming its 12px.
+   -------------------------------------------------------------------------- */
+@media (max-width: 989px) {
+  .bb > * + * { margin-block-start: 8px; }
+
+  /* Tight group: title → rating → rank read as one identity block. */
+  .bb__title-row + *,
+  .bb__rating + *,
+  .bb__rank + * { margin-block-start: 3px; }
+
+  /* Tight group: price → note → stock warning are one price statement. */
+  .bb__price-row + *,
+  .bb__price-note + * { margin-block-start: 3px; }
+
+  /* A collapsed disclosure occupies nothing, including the gap after it. */
+  .bb__title-more[data-open="false"],
+  .bb__title-more[data-open="false"] + * { margin-block-start: 0; }
+
+  /* Scripts are data, not layout. */
+  .bb > script { display: none; }
+
+  /* The promise strip sits against the photo, as on the reference. */
+  .bb > .bb__savings:first-child { margin-block-start: 0; }
+  .bb__savings + * { margin-block-start: 10px; }
+
+  /* Groups that genuinely are separate keep their air. */
+  .cod-wrap,
+  .bb__promo { margin-block-start: 12px; }
+
+  /* Delivery promises stack tightly; they are one list, not four sections. */
+  .bb__trust + .bb__carriers,
+  .bb__carriers + .bb__trust,
+  .bb__trust + .bb__pills { margin-block-start: 6px; }
+}
