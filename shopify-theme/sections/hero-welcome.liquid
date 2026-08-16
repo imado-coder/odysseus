@@ -35,7 +35,7 @@
            fetchpriority: 'high' }}
   {%- endif -%}
 
-  <div class="hero-w__inner">
+  <div class="hero-w__inner" data-reveal>
     {%- if section.settings.eyebrow != blank -%}
       <span class="hero-w__eyebrow">
         {%- if section.settings.eyebrow_icon != blank -%}
@@ -81,7 +81,7 @@
     {%- endcomment -%}
     {%- assign proof_blocks = section.blocks | where: 'type', 'proof' -%}
     {%- if proof_blocks.size > 0 -%}
-      <ul class="hero-w__proof">
+      <ul class="hero-w__proof" data-reveal-stagger>
         {%- for block in proof_blocks limit: 3 -%}
           <li class="hero-w__proof-item" {{ block.shopify_attributes }}>
             {%- if block.settings.icon != blank -%}

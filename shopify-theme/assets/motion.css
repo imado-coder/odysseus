@@ -236,3 +236,179 @@
     max-inline-size: 340px;
   }
 }
+
+/* ==========================================================================
+   Price countdown and its landing
+   The number falls from what the item was worth to what it costs. While it
+   runs the digits must not reflow the line — a price that changes width on
+   every frame drags the badge beside it back and forth.
+   ========================================================================== */
+[data-price-count] { font-variant-numeric: tabular-nums; }
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-price-count][data-counting] {
+    color: var(--c-sale, #ff4438);
+    transition: color 200ms ease;
+  }
+
+  /* The landing. The row jolts once — not a wobble, a single settle, the way
+     a physical counter stops. The struck price is what the shopper is being
+     saved from, so it is the part that flinches. */
+  [data-price-row][data-landed] [data-price-count] {
+    animation: price-land 420ms cubic-bezier(0.2, 1.5, 0.4, 1);
+  }
+
+  [data-price-row][data-landed] .bb__price-was,
+  [data-price-row][data-landed] s {
+    animation: price-strike 620ms ease;
+  }
+
+  @keyframes price-land {
+    0%   { transform: scale(1.14); }
+    55%  { transform: scale(0.97); }
+    100% { transform: scale(1); }
+  }
+
+  /* The strike-through sweeps across as the new price lands, so the old one
+     is visibly cancelled rather than having always been crossed out. */
+  @keyframes price-strike {
+    0%   { opacity: 0.35; transform: translate3d(0, -3px, 0); }
+    40%  { opacity: 1; }
+    100% { opacity: 1; transform: none; }
+  }
+}
+
+/* ==========================================================================
+   Confirmation burst
+   Twenty-eight spans, transform and opacity only. Pointer-events off so it
+   cannot swallow a tap on the button underneath it.
+   ========================================================================== */
+.burst {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.burst__bit {
+  position: absolute;
+  inset-block-start: 12%;
+  inset-inline-start: var(--x);
+  inline-size: 8px;
+  block-size: 12px;
+  border-radius: 2px;
+  opacity: 0;
+  animation: burst-fall var(--dur, 1200ms) var(--delay, 0ms) cubic-bezier(0.25, 0.6, 0.4, 1) forwards;
+}
+
+@keyframes burst-fall {
+  0%   { opacity: 0; transform: translate3d(0, -14px, 0) rotate(0deg) scale(0.6); }
+  12%  { opacity: 1; }
+  100% { opacity: 0; transform: translate3d(var(--dx), var(--dy), 0) rotate(var(--rot)) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .burst { display: none; }
+}
+
+/* ==========================================================================
+   Small reactions
+   Each of these marks a state change the shopper caused. None of them loop:
+   a storefront that is permanently in motion is a storefront nobody reads.
+   ========================================================================== */
+@media (prefers-reduced-motion: no-preference) {
+
+  /* The cart count changed — the bubble acknowledges it once. */
+  .cartbub[data-bumped] .cartbub__disc,
+  .mhead__cart-count[data-bumped] {
+    animation: bump 420ms cubic-bezier(0.2, 1.6, 0.4, 1);
+  }
+
+  @keyframes bump {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.22); }
+    100% { transform: scale(1); }
+  }
+
+  /* A chosen swatch or size should feel picked up, not merely marked. */
+  .bb__swatch input:checked ~ img,
+  .bb__swatch input:checked ~ .bb__swatch-name,
+  .size input:checked ~ span {
+    animation: pick 260ms cubic-bezier(0.2, 1.5, 0.4, 1);
+  }
+
+  @keyframes pick {
+    0%   { transform: scale(0.94); }
+    60%  { transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+
+  /* The quantity rolls to its new value rather than swapping. */
+  .qty__input[data-rolled] {
+    animation: roll 260ms ease;
+  }
+
+  @keyframes roll {
+    0%   { transform: translate3d(0, var(--roll-from, 8px), 0); opacity: 0; }
+    100% { transform: none; opacity: 1; }
+  }
+
+  /* Stars fill from the left when the rating first comes into view — the
+     score is the one number people look for, so it earns an entrance. */
+  .stars.is-in { animation: stars-sweep 720ms cubic-bezier(0.2, 0, 0.1, 1); }
+
+  @keyframes stars-sweep {
+    from { --stars-fill: 0%; }
+    to   { --stars-fill: var(--stars-fill); }
+  }
+
+  /* The free-shipping meter grows to its level instead of appearing at it. */
+  .freeship__fill {
+    transition: inline-size 640ms cubic-bezier(0.2, 0, 0.1, 1);
+  }
+
+  /* A promise row's icon arrives with its text rather than sitting there
+     waiting for it. */
+  .js [data-reveal] .trow__icon .icon,
+  .js [data-reveal] .pdetails__grid { transition-delay: 90ms; }
+}
+
+/* Sheets rise from the edge they are anchored to, with a little overshoot so
+   they feel thrown rather than slid. */
+@media (prefers-reduced-motion: no-preference) {
+  .tsheet[data-open="true"] .tsheet__panel,
+  .cod-sheet[data-open="true"] .cod-sheet__panel {
+    animation: sheet-up 340ms cubic-bezier(0.16, 1.1, 0.3, 1);
+  }
+
+  @keyframes sheet-up {
+    from { transform: translate3d(0, 100%, 0); }
+    to   { transform: none; }
+  }
+}
+
+/* A sale badge catches the light once as it enters, then stops. A permanent
+   shine is a banner ad; a single pass is a highlight. */
+@media (prefers-reduced-motion: no-preference) {
+  .bb__discount.is-in,
+  .pgc__badge.is-in {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .bb__discount.is-in::after,
+  .pgc__badge.is-in::after {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    inline-size: 40%;
+    inset-inline-start: -50%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+    animation: shine 900ms 260ms ease forwards;
+  }
+
+  @keyframes shine {
+    to { inset-inline-start: 130%; }
+  }
+}

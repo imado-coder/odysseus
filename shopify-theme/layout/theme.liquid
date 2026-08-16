@@ -54,5 +54,16 @@
       from a collection, and the same drawer opens.
     {%- endcomment -%}
     {% render 'cart-drawer' %}
+
+    {%- comment -%}
+      Toast target. theme.js has always had a toast() for add-to-cart, and the
+      element it looks for was never in any layout — so every confirmation it
+      tried to show went nowhere. Polite, not assertive: it reports something
+      the shopper just did rather than interrupting what they are reading.
+    {%- endcomment -%}
+    <div class="toast" data-toast data-open="false" role="status" aria-live="polite">
+      <span class="toast__icon" aria-hidden="true">{% render 'icon', name: 'badge-check' %}</span>
+      <span data-toast-text></span>
+    </div>
   </body>
 </html>

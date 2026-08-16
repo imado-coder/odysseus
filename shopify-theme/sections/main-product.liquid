@@ -138,8 +138,18 @@
                   </button>
                 </div>
 
+              {%- comment -%}
+                The saving is the argument, so the page makes it once in the
+                open: the figure starts at what the item was worth and falls
+                to today's price, and the struck price flinches as it lands.
+
+                The animation is opt-in per shop and it is additive — the
+                final price is what Liquid rendered, so with scripting off,
+                reduced motion on, or the setting unticked, the shopper sees
+                the correct price immediately and nothing else changes.
+              {%- endcomment -%}
               {%- when 'price' -%}
-                <div class="bb__price-row" {{ block.shopify_attributes }}>
+                <div class="bb__price-row" data-price-row {{ block.shopify_attributes }}>
                   {%- if on_sale and block.settings.show_compare -%}
                     <s class="bb__price-was">
                       <span class="visually-hidden">{{ 'products.product.regular_price' | t }} </span>{{ v.compare_at_price | money }}
@@ -148,7 +158,12 @@
                   <span class="bb__price-deal">
                     {%- if block.settings.icon != blank -%}<span aria-hidden="true">{{ block.settings.icon }}</span>{%- endif -%}
                     {%- if block.settings.label != blank -%}<span class="bb__price-label">{{ block.settings.label }}</span>{%- endif -%}
-                    <span class="bb__price-now">{{ v.price | money }}</span>
+                    <span class="bb__price-now"
+                          {%- if on_sale and block.settings.count_price %}
+                            data-price-count
+                            data-from="{{ v.compare_at_price | divided_by: 100.0 }}"
+                            data-to="{{ v.price | divided_by: 100.0 }}"
+                          {%- endif -%}>{{ v.price | money }}</span>
                   </span>
                 </div>
                 {%- comment -%}
@@ -161,7 +176,9 @@
                   <p class="bb__price-note">{{ block.settings.note }}</p>
                 {%- endif -%}
                 {%- if on_sale and block.settings.show_discount -%}
-                  <span class="bb__off bb__off--chip" style="{% if block.settings.off_bg != blank %}background: {{ block.settings.off_bg }};{% endif %}">
+                  <span class="bb__off bb__off--chip"
+                        {% if block.settings.count_price %}data-count-to="{{ off }}"{% endif %}
+                        style="{% if block.settings.off_bg != blank %}background: {{ block.settings.off_bg }};{% endif %}">
                     {{ block.settings.off_prefix }}{{ off }}{{ block.settings.off_suffix }}
                   </span>
                 {%- endif -%}
@@ -473,7 +490,7 @@
             -%}
 
             {%- if spec_k.size > 0 -%}
-              <section class="pdetails" {{ spec_block.shopify_attributes }}>
+              <section class="pdetails" data-reveal {{ spec_block.shopify_attributes }}>
                 <div class="pdetails__head">
                   <h2 class="pdetails__title">{{ spec_block.settings.title }}</h2>
                   {%- if spec_block.settings.action_label != blank -%}
@@ -521,7 +538,7 @@
           {%- endif -%}
 
           {%- if has_landing -%}
-            <section class="landing" aria-labelledby="Desc-{{ section.id }}">
+            <section class="landing" data-reveal aria-labelledby="Desc-{{ section.id }}">
               <h2 class="landing__title" id="Desc-{{ section.id }}">
                 {{ section.settings.description_title }}
               </h2>
@@ -649,11 +666,11 @@
             {%- endcapture -%}
 
             {%- if related_shown > 0 -%}
-              <section class="related" aria-labelledby="Rel-{{ section.id }}">
+              <section class="related" data-reveal aria-labelledby="Rel-{{ section.id }}">
                 <h2 class="related__title" id="Rel-{{ section.id }}">
                   {{ section.settings.related_title }}
                 </h2>
-                <div class="cgrid">{{ related_cards }}</div>
+                <div class="cgrid" data-reveal-stagger>{{ related_cards }}</div>
               </section>
             {%- endif -%}
           {%- endif -%}
@@ -664,7 +681,7 @@
             presented as verified by anyone but the merchant.
           {%- endcomment -%}
           {%- if review_blocks.size > 0 -%}
-            <section class="reviews" aria-labelledby="Rev-{{ section.id }}">
+            <section class="reviews" data-reveal aria-labelledby="Rev-{{ section.id }}">
               <div class="reviews__head">
                 <h2 class="landing__title" id="Rev-{{ section.id }}">
                   {{ section.settings.reviews_title | default: 'Avis clients' }}
@@ -1516,6 +1533,13 @@
           "type": "color",
           "id": "off_bg",
           "label": "Couleur du badge"
+        },
+        {
+          "type": "checkbox",
+          "id": "count_price",
+          "label": "Animer le prix à l'ouverture",
+          "info": "Le prix descend du prix barré au prix du jour, et la remise se compte avec lui. Ignoré si le visiteur a demandé moins d'animations.",
+          "default": true
         }
       ]
     },

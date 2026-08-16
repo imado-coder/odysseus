@@ -536,17 +536,31 @@
       { rootMargin: "0px 0px -8% 0px", threshold: 0.05 }
     );
 
-    document
-      .querySelectorAll("[data-reveal], [data-reveal-stagger]")
-      .forEach(function (el) { io.observe(el); });
+    var watched = document.querySelectorAll("[data-reveal], [data-reveal-stagger]");
+    watched.forEach(function (el) { io.observe(el); });
+
+    /* Safety net.
+
+       Hiding content and waiting for an observer to give it back is a bet,
+       and the cost of losing it is a blank section — worse than never having
+       animated at all. An element inside a container that never scrolls, one
+       whose ancestor is display:none at load, or a browser that throttles the
+       observer in a background tab, all end the same way.
+
+       So: anything still hidden after four seconds is shown regardless. The
+       animation is a nicety; the content is not. */
+    setTimeout(function () {
+      watched.forEach(function (el) {
+        if (!el.classList.contains("is-in")) {
+          el.classList.add("is-in");
+          io.unobserve(el);
+        }
+      });
+    }, 4000);
   }
 
   /* ----------------------------------------------------------------------
      Cart.
-     Held in localStorage so the basket survives a reload, which matters when
-     a customer is comparing products before ordering. In the theme the same
-     shape is fed by Shopify's /cart.js; the contract below is what the
-     drawer renders either way.
      ---------------------------------------------------------------------- */
   /* Shopify's cart is the cart.
 
@@ -712,8 +726,15 @@
          2 above a drawer saying 3 is the bug the shopper actually reports. */
       document.querySelectorAll("[data-cart-count], .mhead__cart-count, .cartbub__count")
         .forEach(function (el) {
+          /* Only react when the number actually moved. Re-rendering the
+             drawer for an unrelated reason must not make the header twitch. */
+          var changed = el.textContent !== String(CART.count);
           el.textContent = CART.count;
           el.hidden = CART.count === 0;
+          if (!changed || !CART.count) return;
+          var target = el.closest(".cartbub") || el;
+          target.dataset.bumped = "1";
+          setTimeout(function () { delete target.dataset.bumped; }, 460);
         });
 
       var bubble = document.querySelector(".cartbub");
@@ -843,6 +864,165 @@
 
 
   /* ----------------------------------------------------------------------
+     Confirmation celebration.
+
+     One burst, on the page that exists to say the order landed. Built from a
+     handful of absolutely positioned spans rather than a canvas: no library,
+     no render loop, and the browser drops the whole thing off the main thread
+     because each piece only animates transform and opacity.
+
+     Skipped entirely under reduced motion — a confirmation must never be the
+     page that makes someone feel unwell.
+     ---------------------------------------------------------------------- */
+  function initCelebrate(root) {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    var palette = ["--c-accent", "--c-trust", "--c-amber", "--c-sale"];
+    var cs = getComputedStyle(document.documentElement);
+    var colors = palette
+      .map(function (v) { return cs.getPropertyValue(v).trim(); })
+      .filter(Boolean);
+    if (!colors.length) colors = ["#ff6d00", "#0a8800", "#ffb020"];
+
+    var layer = document.createElement("div");
+    layer.className = "burst";
+    layer.setAttribute("aria-hidden", "true");
+
+    for (var i = 0; i < 28; i++) {
+      var bit = document.createElement("span");
+      bit.className = "burst__bit";
+      /* Spread across the width, thrown from just above the card's mark. */
+      bit.style.setProperty("--x", (Math.random() * 100).toFixed(2) + "%");
+      bit.style.setProperty("--dx", (Math.random() * 160 - 80).toFixed(0) + "px");
+      bit.style.setProperty("--dy", (Math.random() * 60 + 190).toFixed(0) + "px");
+      bit.style.setProperty("--rot", (Math.random() * 720 - 360).toFixed(0) + "deg");
+      bit.style.setProperty("--delay", (Math.random() * 260).toFixed(0) + "ms");
+      bit.style.setProperty("--dur", (900 + Math.random() * 700).toFixed(0) + "ms");
+      bit.style.background = colors[i % colors.length];
+      if (i % 3 === 0) bit.style.borderRadius = "50%";
+      layer.appendChild(bit);
+    }
+
+    root.appendChild(layer);
+    /* Remove rather than leave 28 elements parked on the page forever. */
+    setTimeout(function () { layer.remove(); }, 2200);
+  }
+
+  /* ----------------------------------------------------------------------
+     Price countdown.
+
+     The saving is the argument, so the page makes it once, in the open: the
+     figure starts at what the item was worth and falls to what it costs
+     today. A shopper who arrives mid-scroll has already missed it, so it
+     only runs when the price is actually on screen.
+
+     The final text is authoritative and is never rebuilt from scratch — the
+     shop's own money format decides where the symbol goes, whether the
+     separator is a space, a comma or a dot, and how many decimals there are.
+     This reads that formatting off the rendered string and refills only the
+     digits, so a shop in dinars, euros or rupees all animate correctly
+     without the theme knowing anything about currencies.
+     ---------------------------------------------------------------------- */
+  function initPriceCount(el) {
+    var from = parseFloat(el.dataset.from);
+    var to = parseFloat(el.dataset.to);
+    if (!isFinite(from) || !isFinite(to) || from <= to) return;
+
+    var finalText = el.textContent;
+    /* Digits with any grouping or decimal separator between them. */
+    var match = finalText.match(/[\d][\d\s.,\u00a0\u202f]*\d|\d/);
+    if (!match) return;
+
+    var numeric = match[0];
+    var prefix = finalText.slice(0, match.index);
+    var suffix = finalText.slice(match.index + numeric.length);
+
+    /* The last separator followed by one or two digits at the end is the
+       decimal mark; anything else in the run is grouping. */
+    var dec = numeric.match(/([.,])(\d{1,2})$/);
+    var decimals = dec ? dec[2].length : 0;
+    var decimalMark = dec ? dec[1] : ".";
+    var groupMark = (numeric.replace(/[\d]/g, "").replace(decimalMark, "") || " ")[0] || "";
+
+    function render(value) {
+      var fixed = value.toFixed(decimals);
+      var parts = fixed.split(".");
+      var whole = parts[0];
+      if (groupMark) whole = whole.replace(/\B(?=(\d{3})+(?!\d))/g, groupMark);
+      return prefix + whole + (decimals ? decimalMark + parts[1] : "") + suffix;
+    }
+
+    var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce || !("IntersectionObserver" in window)) return;
+
+    var ran = false;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting || ran) return;
+        ran = true;
+        io.disconnect();
+        run();
+      });
+    }, { threshold: 0.6 });
+    io.observe(el);
+
+    function run() {
+      var duration = Math.min(1400, Math.max(700, (from - to) * 0.35));
+      var start = 0;
+      el.dataset.counting = "true";
+
+      function frame(now) {
+        if (!start) start = now;
+        var t = Math.min(1, (now - start) / duration);
+        /* Ease out quart: most of the distance early, so the eye reads the
+           drop as decisive rather than as a slot machine winding down. */
+        var eased = 1 - Math.pow(1 - t, 4);
+        el.textContent = render(from + (to - from) * eased);
+        if (t < 1) return requestAnimationFrame(frame);
+
+        el.textContent = finalText;
+        delete el.dataset.counting;
+        /* The landing is the point of the whole effect: the row it lives in
+           reacts, so the saving registers as an event rather than a number
+           that quietly changed. */
+        var row = el.closest("[data-price-row]") || el.parentElement;
+        if (row) {
+          row.dataset.landed = "true";
+          setTimeout(function () { delete row.dataset.landed; }, 700);
+        }
+      }
+      requestAnimationFrame(frame);
+    }
+  }
+
+  /* Percentages count too, and land with the price they belong to. */
+  function initCountUp(el) {
+    var to = parseFloat(el.dataset.countTo);
+    if (!isFinite(to)) return;
+    var finalText = el.textContent;
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!("IntersectionObserver" in window)) return;
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        io.disconnect();
+        var start = 0;
+        var duration = 900;
+        (function frame(now) {
+          if (!start) start = now;
+          var t = Math.min(1, (now - start) / duration);
+          var eased = 1 - Math.pow(1 - t, 4);
+          el.textContent = finalText.replace(/\d+/, String(Math.round(to * eased)));
+          if (t < 1) requestAnimationFrame(frame);
+          else el.textContent = finalText;
+        })(performance.now());
+      });
+    }, { threshold: 0.6 });
+    io.observe(el);
+  }
+
+  /* ----------------------------------------------------------------------
      Order confirmation page.
 
      Reads the handover the COD form left in sessionStorage. Everything here
@@ -939,6 +1119,12 @@
       var next = Math.min(max, Math.max(min, now + by));
       if (next === now) return;
       input.value = String(next);
+      /* The digit rolls in from the direction it came: up for +, down for −.
+         It is a two-frame cue, but it is the difference between a number
+         that changed and a number the shopper changed. */
+      input.style.setProperty("--roll-from", by > 0 ? "8px" : "-8px");
+      input.dataset.rolled = "1";
+      setTimeout(function () { delete input.dataset.rolled; }, 280);
       input.dispatchEvent(new Event("change", { bubbles: true }));
     }
 
@@ -974,6 +1160,9 @@
     initAddToCart();
     document.querySelectorAll("[data-cart-drawer]").forEach(initCartDrawer);
     document.querySelectorAll("[data-ty]").forEach(initThanks);
+    document.querySelectorAll("[data-price-count]").forEach(initPriceCount);
+    document.querySelectorAll("[data-count-to]").forEach(initCountUp);
+    document.querySelectorAll("[data-celebrate]").forEach(initCelebrate);
   }
 
   if (document.readyState === "loading") {

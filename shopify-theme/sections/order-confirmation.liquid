@@ -17,7 +17,7 @@
 {{ 'thank-you.css' | asset_url | stylesheet_tag }}
 
 <div class="ty" data-ty>
-  <div class="ty__card">
+  <div class="ty__card" data-reveal data-celebrate>
     <span class="ty__mark" aria-hidden="true">{% render 'icon', name: 'check' %}</span>
 
     <h1 class="ty__title">{{ section.settings.title }}</h1>
@@ -34,7 +34,7 @@
 
     {%- assign step_blocks = section.blocks | where: 'type', 'step' -%}
     {%- if step_blocks.size > 0 -%}
-      <ol class="ty__steps">
+      <ol class="ty__steps" data-reveal-stagger>
         {%- for block in step_blocks -%}
           <li class="ty__step{% if block.settings.done %} ty__step--done{% endif %}"
               {{ block.shopify_attributes }}>

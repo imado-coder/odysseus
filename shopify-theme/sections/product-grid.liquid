@@ -33,7 +33,7 @@
       <h2 class="visually-hidden" id="Grid-{{ section.id }}">{{ 'products.facets.product_count_simple' | t: count: col.products_count }}</h2>
     {%- endif -%}
 
-    <div class="cgrid">
+    <div class="cgrid" data-reveal-stagger>
       {%- for product in col.products limit: section.settings.count -%}
         {% render 'product-card', card: product, index: forloop.index0 %}
       {%- endfor -%}
