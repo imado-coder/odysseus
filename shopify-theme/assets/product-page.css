@@ -1410,3 +1410,109 @@
     /* Purely a touch target — nothing is drawn. */
   }
 }
+
+/* ==========================================================================
+   Delivery promise rows
+
+   One row per promise: a flat icon, the headline as a green link, an optional
+   trailing note, and a chevron pinned right. Emoji were doing the icon job —
+   they carry the vendor's own colour, cannot be themed, and render
+   differently on every phone.
+   ========================================================================== */
+.trow { border-block-start: 1px solid var(--c-border, #e7eaec); padding-block: 11px; }
+.trow:first-child { border-block-start: 0; }
+.trow--flat { border-block-start: 0; padding-block-start: 0; }
+
+.trow__head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--c-trust, #067d3d);
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  text-decoration: none;
+}
+
+.trow__icon { flex: none; display: grid; place-items: center; color: var(--c-trust, #067d3d); }
+.trow__icon .icon { inline-size: 19px; block-size: 19px; }
+
+.trow__title { min-inline-size: 0; }
+
+/* The trailing note is context, not a promise: it stays quiet and gives way
+   before the headline does. */
+.trow__trail {
+  margin-inline-start: auto;
+  color: var(--c-ink-3, #6e7781);
+  font-size: 13px;
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trow__chev {
+  flex: none;
+  margin-inline-start: auto;
+  color: var(--c-ink-3, #6e7781);
+  display: grid;
+  place-items: center;
+}
+
+.trow__trail + .trow__chev { margin-inline-start: 4px; }
+.trow__chev .icon { inline-size: 15px; block-size: 15px; }
+
+.trow__sub {
+  display: block;
+  padding-block-start: 4px;
+  color: var(--c-ink-3, #6e7781);
+  font-size: 13px;
+}
+
+/* Carriers stay on one line and scroll; wrapping turned three couriers into
+   a two-line paragraph. */
+.carriers {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-block-start: 4px;
+}
+
+.carriers::-webkit-scrollbar { display: none; }
+.carriers__label { flex: none; color: var(--c-ink-3, #6e7781); font-size: 13px; }
+
+.carrier {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: var(--c-ink-2, #5b6570);
+  white-space: nowrap;
+}
+
+.carrier__logo { block-size: 18px; inline-size: auto; object-fit: contain; }
+
+.carrier__mark {
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: var(--c-bg, #f4f5f6);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .02em;
+  color: var(--c-ink, #101418);
+}
+
+.bb__pills {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-block-start: 8px;
+}
+
+.bb__pills::-webkit-scrollbar { display: none; }
+.bb__pill { flex: none; white-space: nowrap; }

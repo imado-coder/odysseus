@@ -255,42 +255,89 @@
                   </div>
                 {%- endif -%}
 
+              {%- comment -%}
+                Delivery promises.
+
+                Each promise is one row: a flat icon, the headline as a green
+                link, an optional trailing note, and a chevron on the far
+                right that says there is more behind it. Emoji were doing the
+                icon job before — they carry the vendor's own colour, cannot
+                be themed, and render differently on every phone.
+              {%- endcomment -%}
               {%- when 'shipping' -%}
-                <div class="bb__trust" {{ block.shopify_attributes }}>
+                <div class="trow" {{ block.shopify_attributes }}>
                   {%- if block.settings.title != blank -%}
-                    <span class="bb__ship-title">
-                      <span aria-hidden="true">{{ block.settings.icon }}</span> {{ block.settings.title }}
-                    </span>
+                    <a class="trow__head" href="{{ block.settings.url | default: '#' }}">
+                      <span class="trow__icon">{% render 'icon', name: block.settings.icon_name | default: 'truck' %}</span>
+                      <span class="trow__title">{{ block.settings.title }}</span>
+                      {%- if block.settings.trailing != blank -%}
+                        <span class="trow__trail">{{ block.settings.trailing }}</span>
+                      {%- endif -%}
+                      <span class="trow__chev" aria-hidden="true">{% render 'icon', name: 'chevron' %}</span>
+                    </a>
                   {%- endif -%}
                   {%- if block.settings.line != blank -%}
-                    <span class="bb__ship-line">{{ block.settings.line }}</span>
+                    <span class="trow__sub">{{ block.settings.line }}</span>
                   {%- endif -%}
                 </div>
 
               {%- when 'carriers' -%}
-                <div class="bb__carriers" {{ block.shopify_attributes }}>
-                  {%- if block.settings.label != blank -%}
-                    <span class="bb__ship-line">{{ block.settings.label }}</span>
-                  {%- endif -%}
-                  {%- assign names = block.settings.names | split: ',' -%}
-                  {%- for n in names -%}
-                    <span class="bb__carrier">
-                      <span class="bb__carrier-logo">{{ n | strip | slice: 0, 3 | upcase }}</span> {{ n | strip }}
-                    </span>
-                  {%- endfor -%}
+                <div class="trow trow--flat" {{ block.shopify_attributes }}>
+                  <span class="carriers">
+                    {%- if block.settings.label != blank -%}
+                      <span class="carriers__label">{{ block.settings.label }}</span>
+                    {%- endif -%}
+                    {%- assign names = block.settings.names | split: ',' -%}
+                    {%- for n in names -%}
+                      <span class="carrier">
+                        {%- liquid
+                          assign logo_key = 'logo_' | append: forloop.index
+                          assign logo = block.settings[logo_key]
+                          # A filtered value cannot be passed as a filter argument, so the
+                          # trimmed name is assigned before image_tag sees it.
+                          assign carrier_name = n | strip
+                        -%}
+                        {%- if logo != blank -%}
+                          {{ logo | image_url: height: 18 | image_tag: class: 'carrier__logo', alt: carrier_name, loading: 'lazy' }}
+                        {%- else -%}
+                          <span class="carrier__mark">{{ carrier_name | slice: 0, 3 | upcase }}</span>
+                        {%- endif -%}
+                        <span class="carrier__name">{{ carrier_name }}</span>
+                      </span>
+                    {%- endfor -%}
+                  </span>
                 </div>
 
               {%- when 'guarantees' -%}
-                <div class="bb__trust" {{ block.shopify_attributes }}>
+                <div {{ block.shopify_attributes }}>
                   {%- if block.settings.line_1 != blank -%}
-                    <span class="bb__trust-row"><span aria-hidden="true">{{ block.settings.icon_1 }}</span> {{ block.settings.line_1 }}</span>
+                    <div class="trow">
+                      <a class="trow__head" href="{{ block.settings.url_1 | default: '#' }}">
+                        <span class="trow__icon">{% render 'icon', name: block.settings.icon_name_1 | default: 'shield-check' %}</span>
+                        <span class="trow__title">{{ block.settings.line_1 }}</span>
+                        <span class="trow__chev" aria-hidden="true">{% render 'icon', name: 'chevron' %}</span>
+                      </a>
+                    </div>
                   {%- endif -%}
                   {%- if block.settings.line_2 != blank -%}
-                    <span class="bb__trust-row"><span aria-hidden="true">{{ block.settings.icon_2 }}</span> {{ block.settings.line_2 }}</span>
+                    <div class="trow">
+                      <a class="trow__head" href="{{ block.settings.url_2 | default: '#' }}">
+                        <span class="trow__icon">{% render 'icon', name: block.settings.icon_name_2 | default: 'refresh' %}</span>
+                        <span class="trow__title">{{ block.settings.line_2 }}</span>
+                        {%- if block.settings.trailing_2 != blank -%}
+                          <span class="trow__trail">{{ block.settings.trailing_2 }}</span>
+                        {%- endif -%}
+                        <span class="trow__chev" aria-hidden="true">{% render 'icon', name: 'chevron' %}</span>
+                      </a>
+                    </div>
                   {%- endif -%}
                 </div>
 
               {%- when 'pills' -%}
+                {%- comment -%}
+                  One row that scrolls, not a block that wraps. Wrapped rows
+                  make three short guarantees look like a paragraph of terms.
+                {%- endcomment -%}
                 <div class="bb__pills" {{ block.shopify_attributes }}>
                   {%- assign pills = block.settings.items | split: ',' -%}
                   {%- for p in pills -%}
@@ -1306,6 +1353,72 @@
           "id": "line",
           "label": "Détail",
           "default": "Livraison : 2 à 5 jours ouvrés"
+        },
+        {
+          "type": "select",
+          "id": "icon_name",
+          "label": "Icône",
+          "options": [
+            {
+              "value": "truck",
+              "label": "Camion"
+            },
+            {
+              "value": "box",
+              "label": "Colis"
+            },
+            {
+              "value": "shield",
+              "label": "Bouclier"
+            },
+            {
+              "value": "shield-check",
+              "label": "Bouclier validé"
+            },
+            {
+              "value": "cash",
+              "label": "Espèces"
+            },
+            {
+              "value": "card",
+              "label": "Carte"
+            },
+            {
+              "value": "lock",
+              "label": "Cadenas"
+            },
+            {
+              "value": "refresh",
+              "label": "Échange"
+            },
+            {
+              "value": "check",
+              "label": "Coche"
+            },
+            {
+              "value": "clock",
+              "label": "Horloge"
+            },
+            {
+              "value": "gift",
+              "label": "Cadeau"
+            },
+            {
+              "value": "headset",
+              "label": "Support"
+            }
+          ],
+          "default": "truck"
+        },
+        {
+          "type": "text",
+          "id": "trailing",
+          "label": "Note à droite"
+        },
+        {
+          "type": "url",
+          "id": "url",
+          "label": "Lien"
         }
       ]
     },
@@ -1326,6 +1439,35 @@
           "label": "Transporteurs",
           "default": "Yalidine, ZR Express, Algérie Poste",
           "info": "Séparez par des virgules."
+        },
+        {
+          "type": "header",
+          "content": "Logos des transporteurs"
+        },
+        {
+          "type": "image_picker",
+          "id": "logo_1",
+          "label": "Logo 1"
+        },
+        {
+          "type": "image_picker",
+          "id": "logo_2",
+          "label": "Logo 2"
+        },
+        {
+          "type": "image_picker",
+          "id": "logo_3",
+          "label": "Logo 3"
+        },
+        {
+          "type": "image_picker",
+          "id": "logo_4",
+          "label": "Logo 4"
+        },
+        {
+          "type": "image_picker",
+          "id": "logo_5",
+          "label": "Logo 5"
         }
       ]
     },
@@ -1357,6 +1499,133 @@
           "id": "line_2",
           "label": "Ligne 2",
           "default": "Garantie de commande"
+        },
+        {
+          "type": "select",
+          "id": "icon_name_1",
+          "label": "Icône 1",
+          "options": [
+            {
+              "value": "truck",
+              "label": "Camion"
+            },
+            {
+              "value": "box",
+              "label": "Colis"
+            },
+            {
+              "value": "shield",
+              "label": "Bouclier"
+            },
+            {
+              "value": "shield-check",
+              "label": "Bouclier validé"
+            },
+            {
+              "value": "cash",
+              "label": "Espèces"
+            },
+            {
+              "value": "card",
+              "label": "Carte"
+            },
+            {
+              "value": "lock",
+              "label": "Cadenas"
+            },
+            {
+              "value": "refresh",
+              "label": "Échange"
+            },
+            {
+              "value": "check",
+              "label": "Coche"
+            },
+            {
+              "value": "clock",
+              "label": "Horloge"
+            },
+            {
+              "value": "gift",
+              "label": "Cadeau"
+            },
+            {
+              "value": "headset",
+              "label": "Support"
+            }
+          ],
+          "default": "shield-check"
+        },
+        {
+          "type": "url",
+          "id": "url_1",
+          "label": "Lien 1"
+        },
+        {
+          "type": "select",
+          "id": "icon_name_2",
+          "label": "Icône 2",
+          "options": [
+            {
+              "value": "truck",
+              "label": "Camion"
+            },
+            {
+              "value": "box",
+              "label": "Colis"
+            },
+            {
+              "value": "shield",
+              "label": "Bouclier"
+            },
+            {
+              "value": "shield-check",
+              "label": "Bouclier validé"
+            },
+            {
+              "value": "cash",
+              "label": "Espèces"
+            },
+            {
+              "value": "card",
+              "label": "Carte"
+            },
+            {
+              "value": "lock",
+              "label": "Cadenas"
+            },
+            {
+              "value": "refresh",
+              "label": "Échange"
+            },
+            {
+              "value": "check",
+              "label": "Coche"
+            },
+            {
+              "value": "clock",
+              "label": "Horloge"
+            },
+            {
+              "value": "gift",
+              "label": "Cadeau"
+            },
+            {
+              "value": "headset",
+              "label": "Support"
+            }
+          ],
+          "default": "refresh"
+        },
+        {
+          "type": "text",
+          "id": "trailing_2",
+          "label": "Note à droite (ligne 2)"
+        },
+        {
+          "type": "url",
+          "id": "url_2",
+          "label": "Lien 2"
         }
       ]
     },
