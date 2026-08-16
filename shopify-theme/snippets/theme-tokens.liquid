@@ -12,9 +12,43 @@
   :root {
     {%- if settings.color_accent != blank %}
       --c-accent: {{ settings.color_accent }};
-      --c-accent-text: {{ settings.color_accent_text | default: settings.color_accent | color_darken: 18 }};
+      {%- comment -%}
+        Two statements, not one chain. `a | default: b | color_darken: 18`
+        darkens whatever default returned — including the merchant's own
+        colour when they set one — so a picked accent text came out 18%
+        darker than the swatch they chose, and the shipped default #c24e00
+        arrived on the page as #662900 brown. default picks; darken only
+        applies to the branch that is actually being derived.
+      {%- endcomment -%}
+      {%- if settings.color_accent_text != blank -%}
+        --c-accent-text: {{ settings.color_accent_text }};
+      {%- else -%}
+        --c-accent-text: {{ settings.color_accent | color_darken: 18 }};
+      {%- endif -%}
       --c-accent-dark: {{ settings.color_accent | color_darken: 8 }};
       --c-accent-light: {{ settings.color_accent | color_lighten: 42 }};
+      {%- comment -%}
+        Button shade.
+
+        White on a vivid orange is about 2.8:1 — it fails AA at every text
+        size, large included. The two ways this normally gets "solved" are
+        both wrong: ship the accent anyway and the order button is the least
+        readable thing on the page, or reach for the small-text shade and the
+        button turns brown and stops looking like the merchant's brand.
+
+        So it is measured instead of guessed. Darken the merchant's own
+        accent in small steps until white text clears 4.5:1, and stop there —
+        the result is the closest colour to what they picked that a shopper
+        in daylight can actually read. A merchant whose accent is already
+        dark enough gets their colour back untouched on the first pass.
+      {%- endcomment -%}
+      {%- assign btn = settings.color_accent -%}
+      {%- for i in (1..14) -%}
+        {%- assign ratio = btn | color_contrast: '#ffffff' -%}
+        {%- if ratio >= 4.5 -%}{%- break -%}{%- endif -%}
+        {%- assign btn = btn | color_darken: 4 -%}
+      {%- endfor -%}
+      --c-accent-btn: {{ btn }};
     {%- endif %}
     {%- if settings.color_brand != blank %}
       --c-brand: {{ settings.color_brand }};
@@ -26,6 +60,28 @@
       --c-sale-text: {{ settings.color_sale | color_darken: 14 }};
       --c-sale-dark: {{ settings.color_sale | color_darken: 8 }};
       --c-sale-light: {{ settings.color_sale | color_lighten: 40 }};
+    {%- endif %}
+    {%- comment -%}
+      Trust green. One setting drives every delivery promise, guarantee row,
+      solid mark and green badge in the theme — before this it was two
+      different greens hardcoded across nine stylesheets, so a merchant who
+      changed one still had the other showing up three blocks down.
+
+      The deep shade is for text sitting on the tint, where the badge green
+      itself is too light to read; the tint is the pale wash behind it.
+      Both are derived so the merchant picks one colour, not three.
+    {%- endcomment -%}
+    {%- if settings.color_trust != blank %}
+      --c-trust: {{ settings.color_trust }};
+      --c-trust-solid: {{ settings.color_trust }};
+      --c-trust-deep: {{ settings.color_trust | color_darken: 10 }};
+      {%- comment -%}
+        Mixing toward white, not lightening. color_lighten raises HSL
+        lightness and leaves saturation alone, so a fully saturated green
+        becomes a fully saturated mint — a highlighter, not a wash. Mixing
+        drops saturation with lightness the way a real tint does.
+      {%- endcomment -%}
+      --c-trust-tint: {{ settings.color_trust | color_mix: '#ffffff', 11 }};
     {%- endif %}
     {%- if settings.color_ink != blank %}--c-ink: {{ settings.color_ink }};{% endif %}
     {%- if settings.color_page_bg != blank %}--c-bg: {{ settings.color_page_bg }};{% endif %}

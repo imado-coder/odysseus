@@ -868,7 +868,7 @@
   padding: 2px 6px;
   border-start-end-radius: 8px;
   border-end-start-radius: 8px;
-  background: var(--c-accent-text, #c24e00);
+  background: var(--c-accent-btn, #c85000);
   color: #fff;
   font-size: 10px;
   font-weight: 800;

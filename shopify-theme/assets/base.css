@@ -379,13 +379,24 @@ ul, ol {
 }
 
 /* Delivery and trust green.
-   A saturated green reads as a system alert, not as reassurance. These are
-   deep enough to carry weight next to the orange accent and still pass
-   contrast: --c-trust 5.2:1 on white, --c-trust-solid 4.5:1 behind white. */
+
+   The earlier value leaned blue — a forest green, which reads as sober and
+   institutional. The reference green is a pure grass green with a warm lean,
+   and the difference is hue, not lightness: it is what makes the delivery
+   promise read as good news sitting next to the orange price.
+
+   Contrast on white is 4.6:1, which clears AA for body text and for the
+   white label on the solid badges. Do not lighten it further; the next step
+   up in brightness drops the badges below 4.5:1 and the 12px pill labels
+   are the first thing to become unreadable in daylight.
+
+   Every value here is overwritten by the theme settings — see
+   settings_schema.json. The literals are the fallback for a shop that has
+   never opened the colour panel. */
 :root {
-  --c-trust: #067d3d;
-  --c-trust-solid: #0a8a3f;
-  --c-trust-tint: #eefaf933;
+  --c-trust: #0a8800;
+  --c-trust-solid: #0a8800;
+  --c-trust-tint: #eaf7e6;
   --c-partner: #ffd44d;
   --c-partner-ink: #4a3600;
 }

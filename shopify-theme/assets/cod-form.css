@@ -352,7 +352,7 @@ textarea.field__control {
   margin-block-start: 12px;
   padding-inline: 20px;
   border-radius: 999px;
-  background: var(--c-accent-text, #c24e00);
+  background: var(--c-accent-btn, #c85000);
   color: #fff;
   font-size: 17px;
   font-weight: 800;
@@ -413,7 +413,7 @@ textarea.field__control {
 .cod__status[data-state="success"] {
   display: flex;
   background: #eaf6ee;
-  color: #0b5f2f;
+  color: var(--c-trust-deep, #076200);
 }
 
 /* --- mobile sheet ---------------------------------------------------------

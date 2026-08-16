@@ -6,9 +6,9 @@
    ========================================================================== */
 
 .bdg {
-  --bdg-fill: #0b7d14;
-  --bdg-ink: #0b7d14;
-  --bdg-tint: #e8f6e9;
+  --bdg-fill: var(--c-trust-solid, #0a8800);
+  --bdg-ink: var(--c-trust, #0a8800);
+  --bdg-tint: var(--c-trust-tint, #eaf7e6);
 
   display: inline-flex;
   align-items: center;
@@ -29,7 +29,7 @@
    A true green, not the teal-leaning forest green: the reference badges read
    as unmistakably "green", and a desaturated one looks like a mistake beside
    an orange price. */
-.bdg--green  { --bdg-fill: #0b7d14; --bdg-ink: #0a6a11; --bdg-tint: #e8f6e9; }
+.bdg--green  { --bdg-fill: var(--c-trust-solid, #0a8800); --bdg-ink: var(--c-trust-deep, #076200); --bdg-tint: var(--c-trust-tint, #eaf7e6); }
 .bdg--red    { --bdg-fill: #c9271c; --bdg-ink: #b32117; --bdg-tint: #fdeceb; }
 .bdg--orange { --bdg-fill: #c24e00; --bdg-ink: #a84400; --bdg-tint: #fff1e6; }
 .bdg--violet { --bdg-fill: #5b32bd; --bdg-ink: #4d2aa3; --bdg-tint: #efeafc; }

@@ -95,8 +95,8 @@
   transition: inline-size 320ms var(--ease, ease);
 }
 
-.freeship--done { background: #e8f6e9; color: #0a6a11; }
-.freeship--done .freeship__fill { background: #0b7d14; }
+.freeship--done { background: var(--c-trust-tint, #eaf7e6); color: var(--c-trust-deep, #076200); }
+.freeship--done .freeship__fill { background: var(--c-trust-solid, #0a8800); }
 
 /* --- line items --- */
 .citem {
@@ -223,7 +223,7 @@
   min-block-size: 54px;
   margin-block-start: 12px;
   border-radius: var(--r-pill, 999px);
-  background: var(--c-accent-text, #c24e00);
+  background: var(--c-accent-btn, #c85000);
   color: #fff;
   font-size: 16px;
   font-weight: 800;

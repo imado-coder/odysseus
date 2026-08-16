@@ -120,10 +120,22 @@
                   {%- endif -%}
                 </div>
 
+              {%- comment -%}
+                Rank. A bestseller claim the shopper cannot question is just
+                a sticker, so the whole row opens the sheet that says what the
+                ranking counts and over what period — the merchant writes it,
+                because only they know.
+              {%- endcomment -%}
               {%- when 'rank' -%}
                 <div class="bb__rank" {{ block.shopify_attributes }}>
-                  <span class="bb__rank-badge" style="{% if block.settings.badge_bg != blank %}background: {{ block.settings.badge_bg }};{% endif %}">{{ block.settings.badge }}</span>
-                  <span>{{ block.settings.text }}</span>
+                  <button class="bb__rank-head" type="button"
+                          data-sheet-open aria-controls="RankSheet-{{ block.id }}">
+                    <span class="bb__rank-badge" style="{% if block.settings.badge_bg != blank %}background: {{ block.settings.badge_bg }};{% endif %}">
+                      {% render 'icon', name: 'trophy' %}{{ block.settings.badge }}
+                    </span>
+                    <span class="bb__rank-text">{{ block.settings.text }}</span>
+                    <span class="bb__rank-chev" aria-hidden="true">{% render 'icon', name: 'chevron' %}</span>
+                  </button>
                 </div>
 
               {%- when 'price' -%}
@@ -168,9 +180,17 @@
                     <span class="bb__promo-name">{{ block.settings.name }}</span>
                     <span class="bb__promo-rule" aria-hidden="true"></span>
                     {%- if block.settings.deadline != blank -%}
+                      {%- comment -%}
+                        The label is wrapped so it can be the part that gives
+                        way. Left as a bare text node it wrapped to a second
+                        line and doubled the height of the whole panel — and
+                        the clock is the one thing in here that must never
+                        shrink or truncate.
+                      {%- endcomment -%}
                       <span class="bb__promo-timer" data-countdown="{{ block.settings.deadline }}">
-                        <span aria-hidden="true">&#9201;</span> {{ block.settings.timer_label }}
-                        <span data-countdown-out>--:--:--</span>
+                        <span class="bb__promo-clock" aria-hidden="true">{% render 'icon', name: 'clock-fill' %}</span>
+                        <span class="bb__promo-until">{{ block.settings.timer_label }}</span>
+                        <span class="bb__promo-out" data-countdown-out>--:--:--</span>
                       </span>
                     {%- endif -%}
                   </div>
@@ -455,6 +475,21 @@
                 <span class="reviews__count">{{ review_blocks.size }} {{ section.settings.reviews_count_label | default: 'avis' }}</span>
               </div>
 
+              {%- comment -%}
+                Provenance bar.
+
+                It is the merchant's own statement, not the theme's — these
+                reviews are blocks they typed, and nothing here verified them.
+                So it is a setting they fill in and can empty, with the schema
+                telling them to keep it only if it is true of their shop.
+              {%- endcomment -%}
+              {%- if section.settings.reviews_verified_text != blank -%}
+                <p class="reviews__verified">
+                  <span class="reviews__verified-mark">{% render 'icon', name: 'badge-check' %}</span>
+                  {{ section.settings.reviews_verified_text }}
+                </p>
+              {%- endif -%}
+
               {%- for block in review_blocks -%}
                 {%- assign rpct = block.settings.rating | times: 20 -%}
                 <article class="review" {{ block.shopify_attributes }}>
@@ -504,6 +539,39 @@
   {%- endcomment -%}
   {%- for block in section.blocks -%}
     {%- case block.type -%}
+
+      {%- when 'rank' -%}
+        {%- capture rank_content -%}
+          <ol class="tnum">
+            {%- for i in (1..3) -%}
+              {%- liquid
+                assign rtk = 'rank' | append: i | append: '_title'
+                assign rbk = 'rank' | append: i | append: '_body'
+                assign rt = block.settings[rtk]
+                assign rb = block.settings[rbk]
+              -%}
+              {%- if rt != blank -%}
+                <li class="tnum__item">
+                  <span class="tnum__n">{{ forloop.index }}</span>
+                  <div>
+                    <p class="tnum__title">{{ rt }}</p>
+                    {%- if rb != blank -%}<p class="tnum__body">{{ rb }}</p>{%- endif -%}
+                  </div>
+                </li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ol>
+        {%- endcapture -%}
+        {%- liquid
+          assign rank_sheet_id = 'RankSheet-' | append: block.id
+          assign rank_sheet_title = block.settings.sheet_title | default: block.settings.badge
+        -%}
+        {% render 'trust-sheet',
+           id: rank_sheet_id,
+           title: rank_sheet_title,
+           icon: 'trophy',
+           close_label: section.settings.close_label,
+           content: rank_content %}
 
       {%- when 'shipping' -%}
         {%- capture ship_content -%}
@@ -633,6 +701,33 @@
   {%- endfor -%}
 
 {%- comment -%} Mobile: the buy box is far up the page, so keep a bar in reach. {%- endcomment -%}
+{%- comment -%}
+  Floating cart.
+
+  The order bar below carries this product; the cart is a different job —
+  getting back to what is already chosen — and burying it in the bar makes
+  the two compete. It floats clear of both, above the bar and out of the
+  thumb's path to it, and carries the merchant's delivery line so the reason
+  to open it is on the bubble itself.
+
+  Empty cart, no bubble: a floating zero is a floating dead end.
+{%- endcomment -%}
+{%- if section.settings.show_cart_bubble and cart.item_count > 0 -%}
+  <a class="cartbub" href="{{ routes.cart_url }}" data-cart-open
+     aria-label="{{ 'sections.header.cart_count' | t: count: cart.item_count }}">
+    <span class="cartbub__disc">
+      {% render 'icon', name: 'cart' %}
+      {%- if section.settings.cart_bubble_label != blank -%}
+        <span class="cartbub__label">{{ section.settings.cart_bubble_label }}</span>
+      {%- endif -%}
+      <span class="cartbub__count" aria-hidden="true">{{ cart.item_count }}</span>
+    </span>
+    {%- if section.settings.cart_bubble_note != blank -%}
+      <span class="cartbub__note">{{ section.settings.cart_bubble_note }}</span>
+    {%- endif -%}
+  </a>
+{%- endif -%}
+
 {%- if section.settings.show_mobile_bar -%}
   <div class="pdp__mobile-cta">
     <span class="pdp__mobile-price">
@@ -756,6 +851,26 @@
       "default": true
     },
     {
+      "type": "checkbox",
+      "id": "show_cart_bubble",
+      "label": "Afficher la bulle panier flottante",
+      "info": "N'apparaît que si le panier contient au moins un article.",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "cart_bubble_label",
+      "label": "Bulle panier — libellé",
+      "default": "Panier"
+    },
+    {
+      "type": "text",
+      "id": "cart_bubble_note",
+      "label": "Bulle panier — note",
+      "info": "Petite pastille sous la bulle. Laissez vide pour la masquer.",
+      "default": "Livraison gratuite"
+    },
+    {
       "type": "text",
       "id": "mobile_cta_label",
       "label": "Texte du bouton mobile",
@@ -776,6 +891,13 @@
       "id": "reviews_title",
       "label": "Titre de la section avis",
       "default": "Avis clients"
+    },
+    {
+      "type": "text",
+      "id": "reviews_verified_text",
+      "label": "Bandeau de provenance des avis",
+      "info": "Affiché au-dessus des avis. Ce sont VOS avis, saisis par vous : ne gardez cette phrase que si elle est vraie dans votre boutique, sinon videz le champ.",
+      "default": "Tous les avis proviennent d'achats vérifiés"
     },
     {
       "type": "text",
@@ -903,6 +1025,56 @@
           "id": "text",
           "label": "Texte à côté",
           "default": "dans sa catégorie"
+        },
+        {
+          "type": "header",
+          "content": "Détails (fiche)"
+        },
+        {
+          "type": "paragraph",
+          "content": "Le classement s'ouvre en fiche quand on tape la ligne. Expliquez ce qu'il compte : un chiffre sans explication n'est qu'un autocollant."
+        },
+        {
+          "type": "text",
+          "id": "sheet_title",
+          "label": "Titre de la fiche",
+          "default": "Classement des ventes"
+        },
+        {
+          "type": "text",
+          "id": "rank1_title",
+          "label": "Point 1 — titre",
+          "default": "Ce que compte le classement"
+        },
+        {
+          "type": "textarea",
+          "id": "rank1_body",
+          "label": "Point 1 — texte",
+          "default": "Le rang est établi sur les commandes livrées et payées des 30 derniers jours, dans cette catégorie uniquement."
+        },
+        {
+          "type": "text",
+          "id": "rank2_title",
+          "label": "Point 2 — titre",
+          "default": "Mise à jour"
+        },
+        {
+          "type": "textarea",
+          "id": "rank2_body",
+          "label": "Point 2 — texte",
+          "default": "Le classement est recalculé chaque semaine. Il peut donc changer entre le moment où vous le voyez et celui où vous commandez."
+        },
+        {
+          "type": "text",
+          "id": "rank3_title",
+          "label": "Point 3 — titre",
+          "default": "Paiement à la livraison"
+        },
+        {
+          "type": "textarea",
+          "id": "rank3_body",
+          "label": "Point 3 — texte",
+          "default": "Quel que soit le classement, vous ne payez qu'à la remise du colis, après l'avoir vérifié."
         }
       ]
     },

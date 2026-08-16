@@ -205,7 +205,7 @@
   background: var(--c-peach, #fff3ec);
   font-size: 14px;
   font-weight: 600;
-  color: #0b7d14;
+  color: var(--c-trust, #0a8800);
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -531,7 +531,7 @@
   gap: 2px;
   padding: 8px 4px 6px;
   border-radius: 16px;
-  background: #0b7d14;
+  background: var(--c-trust-solid, #0a8800);
   color: #fff;
   text-align: center;
   box-shadow: 0 6px 18px rgba(11, 125, 20, 0.34);
@@ -768,7 +768,7 @@ html:not(.js) .bb__title-more { grid-template-rows: 1fr; }
     font-weight: 600;
   }
 
-  .bb__savings-item:first-child { padding-inline-start: 0; color: var(--c-trust, #067d3d); }
+  .bb__savings-item:first-child { padding-inline-start: 0; color: var(--c-trust, #0a8800); }
 
   .bb__savings-item + .bb__savings-item {
     border-inline-start: 1px solid color-mix(in srgb, var(--c-ink-3, #6e7781) 35%, transparent);
@@ -1030,7 +1030,7 @@ html:not(.js) .bb__title-more { grid-template-rows: 1fr; }
   border-block-end: 1px solid var(--c-border, #e7eaec);
 }
 
-.tsheet__icon { display: grid; place-items: center; color: var(--c-trust, #067d3d); }
+.tsheet__icon { display: grid; place-items: center; color: var(--c-trust, #0a8800); }
 .tsheet__icon .icon { inline-size: 21px; block-size: 21px; }
 
 .tsheet__title {
@@ -1110,7 +1110,7 @@ html:not(.js) .bb__title-more { grid-template-rows: 1fr; }
   inline-size: 1.1em;
   block-size: 1.1em;
   margin-block-start: 2px;
-  color: var(--c-trust, #067d3d);
+  color: var(--c-trust, #0a8800);
 }
 
 /* --- numbered terms --- */
@@ -1132,7 +1132,7 @@ html:not(.js) .bb__title-more { grid-template-rows: 1fr; }
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: var(--c-trust-solid, #0a8a3f);
+  background: var(--c-trust-solid, #0a8800);
   color: #fff;
   font-size: 12px;
   font-weight: 800;
@@ -1180,4 +1180,86 @@ html:not(.js) .bb__title-more { grid-template-rows: 1fr; }
 
   /* Above the order bar and the tab bar alike. */
   .tsheet { z-index: 90; }
+}
+
+/* ==========================================================================
+   Floating cart bubble
+   Phones only: on desktop the header cart is always in view, so a floating
+   copy of it is just something covering the page.
+   ========================================================================== */
+@media (max-width: 749px) {
+  .cartbub {
+    position: fixed;
+    /* Clear of the order bar, not on top of it. The bar is ~72px including
+       the safe area, and the gap keeps the two from reading as one control. */
+    inset-block-end: calc(88px + env(safe-area-inset-bottom));
+    inset-inline-end: 12px;
+    z-index: 70;
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    text-decoration: none;
+    /* Under the sheets (z 90), which must be able to cover it. */
+  }
+
+  .cartbub__disc {
+    position: relative;
+    inline-size: 62px;
+    block-size: 62px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    gap: 1px;
+    background: #fff;
+    border: 2px solid var(--c-trust-solid, #0a8800);
+    color: var(--c-trust-deep, #076200);
+    box-shadow: 0 3px 12px rgba(16, 20, 24, 0.16);
+  }
+
+  .cartbub__disc .icon { inline-size: 20px; block-size: 20px; }
+
+  .cartbub__label {
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  /* The count is the only part that must survive at a glance, so it sits
+     outside the disc rather than competing with the label inside it. */
+  .cartbub__count {
+    position: absolute;
+    inset-block-start: -4px;
+    inset-inline-end: -4px;
+    min-inline-size: 20px;
+    block-size: 20px;
+    padding-inline: 5px;
+    border-radius: 999px;
+    background: var(--c-sale, #ff4438);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+    display: grid;
+    place-items: center;
+  }
+
+  .cartbub__note {
+    max-inline-size: 92px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--c-trust-solid, #0a8800);
+    color: #fff;
+    font-size: 10.5px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-align: center;
+  }
+
+  /* While the order sheet is open the bubble is behind it but still casts a
+     shadow onto the scrim, which reads as a rendering fault. */
+  body:has(.tsheet[data-open="true"]) .cartbub,
+  body:has(.cod-sheet[data-open="true"]) .cartbub { display: none; }
+}
+
+@media (min-width: 750px) {
+  .cartbub { display: none; }
 }

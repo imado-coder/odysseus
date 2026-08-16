@@ -291,17 +291,53 @@
   color: var(--c-ink, #101418);
 }
 
+/* The whole row opens the sheet, so the whole row is the target — 44px, and
+   the chevron pinned to the far edge the way the promise rows do it. */
+.bb__rank-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  inline-size: 100%;
+  min-block-size: 44px;
+  text-align: start;
+  color: inherit;
+  font: inherit;
+}
+
 .bb__rank-badge {
+  flex: none;
   display: inline-flex;
   align-items: center;
-  padding: 3px 7px;
+  gap: 4px;
+  padding: 4px 8px;
   border-radius: 3px;
-  background: #0b7d14;
+  background: var(--c-trust-solid, #0a8800);
   color: #fff;
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 700;
   white-space: nowrap;
 }
+
+.bb__rank-badge .icon { inline-size: 14px; block-size: 14px; }
+
+/* The category is the part that can be any length, so it is the part that
+   gives way — the rank itself never truncates. */
+.bb__rank-text {
+  min-inline-size: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bb__rank-chev {
+  flex: none;
+  margin-inline-start: auto;
+  display: grid;
+  place-items: center;
+  color: var(--c-ink-3, #6e7781);
+}
+
+.bb__rank-chev .icon { inline-size: 15px; block-size: 15px; }
 
 /* --- price --- */
 .bb__price-row {
@@ -362,7 +398,7 @@
   align-items: center;
   padding: 3px 8px;
   border-radius: 3px;
-  background: #0b7d14;
+  background: var(--c-trust-solid, #0a8800);
   color: #fff;
   font-size: 13px;
   font-weight: 800;
@@ -389,24 +425,32 @@
   overflow: hidden;
 }
 
+/* One line, whatever the merchant types and however narrow the phone.
+   The three parts do not compete for space equally: the promo name and the
+   clock are fixed, the decorative rule collapses first, and the "ends in"
+   label truncates last. The countdown itself never gives an inch — a promo
+   panel that hides the time it ends is the one thing this block must not do. */
 .bb__promo-head {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
+  gap: 8px;
+  padding: 8px 10px;
   background: var(--c-accent, #ff6d00);
   color: #fff;
-  font-size: 13px;
-}
-
-.bb__promo-name {
-  font-weight: 800;
-  font-style: italic;
+  font-size: 12.5px;
   white-space: nowrap;
 }
 
+.bb__promo-name {
+  flex: none;
+  font-weight: 800;
+  font-style: italic;
+}
+
 .bb__promo-rule {
-  inline-size: 34px;
+  /* Shrinks to nothing before anything with words in it does. */
+  flex: 0 1 30px;
+  min-inline-size: 0;
   block-size: 3px;
   border-radius: 2px;
   background: rgba(255, 255, 255, 0.65);
@@ -415,12 +459,33 @@
 .bb__promo-timer {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
+  min-inline-size: 0;
+  margin-inline-start: auto;
   font-weight: 700;
   /* Time runs left-to-right even on an RTL storefront. */
   direction: ltr;
   unicode-bidi: isolate;
   font-variant-numeric: tabular-nums;
+}
+
+.bb__promo-clock { flex: none; display: grid; place-items: center; }
+.bb__promo-clock .icon { inline-size: 13px; block-size: 13px; }
+
+.bb__promo-until {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+}
+
+.bb__promo-out { flex: none; }
+
+/* Under about 340px of usable width the label cannot truncate to anything
+   readable, so it goes entirely rather than becoming a single letter and an
+   ellipsis. The clock icon still says what the number is. */
+@media (max-width: 374px) {
+  .bb__promo-until { display: none; }
 }
 
 .bb__promo-more {
@@ -490,10 +555,16 @@
   min-block-size: 56px;
   padding-inline: 24px;
   border-radius: 999px;
-  background: var(--c-accent-text, #c24e00);
+  /* The measured button shade, not the raw accent and not the small-text
+     shade. The raw accent fails contrast at every size; the text shade is
+     ground down for 12px type on white and turned this into a brown slab.
+     See theme-tokens.liquid — the shade is derived from the merchant's own
+     accent and stops at the first step that clears 4.5:1. */
+  background: var(--c-accent-btn, #c85000);
   color: #fff;
-  font-size: 17px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
   transition: filter 120ms ease, transform 120ms ease;
 }
 
@@ -527,7 +598,7 @@
 }
 
 .bb__trust-row--ship {
-  color: #0b7d14;
+  color: var(--c-trust, #0a8800);
   font-weight: 700;
 }
 
@@ -562,7 +633,7 @@
   flex: none;
   padding: 5px 10px;
   border-radius: 4px;
-  background: #0b7d14;
+  background: var(--c-trust-solid, #0a8800);
   color: #fff;
   font-size: 12px;
   font-weight: 600;
@@ -606,18 +677,36 @@
   letter-spacing: 1px;
 }
 
+/* A bar, not a chip tucked at the end of the heading row. The claim is about
+   every review under it, so it spans the same width they do — and the solid
+   mark sits in its own filled square, which is what separates it from the
+   green pills elsewhere on the page. */
 .reviews__verified {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 6px;
-  margin-inline-start: auto;
-  padding: 5px 9px;
+  gap: 10px;
+  margin-block: 10px 14px;
+  padding: 0 12px 0 0;
   border-radius: 4px;
-  background: #eaf6ee;
-  color: #0b5f2f;
-  font-size: 13px;
+  overflow: hidden;
+  background: var(--c-trust-tint, #eaf7e6);
+  color: var(--c-trust-deep, #076200);
+  font-size: 13.5px;
   font-weight: 600;
+  line-height: 1.35;
 }
+
+.reviews__verified-mark {
+  flex: none;
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  padding-inline: 9px;
+  background: var(--c-trust-solid, #0a8800);
+  color: #fff;
+}
+
+.reviews__verified-mark .icon { inline-size: 17px; block-size: 17px; }
 
 /* fit meters */
 .reviews__fit {
@@ -829,10 +918,13 @@
   color: var(--c-ink-3, #6e7781);
 }
 
+/* The bar shares its width with the price, so the label here is smaller than
+   the in-page CTA — which is exactly why the shade has to carry the contrast
+   rather than the type size. */
 .pdp__mobile-cta .bb__cta {
   flex: 1;
   min-block-size: 46px;
-  font-size: 15px;
+  font-size: 15.5px;
 }
 
 @media (max-width: 989px) {
@@ -953,7 +1045,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #0b7d14;
+  color: var(--c-trust, #0a8800);
   font-size: 14px;
   font-weight: 700;
 }
@@ -1017,7 +1109,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #0b7d14;
+  color: var(--c-trust, #0a8800);
   font-size: 14px;
   font-weight: 700;
 }
@@ -1100,7 +1192,7 @@
   color: var(--c-ink, #101418);
 }
 
-.deliv__line .icon { color: #0b7d14; }
+.deliv__line .icon { color: var(--c-trust, #0a8800); }
 
 .deliv__pills {
   display: flex;
@@ -1111,7 +1203,7 @@
 .deliv__pill {
   padding: 4px 9px;
   border-radius: 4px;
-  background: #0b7d14;
+  background: var(--c-trust-solid, #0a8800);
   color: #fff;
   font-size: 11px;
   font-weight: 600;
@@ -1129,7 +1221,7 @@
   min-block-size: 56px;
   padding-inline: 20px;
   border-radius: var(--r-pill, 999px);
-  background: var(--c-accent-text, #c24e00);
+  background: var(--c-accent-btn, #c85000);
   color: #fff;
   font-size: 17px;
   font-weight: 800;
@@ -1309,7 +1401,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--c-trust, #067d3d);
+  color: var(--c-trust, #0a8800);
   font-size: 14.5px;
   font-weight: 700;
   letter-spacing: -0.005em;
@@ -1338,7 +1430,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--c-trust, #067d3d);
+  color: var(--c-trust, #0a8800);
   font-size: 14.5px;
   font-weight: 700;
 }
@@ -1389,7 +1481,7 @@
 .bb__pill {
   padding: 4px 10px;
   border-radius: 6px;
-  background: var(--c-trust-solid, #0a8a3f);
+  background: var(--c-trust-solid, #0a8800);
   color: #fff;
   font-size: 12px;
   font-weight: 600;
@@ -1450,7 +1542,7 @@
   gap: 9px;
   /* These became links in this change, so they became touch targets too. */
   min-block-size: 44px;
-  color: var(--c-trust, #067d3d);
+  color: var(--c-trust, #0a8800);
   font-size: 14.5px;
   font-weight: 700;
   letter-spacing: -0.005em;
@@ -1461,7 +1553,7 @@
   text-align: start;
 }
 
-.trow__icon { flex: none; display: grid; place-items: center; color: var(--c-trust, #067d3d); }
+.trow__icon { flex: none; display: grid; place-items: center; color: var(--c-trust, #0a8800); }
 .trow__icon .icon { inline-size: 19px; block-size: 19px; }
 
 /* One line, always. A promise that wraps to two turns a 44px row into 88px

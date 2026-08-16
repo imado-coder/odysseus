@@ -71,6 +71,13 @@
       },
       {
         "type": "color",
+        "id": "color_trust",
+        "label": "Vert de confiance (livraison, garanties, badges)",
+        "info": "Utilisé par toutes les promesses de livraison, les garanties, les icônes pleines et les badges verts. Les nuances claire et foncée en sont déduites automatiquement.",
+        "default": "#0a8800"
+      },
+      {
+        "type": "color",
         "id": "color_sale",
         "label": "Promotion (soldes, urgence)",
         "default": "#ff4438"
