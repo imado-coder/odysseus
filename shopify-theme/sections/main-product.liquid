@@ -265,11 +265,12 @@
                 be themed, and render differently on every phone.
               {%- endcomment -%}
               {%- when 'shipping' -%}
+                {%- assign ship_row_icon = block.settings.icon_name | default: 'truck-fast' -%}
                 <div class="trow" {{ block.shopify_attributes }}>
                   {%- if block.settings.title != blank -%}
                     <button class="trow__head" type="button"
                             data-sheet-open aria-controls="ShipSheet-{{ block.id }}">
-                      <span class="trow__icon">{% render 'icon', name: block.settings.icon_name | default: 'truck-fast' %}</span>
+                      <span class="trow__icon">{% render 'icon', name: ship_row_icon %}</span>
                       <span class="trow__title">{{ block.settings.title }}</span>
                       {%- if block.settings.trailing != blank -%}
                         <span class="trow__trail">{{ block.settings.trailing }}</span>
@@ -310,12 +311,16 @@
                 </div>
 
               {%- when 'guarantees' -%}
+                {%- liquid
+                  assign sec_row_icon = block.settings.icon_name_1 | default: 'shield-fill'
+                  assign guar_row_icon = block.settings.icon_name_2 | default: 'guarantee'
+                -%}
                 <div {{ block.shopify_attributes }}>
                   {%- if block.settings.line_1 != blank -%}
                     <div class="trow">
                       <button class="trow__head" type="button"
                               data-sheet-open aria-controls="SecSheet-{{ block.id }}">
-                        <span class="trow__icon">{% render 'icon', name: block.settings.icon_name_1 | default: 'shield-fill' %}</span>
+                        <span class="trow__icon">{% render 'icon', name: sec_row_icon %}</span>
                         <span class="trow__title">{{ block.settings.line_1 }}</span>
                         <span class="trow__chev" aria-hidden="true">{% render 'icon', name: 'chevron' %}</span>
                       </button>
@@ -325,7 +330,7 @@
                     <div class="trow">
                       <button class="trow__head" type="button"
                               data-sheet-open aria-controls="GuarSheet-{{ block.id }}">
-                        <span class="trow__icon">{% render 'icon', name: block.settings.icon_name_2 | default: 'guarantee' %}</span>
+                        <span class="trow__icon">{% render 'icon', name: guar_row_icon %}</span>
                         <span class="trow__title">{{ block.settings.line_2 }}</span>
                         {%- if block.settings.trailing_2 != blank -%}
                           <span class="trow__trail">{{ block.settings.trailing_2 }}</span>
@@ -537,11 +542,18 @@
             </p>
           {%- endif -%}
         {%- endcapture -%}
-        {%- assign ship_sheet_id = 'ShipSheet-' | append: block.id -%}
+        {%- liquid
+          # render arguments are plain values, not expressions: a filter here is
+          # a parse error and the whole sheet silently never renders. Resolve the
+          # fallbacks first, pass finished values.
+          assign ship_sheet_id = 'ShipSheet-' | append: block.id
+          assign ship_title = block.settings.sheet_title | default: block.settings.title
+          assign ship_icon = block.settings.icon_name | default: 'truck-fast'
+        -%}
         {% render 'trust-sheet',
            id: ship_sheet_id,
-           title: block.settings.sheet_title | default: block.settings.title,
-           icon: block.settings.icon_name | default: 'truck-fast',
+           title: ship_title,
+           icon: ship_icon,
            close_label: section.settings.close_label,
            content: ship_content %}
 
@@ -567,11 +579,14 @@
             {%- endfor -%}
           </ol>
         {%- endcapture -%}
-        {%- assign sec_sheet_id = 'SecSheet-' | append: block.id -%}
+        {%- liquid
+          assign sec_sheet_id = 'SecSheet-' | append: block.id
+          assign sec_icon = block.settings.icon_name_1 | default: 'shield-fill'
+        -%}
         {% render 'trust-sheet',
            id: sec_sheet_id,
            title: block.settings.line_1,
-           icon: block.settings.icon_name_1 | default: 'shield-fill',
+           icon: sec_icon,
            close_label: section.settings.close_label,
            content: sec_content %}
 
@@ -596,11 +611,14 @@
             {%- endfor -%}
           </ol>
         {%- endcapture -%}
-        {%- assign guar_sheet_id = 'GuarSheet-' | append: block.id -%}
+        {%- liquid
+          assign guar_sheet_id = 'GuarSheet-' | append: block.id
+          assign guar_icon = block.settings.icon_name_2 | default: 'guarantee'
+        -%}
         {% render 'trust-sheet',
            id: guar_sheet_id,
            title: block.settings.line_2,
-           icon: block.settings.icon_name_2 | default: 'guarantee',
+           icon: guar_icon,
            close_label: section.settings.close_label,
            content: guar_content %}
 
@@ -1485,8 +1503,36 @@
           "label": "Icône",
           "options": [
             {
+              "value": "truck-fast",
+              "label": "Camion (plein)"
+            },
+            {
+              "value": "shield-fill",
+              "label": "Bouclier validé (plein)"
+            },
+            {
+              "value": "guarantee",
+              "label": "Garantie (plein)"
+            },
+            {
+              "value": "badge-check",
+              "label": "Pastille validée (plein)"
+            },
+            {
+              "value": "cash-fill",
+              "label": "Espèces (plein)"
+            },
+            {
+              "value": "clock-fill",
+              "label": "Horloge (plein)"
+            },
+            {
+              "value": "box-fill",
+              "label": "Colis (plein)"
+            },
+            {
               "value": "truck",
-              "label": "Camion"
+              "label": "Camion (trait)"
             },
             {
               "value": "box",
@@ -1533,7 +1579,7 @@
               "label": "Support"
             }
           ],
-          "default": "truck"
+          "default": "truck-fast"
         },
         {
           "type": "text",
@@ -1655,21 +1701,9 @@
       "settings": [
         {
           "type": "text",
-          "id": "icon_1",
-          "label": "Icône 1",
-          "default": "💵"
-        },
-        {
-          "type": "text",
           "id": "line_1",
           "label": "Ligne 1",
           "default": "Paiement à la livraison — payez après vérification"
-        },
-        {
-          "type": "text",
-          "id": "icon_2",
-          "label": "Icône 2",
-          "default": "🛡"
         },
         {
           "type": "text",
@@ -1683,8 +1717,36 @@
           "label": "Icône 1",
           "options": [
             {
+              "value": "truck-fast",
+              "label": "Camion (plein)"
+            },
+            {
+              "value": "shield-fill",
+              "label": "Bouclier validé (plein)"
+            },
+            {
+              "value": "guarantee",
+              "label": "Garantie (plein)"
+            },
+            {
+              "value": "badge-check",
+              "label": "Pastille validée (plein)"
+            },
+            {
+              "value": "cash-fill",
+              "label": "Espèces (plein)"
+            },
+            {
+              "value": "clock-fill",
+              "label": "Horloge (plein)"
+            },
+            {
+              "value": "box-fill",
+              "label": "Colis (plein)"
+            },
+            {
               "value": "truck",
-              "label": "Camion"
+              "label": "Camion (trait)"
             },
             {
               "value": "box",
@@ -1731,7 +1793,7 @@
               "label": "Support"
             }
           ],
-          "default": "shield-check"
+          "default": "shield-fill"
         },
         {
           "type": "url",
@@ -1744,8 +1806,36 @@
           "label": "Icône 2",
           "options": [
             {
+              "value": "truck-fast",
+              "label": "Camion (plein)"
+            },
+            {
+              "value": "shield-fill",
+              "label": "Bouclier validé (plein)"
+            },
+            {
+              "value": "guarantee",
+              "label": "Garantie (plein)"
+            },
+            {
+              "value": "badge-check",
+              "label": "Pastille validée (plein)"
+            },
+            {
+              "value": "cash-fill",
+              "label": "Espèces (plein)"
+            },
+            {
+              "value": "clock-fill",
+              "label": "Horloge (plein)"
+            },
+            {
+              "value": "box-fill",
+              "label": "Colis (plein)"
+            },
+            {
               "value": "truck",
-              "label": "Camion"
+              "label": "Camion (trait)"
             },
             {
               "value": "box",
@@ -1792,7 +1882,7 @@
               "label": "Support"
             }
           ],
-          "default": "refresh"
+          "default": "guarantee"
         },
         {
           "type": "text",

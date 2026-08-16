@@ -367,6 +367,17 @@ ul, ol {
 .icon--sm { inline-size: 1em; block-size: 1em; }
 .icon--fill { fill: currentColor; stroke: none; }
 
+/* Solid marks. Filled area reads heavier than the same glyph in hairline, so
+   these are drawn a touch smaller to sit at the same optical weight as the
+   text beside them, and they must never inherit a stroke — a stroke on a
+   filled shape thickens it unevenly and closes the knocked-out check. */
+.icon--solid {
+  fill: currentColor;
+  stroke: none;
+  inline-size: 1.15em;
+  block-size: 1.15em;
+}
+
 /* Delivery and trust green.
    A saturated green reads as a system alert, not as reassurance. These are
    deep enough to carry weight next to the orange accent and still pass
