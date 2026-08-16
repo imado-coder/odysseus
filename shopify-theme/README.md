@@ -97,8 +97,13 @@ librement : `Personnaliser → Produit → Informations produit`.
 | Garanties | Deux lignes, chacune avec sa fiche |
 | Pastilles | Retour, échange, remboursement |
 | **Formulaire COD** | Le formulaire de commande |
+| Détails du produit | Tableau de caractéristiques + fiche complète |
 | Avis | Un bloc par avis |
 | Média | Images de la page d'atterrissage |
+
+Sous les blocs viennent, dans l'ordre : les détails, la page d'atterrissage
+(vos images et vidéos, ou celles du produit si vous n'en avez ajouté aucune),
+les produits similaires, puis les avis.
 
 ### Les fiches détaillées
 
@@ -108,6 +113,27 @@ ne peut pas inventer vos délais ni vos conditions de retour à votre place.
 
 Les textes livrés par défaut sont des exemples cohérents avec le paiement à la
 livraison. Relisez-les et corrigez-les pour votre boutique avant d'ouvrir.
+
+### La page de confirmation
+
+Après une commande, l'acheteur doit atterrir quelque part : rien n'a été payé,
+donc rien ne semble réglé. Le thème fournit cette page, mais elle demande une
+manipulation de votre part, une seule fois :
+
+1. `Boutique en ligne → Pages → Ajouter une page`, titre « Merci ».
+2. Dans **Modèle de page**, choisissez `page.merci`.
+3. Enregistrez, puis copiez l'adresse de la page.
+4. `Personnaliser → Paramètres du thème → Paiement à la livraison → Page de
+   confirmation` : collez l'adresse.
+
+Sans cette adresse, le formulaire affiche simplement un message de réussite
+sous les champs — rien n'est cassé, mais l'acheteur reste sur la fiche produit.
+
+Le récapitulatif (référence, nom, téléphone, total) transite par la session du
+navigateur, pas par l'adresse de la page : une référence et un montant dans une
+URL finissent dans l'historique, dans les statistiques, et dans ce que l'acheteur
+recopie à un proche. Il s'efface dès qu'il est affiché, pour qu'un rechargement
+ne rejoue pas une commande déjà traitée.
 
 ### Le bandeau des avis
 

@@ -1,7 +1,52 @@
 {
   "sections": {
-    "pills":     { "type": "category-pills", "settings": {} },
-    "recommend": { "type": "product-grid", "settings": { "title": "Recommandé pour vous", "count": 20 } }
+    "pills": {
+      "type": "category-pills",
+      "settings": {}
+    },
+    "recommend": {
+      "type": "product-grid",
+      "settings": {
+        "title": "Recommandé pour vous",
+        "count": 20
+      }
+    },
+    "hero": {
+      "type": "hero-welcome",
+      "blocks": {
+        "p1": {
+          "type": "proof",
+          "settings": {
+            "icon": "cash-fill",
+            "text": "Paiement à la livraison"
+          }
+        },
+        "p2": {
+          "type": "proof",
+          "settings": {
+            "icon": "truck-fast",
+            "text": "58 wilayas livrées"
+          }
+        },
+        "p3": {
+          "type": "proof",
+          "settings": {
+            "icon": "guarantee",
+            "text": "Retour sous 7 jours"
+          }
+        }
+      },
+      "block_order": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "settings": {}
+    }
   },
-  "order": ["pills", "recommend"]
+  "order": [
+    "hero",
+    "pills",
+    "recommend"
+  ]
 }

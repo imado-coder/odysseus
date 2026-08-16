@@ -321,6 +321,27 @@
         new CustomEvent("cod:submit", { bubbles: true, detail: payload })
       );
 
+      /* Hand the confirmation page what it needs to show, via sessionStorage
+         rather than the URL. A reference and a total in a querystring end up
+         in history, in any analytics that records paths, and in whatever the
+         shopper pastes to a friend. sessionStorage dies with the tab, which
+         is exactly the lifetime this data should have. */
+      function handOver(reference) {
+        var place = [payload.commune, payload.wilaya].filter(Boolean).join(", ");
+        try {
+          sessionStorage.setItem("souq:lastOrder", JSON.stringify({
+            ref: reference || "",
+            name: [payload.prenom, payload.nom].filter(Boolean).join(" "),
+            phone: payload.telephone || "",
+            place: place,
+            total: out.total ? out.total.textContent : "",
+          }));
+        } catch (e) { /* private mode: the page falls back to its static copy */ }
+        var to = form.dataset.thanksUrl;
+        if (to) window.location.assign(to);
+        return !!to;
+      }
+
       if (!endpoint) {
         submit.removeAttribute("aria-busy");
         status.dataset.state = "success";
@@ -337,12 +358,18 @@
       })
         .then(function (r) {
           if (!r.ok) throw new Error(r.status);
+          return r.json().catch(function () { return {}; });
+        })
+        .then(function (data) {
           status.dataset.state = "success";
           status.textContent =
             form.dataset.msgSuccess || "Commande enregistrée. Nous vous appelons bientôt.";
+          /* Reset before leaving: a back button lands on a clean form rather
+             than one still holding the order that was just placed. */
           form.reset();
           fillCommunes();
           recalc();
+          handOver(data && (data.reference || data.ref || data.orderName));
         })
         .catch(function () {
           status.dataset.state = "error";
@@ -815,6 +842,48 @@
   }
 
 
+  /* ----------------------------------------------------------------------
+     Order confirmation page.
+
+     Reads the handover the COD form left in sessionStorage. Everything here
+     is additive: the page renders its full message, steps and buttons from
+     Liquid, and this only fills in the summary that is specific to the order
+     just placed. A shopper who opens the page directly, or who has scripting
+     off, sees the page without a summary rather than a summary of nothing.
+     ---------------------------------------------------------------------- */
+  function initThanks(root) {
+    var data;
+    try { data = JSON.parse(sessionStorage.getItem("souq:lastOrder") || "null"); }
+    catch (e) { data = null; }
+    if (!data) return;
+
+    function put(sel, value) {
+      var el = root.querySelector(sel);
+      if (el && value) el.textContent = value;
+      return !!value;
+    }
+
+    var any = false;
+    any = put("[data-ty-name]", data.name) || any;
+    any = put("[data-ty-phone]", data.phone) || any;
+    any = put("[data-ty-place]", data.place) || any;
+    any = put("[data-ty-total]", data.total) || any;
+
+    var summary = root.querySelector("[data-ty-summary]");
+    if (summary && any) summary.hidden = false;
+
+    if (data.ref) {
+      var ref = root.querySelector("[data-ty-ref]");
+      var refVal = root.querySelector("[data-ty-ref-value]");
+      if (refVal) refVal.textContent = data.ref;
+      if (ref) ref.hidden = false;
+    }
+
+    /* One order, one confirmation. Without this a reload — or a later visit
+       to the page from the menu — replays an order that is already handled. */
+    try { sessionStorage.removeItem("souq:lastOrder"); } catch (e) {}
+  }
+
   /* Countdown on a promo panel.
      The deadline is a merchant-typed local datetime ("2026-12-31 23:59"),
      which Safari refuses to parse in that form — so it is parsed by hand.
@@ -904,6 +973,7 @@
     initReveal();
     initAddToCart();
     document.querySelectorAll("[data-cart-drawer]").forEach(initCartDrawer);
+    document.querySelectorAll("[data-ty]").forEach(initThanks);
   }
 
   if (document.readyState === "loading") {

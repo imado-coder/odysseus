@@ -151,3 +151,45 @@
 @media (min-width: 750px) {
   .hero-w { padding: 64px 24px 52px; }
 }
+
+/* Optional background photograph.
+
+   It sits BEHIND the gradient rather than replacing it, because a headline
+   over an unknown photo is a headline you cannot promise is readable — the
+   merchant uploads whatever they have, and white-on-white is the failure
+   mode. The gradient keeps its own contrast and the photo adds depth. */
+.hero-w__bg {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  z-index: -1;
+}
+
+.hero-w--image { isolation: isolate; }
+
+.hero-w--image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(160deg,
+    color-mix(in srgb, var(--c-brand-dark, #00614f) 88%, transparent) 0%,
+    color-mix(in srgb, var(--c-brand, #00806a) 76%, transparent) 100%);
+}
+
+/* The proof strip is a list; it must not read as one to a screen reader
+   listening for prose, and it must not carry bullets. */
+.hero-w__proof { list-style: none; margin: 0; padding: 0; }
+
+.hero-w__proof-item .icon { flex: none; inline-size: 18px; block-size: 18px; }
+
+/* color-mix is recent enough that a miss would leave the panel transparent
+   and the white text on the page background. These are the flat fallbacks;
+   browsers that understand the rules above simply override them. */
+@supports not (background: color-mix(in srgb, red 50%, blue)) {
+  .hero-w { background: linear-gradient(160deg, var(--c-brand-dark, #00614f), var(--c-brand, #00806a)); }
+  .hero-w__proof-item { background: rgba(0, 0, 0, 0.22); }
+  .hero-w--image::after { background: linear-gradient(160deg, rgba(0, 40, 32, 0.88), rgba(0, 80, 66, 0.76)); }
+}

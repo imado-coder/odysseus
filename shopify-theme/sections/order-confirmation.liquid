@@ -1,0 +1,239 @@
+{%- comment -%}
+  Order confirmation.
+
+  The moment after a cash-on-delivery order is where doubt creeps in: nothing
+  was paid, so nothing feels settled. This page says the order exists, that a
+  human will call, and roughly when.
+
+  Shopify's own order-status page cannot be themed outside Plus, and a COD
+  lead never reaches checkout anyway — so the form hands over here. What it
+  hands over is written to sessionStorage rather than to the URL: an order
+  reference and a total in a querystring end up in browser history, in any
+  analytics that records paths, and in whatever the shopper pastes to a
+  friend. Only the summary is filled in by script; the page itself reads and
+  works with JavaScript off.
+{%- endcomment -%}
+
+{{ 'thank-you.css' | asset_url | stylesheet_tag }}
+
+<div class="ty" data-ty>
+  <div class="ty__card">
+    <span class="ty__mark" aria-hidden="true">{% render 'icon', name: 'check' %}</span>
+
+    <h1 class="ty__title">{{ section.settings.title }}</h1>
+
+    {%- if section.settings.lede != blank -%}
+      <p class="ty__lede">{{ section.settings.lede }}</p>
+    {%- endif -%}
+
+    {%- comment -%} Hidden until a reference is actually known. {%- endcomment -%}
+    <p class="ty__ref" data-ty-ref hidden>
+      {% render 'icon', name: 'box-fill' %}
+      <span>{{ section.settings.ref_label }} <b data-ty-ref-value></b></span>
+    </p>
+
+    {%- assign step_blocks = section.blocks | where: 'type', 'step' -%}
+    {%- if step_blocks.size > 0 -%}
+      <ol class="ty__steps">
+        {%- for block in step_blocks -%}
+          <li class="ty__step{% if block.settings.done %} ty__step--done{% endif %}"
+              {{ block.shopify_attributes }}>
+            <span class="ty__step-dot" aria-hidden="true">
+              {% render 'icon', name: block.settings.icon %}
+            </span>
+            <span>
+              <span class="ty__step-title">{{ block.settings.title }}</span>
+              {%- if block.settings.text != blank -%}
+                <span class="ty__step-text">{{ block.settings.text }}</span>
+              {%- endif -%}
+            </span>
+          </li>
+        {%- endfor -%}
+      </ol>
+    {%- endif -%}
+
+    {%- comment -%}
+      Summary. Empty in the markup and filled from the handover; a shopper who
+      arrives here directly sees the page without a summary rather than a
+      summary of nothing.
+    {%- endcomment -%}
+    <dl class="ty__summary" data-ty-summary hidden>
+      <div class="ty__line">
+        <dt>{{ section.settings.label_name }}</dt>
+        <dd data-ty-name></dd>
+      </div>
+      <div class="ty__line">
+        <dt>{{ section.settings.label_phone }}</dt>
+        <dd data-ty-phone></dd>
+      </div>
+      <div class="ty__line">
+        <dt>{{ section.settings.label_place }}</dt>
+        <dd data-ty-place></dd>
+      </div>
+      <div class="ty__line ty__line--total">
+        <dt>{{ section.settings.label_total }}</dt>
+        <dd data-ty-total></dd>
+      </div>
+    </dl>
+
+    {%- if section.settings.pay_note != blank -%}
+      <p class="ty__paynote">
+        {% render 'icon', name: 'cash-fill' %}
+        {{ section.settings.pay_note }}
+      </p>
+    {%- endif -%}
+
+    <div class="ty__actions">
+      <a class="ty__btn ty__btn--primary"
+         href="{{ section.settings.cta_url | default: routes.all_products_collection_url }}">
+        {{ section.settings.cta_label }}
+      </a>
+      {%- if section.settings.cta2_label != blank and settings.social_whatsapp != blank -%}
+        <a class="ty__btn ty__btn--ghost" href="{{ settings.social_whatsapp }}">
+          {% render 'icon', name: 'headset' %}
+          {{ section.settings.cta2_label }}
+        </a>
+      {%- endif -%}
+    </div>
+
+    {%- if section.settings.help != blank -%}
+      <p class="ty__help">{{ section.settings.help }}</p>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Confirmation de commande",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Créez une page (par exemple « merci »), assignez-lui ce modèle, puis indiquez son adresse dans le bloc « Formulaire COD » de la page produit."
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Titre",
+      "default": "Commande enregistrée"
+    },
+    {
+      "type": "textarea",
+      "id": "lede",
+      "label": "Texte d'introduction",
+      "default": "Merci. Nous vous appelons pour confirmer avant l'expédition. Vous ne payez rien avant de recevoir le colis."
+    },
+    {
+      "type": "text",
+      "id": "ref_label",
+      "label": "Intitulé de la référence",
+      "default": "Référence :"
+    },
+    {
+      "type": "header",
+      "content": "Récapitulatif"
+    },
+    { "type": "text", "id": "label_name", "label": "Intitulé — nom", "default": "Destinataire" },
+    { "type": "text", "id": "label_phone", "label": "Intitulé — téléphone", "default": "Téléphone" },
+    { "type": "text", "id": "label_place", "label": "Intitulé — adresse", "default": "Livraison" },
+    { "type": "text", "id": "label_total", "label": "Intitulé — total", "default": "À payer à la réception" },
+    {
+      "type": "text",
+      "id": "pay_note",
+      "label": "Rappel de paiement",
+      "default": "Aucun paiement en ligne. Vous payez le livreur, en espèces, après avoir vérifié le colis."
+    },
+    {
+      "type": "header",
+      "content": "Actions"
+    },
+    { "type": "text", "id": "cta_label", "label": "Bouton principal", "default": "Continuer mes achats" },
+    { "type": "url", "id": "cta_url", "label": "Lien du bouton principal" },
+    {
+      "type": "text",
+      "id": "cta2_label",
+      "label": "Bouton WhatsApp",
+      "info": "Affiché seulement si un lien WhatsApp est renseigné dans les réglages du thème.",
+      "default": "Nous écrire"
+    },
+    {
+      "type": "text",
+      "id": "help",
+      "label": "Note d'aide",
+      "default": "Un doute sur votre commande ? Appelez-nous, nous répondons du samedi au jeudi."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "step",
+      "name": "Étape",
+      "limit": 5,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "done",
+          "label": "Étape déjà franchie",
+          "info": "Affichée en vert plutôt qu'en orange.",
+          "default": false
+        },
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icône",
+          "options": [
+            { "value": "check", "label": "Coche" },
+            { "value": "headset", "label": "Appel" },
+            { "value": "box-fill", "label": "Colis" },
+            { "value": "truck-fast", "label": "Camion" },
+            { "value": "cash-fill", "label": "Espèces" },
+            { "value": "clock-fill", "label": "Horloge" }
+          ],
+          "default": "check"
+        },
+        { "type": "text", "id": "title", "label": "Titre", "default": "Commande reçue" },
+        { "type": "textarea", "id": "text", "label": "Texte" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Confirmation de commande",
+      "blocks": [
+        {
+          "type": "step",
+          "settings": {
+            "done": true,
+            "icon": "check",
+            "title": "Commande reçue",
+            "text": "Votre demande est enregistrée chez nous."
+          }
+        },
+        {
+          "type": "step",
+          "settings": {
+            "icon": "headset",
+            "title": "Appel de confirmation",
+            "text": "Nous vous appelons pour vérifier l'adresse et la quantité. Gardez votre téléphone à portée."
+          }
+        },
+        {
+          "type": "step",
+          "settings": {
+            "icon": "truck-fast",
+            "title": "Expédition",
+            "text": "Le colis part vers votre wilaya dès la confirmation."
+          }
+        },
+        {
+          "type": "step",
+          "settings": {
+            "icon": "cash-fill",
+            "title": "Paiement à la réception",
+            "text": "Vous vérifiez le colis, puis vous payez le livreur en espèces."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

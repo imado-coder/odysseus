@@ -1005,22 +1005,53 @@
   </a>
 {%- endif -%}
 
+{%- comment -%}
+  Mobile order bar, two shapes for the same job.
+
+  "bar" is a full-width strip pinned to the bottom edge; "pill" floats clear
+  of it and carries a second line under the label, which is where the offer
+  goes — "-45% aujourd'hui" converts harder than "Commander". Neither is
+  better in the abstract: a bar looks more like a checkout and a pill looks
+  more like an offer, and the merchant knows which their shop is.
+{%- endcomment -%}
 {%- if section.settings.show_mobile_bar -%}
-  <div class="pdp__mobile-cta">
-    <span class="pdp__mobile-price">
-      <b>{{ v.price | money }}</b>
-      {%- if on_sale -%}<s>{{ v.compare_at_price | money }}</s>{%- endif -%}
-    </span>
-    {%- if cod_block_count > 0 -%}
-      <button class="bb__cta" type="button" data-sheet-open aria-controls="CodSheet-{{ section.id }}">
-        {{ section.settings.mobile_cta_label }}
-      </button>
-    {%- else -%}
-      <button class="bb__cta" type="submit" form="AddToCart-{{ section.id }}">
-        {{ section.settings.mobile_cta_label }}
-      </button>
-    {%- endif -%}
-  </div>
+  {%- if section.settings.mobile_bar_style == 'pill' -%}
+    <div class="order-float" data-order-bar>
+      <span class="order-float__price">
+        <b class="order-float__now">{{ v.price | money }}</b>
+        {%- if on_sale -%}<s class="order-float__was">{{ v.compare_at_price | money }}</s>{%- endif -%}
+      </span>
+      {%- capture float_inner -%}
+        <span class="order-float__main">{{ section.settings.mobile_cta_label }}</span>
+        {%- if section.settings.mobile_cta_sub != blank -%}
+          <span class="order-float__sub">{{ section.settings.mobile_cta_sub }}</span>
+        {%- endif -%}
+      {%- endcapture -%}
+      {%- if cod_block_count > 0 -%}
+        <button class="order-float__btn" type="button"
+                data-sheet-open aria-controls="CodSheet-{{ section.id }}">{{ float_inner }}</button>
+      {%- else -%}
+        <button class="order-float__btn" type="submit"
+                form="AddToCart-{{ section.id }}">{{ float_inner }}</button>
+      {%- endif -%}
+    </div>
+  {%- else -%}
+    <div class="pdp__mobile-cta">
+      <span class="pdp__mobile-price">
+        <b>{{ v.price | money }}</b>
+        {%- if on_sale -%}<s>{{ v.compare_at_price | money }}</s>{%- endif -%}
+      </span>
+      {%- if cod_block_count > 0 -%}
+        <button class="bb__cta" type="button" data-sheet-open aria-controls="CodSheet-{{ section.id }}">
+          {{ section.settings.mobile_cta_label }}
+        </button>
+      {%- else -%}
+        <button class="bb__cta" type="submit" form="AddToCart-{{ section.id }}">
+          {{ section.settings.mobile_cta_label }}
+        </button>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
 
   {%- for block in section.blocks -%}
     {%- if block.type == 'cod_form' -%}
@@ -1148,6 +1179,29 @@
       "id": "show_mobile_bar",
       "label": "Afficher la barre d'achat sur mobile",
       "default": true
+    },
+    {
+      "type": "select",
+      "id": "mobile_bar_style",
+      "label": "Style de la barre d'achat",
+      "options": [
+        {
+          "value": "bar",
+          "label": "Barre pleine largeur"
+        },
+        {
+          "value": "pill",
+          "label": "Bulle flottante"
+        }
+      ],
+      "default": "bar"
+    },
+    {
+      "type": "text",
+      "id": "mobile_cta_sub",
+      "label": "Seconde ligne (bulle flottante)",
+      "info": "Affichée sous le libellé quand le style « bulle » est choisi.",
+      "default": "Payez à la réception"
     },
     {
       "type": "checkbox",

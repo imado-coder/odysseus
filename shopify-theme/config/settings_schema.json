@@ -293,6 +293,12 @@
         "info": "Laissez vide tant que l'application n'est pas connectée : le formulaire valide les champs sans envoyer."
       },
       {
+        "type": "url",
+        "id": "cod_thanks_url",
+        "label": "Page de confirmation",
+        "info": "Créez une page avec le modèle « Confirmation de commande » et indiquez-la ici. Laissez vide pour afficher simplement un message sous le formulaire."
+      },
+      {
         "type": "textarea",
         "id": "cod_tariffs",
         "label": "Tarifs de livraison par wilaya",

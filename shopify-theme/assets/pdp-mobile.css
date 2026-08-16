@@ -538,8 +538,7 @@
    -------------------------------------------------------------------------- */
 .bb__swatches,
 .bb__pills,
-.deliv__carriers,
-.ship-strip,
+.carriers,
 .sizes {
   max-inline-size: 100%;
   min-inline-size: 0;
@@ -1140,7 +1139,18 @@ html:not(.js) .bb__title-more { grid-template-rows: 1fr; }
 
      On a product page the order bar owns the bottom — which is also what the
      reference does; its product page carries no tab bar at all. */
-  body:has(.pdp__mobile-cta) .tabbar { display: none; }
+  /* Either shape of the order bar owns the bottom of the screen; the tab bar
+     would sit under it and the page would end behind both. The pill needs
+     more clearance than the bar because it floats above the edge. */
+  body:has(.pdp__mobile-cta) .tabbar,
+  body:has(.order-float) .tabbar { display: none; }
+
+  body:has(.order-float) { padding-block-end: calc(90px + env(safe-area-inset-bottom)); }
+
+  /* The floating cart sits above whichever one is on screen. */
+  body:has(.order-float) .cartbub {
+    inset-block-end: calc(96px + env(safe-area-inset-bottom));
+  }
 
   /* With the tab bar gone, the page's bottom padding has to come from the
      order bar instead, or the last row hides under it. */

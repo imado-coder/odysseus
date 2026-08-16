@@ -98,6 +98,7 @@
       data-tariffs='{{ tariffs }}'
       data-tariff-fallback='{{ tariff_fallback }}'
       {% if settings.cod_endpoint != blank %}data-endpoint="{{ settings.cod_endpoint }}"{% endif %}
+      {% if settings.cod_thanks_url != blank %}data-thanks-url="{{ settings.cod_thanks_url }}"{% endif %}
       data-msg-invalid="{{ f_msg_invalid | escape }}"
       data-msg-success="{{ f_msg_success | escape }}"
       data-msg-fail="{{ f_msg_fail | escape }}"

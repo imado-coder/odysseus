@@ -1,0 +1,216 @@
+{%- comment -%}
+  Storefront welcome.
+
+  The first screen answers three questions in order: whose shop is this, what
+  does it promise, and where do I start. Built on the merchant's own brand
+  colour rather than an uploaded banner, so a shop with no photographer still
+  gets a first screen that looks deliberate — and one that never ships a
+  400KB image to a phone on 3G.
+
+  A background image is optional and sits behind the gradient, not instead of
+  it: text on an unknown photograph is text you cannot guarantee is readable.
+{%- endcomment -%}
+
+{{ 'hero.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign has_image = false
+  if section.settings.image != blank
+    assign has_image = true
+  endif
+-%}
+
+<section class="hero-w{% if has_image %} hero-w--image{% endif %}"
+         {% if section.settings.brand_color != blank %}style="--c-brand: {{ section.settings.brand_color }};"{% endif %}>
+
+  {%- if has_image -%}
+    {{ section.settings.image
+       | image_url: width: 1600
+       | image_tag:
+           class: 'hero-w__bg',
+           widths: '600,900,1200,1600',
+           sizes: '100vw',
+           alt: '',
+           loading: 'eager',
+           fetchpriority: 'high' }}
+  {%- endif -%}
+
+  <div class="hero-w__inner">
+    {%- if section.settings.eyebrow != blank -%}
+      <span class="hero-w__eyebrow">
+        {%- if section.settings.eyebrow_icon != blank -%}
+          {% render 'icon', name: section.settings.eyebrow_icon %}
+        {%- endif -%}
+        {{ section.settings.eyebrow }}
+      </span>
+    {%- endif -%}
+
+    {%- if section.settings.title != blank -%}
+      {%- comment -%}
+        The highlight is written by the merchant as <em> in the rich text
+        field, which the stylesheet paints amber. One emphasis per headline —
+        two is no emphasis.
+      {%- endcomment -%}
+      <h1 class="hero-w__title">{{ section.settings.title }}</h1>
+    {%- endif -%}
+
+    {%- if section.settings.lede != blank -%}
+      <p class="hero-w__lede">{{ section.settings.lede }}</p>
+    {%- endif -%}
+
+    {%- if section.settings.cta_label != blank or section.settings.cta2_label != blank -%}
+      <div class="hero-w__actions">
+        {%- if section.settings.cta_label != blank -%}
+          <a class="hero-w__cta" href="{{ section.settings.cta_url | default: routes.all_products_collection_url }}">
+            {{ section.settings.cta_label }}
+            {% render 'icon', name: 'chevron' %}
+          </a>
+        {%- endif -%}
+        {%- if section.settings.cta2_label != blank -%}
+          <a class="hero-w__cta hero-w__cta--ghost" href="{{ section.settings.cta2_url | default: routes.all_products_collection_url }}">
+            {{ section.settings.cta2_label }}
+          </a>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- comment -%}
+      Proof strip. Three promises, because these are the ones that decide a
+      cash-on-delivery purchase: that you pay on receipt, that it reaches your
+      wilaya, and that you can send it back.
+    {%- endcomment -%}
+    {%- assign proof_blocks = section.blocks | where: 'type', 'proof' -%}
+    {%- if proof_blocks.size > 0 -%}
+      <ul class="hero-w__proof">
+        {%- for block in proof_blocks limit: 3 -%}
+          <li class="hero-w__proof-item" {{ block.shopify_attributes }}>
+            {%- if block.settings.icon != blank -%}
+              {% render 'icon', name: block.settings.icon %}
+            {%- endif -%}
+            {{ block.settings.text }}
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Bannière d'accueil",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Surtitre",
+      "default": "PAIEMENT À LA LIVRAISON"
+    },
+    {
+      "type": "select",
+      "id": "eyebrow_icon",
+      "label": "Icône du surtitre",
+      "options": [
+        { "value": "", "label": "Aucune" },
+        { "value": "truck-fast", "label": "Camion" },
+        { "value": "shield-fill", "label": "Bouclier" },
+        { "value": "badge-check", "label": "Pastille validée" },
+        { "value": "cash-fill", "label": "Espèces" },
+        { "value": "flame", "label": "Flamme" }
+      ],
+      "default": "cash-fill"
+    },
+    {
+      "type": "richtext",
+      "id": "title",
+      "label": "Titre",
+      "info": "Mettez un mot en italique pour le faire ressortir en doré.",
+      "default": "<p>Commandez aujourd'hui, <em>payez à la réception</em></p>"
+    },
+    {
+      "type": "text",
+      "id": "lede",
+      "label": "Sous-titre",
+      "default": "Livraison dans les 58 wilayas. Vous vérifiez le colis avant de payer, sans avance et sans carte bancaire."
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Bouton principal",
+      "default": "Découvrir la boutique"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "Lien du bouton principal"
+    },
+    {
+      "type": "text",
+      "id": "cta2_label",
+      "label": "Bouton secondaire"
+    },
+    {
+      "type": "url",
+      "id": "cta2_url",
+      "label": "Lien du bouton secondaire"
+    },
+    {
+      "type": "header",
+      "content": "Apparence"
+    },
+    {
+      "type": "color",
+      "id": "brand_color",
+      "label": "Couleur de la bannière",
+      "info": "Laissez vide pour utiliser la couleur de marque du thème."
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image de fond",
+      "info": "Facultative. Elle passe derrière le dégradé afin que le texte reste lisible quelle que soit la photo."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "proof",
+      "name": "Promesse",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icône",
+          "options": [
+            { "value": "cash-fill", "label": "Espèces" },
+            { "value": "truck-fast", "label": "Camion" },
+            { "value": "shield-fill", "label": "Bouclier" },
+            { "value": "guarantee", "label": "Garantie" },
+            { "value": "badge-check", "label": "Pastille validée" },
+            { "value": "clock-fill", "label": "Horloge" },
+            { "value": "box-fill", "label": "Colis" },
+            { "value": "headset", "label": "Support" }
+          ],
+          "default": "cash-fill"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Texte",
+          "default": "Paiement à la livraison"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Bannière d'accueil",
+      "blocks": [
+        { "type": "proof", "settings": { "icon": "cash-fill", "text": "Paiement à la livraison" } },
+        { "type": "proof", "settings": { "icon": "truck-fast", "text": "58 wilayas livrées" } },
+        { "type": "proof", "settings": { "icon": "guarantee", "text": "Retour sous 7 jours" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1124,116 +1124,12 @@
 /* ==========================================================================
    Delivery block — carriers with merchant-uploaded logos
    ========================================================================== */
-.deliv {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  font-size: 13px;
-}
-
-.deliv__title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--c-trust, #0a8800);
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.deliv__row {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 4px 8px;
-  color: var(--c-ink-2, #5b6570);
-}
-
-.deliv__row b { color: var(--c-ink, #101418); font-weight: 600; }
-
-.deliv__carriers {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px 14px;
-}
-
-.deliv__carrier {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--c-ink, #101418);
-}
-
-/* Logos keep their own aspect ratio and cap at a shared height so a tall
-   upload cannot push the row around. */
-.deliv__logo {
-  block-size: 18px;
-  inline-size: auto;
-  max-inline-size: 72px;
-  object-fit: contain;
-}
-
-.deliv__logo--text {
-  display: inline-grid;
-  place-items: center;
-  min-inline-size: 38px;
-  padding-inline: 5px;
-  border-radius: 3px;
-  background: var(--c-bg, #f4f5f6);
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-}
-
-/* Partner strip: two-tone chip, merchant name on the left */
-.deliv__partner {
-  display: inline-flex;
-  align-self: flex-start;
-  border-radius: 3px;
-  overflow: hidden;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.deliv__partner-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 8px;
-  background: #1f6fb0;
-  color: #fff;
-}
-
-.deliv__partner-text {
-  padding: 3px 8px;
-  background: #ffd84d;
-  color: #5a3600;
-}
-
-.deliv__line {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--c-ink, #101418);
-}
-
-.deliv__line .icon { color: var(--c-trust, #0a8800); }
-
-.deliv__pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.deliv__pill {
-  padding: 4px 9px;
-  border-radius: 4px;
-  background: var(--c-trust-solid, #0a8800);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 600;
-}
+/* The delivery block that used to live here (.deliv, .deliv__row,
+   .deliv__carriers, .deliv__partner …) is deleted. It was the ancestor of the
+   .trow promise rows and .carriers strip further down this file — same job,
+   no detail sheets, no 44px targets. It had no markup and never had any, and
+   shipping both would have given merchants two delivery blocks in the block
+   picker that contradict each other. See .trow. */
 
 /* ==========================================================================
    Buy box reveal — the form can start as a button instead of a full form

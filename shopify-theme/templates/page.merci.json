@@ -1,0 +1,45 @@
+{
+  "sections": {
+    "main": {
+      "type": "order-confirmation",
+      "blocks": {
+        "s1": {
+          "type": "step",
+          "settings": {
+            "done": true,
+            "icon": "check",
+            "title": "Commande reçue",
+            "text": "Votre demande est enregistrée chez nous."
+          }
+        },
+        "s2": {
+          "type": "step",
+          "settings": {
+            "icon": "headset",
+            "title": "Appel de confirmation",
+            "text": "Nous vous appelons pour vérifier l'adresse et la quantité. Gardez votre téléphone à portée."
+          }
+        },
+        "s3": {
+          "type": "step",
+          "settings": {
+            "icon": "truck-fast",
+            "title": "Expédition",
+            "text": "Le colis part vers votre wilaya dès la confirmation."
+          }
+        },
+        "s4": {
+          "type": "step",
+          "settings": {
+            "icon": "cash-fill",
+            "title": "Paiement à la réception",
+            "text": "Vous vérifiez le colis, puis vous payez le livreur en espèces."
+          }
+        }
+      },
+      "block_order": ["s1", "s2", "s3", "s4"],
+      "settings": {}
+    }
+  },
+  "order": ["main"]
+}
