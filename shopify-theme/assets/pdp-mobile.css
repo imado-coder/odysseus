@@ -48,7 +48,10 @@
     flex: 0 0 100%;
     scroll-snap-align: center;
     scroll-snap-stop: always;
-    aspect-ratio: 1;
+    /* Product photography is shot portrait far more often than square, and a
+       square crop on a phone throws away the height that sells the item. The
+       merchant sets the shape; 3:4 matches how these listings are shot. */
+    aspect-ratio: var(--pdp-media-ratio, 3 / 4);
     background: var(--c-surface-2, #fafbfb);
   }
 

@@ -28,7 +28,8 @@
   endif
 -%}
 
-<div class="pdp{% if section.settings.mobile_immersive %} pdp--immersive{% endif %}">
+<div class="pdp{% if section.settings.mobile_immersive %} pdp--immersive{% endif %}"
+     style="--pdp-media-ratio: {{ section.settings.media_ratio | default: '3 / 4' }};">
   <div class="pdp__inner">
     {%- if section.settings.show_breadcrumbs -%}
       <nav class="pdp__crumbs" aria-label="{{ 'general.breadcrumbs.label' | t }}">
@@ -470,6 +471,31 @@
       "label": "Image plein écran en haut (mobile)",
       "default": true,
       "info": "Masque l'en-tête au-dessus des photos sur mobile. Retour, recherche et panier flottent sur l'image."
+    },
+    {
+      "type": "select",
+      "id": "media_ratio",
+      "label": "Forme des photos (mobile)",
+      "options": [
+        {
+          "value": "3 / 4",
+          "label": "Portrait 3:4 (recommandé)"
+        },
+        {
+          "value": "4 / 5",
+          "label": "Portrait 4:5"
+        },
+        {
+          "value": "1 / 1",
+          "label": "Carré"
+        },
+        {
+          "value": "4 / 3",
+          "label": "Paysage 4:3"
+        }
+      ],
+      "default": "3 / 4",
+      "info": "Une photo carrée perd la hauteur qui vend le produit."
     },
     {
       "type": "checkbox",
