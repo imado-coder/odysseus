@@ -348,6 +348,11 @@
     function open() {
       lastFocus = document.activeElement;
       sheet.dataset.open = "true";
+      /* The sheet ships aria-hidden so it is not announced while closed.
+         Leaving it set once the sheet is open hides the whole dialog from a
+         screen reader — the shopper hears nothing and focus lands inside a
+         region that, as far as the assistive layer knows, is not there. */
+      sheet.removeAttribute("aria-hidden");
       document.body.style.overflow = "hidden";
       var first = sheet.querySelector("input, select, textarea, button");
       if (first) first.focus();
@@ -356,8 +361,12 @@
     function close() {
       if (sheet.dataset.open !== "true") return;
       sheet.dataset.open = "false";
-      document.body.style.removeProperty("overflow");
+      /* Blur first: aria-hidden over the element holding focus is invalid,
+         and returning focus to the trigger is where it belongs anyway. */
       if (lastFocus) lastFocus.focus();
+      else if (sheet.contains(document.activeElement)) document.activeElement.blur();
+      sheet.setAttribute("aria-hidden", "true");
+      document.body.style.removeProperty("overflow");
     }
 
     trigger.addEventListener("click", open);

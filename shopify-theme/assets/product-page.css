@@ -540,6 +540,24 @@
 
 .bb__pills::-webkit-scrollbar { display: none; }
 
+/* A row that scrolls and a row that is broken look identical when the last
+   item is sliced flat by the page edge. The fade is the only thing telling
+   the shopper there is more to the right — phones have no scrollbar to do
+   it, and a row that fits inside the width never reaches the fade at all. */
+.bb__pills,
+.carriers {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 26px), transparent);
+          mask-image: linear-gradient(to right, #000 calc(100% - 26px), transparent);
+  padding-inline-end: 20px;
+}
+
+/* The fade belongs on the edge the content runs off; in Arabic that flips. */
+[dir="rtl"] .bb__pills,
+[dir="rtl"] .carriers {
+  -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 26px), transparent);
+          mask-image: linear-gradient(to left, #000 calc(100% - 26px), transparent);
+}
+
 .bb__pill {
   flex: none;
   padding: 5px 10px;
@@ -1421,6 +1439,9 @@
    ========================================================================== */
 .trow { border-block-start: 1px solid var(--c-border, #e7eaec); padding-block: 2px; }
 .trow:first-child { border-block-start: 0; }
+/* A grouped row is first inside its own wrapper but not first in the list. */
+.trow-group > .trow:first-child { border-block-start: 1px solid var(--c-border, #e7eaec); }
+.trow-group:first-child > .trow:first-child { border-block-start: 0; }
 .trow--flat { border-block-start: 0; padding-block-start: 0; }
 
 .trow__head {
@@ -1434,12 +1455,25 @@
   font-weight: 700;
   letter-spacing: -0.005em;
   text-decoration: none;
+  /* A button centres its text by UA default. It goes unnoticed while every
+     promise fits on one line, then the first long one centres itself and
+     breaks the left edge the whole column is aligned to. */
+  text-align: start;
 }
 
 .trow__icon { flex: none; display: grid; place-items: center; color: var(--c-trust, #067d3d); }
 .trow__icon .icon { inline-size: 19px; block-size: 19px; }
 
-.trow__title { min-inline-size: 0; }
+/* One line, always. A promise that wraps to two turns a 44px row into 88px
+   and the scannable list into a block of terms — and the merchant cannot
+   know how long their sentence renders on a 360px phone. The chevron is the
+   contract: the full wording is one tap away, so the row can afford to cut. */
+.trow__title {
+  min-inline-size: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 /* The trailing note is context, not a promise: it stays quiet and gives way
    before the headline does. */

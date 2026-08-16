@@ -315,7 +315,14 @@
                   assign sec_row_icon = block.settings.icon_name_1 | default: 'shield-fill'
                   assign guar_row_icon = block.settings.icon_name_2 | default: 'guarantee'
                 -%}
-                <div {{ block.shopify_attributes }}>
+                {%- comment -%}
+                  This block owns two rows, so it needs a wrapper — and the
+                  wrapper makes its first row a :first-child, which is what
+                  the "no rule above the first row" rule keys on. The class
+                  tells that rule this is a group inside the list, not the
+                  top of it, so the hairline above the row comes back.
+                {%- endcomment -%}
+                <div class="trow-group" {{ block.shopify_attributes }}>
                   {%- if block.settings.line_1 != blank -%}
                     <div class="trow">
                       <button class="trow__head" type="button"
@@ -1703,7 +1710,7 @@
           "type": "text",
           "id": "line_1",
           "label": "Ligne 1",
-          "default": "Paiement à la livraison — payez après vérification"
+          "default": "Paiement à la livraison"
         },
         {
           "type": "text",
