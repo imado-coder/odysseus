@@ -1419,7 +1419,7 @@
    they carry the vendor's own colour, cannot be themed, and render
    differently on every phone.
    ========================================================================== */
-.trow { border-block-start: 1px solid var(--c-border, #e7eaec); padding-block: 11px; }
+.trow { border-block-start: 1px solid var(--c-border, #e7eaec); padding-block: 2px; }
 .trow:first-child { border-block-start: 0; }
 .trow--flat { border-block-start: 0; padding-block-start: 0; }
 
@@ -1427,6 +1427,8 @@
   display: flex;
   align-items: center;
   gap: 9px;
+  /* These became links in this change, so they became touch targets too. */
+  min-block-size: 44px;
   color: var(--c-trust, #067d3d);
   font-size: 14.5px;
   font-weight: 700;
@@ -1464,7 +1466,7 @@
 
 .trow__sub {
   display: block;
-  padding-block-start: 4px;
+  padding-block: 0 8px;
   color: var(--c-ink-3, #6e7781);
   font-size: 13px;
 }
