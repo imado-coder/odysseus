@@ -521,44 +521,49 @@ textarea.field__control {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
-  padding: 14px 18px;
+  justify-content: center;
+  gap: 1px;
+  padding: 8px 16px;
   border: 0;
-  border-radius: 999px;
+  border-radius: 10px;
   background: var(--c-accent, #ff6d00);
   color: #fff;
   font: inherit;
   cursor: pointer;
-  /* 44px minimum touch target, with room to spare. */
-  min-block-size: 56px;
-  box-shadow: 0 2px 10px rgb(255 109 0 / .28);
+  /* 46px: comfortably over the 44px touch minimum without dominating the
+     column. A button that fills a third of the buy box reads as a banner
+     and stops being read as a button. */
+  min-block-size: 46px;
+  box-shadow: 0 1px 4px rgb(255 109 0 / .22);
   transition: transform .12s ease, box-shadow .2s ease, filter .2s ease;
 }
 
-.cod-cta:hover { filter: brightness(1.04); box-shadow: 0 4px 16px rgb(255 109 0 / .34); }
+.cod-cta:hover { filter: brightness(1.04); box-shadow: 0 2px 10px rgb(255 109 0 / .3); }
 .cod-cta:active { transform: translateY(1px); }
 
 .cod-cta__main {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 16px;
-  font-weight: 800;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 700;
   letter-spacing: -0.01em;
   text-align: center;
+  line-height: 1.2;
 }
 
 .cod-cta__off {
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: rgb(0 0 0 / .22);
-  font-size: 14px;
-  font-weight: 900;
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: rgb(0 0 0 / .2);
+  font-size: 12.5px;
+  font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
 
 .cod-cta__note {
-  font-size: 12px;
-  font-weight: 600;
-  opacity: .92;
+  font-size: 11px;
+  font-weight: 500;
+  opacity: .9;
+  line-height: 1.25;
 }

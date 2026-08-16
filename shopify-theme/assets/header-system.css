@@ -993,3 +993,81 @@
 .mega__aside li {
   list-style: none;
 }
+
+/* ==========================================================================
+   Logo
+   An uploaded logo is given a height and keeps its own width — a fixed square
+   crops wordmarks and stretches wide marks. The tile style stays available
+   for merchants who want the coloured badge, but it is no longer the only
+   way a logo can be shown.
+   ========================================================================== */
+.mhead__logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-inline-size: 0;
+  text-decoration: none;
+  color: inherit;
+  flex: none;
+}
+
+.mhead__logo-img {
+  display: block;
+  block-size: var(--logo-h, 40px);
+  inline-size: auto;
+  max-inline-size: var(--logo-max, 200px);
+  /* Never distort: whatever the aspect ratio, the logo is fitted, not filled. */
+  object-fit: contain;
+}
+
+/* Text wordmark for merchants with no logo file — set deliberately rather
+   than left as default body text. */
+.mhead__logo-word {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: var(--name-size, 22px);
+  font-weight: var(--name-weight, 800);
+  letter-spacing: var(--name-spacing, -0.02em);
+  line-height: 1.05;
+  white-space: nowrap;
+  /* Inherits the header's own text colour. --logo-fg is the colour *on the
+     tile*; applying it here painted the wordmark orange on an orange header
+     and the shop name vanished. */
+  color: inherit;
+}
+
+.mhead__logo--tile .mhead__logo-word { color: var(--logo-fg, #fff); }
+
+.mhead__logo-mark { font-size: 1.05em; }
+
+.mhead__logo-text {
+  font-size: calc(var(--name-size, 22px) * 0.72);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+/* The badge style, opt-in. */
+.mhead__logo--tile {
+  padding: 6px 10px;
+  border-radius: 12px;
+  background: var(--logo-bg, var(--c-accent, #ff6d00));
+  color: var(--logo-fg, #fff);
+  box-shadow: 0 1px 3px rgb(0 0 0 / .18);
+}
+
+.mhead__logo--tile .mhead__logo-img { max-inline-size: calc(var(--logo-max, 200px) - 20px); }
+
+/* Position. Centring the logo puts it in its own grid column so the nav and
+   the utilities stay balanced either side of it. */
+.mhead__inner[data-logo="center"] { justify-content: center; }
+.mhead__inner[data-logo="center"] .mhead__logo { order: 0; margin-inline: auto; }
+.mhead__inner[data-logo="end"] .mhead__logo { order: 9; margin-inline-start: auto; }
+
+@media (max-width: 749px) {
+  /* A tall logo eats the phone header; cap it and let the search row breathe. */
+  .mhead__logo-img { block-size: min(var(--logo-h, 40px), 38px); max-inline-size: 46vw; }
+  .mhead__logo-word { font-size: min(var(--name-size, 22px), 19px); }
+  .mhead__logo-text { display: none; }
+}

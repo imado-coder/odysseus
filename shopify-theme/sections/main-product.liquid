@@ -43,14 +43,14 @@
     {%- endif -%}
 
     <div class="pdp__grid">
-      <div class="pdp__media">
+      {%- comment -%}
+        Three regions, not two. The description has to be able to sit below
+        the buy box on a phone — price, options and the order button come
+        straight after the images, because a shopper on a phone decides there.
+        Keeping the description inside the media column made that impossible.
+      {%- endcomment -%}
+      <div class="pdp__media pdp__gallery">
         {% render 'product-gallery', product: product, variant: v %}
-        {%- if section.settings.show_description and product.description != blank -%}
-          <section class="landing" aria-labelledby="Desc-{{ section.id }}">
-            <h2 class="visually-hidden" id="Desc-{{ section.id }}">{{ section.settings.description_title }}</h2>
-            <div class="landing__stack rte">{{ product.description }}</div>
-          </section>
-        {%- endif -%}
       </div>
 
       <div class="pdp__buybox" data-sticky-fit>
@@ -267,6 +267,22 @@
           {%- endfor -%}
         </div>
       </div>
+
+      {%- comment -%}
+        Landing content. On desktop it sits under the gallery in column one;
+        on a phone it comes after the buy box, so the order is images → price
+        and order button → the long read.
+      {%- endcomment -%}
+      {%- if section.settings.show_description and product.description != blank -%}
+        <div class="pdp__details pdp__details--{{ section.settings.description_column | default: 'gallery' }}">
+          <section class="landing" aria-labelledby="Desc-{{ section.id }}">
+            <h2 class="landing__title" id="Desc-{{ section.id }}">
+              {{ section.settings.description_title }}
+            </h2>
+            <div class="landing__stack rte">{{ product.description }}</div>
+          </section>
+        </div>
+      {%- endif -%}
     </div>
   </div>
 </div>
@@ -330,6 +346,23 @@
       "id": "description_title",
       "label": "Titre de la description",
       "default": "Détails du produit"
+    },
+    {
+      "type": "select",
+      "id": "description_column",
+      "label": "Colonne de la description",
+      "options": [
+        {
+          "value": "buybox",
+          "label": "À droite, sous le bloc d'achat"
+        },
+        {
+          "value": "gallery",
+          "label": "À gauche, sous les images"
+        }
+      ],
+      "default": "buybox",
+      "info": "Sur mobile la description passe toujours après le bouton de commande."
     },
     {
       "type": "header",

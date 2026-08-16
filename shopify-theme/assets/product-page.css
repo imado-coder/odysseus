@@ -1371,3 +1371,21 @@
   font-weight: 600;
   line-height: 1.35;
 }
+
+/* Which column the description lands in on desktop. Mobile ignores this and
+   always puts it after the buy box — on a phone the decision happens at the
+   price and the button, and the long read belongs after it. */
+@media (min-width: 990px) {
+  .pdp__details--buybox { grid-column: 2; grid-row: 2; }
+  .pdp__details--buybox + .pdp__buybox,
+  .pdp__grid:has(.pdp__details--buybox) .pdp__buybox { grid-row: 1; }
+  .pdp__details--gallery { grid-column: 1; grid-row: 2; }
+}
+
+.landing__title {
+  margin: 0 0 10px;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--c-ink, #101418);
+}

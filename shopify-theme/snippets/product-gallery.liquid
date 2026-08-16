@@ -1,13 +1,22 @@
 {%- comment -%}
-  Thumb rail plus stage. Thumbs are buttons so keyboard works.
+  Product media, two presentations from one markup.
 
-  The rail only exists when there is more than one image, so the grid has to
-  drop its column too — otherwise a product with a single photo renders that
-  photo into the 72px thumb column and it appears as a thumbnail.
+  Desktop is a thumb rail plus a large stage. Phones get a swipeable slider
+  with dots and a counter — scroll-snap does the moving, so it works before
+  JavaScript arrives and keeps working if it never does. CSS decides which of
+  the two is visible; both are always in the DOM.
+
+  The rail only exists when there is more than one image, and the grid drops
+  its column with it, or a single-image product renders its one photo into the
+  72px thumbnail column.
 {%- endcomment -%}
+
 {%- assign featured = variant.featured_media | default: product.featured_media -%}
-<div class="gallery{% if product.media.size <= 1 %} gallery--single{% endif %}">
-  {%- if product.media.size > 1 -%}
+{%- assign media_count = product.media.size -%}
+
+<div class="gallery{% if media_count <= 1 %} gallery--single{% endif %}">
+
+  {%- if media_count > 1 -%}
     <div class="gallery__thumbs" role="group" aria-label="{{ 'products.product.media.gallery_viewer' | t }}">
       {%- for media in product.media -%}
         <button class="gallery__thumb" type="button"
@@ -21,6 +30,7 @@
     </div>
   {%- endif -%}
 
+  {%- comment -%} Desktop stage. {%- endcomment -%}
   <div class="gallery__stage" data-gallery-stage>
     {%- if featured -%}
       <img src="{{ featured | image_url: width: 800 }}"
@@ -34,4 +44,38 @@
       {{ 'product-1' | placeholder_svg_tag }}
     {%- endif -%}
   </div>
+
+  {%- comment -%} Phone slider. {%- endcomment -%}
+  {%- if media_count > 0 -%}
+    <div class="gallery__slider" data-gallery-slider
+         role="group" aria-label="{{ 'products.product.media.gallery_viewer' | t }}">
+      {%- for media in product.media -%}
+        <div class="gallery__slide">
+          <img src="{{ media | image_url: width: 800 }}"
+               srcset="{{ media | image_url: width: 400 }} 400w,
+                       {{ media | image_url: width: 800 }} 800w"
+               sizes="100vw"
+               width="{{ media.preview_image.width }}"
+               height="{{ media.preview_image.height }}"
+               alt="{{ media.alt | escape }}"
+               {% if forloop.first %}fetchpriority="high"{% else %}loading="lazy"{% endif %}
+               decoding="async">
+        </div>
+      {%- endfor -%}
+    </div>
+
+    {%- if media_count > 1 -%}
+      <div class="gallery__dots">
+        {%- for media in product.media -%}
+          <button class="gallery__dot" type="button" data-gallery-dot
+                  {% if forloop.first %}aria-current="true"{% endif %}
+                  aria-label="{{ 'products.product.media.image_available' | t: index: forloop.index }}"></button>
+        {%- endfor -%}
+      </div>
+
+      <span class="gallery__counter" aria-hidden="true">
+        <b data-gallery-index>1</b>/{{ media_count }}
+      </span>
+    {%- endif -%}
+  {%- endif -%}
 </div>

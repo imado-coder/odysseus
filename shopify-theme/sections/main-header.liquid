@@ -10,22 +10,53 @@
     {%- if section.settings.fg != blank %}--mhead-fg: {{ section.settings.fg }};{% endif -%}
     {%- if section.settings.search_btn != blank %}--mhead-search-btn: {{ section.settings.search_btn }};{% endif -%}
   ">
-  <div class="mhead__inner">
-    <a class="mhead__logo" href="{{ routes.root_url }}">
+  <div class="mhead__inner" data-logo="{{ section.settings.logo_position | default: 'start' }}"
+       style="--name-size: {{ section.settings.name_size | default: 22 }}px;
+              --name-weight: {{ section.settings.name_weight | default: '800' }};
+              --name-spacing: {{ section.settings.name_spacing | default: -2 | times: 0.01 }}em;">
+    {%- comment -%}
+      The logo.
+
+      An uploaded logo keeps its own proportions: it is given a height and
+      allowed whatever width that implies. Forcing every logo into a fixed
+      square crops wordmarks and stretches wide marks, which is why this is a
+      height plus max-width rather than a tile. The tile is still available
+      as a deliberate style for merchants who want the coloured badge look.
+
+      Without an upload, the shop name is set as a wordmark rather than left
+      as plain body text.
+    {%- endcomment -%}
+    {%- liquid
+      assign logo_h = section.settings.logo_height | default: 40
+      assign name_text = settings.logo_text | default: shop.name
+    -%}
+    <a class="mhead__logo mhead__logo--{{ section.settings.logo_style | default: 'plain' }}"
+       href="{{ routes.root_url }}"
+       style="--logo-h: {{ logo_h }}px; --logo-max: {{ section.settings.logo_max_width | default: 200 }}px;
+              {% if section.settings.logo_bg != blank %}--logo-bg: {{ section.settings.logo_bg }};{% endif %}
+              {% if section.settings.logo_fg != blank %}--logo-fg: {{ section.settings.logo_fg }};{% endif %}">
       {%- if settings.logo != blank -%}
-        <span class="logo-tile" style="{% if section.settings.logo_bg != blank %}--logo-bg: {{ section.settings.logo_bg }};{% endif %}{% if section.settings.logo_fg != blank %}--logo-fg: {{ section.settings.logo_fg }};{% endif %}">
-          {{ settings.logo | image_url: width: 92 | image_tag: widths: '46,92,138', alt: shop.name, loading: 'eager' }}
-        </span>
+        {%- assign w = logo_h | times: 4 -%}
+        {{ settings.logo
+           | image_url: height: logo_h, width: w
+           | image_tag:
+               class: 'mhead__logo-img',
+               widths: '80,160,240,320,480',
+               alt: shop.name,
+               loading: 'eager',
+               fetchpriority: 'high' }}
       {%- else -%}
-        <span class="logo-tile" style="{% if section.settings.logo_bg != blank %}--logo-bg: {{ section.settings.logo_bg }};{% endif %}{% if section.settings.logo_fg != blank %}--logo-fg: {{ section.settings.logo_fg }};{% endif %}">
+        <span class="mhead__logo-word">
           {%- if section.settings.logo_mark != blank -%}
-            <span class="logo-tile__mark" aria-hidden="true">{{ section.settings.logo_mark }}</span>
+            <span class="mhead__logo-mark" aria-hidden="true">{{ section.settings.logo_mark }}</span>
           {%- endif -%}
-          <span class="logo-tile__word">{{ settings.logo_text | default: shop.name }}</span>
+          {{ name_text }}
         </span>
       {%- endif -%}
-      {%- if section.settings.show_logo_text -%}
-        <span class="mhead__logo-text">{{ settings.logo_text | default: shop.name }}</span>
+
+      {%- comment -%} An uploaded logo can still be paired with the name. {%- endcomment -%}
+      {%- if section.settings.show_logo_text and settings.logo != blank -%}
+        <span class="mhead__logo-text">{{ name_text }}</span>
       {%- endif -%}
     </a>
 
@@ -152,6 +183,105 @@
       "id": "fg",
       "label": "Texte de l'en-tête",
       "default": "#ffffff"
+    },
+    {
+      "type": "select",
+      "id": "logo_style",
+      "label": "Style du logo",
+      "options": [
+        {
+          "value": "plain",
+          "label": "Logo seul (recommandé)"
+        },
+        {
+          "value": "tile",
+          "label": "Sur une tuile colorée"
+        }
+      ],
+      "default": "plain"
+    },
+    {
+      "type": "select",
+      "id": "logo_position",
+      "label": "Position du logo",
+      "options": [
+        {
+          "value": "start",
+          "label": "À gauche"
+        },
+        {
+          "value": "center",
+          "label": "Au centre"
+        },
+        {
+          "value": "end",
+          "label": "À droite"
+        }
+      ],
+      "default": "start"
+    },
+    {
+      "type": "range",
+      "id": "logo_height",
+      "min": 24,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "label": "Hauteur du logo",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "logo_max_width",
+      "min": 80,
+      "max": 320,
+      "step": 10,
+      "unit": "px",
+      "label": "Largeur maximale du logo",
+      "default": 200
+    },
+    {
+      "type": "range",
+      "id": "name_size",
+      "min": 14,
+      "max": 34,
+      "step": 1,
+      "unit": "px",
+      "label": "Taille du nom de la boutique",
+      "default": 22
+    },
+    {
+      "type": "select",
+      "id": "name_weight",
+      "label": "Graisse du nom",
+      "options": [
+        {
+          "value": "600",
+          "label": "Semi-gras"
+        },
+        {
+          "value": "700",
+          "label": "Gras"
+        },
+        {
+          "value": "800",
+          "label": "Très gras"
+        },
+        {
+          "value": "900",
+          "label": "Noir"
+        }
+      ],
+      "default": "800"
+    },
+    {
+      "type": "range",
+      "id": "name_spacing",
+      "min": -4,
+      "max": 6,
+      "step": 1,
+      "label": "Interlettrage du nom (×0.01em)",
+      "default": -2
     },
     {
       "type": "color",
