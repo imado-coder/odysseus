@@ -140,6 +140,64 @@ chose depuis une machine qui atteint la base.
 
 ---
 
+## Les transporteurs
+
+Un adaptateur par transporteur derrière une seule interface : créer un colis,
+rendre un numéro de suivi, dire quand le statut change. Rien en dehors de
+`supabase/functions/carriers/index.ts` ne sait quel transporteur une boutique
+utilise.
+
+| Transporteur | Authentification | Confiance sur le contrat |
+|---|---|---|
+| Yalidine | `X-API-ID` + `X-API-TOKEN` | Haute — endpoint et champs publics |
+| Ecotrack | `Bearer`, hôte par transporteur | Haute — deux sources concordantes |
+| ZR Express | en-têtes `token` (id) + `key` | Moyenne — endpoints confirmés |
+| NOEST | `api_token` + `user_guid` dans le corps | Moyenne — création en deux temps |
+| Maystro | `Authorization: Token …` | Moyenne — la commune est un **id**, pas un nom |
+| Manuel | aucune | — |
+
+Aucun de ces contrats ne peut être prouvé d'ici sans un compte réel. C'est
+précisément à quoi sert le bouton **Tester** : le marchand relie un compte,
+appuie une fois, et un adaptateur qui s'est trompé le dit tout de suite — au
+lieu d'échouer en silence sur le colis d'un vrai client.
+
+### Trois règles non négociables
+
+- **Le colis part à la confirmation, jamais à la création.** C'est tout le
+  sens du paiement à la livraison : on appelle d'abord, parce qu'une part
+  importante des commandes ne survit pas à l'appel. Pousser à la création
+  enverrait au transporteur chaque commande abandonnée, et chaque retour est
+  payé par le marchand.
+- **Un colis, une fois.** `Shipment.codOrderId` est unique en base, et la ligne
+  est réservée *avant* l'appel sortant : deux appuis simultanés se heurtent à
+  la base, pas au transporteur.
+- **Le montant remis au transporteur inclut déjà la livraison.** Chaque
+  adaptateur le lui dit explicitement (`freeshipping`, `montant`, `Total`…).
+  Sans cela le transporteur ajoute son propre tarif et le client se voit
+  réclamer plus que ce que la boutique a annoncé. C'est le détail le plus cher
+  à rater.
+
+### Les identifiants
+
+Ils vont dans **Supabase Vault**, chiffrés au repos ; la table `Carrier` ne
+garde que l'identifiant du secret. Aucune requête écrite plus tard pour un
+écran ne peut donc sérialiser un token par accident.
+
+### Les prix par transporteur
+
+`ShippingRate` est désormais identifié par *(boutique, transporteur, wilaya)*.
+La colonne est **nullable** et la migration purement additive : les lignes
+existantes deviennent « la liste propre de la boutique », utilisée quand aucun
+transporteur n'est relié ou quand le transporteur relié n'a pas tarifé cette
+wilaya.
+
+> L'index unique ne peut pas s'écrire en Prisma : Postgres considère deux
+> `NULL` comme distincts, donc une contrainte ordinaire laisserait passer des
+> doublons pour exactement le cas le plus courant. La migration le construit
+> sur `COALESCE("carrierId", '')`.
+
+---
+
 ## Le doublon assumé
 
 L'endpoint existe deux fois : `app/routes/api.cod.tsx` (canonique) et

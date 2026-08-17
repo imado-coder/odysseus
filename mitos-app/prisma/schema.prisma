@@ -37,29 +37,31 @@ model Session {
 
 /// One row per installed store. Everything else hangs off this.
 model Shop {
-  id           String   @id @default(cuid())
-  domain       String   @unique // my-store.myshopify.com
-  name         String?
-  email        String?
-  currency     String   @default("DZD")
-  installedAt  DateTime @default(now())
+  id            String    @id @default(cuid())
+  domain        String    @unique // my-store.myshopify.com
+  name          String?
+  email         String?
+  currency      String    @default("DZD")
+  installedAt   DateTime  @default(now())
   uninstalledAt DateTime?
-  planName     String?
+  planName      String?
 
-  settings      ShopSettings?
-  leads         Lead[]
-  orders        CodOrder[]
-  rates         ShippingRate[]
-  offers        Offer[]
-  subscription  Subscription?
+  settings     ShopSettings?
+  leads        Lead[]
+  orders       CodOrder[]
+  rates        ShippingRate[]
+  offers       Offer[]
+  subscription Subscription?
+  carriers     Carrier[]
+  shipments    Shipment[]
 
   @@index([domain])
 }
 
 model ShopSettings {
-  id                String  @id @default(cuid())
-  shopId            String  @unique
-  shop              Shop    @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  shopId String @unique
+  shop   Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
 
   /// Create the Shopify order immediately, or hold the lead for a call first.
   autoCreateOrder   Boolean @default(true)
@@ -74,24 +76,146 @@ model ShopSettings {
   /// Shopify admin. A cash-on-delivery merchant works from the call list all
   /// day and is rarely at a desk; this lets them reach it without the
   /// embedded app. Null means no link has been issued, and the page 404s.
-  dashboardToken    String?  @unique
+  dashboardToken String? @unique
 
-  updatedAt         DateTime @updatedAt
+  updatedAt DateTime @updatedAt
 }
 
 /// Shipping price per wilaya. Home and desk are separate columns rather than
 /// a JSON blob so they can be queried, bulk-edited and reported on.
+///
+/// The price depends on two things, not one: the wilaya *and* the carrier.
+/// Yalidine and ZR Express do not price Adrar alike, and a merchant may use
+/// one carrier for the north and another for the south. So carrierId is part
+/// of the identity of a row — and it is nullable, because a shop that has
+/// linked no carrier still keeps its own list, which is what every existing
+/// row became.
+///
+/// The unique index cannot be expressed here: Postgres treats two NULLs as
+/// distinct, so `@@unique` on a nullable column would allow duplicate rows
+/// for exactly the most common case. The migration builds it on
+/// COALESCE(carrierId, '') instead.
 model ShippingRate {
-  id         String  @id @default(cuid())
+  id         String   @id @default(cuid())
   shopId     String
-  shop       Shop    @relation(fields: [shopId], references: [id], onDelete: Cascade)
-  wilayaCode String  // "01".."58"
+  shop       Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  carrierId  String?
+  carrier    Carrier? @relation(fields: [carrierId], references: [id], onDelete: Cascade)
+  wilayaCode String // "01".."58"
   homeRate   Int
   deskRate   Int
-  enabled    Boolean @default(true)
+  enabled    Boolean  @default(true)
 
-  @@unique([shopId, wilayaCode])
   @@index([shopId])
+  @@index([carrierId])
+}
+
+/// A delivery company the merchant has linked.
+///
+/// Every Algerian carrier exposes a different API, but what we need from all
+/// of them is the same: create a parcel, give me a tracking number, tell me
+/// when the status changes. So one row describes any of them and an adapter
+/// per provider does the translating.
+model Carrier {
+  id       String          @id @default(cuid())
+  shopId   String
+  shop     Shop            @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  provider CarrierProvider
+  /// The merchant's own label — they may hold two accounts with one provider.
+  name     String
+  enabled  Boolean         @default(true)
+
+  /// The carrier the storefront quotes from, and the one a push defaults to.
+  /// A partial unique index keeps at most one per shop.
+  isDefault Boolean @default(false)
+
+  /// Push automatically the moment an order is confirmed, or wait for the
+  /// merchant to press send. Off by default: a wrong parcel costs a return.
+  autoPush Boolean @default(false)
+
+  /// The Ecotrack family runs one instance per courier, each on its own host,
+  /// so the base URL is data rather than a constant. Null for providers with
+  /// a single fixed endpoint.
+  baseUrl String?
+
+  /// Yalidine prices and routes from an origin wilaya, and rejects a parcel
+  /// without one.
+  fromWilaya String?
+
+  /// Credentials are NOT here. This is the id of a Supabase Vault secret,
+  /// which holds the JSON encrypted at rest; nothing that reads this table
+  /// for display can accidentally serialise a token.
+  credentialsRef String?
+
+  rates     ShippingRate[]
+  shipments Shipment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([shopId, name])
+  @@index([shopId])
+}
+
+/// One parcel handed to one carrier.
+///
+/// Created only when an order is confirmed — that is the whole point of cash
+/// on delivery, and pushing at order time would send the carrier every
+/// abandoned and fake order the storefront collects.
+model Shipment {
+  id         String   @id @default(cuid())
+  shopId     String
+  shop       Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  carrierId  String
+  carrier    Carrier  @relation(fields: [carrierId], references: [id])
+  /// One shipment per order, enforced by the database rather than by care:
+  /// two taps on send must not become two parcels and two delivery fees.
+  codOrderId String   @unique
+  codOrder   CodOrder @relation(fields: [codOrderId], references: [id], onDelete: Cascade)
+
+  state          ShipmentState @default(QUEUED)
+  trackingNumber String?
+  labelUrl       String?
+
+  /// The carrier's own words, kept raw, and our reading of them. Keeping both
+  /// means a carrier changing its vocabulary shows up as an unmapped status
+  /// rather than as a wrong one.
+  carrierStatus String?
+  mappedStatus  CodStatus?
+
+  attempts  Int     @default(0)
+  lastError String?
+
+  /// Exactly what was sent and exactly what came back. When a carrier
+  /// disputes a parcel — and they do — this is the evidence.
+  request  Json?
+  response Json?
+
+  pushedAt  DateTime?
+  syncedAt  DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([shopId, state])
+  @@index([carrierId])
+  @@index([trackingNumber])
+}
+
+enum CarrierProvider {
+  YALIDINE
+  ZR_EXPRESS
+  ECOTRACK
+  MAYSTRO
+  NOEST
+  /// No API: the merchant exports and pastes the tracking number back.
+  MANUAL
+}
+
+enum ShipmentState {
+  QUEUED
+  PUSHED
+  FAILED
+  CANCELLED
 }
 
 /// Quantity-break pricing: buy 2 for X, buy 3 for Y.
@@ -99,7 +223,7 @@ model Offer {
   id        String   @id @default(cuid())
   shopId    String
   shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
-  productId String   // Shopify GID
+  productId String // Shopify GID
   quantity  Int
   price     Int
   label     String?
@@ -114,9 +238,9 @@ model Offer {
 /// What the customer submitted, exactly as submitted. Kept even when order
 /// creation fails, because a failed order is still a lead worth calling.
 model Lead {
-  id         String   @id @default(cuid())
-  shopId     String
-  shop       Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  shopId String
+  shop   Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
 
   firstName  String
   lastName   String
@@ -128,24 +252,24 @@ model Lead {
   delivery   DeliveryMethod
   note       String?
 
-  items      Json     // [{ variantId, productId, title, price, qty, option }]
-  subtotal   Int
-  shipping   Int
-  total      Int
+  items    Json // [{ variantId, productId, title, price, qty, option }]
+  subtotal Int
+  shipping Int
+  total    Int
 
   /// False when Shopify could not be reached to price the variants, so the
   /// amounts above came from the storefront and must be confirmed on the call.
   pricesVerified Boolean @default(true)
 
-  source     String?  // product page, cart drawer, landing
-  userAgent  String?
-  ip         String?
+  source    String? // product page, cart drawer, landing
+  userAgent String?
+  ip        String?
 
   /// Guards against a double-tap creating two orders.
   idempotencyKey String?
-  createdAt  DateTime @default(now())
+  createdAt      DateTime @default(now())
 
-  order      CodOrder?
+  order CodOrder?
 
   @@unique([shopId, idempotencyKey])
   @@index([shopId, createdAt])
@@ -156,18 +280,18 @@ model Lead {
 /// money; this row is the source of truth for the call-and-deliver workflow,
 /// which Shopify has no concept of.
 model CodOrder {
-  id             String      @id @default(cuid())
-  shopId         String
-  shop           Shop        @relation(fields: [shopId], references: [id], onDelete: Cascade)
-  leadId         String      @unique
-  lead           Lead        @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  shopId String
+  shop   Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  leadId String @unique
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
 
-  shopifyOrderId String?     // gid://shopify/Order/123
-  shopifyName    String?     // #1001
-  createFailed   Boolean     @default(false)
+  shopifyOrderId String? // gid://shopify/Order/123
+  shopifyName    String? // #1001
+  createFailed   Boolean @default(false)
   createError    String?
 
-  status         CodStatus   @default(PENDING)
+  status         CodStatus @default(PENDING)
   carrier        String?
   trackingNumber String?
   confirmedAt    DateTime?
@@ -176,8 +300,10 @@ model CodOrder {
   cancelledAt    DateTime?
   cancelReason   String?
 
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+  shipment Shipment?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([shopId, status])
   @@index([shopId, createdAt])
@@ -185,20 +311,20 @@ model CodOrder {
 }
 
 model Subscription {
-  id            String   @id @default(cuid())
-  shopId        String   @unique
-  shop          Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
-  chargeId      String?  // Shopify AppSubscription GID
-  plan          String   @default("trial")
-  status        String   @default("active")
-  trialEndsAt   DateTime?
+  id               String    @id @default(cuid())
+  shopId           String    @unique
+  shop             Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  chargeId         String? // Shopify AppSubscription GID
+  plan             String    @default("trial")
+  status           String    @default("active")
+  trialEndsAt      DateTime?
   currentPeriodEnd DateTime?
-  updatedAt     DateTime @updatedAt
+  updatedAt        DateTime  @updatedAt
 }
 
 /// Reference data, shared by every shop — no shopId here on purpose.
 model Wilaya {
-  code     String   @id // "01".."58"
+  code     String    @id // "01".."58"
   nameFr   String
   nameAr   String
   communes Commune[]
@@ -220,8 +346,8 @@ enum DeliveryMethod {
 }
 
 enum CodStatus {
-  PENDING     // submitted, not yet called
-  CONFIRMED   // customer confirmed by phone
+  PENDING // submitted, not yet called
+  CONFIRMED // customer confirmed by phone
   SHIPPED
   DELIVERED
   CANCELLED

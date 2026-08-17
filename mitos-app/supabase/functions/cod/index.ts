@@ -422,10 +422,19 @@ async function handle(request: Request) {
   }
 
   /* Shipping comes from the merchant's table, never from the payload. */
+  /* The same resolution the quote used, so the shopper is charged the number
+     they were shown: the default carrier's price for this wilaya, else the
+     shop's own list, else the shop default below. */
   const [rate] = await sql`
-    SELECT "homeRate", "deskRate"
-      FROM "ShippingRate"
-     WHERE "shopId" = ${shop.id} AND "wilayaCode" = ${lead.wilayaCode}
+    SELECT r."homeRate", r."deskRate"
+      FROM "ShippingRate" r
+      LEFT JOIN "Carrier" c ON c.id = r."carrierId"
+     WHERE r."shopId" = ${shop.id}
+       AND r."wilayaCode" = ${lead.wilayaCode}
+       AND r.enabled = true
+       AND (r."carrierId" IS NULL OR (c.enabled AND c."isDefault"))
+     ORDER BY (r."carrierId" IS NOT NULL) DESC
+     LIMIT 1
   `;
 
   const shipping = lead.delivery === "DESK"
@@ -625,11 +634,19 @@ async function rates(domain: string) {
 
   if (!shop) return json({ error: "unknown_shop" }, 404);
 
+  /* One price per wilaya, and the default carrier's wins.
+     DISTINCT ON keeps the first row per wilaya, and the ORDER BY puts carrier
+     rows ahead of the shop's own list — so a wilaya the carrier has priced
+     uses that price, and one it has not falls through to the shop's list. */
   const rows = await sql`
-    SELECT "wilayaCode", "homeRate", "deskRate"
-      FROM "ShippingRate"
-     WHERE "shopId" = ${shop.id} AND enabled = true
-     ORDER BY "wilayaCode"
+    SELECT DISTINCT ON (r."wilayaCode")
+           r."wilayaCode", r."homeRate", r."deskRate"
+      FROM "ShippingRate" r
+      LEFT JOIN "Carrier" c ON c.id = r."carrierId"
+     WHERE r."shopId" = ${shop.id}
+       AND r.enabled = true
+       AND (r."carrierId" IS NULL OR (c.enabled AND c."isDefault"))
+     ORDER BY r."wilayaCode", (r."carrierId" IS NOT NULL) DESC
   `;
 
   /* Shaped as the theme already reads it: keyed by wilaya code, [home, desk].

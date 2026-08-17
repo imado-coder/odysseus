@@ -52,7 +52,24 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   const shop = await prisma.shop.findFirst({
     where: { domain, uninstalledAt: null },
-    include: { settings: true, rates: { where: { enabled: true } } },
+    include: {
+      settings: true,
+      rates: {
+        where: {
+          enabled: true,
+          /* The default carrier's price, or the shop's own list. A rate
+             belonging to some other carrier is not what this shopper will be
+             charged, so it is not what they are shown. */
+          OR: [
+            { carrierId: null },
+            { carrier: { enabled: true, isDefault: true } },
+          ],
+        },
+        /* Carrier rows last, so the loop below overwrites the shop's own
+           figure with the carrier's wherever the carrier has priced it. */
+        orderBy: { carrierId: "asc" },
+      },
+    },
   });
 
   if (!shop) return json({ error: "unknown_shop" }, 404);
@@ -141,10 +158,19 @@ async function handle({ request }: ActionFunctionArgs) {
   }
 
   /* Shipping comes from the merchant's table, never from the payload. */
-  const rate = await prisma.shippingRate.findUnique({
+  /* The same resolution the quote used, so the shopper is charged the number
+     they were shown. Carrier first, then the shop's own list. */
+  const rate = await prisma.shippingRate.findFirst({
     where: {
-      shopId_wilayaCode: { shopId: shop.id, wilayaCode: lead.wilayaCode },
+      shopId: shop.id,
+      wilayaCode: lead.wilayaCode,
+      enabled: true,
+      OR: [
+        { carrierId: null },
+        { carrier: { enabled: true, isDefault: true } },
+      ],
     },
+    orderBy: { carrierId: "desc" },
   });
 
   const shipping =
