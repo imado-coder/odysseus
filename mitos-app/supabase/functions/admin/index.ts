@@ -103,8 +103,21 @@ async function handle(request: Request) {
   }
 
   if (url.pathname.endsWith("/rates")) {
-    if (request.method === "GET") return await listRates(shop);
-    if (request.method === "POST") return await saveRates(request, shop);
+    /* Which table: the shop's own list, or one carrier's. Resolved here so a
+       carrier id from a request can never reach a query without first being
+       proved to belong to this shop. */
+    const asked = url.searchParams.get("carrier") ?? "";
+    let carrierId: string | null = null;
+    if (asked) {
+      const [owned] = await sql`
+        SELECT id FROM "Carrier" WHERE id = ${asked} AND "shopId" = ${shop.id}
+      `;
+      if (!owned) return json({ error: "unknown_carrier" }, 404);
+      carrierId = owned.id;
+    }
+
+    if (request.method === "GET") return await listRates(shop, carrierId);
+    if (request.method === "POST") return await saveRates(request, shop, carrierId);
     return new Response("Method Not Allowed", { status: 405, headers: CORS });
   }
 
@@ -256,13 +269,15 @@ async function list(url: URL, shop: any) {
  * silently falls back to the shop default for exactly those.
  */
 // deno-lint-ignore no-explicit-any
-async function listRates(shop: any) {
+async function listRates(shop: any, carrierId: string | null) {
   const rows = await sql`
     SELECT w.code, w."nameFr", w."nameAr",
            r."homeRate", r."deskRate", r.enabled
       FROM "Wilaya" w
       LEFT JOIN "ShippingRate" r
-             ON r."wilayaCode" = w.code AND r."shopId" = ${shop.id}
+             ON r."wilayaCode" = w.code
+            AND r."shopId" = ${shop.id}
+            AND r."carrierId" IS NOT DISTINCT FROM ${carrierId}
      ORDER BY w.code
   `;
 
@@ -273,6 +288,7 @@ async function listRates(shop: any) {
 
   return json({
     ok: true,
+    carrierId,
     shop: { domain: shop.domain, currency: shop.currency },
     fallback: [
       settings?.defaultHomeRate ?? 600,
@@ -291,7 +307,7 @@ async function listRates(shop: any) {
  * half-wrong shop.
  */
 // deno-lint-ignore no-explicit-any
-async function saveRates(request: Request, shop: any) {
+async function saveRates(request: Request, shop: any, carrierId: string | null) {
   let body: { rates?: Record<string, [unknown, unknown]> };
   try {
     body = await request.json();
@@ -322,12 +338,17 @@ async function saveRates(request: Request, shop: any) {
 
   if (!rows.length) return json({ error: "expected_rates_object" }, 400);
 
+  /* The conflict target is the index that exists: rates are identified by
+     (shop, carrier, wilaya), and because Postgres treats two NULLs as
+     distinct, the shop's own list collides on COALESCE rather than on the
+     column. Naming the old (shopId, wilayaCode) pair here is what broke
+     saving the moment the carrier migration landed. */
   await sql.begin(async (tx) => {
     for (const r of rows) {
       await tx`
-        INSERT INTO "ShippingRate" (id, "shopId", "wilayaCode", "homeRate", "deskRate", enabled)
-        VALUES (${crypto.randomUUID()}, ${shop.id}, ${r.code}, ${r.home}, ${r.desk}, true)
-        ON CONFLICT ("shopId", "wilayaCode")
+        INSERT INTO "ShippingRate" (id, "shopId", "carrierId", "wilayaCode", "homeRate", "deskRate", enabled)
+        VALUES (${crypto.randomUUID()}, ${shop.id}, ${carrierId}, ${r.code}, ${r.home}, ${r.desk}, true)
+        ON CONFLICT ("shopId", COALESCE("carrierId", ''), "wilayaCode")
         DO UPDATE SET "homeRate" = ${r.home}, "deskRate" = ${r.desk}, enabled = true
       `;
     }

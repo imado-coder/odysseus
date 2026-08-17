@@ -15,6 +15,8 @@
       "routes/api.cod": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/_index": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/auth.$": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/app.settings": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/app.shipping": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/app._index": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0"
     },
     "routes": {
@@ -75,6 +77,24 @@
         "file": "app/routes/app.tsx",
         "path": "app",
         "config": {}
+      },
+      "routes/app.settings": {
+        "id": "routes/app.settings",
+        "parentId": "routes/app",
+        "file": "app/routes/app.settings.tsx",
+        "path": "settings",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/app.shipping": {
+        "id": "routes/app.shipping",
+        "parentId": "routes/app",
+        "file": "app/routes/app.shipping.tsx",
+        "path": "shipping",
+        "config": {
+          "runtime": "nodejs"
+        }
       },
       "routes/app._index": {
         "id": "routes/app._index",
@@ -142,6 +162,18 @@
         "file": "routes/app.tsx",
         "path": "app"
       },
+      "routes/app.settings": {
+        "id": "routes/app.settings",
+        "parentId": "routes/app",
+        "file": "routes/app.settings.tsx",
+        "path": "settings"
+      },
+      "routes/app.shipping": {
+        "id": "routes/app.shipping",
+        "parentId": "routes/app",
+        "file": "routes/app.shipping.tsx",
+        "path": "shipping"
+      },
       "routes/app._index": {
         "id": "routes/app._index",
         "parentId": "routes/app",
@@ -194,6 +226,16 @@
             "file": "routes/app.tsx",
             "path": "app",
             "children": [
+              {
+                "id": "routes/app.settings",
+                "file": "routes/app.settings.tsx",
+                "path": "settings"
+              },
+              {
+                "id": "routes/app.shipping",
+                "file": "routes/app.shipping.tsx",
+                "path": "shipping"
+              },
               {
                 "id": "routes/app._index",
                 "file": "routes/app._index.tsx",
