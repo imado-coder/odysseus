@@ -334,7 +334,7 @@
         "type": "text",
         "id": "cod_endpoint",
         "label": "URL de l'application COD",
-        "info": "Laissez vide tant que l'application n'est pas connectée : le formulaire valide les champs sans envoyer."
+        "info": "Déjà renseignée. Laissez vide pour tester la boutique sans enregistrer de commande : le formulaire valide les champs et confirme au client, sans rien envoyer."
       },
       {
         "type": "url",

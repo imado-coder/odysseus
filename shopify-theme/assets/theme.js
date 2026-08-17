@@ -314,6 +314,21 @@
       var payload = Object.fromEntries(new FormData(form).entries());
       var endpoint = form.dataset.endpoint;
 
+      /* One key per order, not per tap.
+         The app refuses a second lead carrying a key it has already seen, so
+         a double-tap on a slow connection cannot become two orders. The key
+         therefore has to survive a retry — it is minted once and kept on the
+         form — and it has to be dropped after a success, or the same customer
+         ordering the same product again next month would be waved away as a
+         duplicate and never reach the merchant. */
+      if (!form.dataset.orderKey) {
+        form.dataset.orderKey =
+          (window.crypto && window.crypto.randomUUID
+            ? window.crypto.randomUUID()
+            : String(Date.now()) + "-" + Math.random().toString(36).slice(2));
+      }
+      payload.idempotencyKey = form.dataset.orderKey;
+
       /* Without an endpoint the theme has nowhere to send the lead yet; the
          app supplies it later. Emit the event either way so anything else on
          the page (pixels, analytics) can observe the submission. */
@@ -417,6 +432,8 @@
              still holds the order. Clearing matters too — a back button should
              land on a clean form, not on the order just placed. */
           handOver(data && (data.reference || data.ref || data.orderName));
+          /* The order landed, so the next submission is a new order. */
+          delete form.dataset.orderKey;
           form.reset();
           fillCommunes();
           recalc();

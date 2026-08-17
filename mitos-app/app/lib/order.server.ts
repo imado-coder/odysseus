@@ -101,6 +101,12 @@ async function attempt(admin: AdminApiContext, draft: CodOrderDraft) {
     variables: {
       order: {
         currency: draft.currency,
+        /* Cash on delivery is an unpaid order that is expected to be paid, not
+           an order with no financial state. Left unset, Shopify reports
+           displayFinancialStatus as null and the admin shows a blank column —
+           the merchant cannot tell a pending order from a broken one, and no
+           "unpaid" filter or automation matches it. */
+        financialStatus: "PENDING",
         email: draft.email || undefined,
         phone: toE164(draft.phone),
         tags: [draft.tag],

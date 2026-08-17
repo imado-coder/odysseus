@@ -104,6 +104,13 @@
       data-msg-fail="{{ f_msg_fail | escape }}"
       data-msg-pending="{{ f_msg_pending | escape }}"
       novalidate>
+  {%- comment -%}
+    The app serves many stores from one endpoint and identifies the caller by
+    this field, so an order without it is rejected outright. It has to be
+    permanent_domain, not domain: a store on a custom domain would otherwise
+    announce itself as something the app has never heard of.
+  {%- endcomment -%}
+  <input type="hidden" name="shop" value="{{ shop.permanent_domain }}">
   <input type="hidden" name="product_id" value="{{ product.id }}">
   <input type="hidden" name="variant_id" value="{{ variant.id }}">
   <input type="hidden" name="product_title" value="{{ product.title | escape }}">

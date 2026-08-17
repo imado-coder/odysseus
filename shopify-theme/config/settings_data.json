@@ -24,6 +24,7 @@
     "card_variant": "1",
     "cod_tariffs": "{}",
     "cod_tariff_fallback": "[600,350]",
-    "cod_currency_suffix": "DA"
+    "cod_currency_suffix": "DA",
+    "cod_endpoint": "https://gmgargxjomtaorqjvlyz.supabase.co/functions/v1/cod"
   }
 }
