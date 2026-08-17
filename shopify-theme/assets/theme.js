@@ -354,43 +354,37 @@
       }
 
       function showInlineConfirmation() {
-        var panel = form.closest(".cod-sheet__panel") || form.parentElement;
-        if (!panel || panel.querySelector("[data-cod-done]")) return;
+        /* The full confirmation card is already on the page, hidden. Reveal
+           it and fill it from the same handover the confirmation PAGE reads,
+           so a shop with no page set up shows exactly the same screen as one
+           that has — same words, same steps, same summary. */
+        var overlay = document.querySelector("[data-ty-overlay]");
+        if (!overlay) return;
+        overlay.hidden = false;
+        document.body.style.overflow = "hidden";
+        initThanks(overlay);
+        overlay.scrollTop = 0;
 
-        var done = document.createElement("div");
-        done.className = "cod-done";
-        done.setAttribute("data-cod-done", "");
-        done.setAttribute("role", "status");
-        done.innerHTML =
-          '<span class="cod-done__mark" aria-hidden="true">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" ' +
-          'stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>' +
-          "</span>" +
-          '<p class="cod-done__title">' +
-          (form.dataset.msgSuccess || "Commande enregistrée") +
-          "</p>";
-
-        form.hidden = true;
-        panel.appendChild(done);
-        done.scrollIntoView({ block: "center", behavior: "smooth" });
+        var heading = overlay.querySelector(".ty__title");
+        if (heading) {
+          heading.setAttribute("tabindex", "-1");
+          heading.focus();
+        }
       }
 
-      /* No endpoint yet — the app supplies it later. The order still has to
-         END somewhere: a shopper who fills seven fields, presses the button
-         and gets a sentence under it has no idea whether anything happened.
-         So the handover and the confirmation run exactly as they do with an
-         endpoint; only the record-keeping is missing, and the merchant is the
-         one who knows that. */
       if (!endpoint) {
         submit.removeAttribute("aria-busy");
         status.dataset.state = "success";
         status.textContent =
           form.dataset.msgPending ||
           "Formulaire valide. En attente de la connexion à l'application COD.";
+        /* Capture BEFORE clearing. Resetting the form empties the wilaya,
+           which sends recalc() back to a zero total — so a handover taken
+           afterwards recorded "0 DA" as the amount the shopper owes. */
+        handOver(null);
         form.reset();
         fillCommunes();
         recalc();
-        handOver(null);
         return;
       }
 
@@ -407,12 +401,14 @@
           status.dataset.state = "success";
           status.textContent =
             form.dataset.msgSuccess || "Commande enregistrée. Nous vous appelons bientôt.";
-          /* Reset before leaving: a back button lands on a clean form rather
-             than one still holding the order that was just placed. */
+          /* Capture first, then clear: resetting empties the wilaya and takes
+             recalc() back to zero, so the total has to be read while the form
+             still holds the order. Clearing matters too — a back button should
+             land on a clean form, not on the order just placed. */
+          handOver(data && (data.reference || data.ref || data.orderName));
           form.reset();
           fillCommunes();
           recalc();
-          handOver(data && (data.reference || data.ref || data.orderName));
         })
         .catch(function () {
           status.dataset.state = "error";
@@ -1183,8 +1179,14 @@
     }
 
     /* One order, one confirmation. Without this a reload — or a later visit
-       to the page from the menu — replays an order that is already handled. */
-    try { sessionStorage.removeItem("souq:lastOrder"); } catch (e) {}
+       to the page from the menu — replays an order that is already handled.
+
+       Cleared only on a real page load. The overlay path calls this straight
+       after writing the handover, and clearing it there would leave a shopper
+       who then refreshes with an empty summary. */
+    if (!root.hasAttribute("data-ty-overlay")) {
+      try { sessionStorage.removeItem("souq:lastOrder"); } catch (e) {}
+    }
   }
 
   /* Countdown on a promo panel.

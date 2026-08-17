@@ -1,0 +1,91 @@
+{%- comment -%}
+  The confirmation, rendered from one place.
+
+  It appears in two situations and must be the same thing in both: on the
+  page the merchant created for it, and — when they have not created one —
+  over the product page as soon as the order is placed. A shopper who orders
+  from a shop that skipped a setup step should not get a lesser confirmation
+  than one who orders from a shop that did.
+
+  So the copy lives in theme settings rather than in the page section: it is
+  one message per shop, not one per page. Steps come from blocks when a
+  section passes them, and from a sensible default set otherwise.
+
+  Params: steps (optional block array), heading_tag
+{%- endcomment -%}
+
+{%- liquid
+  assign h = heading_tag | default: 'h1'
+-%}
+
+<div class="ty__card" data-reveal data-celebrate>
+  <span class="ty__mark" aria-hidden="true">{% render 'icon', name: 'check' %}</span>
+
+  <{{ h }} class="ty__title">{{ settings.ty_title }}</{{ h }}>
+
+  {%- if settings.ty_lede != blank -%}
+    <p class="ty__lede">{{ settings.ty_lede }}</p>
+  {%- endif -%}
+
+  <p class="ty__ref" data-ty-ref hidden>
+    {% render 'icon', name: 'box-fill' %}
+    <span>{{ settings.ty_ref_label }} <b data-ty-ref-value></b></span>
+  </p>
+
+  {%- if steps != blank and steps.size > 0 -%}
+    <ol class="ty__steps" data-reveal-stagger>
+      {%- for block in steps -%}
+        <li class="ty__step{% if block.settings.done %} ty__step--done{% endif %}"
+            {{ block.shopify_attributes }}>
+          <span class="ty__step-dot" aria-hidden="true">
+            {% render 'icon', name: block.settings.icon %}
+          </span>
+          <span>
+            <span class="ty__step-title">{{ block.settings.title }}</span>
+            {%- if block.settings.text != blank -%}
+              <span class="ty__step-text">{{ block.settings.text }}</span>
+            {%- endif -%}
+          </span>
+        </li>
+      {%- endfor -%}
+    </ol>
+  {%- endif -%}
+
+  <dl class="ty__summary" data-ty-summary hidden>
+    <div class="ty__line">
+      <dt>{{ settings.ty_label_name }}</dt><dd data-ty-name></dd>
+    </div>
+    <div class="ty__line">
+      <dt>{{ settings.ty_label_phone }}</dt><dd data-ty-phone></dd>
+    </div>
+    <div class="ty__line">
+      <dt>{{ settings.ty_label_place }}</dt><dd data-ty-place></dd>
+    </div>
+    <div class="ty__line ty__line--total">
+      <dt>{{ settings.ty_label_total }}</dt><dd data-ty-total></dd>
+    </div>
+  </dl>
+
+  {%- if settings.ty_pay_note != blank -%}
+    <p class="ty__paynote">
+      {% render 'icon', name: 'cash-fill' %}
+      {{ settings.ty_pay_note }}
+    </p>
+  {%- endif -%}
+
+  <div class="ty__actions">
+    <a class="ty__btn ty__btn--primary" href="{{ routes.all_products_collection_url }}">
+      {{ settings.ty_cta_label }}
+    </a>
+    {%- if settings.social_whatsapp != blank -%}
+      <a class="ty__btn ty__btn--ghost" href="{{ settings.social_whatsapp }}">
+        {% render 'icon', name: 'headset' %}
+        {{ settings.ty_cta2_label | default: 'Nous écrire' }}
+      </a>
+    {%- endif -%}
+  </div>
+
+  {%- if settings.ty_help != blank -%}
+    <p class="ty__help">{{ settings.ty_help }}</p>
+  {%- endif -%}
+</div>

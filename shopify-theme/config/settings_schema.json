@@ -361,6 +361,74 @@
         "id": "cod_currency_suffix",
         "label": "Suffixe de devise",
         "default": "DA"
+      },
+      {
+        "type": "header",
+        "content": "Confirmation après commande"
+      },
+      {
+        "type": "paragraph",
+        "content": "Ce message s'affiche à l'acheteur dès que sa commande est enregistrée. Si vous avez créé une page avec le modèle « Confirmation de commande », il y est envoyé ; sinon le même écran s'ouvre par-dessus la page produit. Dans les deux cas le texte ci-dessous est celui qu'il lit."
+      },
+      {
+        "type": "text",
+        "id": "ty_title",
+        "label": "Titre",
+        "default": "Commande enregistrée"
+      },
+      {
+        "type": "textarea",
+        "id": "ty_lede",
+        "label": "Texte",
+        "default": "Merci. Nous vous appelons pour confirmer avant l'expédition. Vous ne payez rien avant de recevoir le colis."
+      },
+      {
+        "type": "text",
+        "id": "ty_ref_label",
+        "label": "Intitulé de la référence",
+        "default": "Référence :"
+      },
+      {
+        "type": "text",
+        "id": "ty_label_name",
+        "label": "Récap — nom",
+        "default": "Destinataire"
+      },
+      {
+        "type": "text",
+        "id": "ty_label_phone",
+        "label": "Récap — téléphone",
+        "default": "Téléphone"
+      },
+      {
+        "type": "text",
+        "id": "ty_label_place",
+        "label": "Récap — adresse",
+        "default": "Livraison"
+      },
+      {
+        "type": "text",
+        "id": "ty_label_total",
+        "label": "Récap — total",
+        "default": "À payer à la réception"
+      },
+      {
+        "type": "text",
+        "id": "ty_pay_note",
+        "label": "Rappel de paiement",
+        "default": "Aucun paiement en ligne. Vous payez le livreur, en espèces, après avoir vérifié le colis."
+      },
+      {
+        "type": "text",
+        "id": "ty_cta_label",
+        "label": "Bouton",
+        "default": "Continuer mes achats"
+      },
+      {
+        "type": "text",
+        "id": "ty_help",
+        "label": "Note d'aide",
+        "default": "Un doute sur votre commande ? Appelez-nous, nous répondons du samedi au jeudi."
       }
     ]
   },

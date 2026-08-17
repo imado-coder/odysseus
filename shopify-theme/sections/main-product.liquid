@@ -458,14 +458,20 @@
             {%- liquid
               assign spec_keys = ''
               assign spec_vals = ''
+              # Liquid assign has no block scope: naming these k and v
+              # overwrote `v`, the product variant this whole section runs on,
+              # from here to the end of the file. The mobile order form was
+              # then rendered with a spec string in place of the variant and
+              # shipped a unit price of 0 — the shopper reached the
+              # confirmation owing the delivery fee and nothing for the item.
               for i in (1..9)
-                assign kk = 'k' | append: i
-                assign vk = 'v' | append: i
-                assign k = spec_block.settings[kk]
-                assign v = spec_block.settings[vk]
-                if k != blank and v != blank
-                  assign spec_keys = spec_keys | append: '|' | append: k
-                  assign spec_vals = spec_vals | append: '|' | append: v
+                assign spec_kk = 'k' | append: i
+                assign spec_vk = 'v' | append: i
+                assign spec_k1 = spec_block.settings[spec_kk]
+                assign spec_v1 = spec_block.settings[spec_vk]
+                if spec_k1 != blank and spec_v1 != blank
+                  assign spec_keys = spec_keys | append: '|' | append: spec_k1
+                  assign spec_vals = spec_vals | append: '|' | append: spec_v1
                 endif
               endfor
 
@@ -1035,6 +1041,22 @@
   better in the abstract: a bar looks more like a checkout and a pill looks
   more like an offer, and the merchant knows which their shop is.
 {%- endcomment -%}
+{%- comment -%}
+  The confirmation, waiting.
+
+  A merchant who has not created the confirmation page still has a customer
+  who just placed an order, and that customer deserves the same screen — not
+  a smaller version of it. So the identical card is rendered here, hidden,
+  and takes over the viewport the moment the order lands. If the merchant HAS
+  created the page, the form navigates there instead and this never appears.
+{%- endcomment -%}
+{%- if cod_block_count > 0 and settings.cod_thanks_url == blank -%}
+  {{ 'thank-you.css' | asset_url | stylesheet_tag }}
+  <div class="ty ty--overlay" data-ty data-ty-overlay hidden>
+    {% render 'confirmation-card', heading_tag: 'h2' %}
+  </div>
+{%- endif -%}
+
 {%- if section.settings.show_mobile_bar -%}
   {%- if section.settings.mobile_bar_style == 'pill' -%}
     <div class="order-float" data-order-bar>

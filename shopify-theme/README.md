@@ -142,20 +142,26 @@ ne peut pas inventer vos délais ni vos conditions de retour à votre place.
 Les textes livrés par défaut sont des exemples cohérents avec le paiement à la
 livraison. Relisez-les et corrigez-les pour votre boutique avant d'ouvrir.
 
-### La page de confirmation
+### La confirmation après commande
 
 Après une commande, l'acheteur doit atterrir quelque part : rien n'a été payé,
-donc rien ne semble réglé. Le thème fournit cette page, mais elle demande une
-manipulation de votre part, une seule fois :
+donc rien ne semble réglé. **Cet écran s'affiche toujours**, que vous ayez créé
+une page ou non — c'est le même écran, avec les mêmes mots :
+
+- **sans page créée** : il s'ouvre par-dessus la fiche produit ;
+- **avec une page créée** : l'acheteur y est envoyé, et l'adresse reste dans
+  son historique s'il veut y revenir.
+
+Le texte se règle une seule fois dans `Paramètres du thème → Paiement à la
+livraison → Confirmation après commande`.
+
+Pour utiliser une vraie page (recommandé, l'acheteur peut la retrouver) :
 
 1. `Boutique en ligne → Pages → Ajouter une page`, titre « Merci ».
 2. Dans **Modèle de page**, choisissez `page.merci`.
 3. Enregistrez, puis copiez l'adresse de la page.
-4. `Personnaliser → Paramètres du thème → Paiement à la livraison → Page de
-   confirmation` : collez l'adresse.
-
-Sans cette adresse, le formulaire affiche simplement un message de réussite
-sous les champs — rien n'est cassé, mais l'acheteur reste sur la fiche produit.
+4. `Paramètres du thème → Paiement à la livraison → Page de confirmation` :
+   collez l'adresse.
 
 Le récapitulatif (référence, nom, téléphone, total) transite par la session du
 navigateur, pas par l'adresse de la page : une référence et un montant dans une
