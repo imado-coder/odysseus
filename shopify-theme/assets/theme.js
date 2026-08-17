@@ -223,9 +223,17 @@
       return deskChosen ? t[1] : t[0];
     }
 
+    /* Quantity breaks, keyed by quantity. Filled from the app; empty until it
+       answers, and empty forever for a product with no offers — in both cases
+       the arithmetic below is exactly what it was before offers existed. */
+    var offers = {};
+
     function recalc() {
       var n = Math.max(1, parseInt((qty && qty.value) || "1", 10));
-      var sub = unit * n;
+      /* An offer price is the total for the whole quantity, not a unit price.
+         The server re-reads the same row and charges from it, so this is a
+         display of the merchant's number, never the source of it. */
+      var sub = offers[n] != null ? offers[n] : unit * n;
       var chosen = wilaya && wilaya.value;
       var ship = chosen ? shippingFor() : null;
 
@@ -462,11 +470,60 @@
        runs after the first paint and never blocks it: on a slow or failed
        request the form keeps working on the setting's figures, which is what
        it did before this existed. */
-    codRates(form).then(function (table) {
-      if (!table) return;
-      tariffs = table;
+    codQuote(form).then(function (quote) {
+      if (!quote) return;
+      if (quote.rates && Object.keys(quote.rates).length) tariffs = quote.rates;
+      if (quote.offers && quote.offers.length) {
+        quote.offers.forEach(function (o) { offers[o.quantity] = o.price; });
+        paintOffers(quote.offers);
+      }
       recalc();
     });
+
+    /* The offers are drawn into the quantity control that already exists
+       rather than beside a second one: two places to choose a quantity is two
+       chances to send a number the customer did not mean. */
+    function paintOffers(list) {
+      if (!qty) return;
+      var host = form.querySelector("[data-cod-offers]");
+      if (!host) return;
+
+      host.innerHTML = list.map(function (o) {
+        return '<button class="cod-offer" type="button" data-offer-qty="' +
+          o.quantity + '"' + (o.featured ? ' data-featured="true"' : "") + ">" +
+          '<span class="cod-offer__n">' + o.quantity + "×</span>" +
+          '<span class="cod-offer__p">' + money(o.price) + "</span>" +
+          (o.badge
+            ? '<span class="cod-offer__badge">' + o.badge + "</span>"
+            : "") +
+        "</button>";
+      }).join("");
+
+      host.hidden = false;
+
+      host.addEventListener("click", function (e) {
+        var b = e.target.closest("[data-offer-qty]");
+        if (!b) return;
+        qty.value = b.getAttribute("data-offer-qty");
+        markOffer();
+        recalc();
+      });
+
+      markOffer();
+      qty.addEventListener("change", markOffer);
+    }
+
+    function markOffer() {
+      var host = form.querySelector("[data-cod-offers]");
+      if (!host) return;
+      var n = String(Math.max(1, parseInt(qty.value || "1", 10)));
+      [].forEach.call(host.querySelectorAll("[data-offer-qty]"), function (b) {
+        b.setAttribute(
+          "aria-pressed",
+          b.getAttribute("data-offer-qty") === n ? "true" : "false",
+        );
+      });
+    }
   }
 
   /* One request per endpoint per page, shared by every form on it — a product
@@ -474,23 +531,30 @@
      the same answer. */
   var ratesCache = {};
 
-  function codRates(form) {
+  function codQuote(form) {
     var endpoint = form.dataset.endpoint;
     var shopField = form.querySelector('[name="shop"]');
     var shop = shopField && shopField.value;
     if (!endpoint || !shop) return Promise.resolve(null);
 
+    /* Shipping table and quantity breaks in one request: the form needs both
+       before it can show a total, and two round trips on a phone connection
+       is two chances to show the customer a number that then changes. */
+    var productField = form.querySelector('[name="product_id"]');
+    var product = productField && productField.value;
+
     var url = endpoint + (endpoint.indexOf("?") === -1 ? "?" : "&") +
-      "shop=" + encodeURIComponent(shop);
+      "shop=" + encodeURIComponent(shop) +
+      (product ? "&product=gid://shopify/Product/" + encodeURIComponent(product) : "");
 
     if (!ratesCache[url]) {
       ratesCache[url] = fetch(url, { headers: { Accept: "application/json" } })
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (d) {
-          /* Only a table with something in it replaces the setting. An empty
-             object would silently drop every wilaya to the fallback price. */
-          if (!d || !d.rates || !Object.keys(d.rates).length) return null;
-          return d.rates;
+          /* An empty rates table is treated as no answer rather than applied:
+             applying it would silently drop every wilaya to the fallback. */
+          if (!d) return null;
+          return d;
         })
         .catch(function () { return null; });
     }

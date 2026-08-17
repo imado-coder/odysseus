@@ -215,6 +215,15 @@
     {%- endif -%}
 
     {%- if f_show_qty -%}
+      {%- comment -%}
+        Quantity breaks land here, next to the quantity control rather than
+        beside a second one — two places to choose a quantity is two chances to
+        send a number the customer did not mean. Hidden until the app answers,
+        and it stays hidden for a product with no offers, so a shop that never
+        sets any sees exactly the form it saw before.
+      {%- endcomment -%}
+      <div class="cod-offers" data-cod-offers hidden></div>
+
       <div class="cod__row cod__row--2">
         <div class="field">
           <label class="field__label" for="{{ id }}-qte">{{ f_label_qty }}</label>

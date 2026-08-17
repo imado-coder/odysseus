@@ -219,17 +219,32 @@ enum ShipmentState {
 }
 
 /// Quantity-break pricing: buy 2 for X, buy 3 for Y.
+///
+/// `price` is the total for the whole quantity, not the unit price — "3 for
+/// 5000 DA" is one row with quantity 3 and price 5000. Storing it per unit
+/// would mean rounding a merchant's round number into thirds and charging
+/// something they never typed.
+///
+/// The storefront shows these, but the order endpoint does not trust what it
+/// sends back: it looks the offer up again by (shop, product, quantity) and
+/// charges what it finds. A price that arrives in a request is a suggestion.
 model Offer {
-  id        String   @id @default(cuid())
+  id        String  @id @default(cuid())
   shopId    String
-  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  shop      Shop    @relation(fields: [shopId], references: [id], onDelete: Cascade)
   productId String // Shopify GID
   quantity  Int
   price     Int
   label     String?
   badge     String?
-  featured  Boolean  @default(false)
+  featured  Boolean @default(false)
+
+  /// Turned off rather than deleted, so an offer can end without erasing the
+  /// reason an old order was priced the way it was.
+  enabled Boolean @default(true)
+
   createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@unique([shopId, productId, quantity])
   @@index([shopId, productId])

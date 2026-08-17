@@ -349,9 +349,10 @@ Deno.serve(async (request: Request) => {
     /* With a shop, this is the storefront asking what delivery costs, so that
        the price it quotes is the price this endpoint will charge. Without one,
        it is a person or a monitor asking whether the thing is alive. */
-    const shop = new URL(request.url).searchParams.get("shop");
+    const q = new URL(request.url).searchParams;
+    const shop = q.get("shop");
     return shop
-      ? await rates(shop.toLowerCase())
+      ? await rates(shop.toLowerCase(), q.get("product"))
       : json({ ok: true, service: "mitos-cod" });
   }
   if (request.method !== "POST") {
@@ -511,12 +512,12 @@ async function handle(request: Request) {
       .filter(([, price]) => price > 0),
   );
 
-  const items = lead.items.map((i) => {
+  const priced = lead.items.map((i) => {
     const gid = toVariantGid(i.variantId);
     const node = nodes.find((n) => n.id === gid);
     return {
       variantId: gid,
-      productId: node?.product?.id ?? null,
+      productId: (node?.product?.id ?? null) as string | null,
       title: node?.product?.title ?? "",
       option: node?.title ?? "",
       price: pricesVerified ? priceOf.get(gid) ?? 0 : claimed.get(gid) ?? 0,
@@ -524,7 +525,47 @@ async function handle(request: Request) {
     };
   });
 
-  const subtotal = items.reduce((n, i) => n + i.price * i.qty, 0);
+  /* Quantity breaks are applied here, from the table — never from the request.
+     The storefront shows "3 for 5000" and sends a quantity; what that quantity
+     costs is decided by looking the offer up again. An offer price arriving in
+     a payload is a suggestion, exactly like a shipping total is.
+
+     A line with no offer — or one priced while Shopify was unreachable, and so
+     carrying no productId — falls back to unit x quantity. */
+  const productIds = [
+    ...new Set(priced.map((i) => i.productId).filter(Boolean)),
+  ] as string[];
+
+  const offerRows = productIds.length
+    ? await sql`
+        SELECT "productId", quantity, price
+          FROM "Offer"
+         WHERE "shopId" = ${shop.id}
+           AND enabled = true
+           AND "productId" IN ${sql(productIds)}
+      `
+    : [];
+
+  const offerFor = new Map<string, number>(
+    offerRows.map((
+      o: { productId: string; quantity: number; price: number },
+    ) => [`${o.productId}:${o.quantity}`, o.price]),
+  );
+
+  const items = priced.map((i) => {
+    const offer = i.productId
+      ? offerFor.get(`${i.productId}:${i.qty}`)
+      : undefined;
+    return {
+      ...i,
+      /* Kept beside the unit price so a lead read months later still shows
+         why it cost what it did. */
+      offerPrice: offer ?? null,
+      lineTotal: offer ?? i.price * i.qty,
+    };
+  });
+
+  const subtotal = items.reduce((n, i) => n + i.lineTotal, 0);
   const total = subtotal + shipping;
 
   const leadId = crypto.randomUUID();
@@ -624,7 +665,7 @@ async function handle(request: Request) {
  * Public, like the rest of this function: a delivery price is on the page
  * already. Nothing here is per-customer.
  */
-async function rates(domain: string) {
+async function rates(domain: string, productId: string | null) {
   const [shop] = await sql`
     SELECT s.id, st."defaultHomeRate", st."defaultDeskRate"
       FROM "Shop" s
@@ -657,6 +698,20 @@ async function rates(domain: string) {
     table[r.wilayaCode] = [r.homeRate, r.deskRate];
   }
 
+  /* Quantity breaks for the product being viewed. The storefront shows these;
+     it does not get to decide what they cost — the order path looks the same
+     rows up again and charges what it finds there. */
+  const offers = productId
+    ? await sql`
+        SELECT quantity, price, label, badge, featured
+          FROM "Offer"
+         WHERE "shopId" = ${shop.id}
+           AND "productId" = ${productId}
+           AND enabled = true
+         ORDER BY quantity
+      `
+    : [];
+
   return json({
     ok: true,
     rates: table,
@@ -664,5 +719,6 @@ async function rates(domain: string) {
       shop.defaultHomeRate ?? 600,
       shop.defaultDeskRate ?? 350,
     ],
+    offers,
   });
 }

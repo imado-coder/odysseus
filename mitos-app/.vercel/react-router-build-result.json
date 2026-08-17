@@ -17,7 +17,8 @@
       "routes/auth.$": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/app.settings": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/app.shipping": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
-      "routes/app._index": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0"
+      "routes/app._index": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/app.offers": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0"
     },
     "routes": {
       "root": {
@@ -104,6 +105,15 @@
         "config": {
           "runtime": "nodejs"
         }
+      },
+      "routes/app.offers": {
+        "id": "routes/app.offers",
+        "parentId": "routes/app",
+        "file": "app/routes/app.offers.tsx",
+        "path": "offers",
+        "config": {
+          "runtime": "nodejs"
+        }
       }
     }
   },
@@ -179,6 +189,12 @@
         "parentId": "routes/app",
         "file": "routes/app._index.tsx",
         "index": true
+      },
+      "routes/app.offers": {
+        "id": "routes/app.offers",
+        "parentId": "routes/app",
+        "file": "routes/app.offers.tsx",
+        "path": "offers"
       }
     },
     "routeDiscovery": {
@@ -240,6 +256,11 @@
                 "id": "routes/app._index",
                 "file": "routes/app._index.tsx",
                 "index": true
+              },
+              {
+                "id": "routes/app.offers",
+                "file": "routes/app.offers.tsx",
+                "path": "offers"
               }
             ]
           }

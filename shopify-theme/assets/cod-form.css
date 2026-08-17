@@ -621,3 +621,67 @@ textarea.field__control {
   line-height: 1.4;
   max-inline-size: 26ch;
 }
+
+/* ── Quantity breaks ────────────────────────────────────────────────────────
+   Cards, not a second select. They sit above the quantity control and drive
+   it, so whichever the shopper touches there is one number leaving the form.
+
+   `hidden` is honoured explicitly: a component that sets its own display wins
+   over the user-agent rule, and this one would otherwise show an empty strip
+   on every product without offers. */
+.cod-offers[hidden] { display: none; }
+
+.cod-offers {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(5.5rem, 1fr);
+  gap: .5rem;
+  margin-bottom: .75rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.cod-offers::-webkit-scrollbar { display: none; }
+
+.cod-offer {
+  position: relative;
+  display: grid;
+  gap: .125rem;
+  justify-items: center;
+  min-height: 64px;
+  padding: .5rem .375rem;
+  border: 1.5px solid var(--c-border);
+  border-radius: 12px;
+  background: var(--c-surface);
+  color: var(--c-ink);
+  font: inherit;
+  cursor: pointer;
+}
+.cod-offer[aria-pressed="true"] {
+  border-color: var(--c-accent-btn, var(--c-accent));
+  background: var(--c-trust-tint, #f4f8f2);
+}
+
+.cod-offer__n {
+  font-weight: 700;
+  font-size: .9375rem;
+  /* A digit next to a times sign inside Arabic copy reorders without this. */
+  unicode-bidi: plaintext;
+}
+.cod-offer__p {
+  font-weight: 600;
+  font-size: .8125rem;
+  font-variant-numeric: tabular-nums;
+  unicode-bidi: plaintext;
+}
+.cod-offer__badge {
+  position: absolute;
+  inset-block-start: -.5rem;
+  inset-inline-end: -.25rem;
+  padding: .0625rem .3125rem;
+  border-radius: 999px;
+  background: var(--c-sale, #ff4438);
+  color: #fff;
+  font-size: .625rem;
+  font-weight: 700;
+  white-space: nowrap;
+}

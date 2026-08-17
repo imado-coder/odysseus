@@ -82,6 +82,23 @@ export async function loader({ request }: LoaderFunctionArgs) {
     rates[r.wilayaCode] = [r.homeRate, r.deskRate];
   }
 
+  /* Quantity breaks for the product being viewed. Shown by the storefront,
+     re-read and re-priced by the action below. */
+  const productId = new URL(request.url).searchParams.get("product");
+  const offers = productId
+    ? await prisma.offer.findMany({
+        where: { shopId: shop.id, productId, enabled: true },
+        orderBy: { quantity: "asc" },
+        select: {
+          quantity: true,
+          price: true,
+          label: true,
+          badge: true,
+          featured: true,
+        },
+      })
+    : [];
+
   return json({
     ok: true,
     rates,
@@ -89,6 +106,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       shop.settings?.defaultHomeRate ?? 600,
       shop.settings?.defaultDeskRate ?? 350,
     ],
+    offers,
   });
 }
 
@@ -244,12 +262,12 @@ async function handle({ request }: ActionFunctionArgs) {
       .filter(([, price]) => price > 0),
   );
 
-  const items = lead.items.map((i) => {
+  const priced = lead.items.map((i) => {
     const gid = toVariantGid(i.variantId);
     const node = nodes.find((n: { id: string }) => n.id === gid);
     return {
       variantId: gid,
-      productId: node?.product?.id ?? null,
+      productId: (node?.product?.id ?? null) as string | null,
       title: node?.product?.title ?? "",
       option: node?.title ?? "",
       price: pricesVerified ? priceOf.get(gid) ?? 0 : claimed.get(gid) ?? 0,
@@ -257,7 +275,44 @@ async function handle({ request }: ActionFunctionArgs) {
     };
   });
 
-  const subtotal = items.reduce((n, i) => n + i.price * i.qty, 0);
+  /* Quantity breaks are applied here, from the table — never from the request.
+     The storefront shows "3 for 5000" and sends a quantity; what that quantity
+     costs is decided by looking the offer up again. An offer price arriving in
+     a payload is a suggestion, exactly like a shipping total is.
+
+     A line with no offer — or one priced while Shopify was unreachable, and so
+     carrying no productId — falls back to unit x quantity.
+
+     Kept in step with supabase/functions/cod/index.ts. */
+  const productIds = [
+    ...new Set(priced.map((i) => i.productId).filter(Boolean)),
+  ] as string[];
+
+  const offerRows = productIds.length
+    ? await prisma.offer.findMany({
+        where: { shopId: shop.id, enabled: true, productId: { in: productIds } },
+        select: { productId: true, quantity: true, price: true },
+      })
+    : [];
+
+  const offerFor = new Map(
+    offerRows.map((o) => [`${o.productId}:${o.quantity}`, o.price]),
+  );
+
+  const items = priced.map((i) => {
+    const offer = i.productId
+      ? offerFor.get(`${i.productId}:${i.qty}`)
+      : undefined;
+    return {
+      ...i,
+      /* Kept beside the unit price so a lead read months later still shows
+         why it cost what it did. */
+      offerPrice: offer ?? null,
+      lineTotal: offer ?? i.price * i.qty,
+    };
+  });
+
+  const subtotal = items.reduce((n, i) => n + i.lineTotal, 0);
   const total = subtotal + shipping;
 
   const record = await prisma.lead.create({
