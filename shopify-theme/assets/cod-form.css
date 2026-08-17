@@ -575,3 +575,49 @@ textarea.field__control {
      phone type floor belongs here to win. */
   .cod-cta__note { font-size: 12px; }
 }
+
+/* ==========================================================================
+   Inline confirmation
+
+   Shown when the merchant has not configured a confirmation page. An order is
+   the one action on this storefront that must never leave the shopper
+   guessing, so the form gives up its whole panel rather than reporting the
+   result in a line of text beneath fields the shopper has stopped reading.
+   ========================================================================== */
+.cod-done {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding: 44px 20px 48px;
+  text-align: center;
+}
+
+.cod-done__mark {
+  inline-size: 68px;
+  block-size: 68px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--c-trust-tint, #eaf7e6);
+  color: var(--c-trust, #0a8800);
+}
+
+.cod-done__mark svg { inline-size: 34px; block-size: 34px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .cod-done__mark { animation: cod-done-pop 420ms cubic-bezier(0.2, 1.5, 0.4, 1); }
+  .cod-done__mark path {
+    stroke-dasharray: 24;
+    stroke-dashoffset: 24;
+    animation: cod-done-draw 420ms 140ms ease forwards;
+  }
+  @keyframes cod-done-pop { from { transform: scale(0.7); } to { transform: none; } }
+  @keyframes cod-done-draw { to { stroke-dashoffset: 0; } }
+}
+
+.cod-done__title {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.4;
+  max-inline-size: 26ch;
+}

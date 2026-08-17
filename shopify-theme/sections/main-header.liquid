@@ -94,6 +94,13 @@
     {%- endif -%}
 
     <div class="mhead__end">
+      {%- comment -%}
+        The shopper's own language choice, first in the action group so it is
+        found before anything else — someone who cannot read the header cannot
+        navigate to a switch buried behind it.
+      {%- endcomment -%}
+      {% render 'lang-switch' %}
+
       {%- if section.settings.show_account -%}
         <a class="mhead__acct" href="{{ routes.account_url }}">
           <span class="mhead__avatar" aria-hidden="true">

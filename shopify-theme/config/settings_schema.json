@@ -211,6 +211,29 @@
           }
         ],
         "default": "ltr"
+      },
+      {
+        "type": "header",
+        "content": "Choix de langue par le visiteur"
+      },
+      {
+        "type": "checkbox",
+        "id": "lang_switch_enabled",
+        "label": "Afficher le sélecteur de langue",
+        "info": "Laisse l'acheteur basculer la boutique entre français et arabe, et retient son choix. Il change le sens de lecture et la typographie — pas vos textes : pour ceux-là, assignez le modèle « product.arabe » à vos produits. Décochez si votre boutique n'existe qu'en une seule langue.",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "lang_a_label",
+        "label": "Libellé — français",
+        "default": "FR"
+      },
+      {
+        "type": "text",
+        "id": "lang_b_label",
+        "label": "Libellé — arabe",
+        "default": "ع"
       }
     ]
   },

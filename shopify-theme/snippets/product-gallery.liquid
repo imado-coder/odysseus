@@ -77,6 +77,13 @@
         </a>
       </div>
       <div class="gallery__float-group">
+        {%- comment -%}
+          Immersive mode hides the whole header group so the photo can start at
+          the top of the screen — which also removes the language switch from
+          the one page a shopper spends the most time on. These floating
+          controls ARE the header here, so the switch belongs among them.
+        {%- endcomment -%}
+        {% render 'lang-switch' %}
         <a class="gfab" href="{{ routes.search_url }}"
            aria-label="{{ 'general.search.search' | t }}">
           {% render 'icon', name: 'search' %}

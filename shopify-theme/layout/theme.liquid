@@ -39,6 +39,27 @@
     {%- endcomment -%}
     {% render 'arabic-type' %}
 
+    {%- comment -%}
+      Direction, before first paint.
+
+      Every other script here is deferred, which is right for behaviour and
+      wrong for this: a returning Arabic reader would get a frame of the
+      French layout, then a flip. This one runs where it stands, reads the
+      shopper's stored choice and sets the attribute the whole stylesheet
+      keys on. It is four lines and touches nothing else.
+    {%- endcomment -%}
+    <script>
+      (function () {
+        try {
+          var d = localStorage.getItem("souq:dir");
+          if (d === "rtl" || d === "ltr") {
+            document.documentElement.setAttribute("dir", d);
+            document.documentElement.setAttribute("lang", d === "rtl" ? "ar" : "{{ request.locale.iso_code }}");
+          }
+        } catch (e) {}
+      })();
+    </script>
+
     <script src="{{ 'theme.js' | asset_url }}" defer="defer"></script>
   </head>
 

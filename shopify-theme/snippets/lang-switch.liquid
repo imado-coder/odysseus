@@ -1,0 +1,36 @@
+{%- comment -%}
+  Language switch.
+
+  The shopper chooses, not the shop. In this market a household reads French
+  and Arabic in different proportions per person, and the merchant cannot know
+  which of the two the visitor in front of them prefers — so the storefront
+  offers both and remembers the answer.
+
+  What it switches is DIRECTION and TYPEFACE, which is everything the theme
+  itself controls. It does not translate the merchant's own copy: that copy
+  lives in the template, and only the merchant can write it in a second
+  language. A switch that flipped the layout and left French text behind
+  would be worse than none, so a shop that has not provided Arabic copy can
+  turn this off — and it is off until they do.
+
+  The choice is stored in localStorage and applied before first paint by the
+  inline script in the layout head, so a returning Arabic reader never sees a
+  frame of the French layout first.
+{%- endcomment -%}
+
+{%- if settings.lang_switch_enabled -%}
+  {%- liquid
+    assign default_dir = settings.text_direction | default: 'ltr'
+    assign label_a = settings.lang_a_label | default: 'FR'
+    assign label_b = settings.lang_b_label | default: 'ع'
+  -%}
+
+  <div class="langsw" data-lang-switch data-default-dir="{{ default_dir }}">
+    <button class="langsw__opt" type="button" data-lang="ltr"
+            aria-pressed="{% if default_dir == 'ltr' %}true{% else %}false{% endif %}"
+            lang="fr">{{ label_a }}</button>
+    <button class="langsw__opt" type="button" data-lang="rtl"
+            aria-pressed="{% if default_dir == 'rtl' %}true{% else %}false{% endif %}"
+            lang="ar">{{ label_b }}</button>
+  </div>
+{%- endif -%}

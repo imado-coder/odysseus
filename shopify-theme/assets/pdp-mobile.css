@@ -1330,3 +1330,22 @@ html:not(.js) .bb__title-more { grid-template-rows: 1fr; }
    nature, the merchant's value is not. */
 .pdetails__cell { min-inline-size: 0; padding-block: 10px; }
 .pdetails__val { overflow-wrap: anywhere; }
+
+/* The language switch riding with the floating gallery controls. It has to
+   read against an unknown photograph, so it takes the same smoked backdrop
+   the buttons beside it use rather than the header's translucent white. */
+@media (max-width: 989px) {
+  .gallery__float .langsw {
+    background: rgba(16, 20, 24, 0.42);
+    border-color: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(6px);
+    color: #fff;
+  }
+
+  .gallery__float .langsw__opt { min-block-size: 44px; min-inline-size: 44px; }
+
+  .gallery__float .langsw__opt[aria-pressed="true"] {
+    background: #fff;
+    color: var(--c-ink, #101418);
+  }
+}

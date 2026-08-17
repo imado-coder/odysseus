@@ -14,6 +14,15 @@
     assign col = collection
   endif
 
+  # Nothing chosen is the state every shop starts in, and it was rendering an
+  # empty homepage — collections[nil] is nil, so the section decided it had
+  # nothing to show and printed nothing at all. Every Shopify store has the
+  # "all" collection, so an unconfigured grid falls back to it and the shop
+  # has products on its front page from the first minute.
+  if col == blank or col.products.size == 0
+    assign col = collections.all
+  endif
+
   assign shown = col.products.size
   if shown > section.settings.count
     assign shown = section.settings.count

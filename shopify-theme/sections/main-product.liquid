@@ -632,54 +632,6 @@
           {%- endif -%}
 
           {%- comment -%}
-            Related products.
-
-            A shopper who has read this far and not ordered is about to
-            leave; the only thing worth showing them is another product. The
-            source is the merchant's choice because "related" means different
-            things per shop: a collection they curate, or — with nothing
-            chosen — whatever else is in the collection this product was
-            reached through, which needs no setup at all.
-
-            Reuses the catalog card, so one card setting still governs every
-            grid on the storefront.
-          {%- endcomment -%}
-          {%- if section.settings.show_related -%}
-            {%- liquid
-              assign related_source = collections[section.settings.related_collection]
-              if related_source == blank or related_source.products.size == 0
-                assign related_source = collection
-              endif
-              if related_source == blank or related_source.products.size == 0
-                assign related_source = collections.all
-              endif
-              assign related_limit = section.settings.related_count | default: 6
-              # One extra is fetched because this product is filtered back out
-              # of its own list, which would otherwise leave a short last row.
-              assign related_fetch = related_limit | plus: 1
-              assign related_shown = 0
-            -%}
-
-            {%- capture related_cards -%}
-              {%- for other in related_source.products limit: related_fetch -%}
-                {%- if other.id != product.id and related_shown < related_limit -%}
-                  {%- assign related_shown = related_shown | plus: 1 -%}
-                  {% render 'product-card', card: other, index: forloop.index0 %}
-                {%- endif -%}
-              {%- endfor -%}
-            {%- endcapture -%}
-
-            {%- if related_shown > 0 -%}
-              <section class="related" data-reveal aria-labelledby="Rel-{{ section.id }}">
-                <h2 class="related__title" id="Rel-{{ section.id }}">
-                  {{ section.settings.related_title }}
-                </h2>
-                <div class="cgrid" data-reveal-stagger>{{ related_cards }}</div>
-              </section>
-            {%- endif -%}
-          {%- endif -%}
-
-          {%- comment -%}
             Reviews. Shopify has no review object of its own, so these are
             blocks the merchant fills in — which also means they must never be
             presented as verified by anyone but the merchant.
@@ -753,6 +705,54 @@
                 </article>
               {%- endfor -%}
             </section>
+          {%- comment -%}
+            Related products.
+
+            A shopper who has read this far and not ordered is about to
+            leave; the only thing worth showing them is another product. The
+            source is the merchant's choice because "related" means different
+            things per shop: a collection they curate, or — with nothing
+            chosen — whatever else is in the collection this product was
+            reached through, which needs no setup at all.
+
+            Reuses the catalog card, so one card setting still governs every
+            grid on the storefront.
+          {%- endcomment -%}
+          {%- if section.settings.show_related -%}
+            {%- liquid
+              assign related_source = collections[section.settings.related_collection]
+              if related_source == blank or related_source.products.size == 0
+                assign related_source = collection
+              endif
+              if related_source == blank or related_source.products.size == 0
+                assign related_source = collections.all
+              endif
+              assign related_limit = section.settings.related_count | default: 6
+              # One extra is fetched because this product is filtered back out
+              # of its own list, which would otherwise leave a short last row.
+              assign related_fetch = related_limit | plus: 1
+              assign related_shown = 0
+            -%}
+
+            {%- capture related_cards -%}
+              {%- for other in related_source.products limit: related_fetch -%}
+                {%- if other.id != product.id and related_shown < related_limit -%}
+                  {%- assign related_shown = related_shown | plus: 1 -%}
+                  {% render 'product-card', card: other, index: forloop.index0 %}
+                {%- endif -%}
+              {%- endfor -%}
+            {%- endcapture -%}
+
+            {%- if related_shown > 0 -%}
+              <section class="related" data-reveal aria-labelledby="Rel-{{ section.id }}">
+                <h2 class="related__title" id="Rel-{{ section.id }}">
+                  {{ section.settings.related_title }}
+                </h2>
+                <div class="cgrid" data-reveal-stagger>{{ related_cards }}</div>
+              </section>
+            {%- endif -%}
+          {%- endif -%}
+
           {%- endif -%}
         </div>
       {%- endif -%}

@@ -338,16 +338,59 @@
           }));
         } catch (e) { /* private mode: the page falls back to its static copy */ }
         var to = form.dataset.thanksUrl;
-        if (to) window.location.assign(to);
-        return !!to;
+        if (to) {
+          window.location.assign(to);
+          return true;
+        }
+
+        /* No confirmation page configured. Rather than leave the shopper on a
+           form with a line of text under it, the form itself becomes the
+           confirmation — same words, same reassurance, taking the whole panel
+           so there is no doubt the order was placed. It is the merchant's one
+           missing setting, and it must not read to their customer as a
+           failure. */
+        showInlineConfirmation();
+        return false;
       }
 
+      function showInlineConfirmation() {
+        var panel = form.closest(".cod-sheet__panel") || form.parentElement;
+        if (!panel || panel.querySelector("[data-cod-done]")) return;
+
+        var done = document.createElement("div");
+        done.className = "cod-done";
+        done.setAttribute("data-cod-done", "");
+        done.setAttribute("role", "status");
+        done.innerHTML =
+          '<span class="cod-done__mark" aria-hidden="true">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" ' +
+          'stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>' +
+          "</span>" +
+          '<p class="cod-done__title">' +
+          (form.dataset.msgSuccess || "Commande enregistrée") +
+          "</p>";
+
+        form.hidden = true;
+        panel.appendChild(done);
+        done.scrollIntoView({ block: "center", behavior: "smooth" });
+      }
+
+      /* No endpoint yet — the app supplies it later. The order still has to
+         END somewhere: a shopper who fills seven fields, presses the button
+         and gets a sentence under it has no idea whether anything happened.
+         So the handover and the confirmation run exactly as they do with an
+         endpoint; only the record-keeping is missing, and the merchant is the
+         one who knows that. */
       if (!endpoint) {
         submit.removeAttribute("aria-busy");
         status.dataset.state = "success";
         status.textContent =
           form.dataset.msgPending ||
           "Formulaire valide. En attente de la connexion à l'application COD.";
+        form.reset();
+        fillCommunes();
+        recalc();
+        handOver(null);
         return;
       }
 
@@ -909,6 +952,51 @@
   }
 
   /* ----------------------------------------------------------------------
+     Language switch.
+
+     Direction and typeface are what the theme controls, so that is what this
+     switches — instantly, with no reload, because everything downstream keys
+     off the dir attribute and logical properties. The choice is remembered so
+     a returning shopper never has to make it twice; the layout head applies
+     it before first paint.
+
+     The merchant's own copy is not translated here. That lives in the
+     template and only they can write it in a second language — see the
+     product.arabe template.
+     ---------------------------------------------------------------------- */
+  function initLangSwitch(root) {
+    var buttons = [].slice.call(root.querySelectorAll("[data-lang]"));
+    if (!buttons.length) return;
+
+    function apply(dir, remember) {
+      document.documentElement.setAttribute("dir", dir);
+      document.documentElement.setAttribute("lang", dir === "rtl" ? "ar" : root.dataset.pageLang || "fr");
+      /* Every switch on the page, not only the one that was tapped. A product
+         page carries two — the header's and the one riding with the gallery
+         controls — and leaving the other showing the opposite state tells the
+         shopper the language did not change. */
+      document.querySelectorAll("[data-lang]").forEach(function (b) {
+        b.setAttribute("aria-pressed", String(b.dataset.lang === dir));
+      });
+      if (remember) {
+        try { localStorage.setItem("souq:dir", dir); } catch (e) {}
+      }
+      /* Anything that measured itself against the old direction gets a chance
+         to measure again — the sticky buy box and the pill rails both do. */
+      window.dispatchEvent(new Event("resize"));
+    }
+
+    /* Reflect what the head script already applied, without writing it back. */
+    var stored = null;
+    try { stored = localStorage.getItem("souq:dir"); } catch (e) {}
+    apply(stored || document.documentElement.getAttribute("dir") || root.dataset.defaultDir || "ltr", false);
+
+    buttons.forEach(function (b) {
+      b.addEventListener("click", function () { apply(b.dataset.lang, true); });
+    });
+  }
+
+  /* ----------------------------------------------------------------------
      Price countdown.
 
      The saving is the argument, so the page makes it once, in the open: the
@@ -926,10 +1014,14 @@
   function initPriceCount(el) {
     var from = parseFloat(el.dataset.from);
     var to = parseFloat(el.dataset.to);
+
+    /* No discount, nothing to count down from. A price that "falls" from
+       itself is a lie the shopper can check, so the animation simply does not
+       run — and the merchant sees a still price because their product has no
+       compare-at price set, which is Shopify data rather than a theme bug. */
     if (!isFinite(from) || !isFinite(to) || from <= to) return;
 
     var finalText = el.textContent;
-    /* Digits with any grouping or decimal separator between them. */
     var match = finalText.match(/[\d][\d\s.,\u00a0\u202f]*\d|\d/);
     if (!match) return;
 
@@ -937,8 +1029,6 @@
     var prefix = finalText.slice(0, match.index);
     var suffix = finalText.slice(match.index + numeric.length);
 
-    /* The last separator followed by one or two digits at the end is the
-       decimal mark; anything else in the run is grouping. */
     var dec = numeric.match(/([.,])(\d{1,2})$/);
     var decimals = dec ? dec[2].length : 0;
     var decimalMark = dec ? dec[1] : ".";
@@ -952,8 +1042,11 @@
       return prefix + whole + (decimals ? decimalMark + parts[1] : "") + suffix;
     }
 
-    var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce || !("IntersectionObserver" in window)) return;
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!("IntersectionObserver" in window)) return;
+
+    var row = el.closest("[data-price-row]") || el.parentElement;
+    var was = row && row.querySelector(".bb__price-was, s");
 
     var ran = false;
     var io = new IntersectionObserver(function (entries) {
@@ -966,30 +1059,60 @@
     }, { threshold: 0.6 });
     io.observe(el);
 
+    /* Split the settled price into one span per character so each digit can
+       roll on its own. Non-digits are marked so they hold still — a currency
+       symbol tumbling alongside the numerals reads as a glitch. */
+    function odometer(text) {
+      el.textContent = "";
+      var frag = document.createDocumentFragment();
+      var digitIndex = 0;
+      for (var i = 0; i < text.length; i++) {
+        var ch = text[i];
+        var span = document.createElement("span");
+        span.className = "podo__c";
+        span.textContent = ch;
+        if (/\d/.test(ch)) {
+          span.classList.add("podo__d");
+          /* Left to right, so the eye follows the number settling the way it
+             would on a physical counter. */
+          span.style.setProperty("--d", digitIndex * 45 + "ms");
+          digitIndex++;
+        }
+        frag.appendChild(span);
+      }
+      el.appendChild(frag);
+      el.classList.add("podo");
+    }
+
     function run() {
-      var duration = Math.min(1400, Math.max(700, (from - to) * 0.35));
+      var duration = Math.min(1500, Math.max(800, (from - to) * 0.4));
       var start = 0;
       el.dataset.counting = "true";
+
+      /* The old price is struck through as the new one falls — the line is
+         drawn across rather than already being there, so the shopper watches
+         the previous price get cancelled. */
+      if (was) was.dataset.striking = "true";
 
       function frame(now) {
         if (!start) start = now;
         var t = Math.min(1, (now - start) / duration);
-        /* Ease out quart: most of the distance early, so the eye reads the
-           drop as decisive rather than as a slot machine winding down. */
         var eased = 1 - Math.pow(1 - t, 4);
         el.textContent = render(from + (to - from) * eased);
         if (t < 1) return requestAnimationFrame(frame);
 
-        el.textContent = finalText;
+        /* Landing: the settled figure is rebuilt as rolling digits, so the
+           last thing the eye sees is each numeral dropping into place. */
+        odometer(finalText);
         delete el.dataset.counting;
-        /* The landing is the point of the whole effect: the row it lives in
-           reacts, so the saving registers as an event rather than a number
-           that quietly changed. */
-        var row = el.closest("[data-price-row]") || el.parentElement;
         if (row) {
           row.dataset.landed = "true";
-          setTimeout(function () { delete row.dataset.landed; }, 700);
+          setTimeout(function () { delete row.dataset.landed; }, 900);
         }
+        setTimeout(function () {
+          el.classList.remove("podo");
+          el.textContent = finalText;
+        }, 900);
       }
       requestAnimationFrame(frame);
     }
@@ -1159,6 +1282,7 @@
     initReveal();
     initAddToCart();
     document.querySelectorAll("[data-cart-drawer]").forEach(initCartDrawer);
+    document.querySelectorAll("[data-lang-switch]").forEach(initLangSwitch);
     document.querySelectorAll("[data-ty]").forEach(initThanks);
     document.querySelectorAll("[data-price-count]").forEach(initPriceCount);
     document.querySelectorAll("[data-count-to]").forEach(initCountUp);

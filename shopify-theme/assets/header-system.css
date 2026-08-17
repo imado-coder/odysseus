@@ -1128,3 +1128,54 @@
     .ubar__item:first-child { opacity: 1; }
   }
 }
+
+/* ==========================================================================
+   Language switch
+   A two-state segment rather than a dropdown: with exactly two languages a
+   menu costs a tap to open and a tap to choose, and hides the option that
+   the person who needs it most cannot read the label of.
+   ========================================================================== */
+.langsw {
+  display: inline-flex;
+  flex: none;
+  padding: 2px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+.langsw__opt {
+  min-inline-size: 44px;
+  min-block-size: 44px;
+  padding-inline: 10px;
+  border-radius: 999px;
+  color: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  opacity: 0.72;
+  transition: background-color 140ms ease, opacity 140ms ease;
+}
+
+/* The Arabic label is a single glyph and reads small beside two Latin caps. */
+.langsw__opt[lang="ar"] { font-size: 16px; }
+
+.langsw__opt[aria-pressed="true"] {
+  background: #fff;
+  color: var(--c-ink, #101418);
+  opacity: 1;
+}
+
+/* On a light header the translucent-white treatment disappears, so the
+   segment falls back to the border colour it can actually be seen against. */
+.mhead[data-variant="3"] .langsw,
+.mhead--light .langsw {
+  background: var(--c-bg, #f4f5f6);
+  border-color: var(--c-border, #e7eaec);
+}
+
+/* The header collapses hard on phones; the switch keeps its 44px target by
+   growing vertically rather than being dropped from the row. */
+@media (max-width: 749px) {
+  .langsw__opt { min-block-size: 44px; min-inline-size: 44px; }
+}
