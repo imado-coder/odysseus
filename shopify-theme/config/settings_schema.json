@@ -132,6 +132,27 @@
         "id": "type_heading",
         "label": "Police des titres",
         "default": "assistant_n7"
+      },
+      {
+        "type": "select",
+        "id": "arabic_font",
+        "label": "Police arabe",
+        "info": "Utilisée uniquement pour les lettres arabes. Le français et les chiffres gardent la police choisie ci-dessus. Une boutique en français ne télécharge jamais ce fichier.",
+        "options": [
+          {
+            "value": "cairo",
+            "label": "Cairo — moderne, géométrique"
+          },
+          {
+            "value": "tajawal",
+            "label": "Tajawal — humaniste, neutre"
+          },
+          {
+            "value": "system",
+            "label": "Police du téléphone"
+          }
+        ],
+        "default": "cairo"
       }
     ]
   },

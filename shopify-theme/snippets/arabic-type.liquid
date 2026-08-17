@@ -1,0 +1,120 @@
+{%- comment -%}
+  Arabic typography.
+
+  The theme let the merchant pick a Latin font from Shopify's library and then
+  fell back to whatever Arabic face the phone happened to have — which on most
+  Android devices is a default Naskh that was never drawn for a dense commerce
+  UI. Arabic was the one language this theme is sold into that had no typeface
+  of its own.
+
+  Two things make this cheap enough to ship by default:
+
+  The faces are declared with unicode-range covering Arabic only, so a shop
+  running in French never downloads a single byte of them — the browser skips
+  a face whose range no glyph on the page falls into. And Cairo is a variable
+  font: one 30KB file carries every weight from 200 to 1000, so the theme is
+  not shipping four static files to get regular, semibold and extrabold.
+
+  The Latin stack is untouched: the merchant's Shopify font still sets French
+  and every numeral. Only Arabic letters change face, which is what keeps a
+  bilingual page — an Arabic label beside a Latin price — looking deliberate
+  rather than like two websites.
+{%- endcomment -%}
+
+{%- liquid
+  assign ar_font = settings.arabic_font | default: 'cairo'
+-%}
+
+{% style %}
+  {%- comment -%}
+    The range is the Arabic block plus its supplements, presentation forms,
+    and the zero-width joiners the script needs to connect letters. Anything
+    outside it — Latin, digits, punctuation — is left to the Latin stack.
+  {%- endcomment -%}
+  {%- assign ar_range = 'U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+08A0-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC' -%}
+
+  {%- if ar_font == 'cairo' -%}
+    @font-face {
+      font-family: "Souq Arabic";
+      src: url({{ 'cairo-arabic.woff2' | asset_url }}) format("woff2");
+      font-weight: 200 1000;
+      font-style: normal;
+      font-display: swap;
+      unicode-range: {{ ar_range }};
+    }
+  {%- elsif ar_font == 'tajawal' -%}
+    @font-face {
+      font-family: "Souq Arabic";
+      src: url({{ 'tajawal-arabic-400.woff2' | asset_url }}) format("woff2");
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+      unicode-range: {{ ar_range }};
+    }
+    @font-face {
+      font-family: "Souq Arabic";
+      src: url({{ 'tajawal-arabic-700.woff2' | asset_url }}) format("woff2");
+      font-weight: 700 900;
+      font-style: normal;
+      font-display: swap;
+      unicode-range: {{ ar_range }};
+    }
+  {%- endif -%}
+
+  {%- if ar_font != 'system' -%}
+    :root {
+      /* First in the stack, but it only claims the Arabic range, so Latin
+         falls straight through to the merchant's own font. */
+      --f-body: "Souq Arabic", {{ settings.type_body.family | default: 'Inter' }},
+        {{ settings.type_body.fallback_families | default: 'sans-serif' }};
+      --f-heading: "Souq Arabic", {{ settings.type_heading.family | default: 'Inter' }},
+        {{ settings.type_heading.fallback_families | default: 'sans-serif' }};
+    }
+  {%- endif -%}
+
+  {%- comment -%}
+    Corrections that matter more than the face itself.
+
+    Negative tracking is the default in this theme's headings, and on Arabic
+    it is not a style choice — it pulls joined letters into each other and
+    damages the word. Arabic letterforms also sit on a deeper baseline with
+    ascenders and descenders that collide at Latin line-heights.
+
+    These are scoped to the RTL storefront so a French shop keeps its tighter
+    Latin setting untouched.
+  {%- endcomment -%}
+  [dir="rtl"] body,
+  [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3,
+  [dir="rtl"] h4, [dir="rtl"] h5, [dir="rtl"] h6,
+  [dir="rtl"] .bb__title,
+  [dir="rtl"] .hero-w__title,
+  [dir="rtl"] .ty__title,
+  [dir="rtl"] .bb__price-now,
+  [dir="rtl"] .pdetails__title,
+  [dir="rtl"] .drawer__title,
+  [dir="rtl"] .cod__title {
+    letter-spacing: normal;
+  }
+
+  [dir="rtl"] body { line-height: 1.75; }
+  [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3 { line-height: 1.4; }
+  [dir="rtl"] .trow__title,
+  [dir="rtl"] .pgc__title,
+  [dir="rtl"] .cpill { line-height: 1.55; }
+
+  {%- comment -%}
+    Arabic has no capitals, so uppercasing does nothing to Arabic text — but
+    it still applies to any Latin mixed into the same label, which makes a
+    bilingual eyebrow read as two shouting registers.
+  {%- endcomment -%}
+  [dir="rtl"] .hero-w__eyebrow { text-transform: none; letter-spacing: normal; }
+
+  {%- comment -%}
+    An Arabic word cannot be hyphenated and its glyphs are wider at the same
+    point size, so the small dense labels need a touch more room before they
+    truncate. Kashida justification is deliberately left off: browsers
+    implement it inconsistently and it stretches words unevenly at these sizes.
+  {%- endcomment -%}
+  [dir="rtl"] .pgc__title,
+  [dir="rtl"] .bb__title { word-break: normal; overflow-wrap: break-word; }
+{% endstyle %}

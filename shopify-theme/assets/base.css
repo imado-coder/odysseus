@@ -517,6 +517,10 @@ ul, ol {
 
    The result is a merchant who prices in "DA", in "دج" or in "€" gets the
    order right without the theme knowing which they chose. */
+/* A signed percentage leads with "-", which is directionally neutral, so in
+   an RTL store it took the store's direction and rendered "45%-". Grouped
+   with the amounts because it is the same class of value. */
+.cod-cta__off,
 .bb__price-now,
 .bb__price-was,
 .bb__price-deal,

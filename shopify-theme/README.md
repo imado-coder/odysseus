@@ -10,7 +10,7 @@ Aucune modification de code n'est nécessaire pour ouvrir une boutique.
 
 ## Avant d'ouvrir la boutique
 
-Cinq réglages décident de l'allure de la boutique. Faites-les dans cet ordre.
+Six réglages décident de l'allure de la boutique. Faites-les dans cet ordre.
 
 ### 1. Identité — `Personnaliser → Paramètres du thème → Identité`
 
@@ -72,7 +72,35 @@ les tarifs qui diffèrent de votre tarif par défaut.
 et arabe (droite à gauche). Les deux sont construits à partir du même code :
 rien n'est à dupliquer, et aucune mise en page ne se casse en arabe.
 
-### 5. Fiche produit (carte) — `Paramètres du thème → Fiche produit (carte)`
+### 5. Arabe — `Paramètres du thème → Typographie → Police arabe`
+
+Le thème est livré avec deux familles arabes, **Cairo** (par défaut) et
+**Tajawal**, hébergées dans le thème — aucun appel à Google Fonts.
+
+Elles ne sont déclarées que pour la plage Unicode arabe. Concrètement :
+
+- une boutique en français **ne télécharge jamais** ces fichiers ;
+- le français et **tous les chiffres** gardent la police que vous avez choisie
+  au-dessus, donc un prix reste dans votre typographie latine ;
+- seules les lettres arabes changent de dessin, ce qui garde une ligne
+  bilingue — un libellé arabe à côté d'un prix latin — cohérente.
+
+Cairo est une police variable : un seul fichier de 30 Ko porte toutes les
+graisses de 200 à 1000.
+
+Le thème corrige aussi ce que la typographie arabe ne tolère pas : le
+crénage négatif des titres est annulé (il colle les lettres liées et abîme le
+mot), l'interligne est augmenté, et les majuscules forcées sont désactivées.
+
+**Le texte de la boutique en arabe.** Shopify recopie les textes par défaut du
+thème dans le modèle au moment de l'installation : ils ne peuvent donc pas
+suivre la langue de la boutique. Le thème fournit à la place un modèle prêt à
+l'emploi, `product.arabe`, dont les 129 textes sont déjà rédigés en arabe.
+Pour l'utiliser : ouvrez un produit dans l'admin, section **Modèle de thème**,
+choisissez `arabe`. Vous pouvez ensuite modifier chaque texte normalement dans
+`Personnaliser`.
+
+### 6. Fiche produit (carte) — `Paramètres du thème → Fiche produit (carte)`
 
 Ce que montre chaque produit dans les grilles. Le nombre de ventes vient du
 métachamp `custom.sold_count` ; sans lui, la ligne ne s'affiche pas.

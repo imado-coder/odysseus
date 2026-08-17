@@ -31,6 +31,26 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
+
+## Arabic typefaces
+
+Three font files under `assets/` are redistributed with this theme:
+
+| File | Family | Copyright |
+|---|---|---|
+| `cairo-arabic.woff2` | Cairo (variable, Arabic subset) | Copyright the Cairo Project Authors — https://github.com/googlefonts/cairo |
+| `tajawal-arabic-400.woff2` | Tajawal Regular (Arabic subset) | Copyright the Tajawal Project Authors — https://github.com/Boutros/Tajawal |
+| `tajawal-arabic-700.woff2` | Tajawal Bold (Arabic subset) | Copyright the Tajawal Project Authors |
+
+Both families are licensed under the SIL Open Font License, Version 1.1, which
+permits redistribution — including bundled inside a commercial theme — provided
+the fonts are not sold on their own and this notice travels with them. The full
+licence text is at https://openfontlicense.org.
+
+Each file is the Arabic subset only; the Latin glyphs are left to the font the
+merchant selects in the theme editor. They are declared with `unicode-range`,
+so a storefront that renders no Arabic never requests them.
+
 ## Preview photography
 
 The images under `dev-preview/photos/` are Unsplash-licensed and are used only

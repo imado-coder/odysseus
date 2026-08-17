@@ -32,6 +32,13 @@
     {%- endcomment -%}
     {% render 'theme-tokens' %}
 
+    {%- comment -%}
+      Arabic faces. Declared after the tokens so they can build on the
+      merchant's chosen Latin family, and scoped by unicode-range so a shop
+      running in French never downloads them.
+    {%- endcomment -%}
+    {% render 'arabic-type' %}
+
     <script src="{{ 'theme.js' | asset_url }}" defer="defer"></script>
   </head>
 
