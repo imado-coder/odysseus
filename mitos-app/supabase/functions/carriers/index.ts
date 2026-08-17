@@ -388,17 +388,25 @@ const zrExpress: Adapter = {
  * the dashboard password. They are different things and only the first works
  * here.
  *
- * Confidence: the three paths below are confirmed against a live Ecotrack
- * host (trexexpress.ecotrack.dz), unauthenticated:
+ * Confidence: HIGHEST here — verified with a live token against a real
+ * Ecotrack host (trexexpress.ecotrack.dz).
  *
- *   /api/v1/get/desks            401  exists, guarded
- *   /api/v1/create/order         405  "Supported methods: POST" — their words
- *   /api/v1/get/trackings/info   401  exists, guarded
+ *   /api/v1/get/desks           200, real payload. Auth is Bearer + a
+ *                               60-character token from the dashboard.
+ *   /api/v1/create/order        POST. Sent an empty body and the server
+ *                               listed its own required fields: nom_client,
+ *                               telephone, adresse, code_wilaya, commune,
+ *                               montant, type — all seven are exactly what
+ *                               push() below sends.
+ *   /api/v1/get/trackings/info  GET, and the parameter is `trackings[]`.
  *
  * Note the shape of a rejection: 401 comes back as an HTML login page, while
  * a real API error comes back as JSON. That is why `call` reads the body as
  * text before trying to parse it — a bare .json() would throw away the only
  * useful part of the most common failure.
+ *
+ * Still unverified: the response shape of a tracking that exists. It needs a
+ * real parcel, and creating one to find out costs a real delivery.
  */
 const ecotrack: Adapter = {
   needsBaseUrl: true,
@@ -469,14 +477,31 @@ const ecotrack: Adapter = {
   },
 
   async track(cfg, tracking) {
+    /* `trackings[]`, plural, and an array. Measured against a live host:
+         ?tracking[]=X   422 "Le champ trackings est obligatoire"
+         ?trackings=X    422 "Le champ trackings doit être un tableau"
+         ?trackings[]=X  404 "Trackings non trouvés"  ← the right shape
+       The singular form is the one this adapter shipped with, and it would
+       have failed every status sync with a validation error. */
     const r = await call(
-      `${base(cfg, "")}/api/v1/get/trackings/info?tracking[]=${encodeURIComponent(tracking)}`,
+      `${base(cfg, "")}/api/v1/get/trackings/info?trackings[]=${
+        encodeURIComponent(tracking)
+      }`,
       { headers: { Authorization: `Bearer ${cfg.credentials.token ?? ""}` } },
     );
+
+    /* A parcel the carrier has not registered yet answers 404. That is a
+       "not yet", not a failure — treating it as an error would fill the
+       shipment's lastError on every sync between the push and the pickup. */
+    if (r.status === 404) return { status: "", raw: r.body };
     if (!r.ok) fail("ecotrack.track", r);
+
     const b = r.body as Record<string, { status?: string; OrderStatus?: string }>;
     const entry = b?.[tracking];
-    return { status: String(entry?.status ?? entry?.OrderStatus ?? ""), raw: r.body };
+    return {
+      status: String(entry?.status ?? entry?.OrderStatus ?? ""),
+      raw: r.body,
+    };
   },
 };
 

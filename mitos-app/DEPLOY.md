@@ -167,14 +167,27 @@ Confirmé par le courrier d'ouverture de compte — « plateforme ECOTRACK — T
 Express », version web `trexexpress.ecotrack.dz`. **Aucun adaptateur à
 écrire** : c'est un transporteur de type `ECOTRACK` avec cette adresse.
 
-Les trois chemins de l'adaptateur ont été vérifiés sans identifiants contre
-cet hôte réel :
+L'adaptateur a été vérifié **avec un vrai token** contre cet hôte :
 
 | Chemin | Réponse | Ce que cela prouve |
 |---|---|---|
-| `/api/v1/get/desks` | `401` | existe, protégé |
-| `/api/v1/create/order` | `405` | existe — « Supported methods: POST », leurs mots |
-| `/api/v1/get/trackings/info` | `401` | existe, protégé |
+| `/api/v1/get/desks` | `200` | authentification par `Bearer` + token de 60 caractères |
+| `/api/v1/create/order` | `422` | le serveur a listé lui-même ses champs obligatoires |
+| `/api/v1/get/trackings/info` | `404` | existe, et le paramètre est `trackings[]` |
+
+Corps vide envoyé à `create/order`, le serveur répond avec sa propre liste :
+`nom_client`, `telephone`, `adresse`, `code_wilaya`, `commune`, `montant`,
+`type`. **Les sept correspondent exactement** à ce que l'adaptateur envoie.
+
+> **Un défaut trouvé grâce à ce test.** L'adaptateur interrogeait le suivi avec
+> `?tracking[]=` au singulier. Le serveur veut `?trackings[]=` — le singulier
+> renvoie `422` et **chaque synchronisation de statut aurait échoué**. Corrigé.
+> Au passage, un colis pas encore enregistré répond `404` : c'est un « pas
+> encore », pas une panne, et il est traité comme tel plutôt que d'inscrire une
+> erreur à chaque passage.
+
+Reste non vérifié : la forme de la réponse pour un suivi qui existe. Cela
+demande un vrai colis, et en créer un pour le savoir coûte une vraie livraison.
 
 > Un refus arrive en **HTML** (page de connexion), alors qu'une vraie erreur
 > d'API arrive en JSON. D'où la lecture du corps en texte avant de tenter le
