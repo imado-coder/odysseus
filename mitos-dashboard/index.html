@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#101418">
+<title>MITOS — Commandes</title>
+<!--
+  The merchant's call list.
+
+  A cash-on-delivery merchant's day is a call list: ring the customer,
+  confirm, hand to the courier. They do it from a phone, standing up. So this
+  is one screen, one column, and every control is a thumb-sized target.
+
+  It is a static file on purpose. It holds no secret, talks to no database,
+  and needs no environment: the merchant's key lives in their own browser and
+  is sent as a bearer header to the Supabase function that owns the data.
+  That is why it could be deployed without anyone pasting credentials
+  anywhere — which is the only reason this exists rather than the embedded
+  Shopify screen in app/routes/app._index.tsx.
+-->
+<style>
+  :root{
+    --ink:#101418; --sub:#5c6672; --line:#e7eaec; --bg:#f4f5f6; --card:#fff;
+    --ok:#0a8800; --bad:#d72c0d; --warn:#a35b00; --info:#1a56b3;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{--ink:#e9edf1;--sub:#9aa5b1;--line:#2a3138;--bg:#14181c;--card:#1b2126}
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .bar{position:sticky;top:0;z-index:5;background:var(--card);
+    border-bottom:1px solid var(--line);padding:.75rem 1rem .5rem;
+    padding-top:max(.75rem,env(safe-area-inset-top))}
+  .bar__row{display:flex;align-items:baseline;justify-content:space-between;
+    gap:.5rem;margin-bottom:.5rem}
+  h1{margin:0;font-size:1.0625rem;letter-spacing:-.01em}
+  .shop{font-size:.8125rem;color:var(--sub);overflow:hidden;
+    text-overflow:ellipsis;white-space:nowrap}
+  .chips{display:flex;gap:.375rem;overflow-x:auto;padding-bottom:.25rem;
+    scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:0 0 auto;display:inline-flex;align-items:center;gap:.375rem;
+    min-height:36px;padding:0 .6875rem;border:1px solid var(--line);
+    border-radius:999px;background:transparent;color:var(--sub);
+    font:inherit;font-size:.8125rem;white-space:nowrap;cursor:pointer}
+  .chip b{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+  .chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);
+    color:var(--card)}
+  .chip[aria-pressed="true"] b{color:var(--card)}
+  main{padding:.75rem;display:grid;gap:.625rem;max-width:44rem;margin:0 auto;
+    padding-bottom:max(1rem,env(safe-area-inset-bottom))}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:.875rem}
+  .card__top{display:flex;justify-content:space-between;align-items:flex-start;
+    gap:.5rem}
+  .name{font-weight:600;letter-spacing:-.01em}
+  .place{color:var(--sub);font-size:.875rem}
+  .pill{flex:0 0 auto;font-size:.75rem;font-weight:600;padding:.1875rem .5rem;
+    border-radius:999px;background:#eef1f3;color:var(--sub)}
+  .s-PENDING{background:#e8f0fe;color:var(--info)}
+  .s-CONFIRMED,.s-SHIPPED{background:#fff2e0;color:var(--warn)}
+  .s-DELIVERED{background:#e7f6e9;color:var(--ok)}
+  .s-CANCELLED,.s-RETURNED,.s-NO_ANSWER{background:#fdecea;color:var(--bad)}
+  .meta{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;
+    margin-top:.5rem;font-size:.875rem;color:var(--sub)}
+  .num{font-variant-numeric:tabular-nums;color:var(--ink);font-weight:600;
+    unicode-bidi:plaintext}
+  .dot{width:3px;height:3px;border-radius:50%;background:#c3cad1;flex:0 0 auto}
+  .warn{color:var(--warn);font-weight:600}
+  .what,.addr{margin-top:.375rem;font-size:.875rem}
+  .addr{color:var(--sub)}
+  .fail{margin-top:.5rem;padding:.5rem .625rem;border-radius:8px;
+    background:#fdecea;color:var(--bad);font-size:.8125rem}
+  .call{display:flex;align-items:center;justify-content:center;min-height:48px;
+    margin-top:.75rem;border-radius:10px;background:var(--ok);color:#fff;
+    font-weight:600;text-decoration:none;unicode-bidi:plaintext}
+  .acts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.375rem;
+    margin-top:.5rem}
+  .acts button{min-height:44px;border:1px solid var(--line);
+    background:transparent;border-radius:10px;font:inherit;font-size:.875rem;
+    color:var(--ink);cursor:pointer}
+  .acts button[aria-pressed="true"]{border-color:var(--ink);font-weight:600}
+  .note{padding:2.5rem 1.25rem;text-align:center;color:var(--sub)}
+  form.gate{max-width:22rem;margin:15vh auto;padding:0 1.25rem;text-align:center}
+  form.gate input{width:100%;min-height:48px;margin-top:1rem;padding:0 .75rem;
+    border:1px solid var(--line);border-radius:10px;background:var(--card);
+    color:var(--ink);font:inherit;font-size:16px}
+  form.gate button{width:100%;min-height:48px;margin-top:.625rem;border:0;
+    border-radius:10px;background:var(--ink);color:var(--card);font:inherit;
+    font-weight:600;cursor:pointer}
+  .err{color:var(--bad);font-size:.875rem;margin-top:.75rem}
+</style>
+</head>
+<body>
+<div id="root"><p class="note">Chargement…</p></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var API = "https://gmgargxjomtaorqjvlyz.supabase.co/functions/v1/admin";
+  var KEY = "mitos:key";
+  var root = document.getElementById("root");
+
+  var LABEL = {
+    PENDING: "À appeler", CONFIRMED: "Confirmée", SHIPPED: "Expédiée",
+    DELIVERED: "Livrée", CANCELLED: "Annulée", RETURNED: "Retournée",
+    NO_ANSWER: "Sans réponse"
+  };
+  var ORDER = ["PENDING","CONFIRMED","SHIPPED","DELIVERED","NO_ANSWER","CANCELLED","RETURNED"];
+  var filter = "";
+
+  /* Names and addresses are typed by whoever filled the order form. They are
+     escaped, not trusted, even though they came back from our own API. */
+  function esc(v) {
+    return String(v == null ? "" : v).replace(/[&<>"']/g, function (c) {
+      return { "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c];
+    });
+  }
+
+  function key() { try { return localStorage.getItem(KEY) || ""; } catch (e) { return ""; } }
+
+  function api(path, options) {
+    options = options || {};
+    options.headers = Object.assign(
+      { "x-mitos-key": key() }, options.headers || {}
+    );
+    return fetch(API + (path || ""), options);
+  }
+
+  function gate(message) {
+    root.innerHTML =
+      '<form class="gate">' +
+        '<h1>MITOS</h1>' +
+        '<p class="note" style="padding:.5rem 0">Entrez votre clé d\'accès.</p>' +
+        '<input type="password" name="k" autocomplete="current-password" ' +
+          'placeholder="clé d\'accès" required>' +
+        '<button type="submit">Ouvrir</button>' +
+        (message ? '<p class="err">' + esc(message) + "</p>" : "") +
+      "</form>";
+
+    root.querySelector("form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var v = e.target.k.value.trim();
+      if (!v) return;
+      try { localStorage.setItem(KEY, v); } catch (err) {}
+      load();
+    });
+  }
+
+  function money(n, currency) {
+    var suffix = currency === "DZD" ? "DA" : currency;
+    return new Intl.NumberFormat("fr-FR").format(n) + " " + suffix;
+  }
+
+  function card(o, currency) {
+    var items = Array.isArray(o.items) ? o.items : [];
+    var what = items.map(function (i) {
+      return esc(i.qty + "× " + (i.title || "article"));
+    }).join(", ");
+
+    return '<article class="card" data-id="' + esc(o.id) + '">' +
+      '<header class="card__top"><div>' +
+        '<div class="name">' + esc(o.firstName) + " " + esc(o.lastName) + "</div>" +
+        '<div class="place">' + esc(o.commune) + ", " + esc(o.wilayaName) + "</div>" +
+      '</div><span class="pill s-' + esc(o.status) + '" data-pill>' +
+        esc(LABEL[o.status] || o.status) + "</span></header>" +
+
+      '<div class="meta">' +
+        "<span>" + (o.delivery === "DESK" ? "Bureau" : "Domicile") + "</span>" +
+        '<span class="dot"></span>' +
+        '<span class="num">' + esc(money(o.total, currency)) + "</span>" +
+        (o.pricesVerified ? "" : '<span class="warn">à confirmer</span>') +
+        (o.shopifyName
+          ? '<span class="dot"></span><span class="num">' + esc(o.shopifyName) + "</span>"
+          : "") +
+      "</div>" +
+
+      (what ? '<div class="what">' + what + "</div>" : "") +
+      '<div class="addr">' + esc(o.address) + "</div>" +
+
+      (o.createFailed
+        ? '<div class="fail">Commande non créée chez Shopify — ' +
+          esc(String(o.createError || "").slice(0, 140)) + "</div>"
+        : "") +
+
+      '<a class="call" href="tel:' + esc(o.phone) + '">Appeler ' + esc(o.phone) + "</a>" +
+
+      '<div class="acts">' +
+        ["CONFIRMED","NO_ANSWER","DELIVERED","CANCELLED"].map(function (s) {
+          return '<button type="button" data-set="' + s + '"' +
+            (o.status === s ? ' aria-pressed="true"' : "") + ">" +
+            esc(LABEL[s]) + "</button>";
+        }).join("") +
+      "</div></article>";
+  }
+
+  function render(data) {
+    var counts = data.counts || {};
+    var total = Object.keys(counts).reduce(function (a, k) { return a + counts[k]; }, 0);
+
+    var chips = '<button class="chip" data-filter=""' +
+      (filter === "" ? ' aria-pressed="true"' : "") +
+      ">Toutes<b>" + total + "</b></button>" +
+      ORDER.filter(function (s) { return counts[s]; }).map(function (s) {
+        return '<button class="chip" data-filter="' + s + '"' +
+          (filter === s ? ' aria-pressed="true"' : "") + ">" +
+          esc(LABEL[s]) + "<b>" + counts[s] + "</b></button>";
+      }).join("");
+
+    var currency = (data.shop && data.shop.currency) || "DZD";
+    var body = data.orders.length
+      ? data.orders.map(function (o) { return card(o, currency); }).join("")
+      : '<p class="note">Aucune commande ici.</p>';
+
+    root.innerHTML =
+      '<header class="bar"><div class="bar__row"><h1>Commandes</h1>' +
+        '<span class="shop">' + esc((data.shop && data.shop.domain) || "") + "</span>" +
+      '</div><nav class="chips">' + chips + "</nav></header>" +
+      "<main>" + body + "</main>";
+  }
+
+  function load() {
+    if (!key()) return gate("");
+    root.innerHTML = '<p class="note">Chargement…</p>';
+
+    api(filter ? "?s=" + encodeURIComponent(filter) : "")
+      .then(function (r) {
+        /* 404 is what a wrong key looks like: the API refuses to confirm
+           that anything is there at all. */
+        if (r.status === 404) throw new Error("bad-key");
+        if (!r.ok) throw new Error("http-" + r.status);
+        return r.json();
+      })
+      .then(render)
+      .catch(function (e) {
+        if (e.message === "bad-key") {
+          try { localStorage.removeItem(KEY); } catch (err) {}
+          return gate("Clé refusée.");
+        }
+        root.innerHTML = '<p class="note">Connexion impossible. Réessayez.</p>';
+      });
+  }
+
+  document.addEventListener("click", function (e) {
+    var chip = e.target.closest("[data-filter]");
+    if (chip) {
+      filter = chip.getAttribute("data-filter");
+      return load();
+    }
+
+    var btn = e.target.closest("[data-set]");
+    if (!btn) return;
+
+    /* The status is shown as changed straight away and rolled back if the
+       write fails. A merchant tapping through a call list must never be left
+       unsure whether it saved. */
+    var card = btn.closest(".card");
+    var pill = card.querySelector("[data-pill]");
+    var want = btn.getAttribute("data-set");
+    var before = { text: pill.textContent, cls: pill.className };
+
+    card.querySelectorAll("[data-set]").forEach(function (b) {
+      b.setAttribute("aria-pressed", b === btn ? "true" : "false");
+    });
+    pill.textContent = LABEL[want] || want;
+    pill.className = "pill s-" + want;
+
+    api("", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: card.dataset.id, status: want })
+    })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); })
+      .catch(function () {
+        pill.textContent = before.text;
+        pill.className = before.cls;
+        btn.setAttribute("aria-pressed", "false");
+        alert("Échec de l'enregistrement. Réessayez.");
+      });
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>

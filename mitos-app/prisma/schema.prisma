@@ -69,6 +69,13 @@ model ShopSettings {
   defaultDeskRate   Int     @default(350)
   freeShippingAbove Int?
   notifyEmail       String?
+
+  /// Secret that opens the standalone order list on a phone, outside the
+  /// Shopify admin. A cash-on-delivery merchant works from the call list all
+  /// day and is rarely at a desk; this lets them reach it without the
+  /// embedded app. Null means no link has been issued, and the page 404s.
+  dashboardToken    String?  @unique
+
   updatedAt         DateTime @updatedAt
 }
 

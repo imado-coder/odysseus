@@ -9,12 +9,20 @@ déployée chez Supabase, qui enregistre le lead puis crée la commande Shopify.
 |---|---|
 | Base de données | Supabase `mitos-cod`, région `eu-west-3` (Paris) |
 | Endpoint COD | `https://gmgargxjomtaorqjvlyz.supabase.co/functions/v1/cod` |
-| Code de la fonction | `supabase/functions/cod/index.ts` |
+| Liste d'appels | `https://mitos-commandes.vercel.app` |
+| API de la liste | `https://gmgargxjomtaorqjvlyz.supabase.co/functions/v1/admin` |
+| Code | `supabase/functions/{cod,admin}/index.ts`, `mitos-dashboard/index.html` |
 | Réglage du thème | `cod_endpoint`, déjà renseigné dans `config/settings_data.json` |
 
-Paris parce que c'est la latence la plus basse depuis l'Algérie, et parce que
-la fonction tourne dans la même région que la base : les six requêtes d'une
-commande ne traversent pas l'Atlantique.
+Paris parce que c'est la latence la plus basse depuis l'Algérie pour la base.
+
+> Les fonctions Edge, elles, ne tournent **pas** dans la région de la base :
+> elles s'exécutent au plus près de l'appelant. Mesuré — un appel depuis les
+> États-Unis répond avec `x-sb-edge-region: us-east-1`. Une commande fait donc
+> six requêtes entre la région du client et Paris. Pour un client algérien la
+> fonction démarre en Europe et le trajet reste court, mais il n'est pas nul.
+> On peut épingler la région avec l'en-tête `x-region`, si cela devient
+> mesurable.
 
 ### Vérifié en direct, sur la vraie boutique
 
@@ -61,12 +69,45 @@ Une boutique installée depuis le tableau de bord Partners passe par OAuth, et
 
 ---
 
+## La liste d'appels
+
+`https://mitos-commandes.vercel.app` — à ouvrir sur le téléphone. À la
+première visite elle demande une clé ; ensuite le navigateur la retient.
+
+La clé de cette boutique est dans `ShopSettings.dashboardToken`. Elle ne donne
+accès qu'à cette boutique : chaque requête est filtrée par `shopId`, y compris
+les écritures, pour qu'un identifiant devine ne suffise pas à toucher les
+commandes d'un autre marchand. Une clé fausse ou absente renvoie **404** —
+l'API ne confirme même pas qu'il y a quelque chose à cette adresse. Pour la
+changer, il suffit de mettre une nouvelle valeur dans la colonne.
+
+C'est un fichier statique, et c'est volontaire : il ne contient aucun secret,
+ne parle à aucune base, n'a besoin d'aucune variable d'environnement. La clé
+vit dans le navigateur du marchand et voyage en en-tête `x-mitos-key`. C'est
+la seule raison pour laquelle il a pu être mis en ligne sans que personne
+colle un identifiant nulle part.
+
+> Pourquoi l'interface n'est pas servie par la fonction elle-même : la
+> passerelle Supabase réécrit **toute** réponse d'une Edge Function en
+> `text/plain`, avec `nosniff` et `default-src 'none'; sandbox`. C'est un
+> durcissement volontaire — on ne peut pas héberger de page sur une adresse
+> `supabase.co`. Du HTML renvoyé de là arrive au marchand sous forme de code
+> source. La fonction reste donc une API, et l'interface est ailleurs.
+
+L'adresse de production `mitos-commandes.vercel.app` est publique. L'alias
+d'équipe `mitos-commandes-patrondzds-projects.vercel.app` est, lui, derrière
+l'authentification Vercel et renvoie une redirection : c'est l'adresse
+courte qu'il faut donner.
+
+---
+
 ## Ce qui reste
 
-**Le tableau de bord marchand** (`app/routes/app._index.tsx`) n'est pas en
-ligne. Il a besoin de Vercel, et Vercel a besoin de ses variables
-d'environnement — que le connecteur ne sait pas écrire. Deux façons de le
-débloquer, l'une ou l'autre :
+**Le tableau de bord embarqué** (`app/routes/app._index.tsx`), celui qui
+s'affiche dans l'admin Shopify, n'est pas en ligne. La liste d'appels
+ci-dessus fait le travail en attendant. Il a besoin de Vercel, et Vercel a
+besoin de ses variables d'environnement — que le connecteur ne sait pas
+écrire. Deux façons de le débloquer, l'une ou l'autre :
 
 1. coller le bloc de variables dans Vercel → Settings → Environment Variables
    (Vercel accepte un `.env` entier d'un coup) ;
@@ -90,10 +131,12 @@ npx shopify app deploy
 l'affichage de l'app dans le cadre de l'admin. C'est la première chose à
 confirmer, et la plus susceptible de demander un ajustement.
 
-**Les 1 541 communes** ne sont pas encore chargées. Aucun chemin de requête
-n'en lit une — le thème envoie la commune en texte depuis sa propre copie —
-donc rien n'est cassé. `npm run prisma:seed` les charge depuis une machine
-qui atteint la base.
+**Les 58 wilayas et 1 541 communes** sont chargées. Les communes sont entrées
+par `POST /functions/v1/admin/communes`, corps = `prisma/algeria.json`, ce qui
+évite de les embarquer dans le bundle : aucun chemin de requête n'en lit une —
+le thème envoie la commune en texte depuis sa propre copie — et les porter
+coûterait 50 ko à chaque démarrage à froid. `npm run prisma:seed` fait la même
+chose depuis une machine qui atteint la base.
 
 ---
 
@@ -109,3 +152,17 @@ commande doit être faite **dans les deux**. Les sections du portage indiquent
 le fichier avec lequel elles doivent s'accorder. Le jour où Vercel a ses
 variables, le portage peut être supprimé et le thème repointé sur
 `/api/cod` : rien d'autre n'en dépend.
+
+---
+
+## Ce qui n'a pas pu être vérifié d'ici
+
+La liste d'appels a été vérifiée côté API, requête par requête : clé absente
+et clé fausse (404), préflight CORS, lecture, filtre par statut, écriture de
+statut, statut inventé (400), identifiant d'une autre boutique (404), et les
+octets servis par Vercel sont identiques au fichier du dépôt.
+
+Ce qui n'a **pas** pu l'être : la page pilotée dans un vrai navigateur. Le
+conteneur où ce code a été écrit ne laisse pas Chromium passer par son proxy.
+Le script est syntaxiquement valide et le balisage équilibré, mais le premier
+chargement sur un téléphone reste le vrai test.
