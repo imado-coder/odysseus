@@ -1,0 +1,213 @@
+{
+  "buildManifest": {
+    "serverBundles": {
+      "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0": {
+        "id": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+        "file": "build/server/nodejs_eyJydW50aW1lIjoibm9kZWpzIn0/index.js",
+        "config": {
+          "runtime": "nodejs"
+        }
+      }
+    },
+    "routeIdToServerBundleId": {
+      "routes/api.admin.bootstrap": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/webhooks": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api.cod": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/_index": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/auth.$": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/app._index": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0"
+    },
+    "routes": {
+      "root": {
+        "id": "root",
+        "file": "app/root.tsx",
+        "path": "",
+        "config": {}
+      },
+      "routes/api.admin.bootstrap": {
+        "id": "routes/api.admin.bootstrap",
+        "parentId": "root",
+        "file": "app/routes/api.admin.bootstrap.tsx",
+        "path": "api/admin/bootstrap",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/webhooks": {
+        "id": "routes/webhooks",
+        "parentId": "root",
+        "file": "app/routes/webhooks.tsx",
+        "path": "webhooks",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/api.cod": {
+        "id": "routes/api.cod",
+        "parentId": "root",
+        "file": "app/routes/api.cod.tsx",
+        "path": "api/cod",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/_index": {
+        "id": "routes/_index",
+        "parentId": "root",
+        "file": "app/routes/_index.tsx",
+        "index": true,
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/auth.$": {
+        "id": "routes/auth.$",
+        "parentId": "root",
+        "file": "app/routes/auth.$.tsx",
+        "path": "auth/*",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/app": {
+        "id": "routes/app",
+        "parentId": "root",
+        "file": "app/routes/app.tsx",
+        "path": "app",
+        "config": {}
+      },
+      "routes/app._index": {
+        "id": "routes/app._index",
+        "parentId": "routes/app",
+        "file": "app/routes/app._index.tsx",
+        "index": true,
+        "config": {
+          "runtime": "nodejs"
+        }
+      }
+    }
+  },
+  "reactRouterConfig": {
+    "appDirectory": "/home/user/odysseus/mitos-app/app",
+    "basename": "/",
+    "buildDirectory": "/home/user/odysseus/mitos-app/build",
+    "future": {
+      "unstable_optimizeDeps": false,
+      "v8_passThroughRequests": false,
+      "v8_trailingSlashAwareDataRequests": false,
+      "unstable_previewServerPrerendering": false,
+      "v8_middleware": false,
+      "v8_splitRouteModules": false,
+      "v8_viteEnvironmentApi": false
+    },
+    "routes": {
+      "root": {
+        "id": "root",
+        "file": "root.tsx",
+        "path": ""
+      },
+      "routes/api.admin.bootstrap": {
+        "id": "routes/api.admin.bootstrap",
+        "parentId": "root",
+        "file": "routes/api.admin.bootstrap.tsx",
+        "path": "api/admin/bootstrap"
+      },
+      "routes/webhooks": {
+        "id": "routes/webhooks",
+        "parentId": "root",
+        "file": "routes/webhooks.tsx",
+        "path": "webhooks"
+      },
+      "routes/api.cod": {
+        "id": "routes/api.cod",
+        "parentId": "root",
+        "file": "routes/api.cod.tsx",
+        "path": "api/cod"
+      },
+      "routes/_index": {
+        "id": "routes/_index",
+        "parentId": "root",
+        "file": "routes/_index.tsx",
+        "index": true
+      },
+      "routes/auth.$": {
+        "id": "routes/auth.$",
+        "parentId": "root",
+        "file": "routes/auth.$.tsx",
+        "path": "auth/*"
+      },
+      "routes/app": {
+        "id": "routes/app",
+        "parentId": "root",
+        "file": "routes/app.tsx",
+        "path": "app"
+      },
+      "routes/app._index": {
+        "id": "routes/app._index",
+        "parentId": "routes/app",
+        "file": "routes/app._index.tsx",
+        "index": true
+      }
+    },
+    "routeDiscovery": {
+      "mode": "lazy",
+      "manifestPath": "/__manifest"
+    },
+    "serverBuildFile": "index.js",
+    "serverModuleFormat": "esm",
+    "ssr": true,
+    "subResourceIntegrity": false,
+    "allowedActionOrigins": false,
+    "unstable_routeConfig": [
+      {
+        "id": "root",
+        "path": "",
+        "file": "root.tsx",
+        "children": [
+          {
+            "id": "routes/api.admin.bootstrap",
+            "file": "routes/api.admin.bootstrap.tsx",
+            "path": "api/admin/bootstrap"
+          },
+          {
+            "id": "routes/webhooks",
+            "file": "routes/webhooks.tsx",
+            "path": "webhooks"
+          },
+          {
+            "id": "routes/api.cod",
+            "file": "routes/api.cod.tsx",
+            "path": "api/cod"
+          },
+          {
+            "id": "routes/_index",
+            "file": "routes/_index.tsx",
+            "index": true
+          },
+          {
+            "id": "routes/auth.$",
+            "file": "routes/auth.$.tsx",
+            "path": "auth/*"
+          },
+          {
+            "id": "routes/app",
+            "file": "routes/app.tsx",
+            "path": "app",
+            "children": [
+              {
+                "id": "routes/app._index",
+                "file": "routes/app._index.tsx",
+                "index": true
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "viteConfig": {
+    "build": {
+      "assetsDir": "assets"
+    }
+  }
+}
