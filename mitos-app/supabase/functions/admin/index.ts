@@ -102,6 +102,12 @@ async function handle(request: Request) {
     return await seedCommunes(request);
   }
 
+  if (url.pathname.endsWith("/rates")) {
+    if (request.method === "GET") return await listRates(shop);
+    if (request.method === "POST") return await saveRates(request, shop);
+    return new Response("Method Not Allowed", { status: 405, headers: CORS });
+  }
+
   if (request.method === "POST") return await setStatus(request, shop);
   if (request.method !== "GET") {
     return new Response("Method Not Allowed", { status: 405, headers: CORS });
@@ -240,4 +246,92 @@ async function list(url: URL, shop: any) {
     ),
     orders,
   });
+}
+
+/**
+ * The shipping table, all 58 wilayas whether or not a rate row exists yet.
+ *
+ * A wilaya with no row still has to appear, or the merchant cannot tell the
+ * difference between "costs nothing" and "never set" — and the order endpoint
+ * silently falls back to the shop default for exactly those.
+ */
+// deno-lint-ignore no-explicit-any
+async function listRates(shop: any) {
+  const rows = await sql`
+    SELECT w.code, w."nameFr", w."nameAr",
+           r."homeRate", r."deskRate", r.enabled
+      FROM "Wilaya" w
+      LEFT JOIN "ShippingRate" r
+             ON r."wilayaCode" = w.code AND r."shopId" = ${shop.id}
+     ORDER BY w.code
+  `;
+
+  const [settings] = await sql`
+    SELECT "defaultHomeRate", "defaultDeskRate"
+      FROM "ShopSettings" WHERE "shopId" = ${shop.id}
+  `;
+
+  return json({
+    ok: true,
+    shop: { domain: shop.domain, currency: shop.currency },
+    fallback: [
+      settings?.defaultHomeRate ?? 600,
+      settings?.defaultDeskRate ?? 350,
+    ],
+    wilayas: rows,
+  });
+}
+
+/**
+ * Writes the whole table in one transaction.
+ *
+ * All of it or none of it: a partial save would leave the merchant quoting
+ * some wilayas at the new price and some at the old, with no way to tell
+ * which. The storefront reads this same table, so a half-written save is a
+ * half-wrong shop.
+ */
+// deno-lint-ignore no-explicit-any
+async function saveRates(request: Request, shop: any) {
+  let body: { rates?: Record<string, [unknown, unknown]> };
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: "invalid_json" }, 400);
+  }
+
+  const given = body.rates;
+  if (!given || typeof given !== "object") {
+    return json({ error: "expected_rates_object" }, 400);
+  }
+
+  /* Prices are money the merchant will collect, so they are read as whole
+     non-negative dinars and nothing else. A NaN reaching the table would show
+     up later as a blank delivery price on a live product page. */
+  const rows: { code: string; home: number; desk: number }[] = [];
+  for (const [code, pair] of Object.entries(given)) {
+    if (!/^\d{2}$/.test(code) || +code < 1 || +code > 58) {
+      return json({ error: "bad_wilaya", detail: code }, 422);
+    }
+    const home = Math.round(Number(Array.isArray(pair) ? pair[0] : NaN));
+    const desk = Math.round(Number(Array.isArray(pair) ? pair[1] : NaN));
+    if (!Number.isFinite(home) || !Number.isFinite(desk) || home < 0 || desk < 0) {
+      return json({ error: "bad_rate", detail: code }, 422);
+    }
+    rows.push({ code, home, desk });
+  }
+
+  if (!rows.length) return json({ error: "expected_rates_object" }, 400);
+
+  await sql.begin(async (tx) => {
+    for (const r of rows) {
+      await tx`
+        INSERT INTO "ShippingRate" (id, "shopId", "wilayaCode", "homeRate", "deskRate", enabled)
+        VALUES (${crypto.randomUUID()}, ${shop.id}, ${r.code}, ${r.home}, ${r.desk}, true)
+        ON CONFLICT ("shopId", "wilayaCode")
+        DO UPDATE SET "homeRate" = ${r.home}, "deskRate" = ${r.desk}, enabled = true
+      `;
+    }
+  });
+
+  return json({ ok: true, saved: rows.length });
 }

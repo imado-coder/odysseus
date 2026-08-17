@@ -10,8 +10,12 @@
  * table — so nothing has to be carried into a deployment payload, and there
  * is no configuration step between writing this and orders arriving.
  *
- * It also runs in the same region as the database, which removes a
- * cross-Atlantic round trip from every one of the six queries an order makes.
+ * It does not, despite what an earlier version of this comment claimed, run
+ * in the database's region — Edge Functions run nearest the caller, measured
+ * as `x-sb-edge-region: us-east-1` for a call from the United States. For an
+ * Algerian shopper it starts in Europe and the hop to Paris is short, but it
+ * is not free. The `x-region` header can pin it if that ever shows up in a
+ * measurement.
  *
  * The cost is that the order logic now exists twice. Any change to
  * validation, pricing or order creation has to be made in both, and the
@@ -40,9 +44,13 @@ import postgres from "npm:postgres@3.4.5";
 
 const SHOPIFY_API_VERSION = "2026-10";
 
+/* GET is listed because the storefront also asks this endpoint for the
+   shipping table. That request is simple enough not to preflight today, but a
+   method missing from this list is a failure waiting for the day someone adds
+   a header to it. */
 const CORS = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization, apikey",
 };
 
@@ -338,9 +346,13 @@ Deno.serve(async (request: Request) => {
     return new Response(null, { status: 204, headers: CORS });
   }
   if (request.method === "GET") {
-    /* A browser opening the URL should get something honest rather than a
-       stack trace; it also makes "is it deployed" answerable without a POST. */
-    return json({ ok: true, service: "mitos-cod" });
+    /* With a shop, this is the storefront asking what delivery costs, so that
+       the price it quotes is the price this endpoint will charge. Without one,
+       it is a person or a monitor asking whether the thing is alive. */
+    const shop = new URL(request.url).searchParams.get("shop");
+    return shop
+      ? await rates(shop.toLowerCase())
+      : json({ ok: true, service: "mitos-cod" });
   }
   if (request.method !== "POST") {
     return json({ error: "method_not_allowed" }, 405);
@@ -589,4 +601,51 @@ async function handle(request: Request) {
 
     return json({ ok: true, pendingReview: true, total });
   }
+}
+
+/**
+ * The merchant's shipping table, for the storefront to quote from.
+ *
+ * This endpoint recomputes shipping from this same table on every order and
+ * ignores the figures the storefront sends. If the theme quoted from its own
+ * setting instead, the two could drift and a shopper would be quoted one price
+ * and charged another — so the theme asks here, and the setting is only its
+ * fallback for when this call fails.
+ *
+ * Public, like the rest of this function: a delivery price is on the page
+ * already. Nothing here is per-customer.
+ */
+async function rates(domain: string) {
+  const [shop] = await sql`
+    SELECT s.id, st."defaultHomeRate", st."defaultDeskRate"
+      FROM "Shop" s
+      LEFT JOIN "ShopSettings" st ON st."shopId" = s.id
+     WHERE s.domain = ${domain} AND s."uninstalledAt" IS NULL
+  `;
+
+  if (!shop) return json({ error: "unknown_shop" }, 404);
+
+  const rows = await sql`
+    SELECT "wilayaCode", "homeRate", "deskRate"
+      FROM "ShippingRate"
+     WHERE "shopId" = ${shop.id} AND enabled = true
+     ORDER BY "wilayaCode"
+  `;
+
+  /* Shaped as the theme already reads it: keyed by wilaya code, [home, desk].
+     Matching the existing shape means the storefront needs no new parsing —
+     the table simply arrives from here instead of from a setting. */
+  const table: Record<string, [number, number]> = {};
+  for (const r of rows) {
+    table[r.wilayaCode] = [r.homeRate, r.deskRate];
+  }
+
+  return json({
+    ok: true,
+    rates: table,
+    fallback: [
+      shop.defaultHomeRate ?? 600,
+      shop.defaultDeskRate ?? 350,
+    ],
+  });
 }

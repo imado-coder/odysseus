@@ -450,6 +450,51 @@
 
     fillCommunes();
     recalc();
+
+    /* The shipping table has to come from the app, not from a theme setting.
+       The app is what actually charges: it recomputes shipping from the
+       merchant's own table and ignores whatever the storefront sent. So if the
+       setting and the table ever disagree, the shopper is quoted one price and
+       charged another — and the merchant has to remember to edit two places to
+       change one number.
+
+       So the setting becomes the fallback and the app becomes the source. This
+       runs after the first paint and never blocks it: on a slow or failed
+       request the form keeps working on the setting's figures, which is what
+       it did before this existed. */
+    codRates(form).then(function (table) {
+      if (!table) return;
+      tariffs = table;
+      recalc();
+    });
+  }
+
+  /* One request per endpoint per page, shared by every form on it — a product
+     page can carry three (inline, mobile sheet, cart drawer) and they all want
+     the same answer. */
+  var ratesCache = {};
+
+  function codRates(form) {
+    var endpoint = form.dataset.endpoint;
+    var shopField = form.querySelector('[name="shop"]');
+    var shop = shopField && shopField.value;
+    if (!endpoint || !shop) return Promise.resolve(null);
+
+    var url = endpoint + (endpoint.indexOf("?") === -1 ? "?" : "&") +
+      "shop=" + encodeURIComponent(shop);
+
+    if (!ratesCache[url]) {
+      ratesCache[url] = fetch(url, { headers: { Accept: "application/json" } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          /* Only a table with something in it replaces the setting. An empty
+             object would silently drop every wilaya to the fallback price. */
+          if (!d || !d.rates || !Object.keys(d.rates).length) return null;
+          return d.rates;
+        })
+        .catch(function () { return null; });
+    }
+    return ratesCache[url];
   }
 
   /* ----------------------------------------------------------------------

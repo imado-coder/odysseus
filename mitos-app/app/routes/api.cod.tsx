@@ -16,7 +16,7 @@
  *   whole point of a cash-on-delivery funnel.
  */
 
-import type { ActionFunctionArgs } from "react-router";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import prisma from "../db.server";
 import { unauthenticated } from "../shopify.server";
 import { validateLead, toVariantGid } from "../lib/validate.server";
@@ -24,7 +24,7 @@ import { createCodOrder } from "../lib/order.server";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
 };
 
@@ -35,8 +35,44 @@ function json(data: unknown, status = 200) {
   });
 }
 
-export async function loader() {
-  return new Response(null, { status: 204, headers: CORS });
+/**
+ * GET with a shop is the storefront asking what delivery costs.
+ *
+ * It matters that this exists: the action below recomputes shipping from the
+ * merchant's own table and ignores whatever the storefront sent. If the theme
+ * quoted from its own setting instead, the two could drift and a shopper would
+ * be quoted one price and charged another — and the merchant would have to
+ * remember to edit two places to change one number.
+ *
+ * Kept in step with supabase/functions/cod/index.ts.
+ */
+export async function loader({ request }: LoaderFunctionArgs) {
+  const domain = new URL(request.url).searchParams.get("shop")?.toLowerCase();
+  if (!domain) return new Response(null, { status: 204, headers: CORS });
+
+  const shop = await prisma.shop.findFirst({
+    where: { domain, uninstalledAt: null },
+    include: { settings: true, rates: { where: { enabled: true } } },
+  });
+
+  if (!shop) return json({ error: "unknown_shop" }, 404);
+
+  /* Shaped as the theme already reads it: keyed by wilaya code, [home, desk].
+     Matching the existing shape means the storefront needs no new parsing —
+     the table simply arrives from here instead of from a setting. */
+  const rates: Record<string, [number, number]> = {};
+  for (const r of shop.rates) {
+    rates[r.wilayaCode] = [r.homeRate, r.deskRate];
+  }
+
+  return json({
+    ok: true,
+    rates,
+    fallback: [
+      shop.settings?.defaultHomeRate ?? 600,
+      shop.settings?.defaultDeskRate ?? 350,
+    ],
+  });
 }
 
 export async function action(args: ActionFunctionArgs) {

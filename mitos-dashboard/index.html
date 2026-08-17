@@ -123,6 +123,57 @@
      from dragging the whole run to the wrong side. */
   .num,.qty{unicode-bidi:plaintext}
   .shop{unicode-bidi:plaintext}
+
+  /* Two screens, one header. The tabs sit where the filter chips used to be
+     the only thing under the title, so they read as navigation rather than as
+     another filter. */
+  .tabs{display:flex;gap:.375rem;margin-bottom:.5rem}
+  .tab{flex:1 1 0;min-height:40px;border:1px solid var(--line);
+    border-radius:10px;background:transparent;color:var(--sub);font:inherit;
+    font-size:.9375rem;cursor:pointer}
+  .tab[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);
+    color:var(--card);font-weight:600}
+
+  .help{margin:0;color:var(--sub);font-size:.875rem}
+
+  .bulk{display:grid;grid-template-columns:1fr 1fr;gap:.375rem}
+  .bulk button{grid-column:1 / -1;min-height:44px;border:1px solid var(--line);
+    border-radius:10px;background:transparent;color:var(--ink);font:inherit;
+    font-size:.875rem;cursor:pointer}
+
+  /* 16px on every input, without exception. Anything smaller and iOS zooms the
+     page on focus and never zooms back — on a 58-row table that is unusable. */
+  .bulk input,.rates input{min-height:44px;width:100%;padding:0 .5rem;
+    border:1px solid var(--line);border-radius:8px;background:var(--card);
+    color:var(--ink);font:inherit;font-size:16px;
+    font-variant-numeric:tabular-nums;text-align:center}
+
+  .rates{width:100%;border-collapse:collapse;background:var(--card);
+    border:1px solid var(--line);border-radius:12px}
+  .rates th,.rates td{padding:.375rem .5rem;text-align:start}
+  /* Deliberately not sticky: the page header already is, with a higher
+     stacking context, so a sticky row here would slide under it and vanish.
+     The column meaning is carried by each input's aria-label anyway. */
+  .rates thead th{background:var(--card);
+    font-size:.75rem;font-weight:600;color:var(--sub);text-align:center;
+    border-bottom:1px solid var(--line)}
+  .rates thead th:first-child{text-align:start}
+  .rates .cur{font-weight:400;opacity:.7}
+  .rates tbody th{font-weight:400;font-size:.875rem;line-height:1.3}
+  /* The table has to fit two 44px inputs and a name on a 360px screen, so the
+     numeric columns are pinned and the name takes whatever is left. */
+  .rates td{width:5.5rem}
+  .wcode{display:inline-block;min-width:1.75rem;color:var(--sub);
+    font-variant-numeric:tabular-nums;unicode-bidi:plaintext}
+
+  /* The save button follows the merchant down 58 rows instead of waiting at
+     the bottom of them. */
+  .savebar{position:sticky;bottom:0;padding:.625rem .75rem;
+    padding-bottom:max(.625rem,env(safe-area-inset-bottom));
+    background:var(--card);border-top:1px solid var(--line)}
+  .savebar button{width:100%;min-height:48px;border:0;border-radius:10px;
+    background:var(--ok);color:#fff;font:inherit;font-weight:600;cursor:pointer}
+  .savebar button:disabled{opacity:.65}
 </style>
 </head>
 <body>
@@ -160,6 +211,10 @@ try {
       failed: "Commande non créée chez Shopify — ",
       call: "Appeler", saveFail: "Échec de l'enregistrement. Réessayez.",
       item: "article",
+      tabOrders: "Commandes", tabRates: "Livraison",
+      ratesHelp: "Le prix que le client voit, et celui qui lui est facturé.",
+      applyAll: "Appliquer à toutes les wilayas",
+      save: "Enregistrer", saved: "Enregistré", saving: "Enregistrement…",
       PENDING: "À appeler", CONFIRMED: "Confirmée", SHIPPED: "Expédiée",
       DELIVERED: "Livrée", CANCELLED: "Annulée", RETURNED: "Retournée",
       NO_ANSWER: "Sans réponse"
@@ -174,6 +229,10 @@ try {
       failed: "لم تُنشأ الطلبية في Shopify — ",
       call: "اتصل", saveFail: "لم يُسجّل التغيير. أعد المحاولة.",
       item: "قطعة",
+      tabOrders: "الطلبيات", tabRates: "التوصيل",
+      ratesHelp: "السعر الذي يراه العميل، وهو نفسه الذي يُحسب عليه.",
+      applyAll: "طبّق على كل الولايات",
+      save: "حفظ", saved: "تم الحفظ", saving: "جارٍ الحفظ…",
       PENDING: "للاتصال", CONFIRMED: "مؤكّدة", SHIPPED: "أُرسلت",
       DELIVERED: "سُلّمت", CANCELLED: "ملغاة", RETURNED: "مرتجعة",
       NO_ANSWER: "بلا ردّ"
@@ -203,6 +262,7 @@ try {
 
   var ORDER = ["PENDING","CONFIRMED","SHIPPED","DELIVERED","NO_ANSWER","CANCELLED","RETURNED"];
   var filter = "";
+  var view = "orders";
 
   /* Names and addresses are typed by whoever filled the order form. They are
      escaped, not trusted, even though they came back from our own API. */
@@ -318,12 +378,149 @@ try {
       : '<p class="note">' + esc(t().none) + "</p>";
 
     root.innerHTML =
-      '<header class="bar"><div class="bar__row">' +
-        "<h1>" + esc(t().title) + "</h1>" +
+      bar(data, '<nav class="chips">' + chips + "</nav>") +
+      "<main>" + body + "</main>";
+  }
+
+  /* The header is identical on both screens, so it is built once — the tabs
+     are the only way between them and must not move or change shape when the
+     screen does. */
+  function bar(data, below) {
+    return '<header class="bar"><div class="bar__row">' +
+        "<h1>" + esc(view === "rates" ? t().tabRates : t().title) + "</h1>" +
         '<span class="shop">' + esc((data.shop && data.shop.domain) || "") + "</span>" +
         langButton() +
-      '</div><nav class="chips">' + chips + "</nav></header>" +
-      "<main>" + body + "</main>";
+      "</div>" +
+      '<nav class="tabs">' +
+        ["orders","rates"].map(function (v) {
+          return '<button class="tab" type="button" data-view="' + v + '"' +
+            (view === v ? ' aria-pressed="true"' : "") + ">" +
+            esc(v === "rates" ? t().tabRates : t().tabOrders) + "</button>";
+        }).join("") +
+      "</nav>" + (below || "") + "</header>";
+  }
+
+  /**
+   * The shipping table.
+   *
+   * Every wilaya is listed, including the ones with no row of their own: a
+   * merchant cannot otherwise tell "costs nothing" from "never set", and those
+   * are exactly the ones the order endpoint quietly prices at the shop
+   * default. Those show the default as a placeholder rather than a value, so
+   * the distinction stays visible.
+   */
+  function renderRates(data) {
+    var fb = data.fallback || [600, 350];
+    var cur = (data.shop && data.shop.currency) === "DZD"
+      ? "DA" : (data.shop && data.shop.currency) || "DA";
+
+    var rows = (data.wilayas || []).map(function (w) {
+      return '<tr data-code="' + esc(w.code) + '">' +
+        '<th scope="row"><span class="wcode">' + esc(w.code) + "</span> " +
+          esc(lang === "ar" ? w.nameAr : w.nameFr) + "</th>" +
+        '<td><input type="number" inputmode="numeric" min="0" step="10" ' +
+          'data-rate="home" aria-label="' + esc(t().home) + '" ' +
+          'placeholder="' + fb[0] + '" value="' +
+          (w.homeRate == null ? "" : w.homeRate) + '"></td>' +
+        '<td><input type="number" inputmode="numeric" min="0" step="10" ' +
+          'data-rate="desk" aria-label="' + esc(t().desk) + '" ' +
+          'placeholder="' + fb[1] + '" value="' +
+          (w.deskRate == null ? "" : w.deskRate) + '"></td>' +
+      "</tr>";
+    }).join("");
+
+    root.innerHTML = bar(data) +
+      "<main>" +
+        '<p class="help">' + esc(t().ratesHelp) + "</p>" +
+
+        '<div class="bulk">' +
+          '<input type="number" inputmode="numeric" min="0" step="10" ' +
+            'id="all-home" placeholder="' + esc(t().home) + '">' +
+          '<input type="number" inputmode="numeric" min="0" step="10" ' +
+            'id="all-desk" placeholder="' + esc(t().desk) + '">' +
+          '<button type="button" data-apply-all>' + esc(t().applyAll) + "</button>" +
+        "</div>" +
+
+        '<table class="rates"><thead><tr>' +
+          "<th></th>" +
+          "<th>" + esc(t().home) + " <span class=\"cur\">" + esc(cur) + "</span></th>" +
+          "<th>" + esc(t().desk) + " <span class=\"cur\">" + esc(cur) + "</span></th>" +
+        "</tr></thead><tbody>" + rows + "</tbody></table>" +
+      "</main>" +
+      '<div class="savebar"><button type="button" data-save-rates>' +
+        esc(t().save) + "</button></div>";
+  }
+
+  function loadRates() {
+    root.innerHTML = '<p class="note">' + esc(t().loading) + "</p>";
+    api("/rates")
+      .then(function (r) {
+        if (r.status === 404) throw new Error("bad-key");
+        if (!r.ok) throw new Error("http-" + r.status);
+        return r.json();
+      })
+      .then(renderRates)
+      .catch(function (e) {
+        if (e.message === "bad-key") {
+          try { localStorage.removeItem(KEY); } catch (err) {}
+          return gate(t().refused);
+        }
+        root.innerHTML = '<p class="note">' + esc(t().offline) + "</p>";
+      });
+  }
+
+  /**
+   * Sends the whole table, not just what was touched.
+   *
+   * A blank field means "use the shop default", so it is left out entirely
+   * rather than sent as a zero — free delivery and unset are different things,
+   * and zero is the one a careless save would write.
+   */
+  function saveRates(btn) {
+    var rates = {};
+    var bad = null;
+
+    [].forEach.call(document.querySelectorAll(".rates tbody tr"), function (tr) {
+      var h = tr.querySelector('[data-rate="home"]');
+      var d = tr.querySelector('[data-rate="desk"]');
+      if (h.value === "" && d.value === "") return;
+      var hv = Number(h.value === "" ? h.placeholder : h.value);
+      var dv = Number(d.value === "" ? d.placeholder : d.value);
+      if (!isFinite(hv) || !isFinite(dv) || hv < 0 || dv < 0) {
+        bad = bad || (h.value !== "" && (!isFinite(hv) || hv < 0) ? h : d);
+        return;
+      }
+      rates[tr.dataset.code] = [Math.round(hv), Math.round(dv)];
+    });
+
+    if (bad) {
+      bad.focus();
+      bad.scrollIntoView({ block: "center", behavior: "smooth" });
+      return;
+    }
+
+    var was = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = t().saving;
+
+    api("/rates", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rates: rates })
+    })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function () {
+        btn.textContent = t().saved;
+        setTimeout(function () {
+          btn.textContent = was;
+          btn.disabled = false;
+        }, 1400);
+      })
+      .catch(function () {
+        btn.textContent = was;
+        btn.disabled = false;
+        alert(t().saveFail);
+      });
   }
 
   function load() {
@@ -348,10 +545,37 @@ try {
       });
   }
 
+  function show() {
+    if (!key()) return gate("");
+    return view === "rates" ? loadRates() : load();
+  }
+
   document.addEventListener("click", function (e) {
     if (e.target.closest("[data-lang]")) {
       toggleLang();
-      return key() ? load() : gate("");
+      return show();
+    }
+
+    var tab = e.target.closest("[data-view]");
+    if (tab) {
+      view = tab.getAttribute("data-view");
+      return show();
+    }
+
+    var saveBtn = e.target.closest("[data-save-rates]");
+    if (saveBtn) return saveRates(saveBtn);
+
+    if (e.target.closest("[data-apply-all]")) {
+      /* Almost every merchant charges one price everywhere and a different one
+         for a handful of wilayas. Typing 58 rows to express that is the kind of
+         work that stops a table from ever being filled in. */
+      var h = document.getElementById("all-home").value;
+      var d = document.getElementById("all-desk").value;
+      [].forEach.call(document.querySelectorAll(".rates tbody tr"), function (tr) {
+        if (h !== "") tr.querySelector('[data-rate="home"]').value = h;
+        if (d !== "") tr.querySelector('[data-rate="desk"]').value = d;
+      });
+      return;
     }
 
     var chip = e.target.closest("[data-filter]");
@@ -392,7 +616,7 @@ try {
   });
 
   applyLang();
-  load();
+  show();
 })();
 </script>
 </body>
