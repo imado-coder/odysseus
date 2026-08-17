@@ -384,9 +384,21 @@ const zrExpress: Adapter = {
  * https://<courier>.ecotrack.dz. Two known hosts break the pattern:
  * DHD at platform.dhd-dz.com and Conexlog at app.conexlog-dz.com.
  *
- * Auth is a bearer token from the courier's own dashboard.
+ * Auth is a bearer token from the courier's own dashboard — the token, not
+ * the dashboard password. They are different things and only the first works
+ * here.
  *
- * Confidence: high, from two independent sources agreeing on the field names.
+ * Confidence: the three paths below are confirmed against a live Ecotrack
+ * host (trexexpress.ecotrack.dz), unauthenticated:
+ *
+ *   /api/v1/get/desks            401  exists, guarded
+ *   /api/v1/create/order         405  "Supported methods: POST" — their words
+ *   /api/v1/get/trackings/info   401  exists, guarded
+ *
+ * Note the shape of a rejection: 401 comes back as an HTML login page, while
+ * a real API error comes back as JSON. That is why `call` reads the body as
+ * text before trying to parse it — a bare .json() would throw away the only
+ * useful part of the most common failure.
  */
 const ecotrack: Adapter = {
   needsBaseUrl: true,

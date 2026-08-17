@@ -150,7 +150,7 @@ utilise.
 | Transporteur | Authentification | Confiance sur le contrat |
 |---|---|---|
 | Yalidine | `X-API-ID` + `X-API-TOKEN` | Haute — endpoint et champs publics |
-| Ecotrack | `Bearer`, hôte par transporteur | Haute — deux sources concordantes |
+| Ecotrack | `Bearer`, hôte par transporteur | **Confirmée en direct** — voir ci-dessous |
 | ZR Express | en-têtes `token` (id) + `key` | Moyenne — endpoints confirmés |
 | NOEST | `api_token` + `user_guid` dans le corps | Moyenne — création en deux temps |
 | Maystro | `Authorization: Token …` | Moyenne — la commune est un **id**, pas un nom |
@@ -160,6 +160,30 @@ Aucun de ces contrats ne peut être prouvé d'ici sans un compte réel. C'est
 précisément à quoi sert le bouton **Tester** : le marchand relie un compte,
 appuie une fois, et un adaptateur qui s'est trompé le dit tout de suite — au
 lieu d'échouer en silence sur le colis d'un vrai client.
+
+### TREX Express passe par Ecotrack
+
+Confirmé par le courrier d'ouverture de compte — « plateforme ECOTRACK — TREX
+Express », version web `trexexpress.ecotrack.dz`. **Aucun adaptateur à
+écrire** : c'est un transporteur de type `ECOTRACK` avec cette adresse.
+
+Les trois chemins de l'adaptateur ont été vérifiés sans identifiants contre
+cet hôte réel :
+
+| Chemin | Réponse | Ce que cela prouve |
+|---|---|---|
+| `/api/v1/get/desks` | `401` | existe, protégé |
+| `/api/v1/create/order` | `405` | existe — « Supported methods: POST », leurs mots |
+| `/api/v1/get/trackings/info` | `401` | existe, protégé |
+
+> Un refus arrive en **HTML** (page de connexion), alors qu'une vraie erreur
+> d'API arrive en JSON. D'où la lecture du corps en texte avant de tenter le
+> parsing : un `.json()` sec jetterait la seule partie utile de l'échec le plus
+> courant.
+
+Il reste à fournir le **token API**, pris dans le tableau de bord Ecotrack —
+pas le mot de passe du compte. Ce sont deux choses différentes et seule la
+première fonctionne ici.
 
 ### Trois règles non négociables
 
