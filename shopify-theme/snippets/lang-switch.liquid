@@ -6,6 +6,12 @@
   which of the two the visitor in front of them prefers — so the storefront
   offers both and remembers the answer.
 
+  It lives on the storefront's entry points — the header — and nowhere else.
+  A shopper deep in a product page has already chosen how they read; putting
+  the control there again spends space on the one screen where every pixel is
+  doing conversion work, and a language switch beside an order button is a
+  distraction from the order button.
+
   What it switches is DIRECTION and TYPEFACE, which is everything the theme
   itself controls. It does not translate the merchant's own copy: that copy
   lives in the template, and only the merchant can write it in a second
@@ -25,7 +31,8 @@
     assign label_b = settings.lang_b_label | default: 'ع'
   -%}
 
-  <div class="langsw" data-lang-switch data-default-dir="{{ default_dir }}">
+  <div class="langsw langsw--{{ size | default: 'sm' }}" data-lang-switch
+       data-default-dir="{{ default_dir }}">
     <button class="langsw__opt" type="button" data-lang="ltr"
             aria-pressed="{% if default_dir == 'ltr' %}true{% else %}false{% endif %}"
             lang="fr">{{ label_a }}</button>

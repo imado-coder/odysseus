@@ -1138,16 +1138,21 @@
 .langsw {
   display: inline-flex;
   flex: none;
-  padding: 2px;
+  padding: 1px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.18);
   border: 1px solid rgba(255, 255, 255, 0.28);
 }
 
+/* Compact by default. This is a preference control, not an action — it sits
+   beside the cart and the account and must not out-weigh either. The 44px
+   touch target is kept by an invisible extension rather than by making the
+   visible chip that big. */
 .langsw__opt {
-  min-inline-size: 44px;
-  min-block-size: 44px;
-  padding-inline: 10px;
+  position: relative;
+  min-inline-size: 30px;
+  min-block-size: 28px;
+  padding-inline: 8px;
   border-radius: 999px;
   color: inherit;
   font-size: 13px;
@@ -1176,6 +1181,18 @@
 
 /* The header collapses hard on phones; the switch keeps its 44px target by
    growing vertically rather than being dropped from the row. */
+/* The chip stays small; the hit area does not. A pseudo-element pads the
+   target out to 44px in every direction without changing what is drawn. */
+.langsw__opt::after {
+  content: "";
+  position: absolute;
+  inset: 50% 0 0 50%;
+  inline-size: max(100%, 44px);
+  block-size: 44px;
+  transform: translate(-50%, -50%);
+}
+
 @media (max-width: 749px) {
-  .langsw__opt { min-block-size: 44px; min-inline-size: 44px; }
+  .langsw__opt { min-block-size: 30px; min-inline-size: 32px; font-size: 12px; }
+  .langsw__opt[lang="ar"] { font-size: 15px; }
 }

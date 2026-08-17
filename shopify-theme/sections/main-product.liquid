@@ -488,18 +488,31 @@
                   assign spec_keys = spec_keys | append: '|' | append: spec_block.settings.auto_sku_label
                   assign spec_vals = spec_vals | append: '|' | append: v.sku
                 endif
-                for option in product.options_with_values
-                  assign opt_values = option.values | join: ', '
-                  assign spec_keys = spec_keys | append: '|' | append: option.name
-                  assign spec_vals = spec_vals | append: '|' | append: opt_values
-                endfor
+                # A product with no real options still has Shopify's
+                # placeholder one — name "Title", single value "Default
+                # Title". It is not a specification, it is the absence of
+                # one, and printing it tells the shopper nothing.
+                unless product.has_only_default_variant
+                  for option in product.options_with_values
+                    assign opt_values = option.values | join: ', '
+                    assign spec_keys = spec_keys | append: '|' | append: option.name
+                    assign spec_vals = spec_vals | append: '|' | append: opt_values
+                  endfor
+                endunless
               endif
 
               assign spec_k = spec_keys | remove_first: '|' | split: '|'
               assign spec_v = spec_vals | remove_first: '|' | split: '|'
             -%}
 
-            {%- if spec_k.size > 0 -%}
+            {%- comment -%}
+              Two facts or it is not a table. One lonely cell under a heading
+              that promises "product details" reads as a shop that knows
+              nothing about what it is selling — worse than not asking the
+              question. A merchant who fills the rows in gets the section
+              back immediately.
+            {%- endcomment -%}
+            {%- if spec_k.size > 1 -%}
               <section class="pdetails" data-reveal {{ spec_block.shopify_attributes }}>
                 <div class="pdetails__head">
                   <h2 class="pdetails__title">{{ spec_block.settings.title }}</h2>
@@ -517,7 +530,7 @@
                   a trailing gap is the background showing through, which is
                   what the 1px gap over a border-coloured backdrop draws.
                 {%- endcomment -%}
-                <div class="pdetails__grid">
+                <div class="pdetails__grid" data-cells="{{ spec_k.size }}">
                   {%- for k in spec_k limit: 9 -%}
                     <div class="pdetails__cell">
                       <span class="pdetails__key">{{ k }}</span>
@@ -803,10 +816,12 @@
               {%- if v.sku != blank -%}
                 <tr><th scope="row">{{ block.settings.auto_sku_label }}</th><td>{{ v.sku }}</td></tr>
               {%- endif -%}
-              {%- for option in product.options_with_values -%}
-                {%- assign opt_all = option.values | join: ', ' -%}
-                <tr><th scope="row">{{ option.name }}</th><td>{{ opt_all }}</td></tr>
-              {%- endfor -%}
+              {%- unless product.has_only_default_variant -%}
+                {%- for option in product.options_with_values -%}
+                  {%- assign opt_all = option.values | join: ', ' -%}
+                  <tr><th scope="row">{{ option.name }}</th><td>{{ opt_all }}</td></tr>
+                {%- endfor -%}
+              {%- endunless -%}
             {%- endif -%}
           </table>
           {%- if block.settings.sheet_note != blank -%}
@@ -1194,7 +1209,7 @@
       "type": "text",
       "id": "description_title",
       "label": "Titre de la description",
-      "default": "Détails du produit"
+      "default": "Description"
     },
     {
       "type": "select",
