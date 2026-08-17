@@ -16,7 +16,8 @@
     "prisma:seed": "prisma db seed",
     "verify": "tsx prisma/verify.ts",
     "demo:shop": "tsx prisma/demo-shop.ts",
-    "setup": "prisma generate && prisma migrate deploy"
+    "setup": "prisma generate && prisma migrate deploy",
+    "vercel-build": "prisma generate && prisma migrate deploy && react-router build"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

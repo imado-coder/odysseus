@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run vercel-build",
+  "framework": null,
+  "regions": ["fra1"],
+  "functions": {
+    "build/server/index.js": {
+      "maxDuration": 30
+    }
+  }
+}
