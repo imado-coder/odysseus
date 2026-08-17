@@ -419,6 +419,214 @@
         "default": "Aucun paiement en ligne. Vous payez le livreur, en espèces, après avoir vérifié le colis."
       },
       {
+        "type": "header",
+        "content": "Étapes après la commande"
+      },
+      {
+        "type": "paragraph",
+        "content": "Les quatre étapes affichées sous le message. Videz un titre pour retirer l'étape."
+      },
+      {
+        "type": "text",
+        "id": "ty_s1_title",
+        "label": "Étape 1 — titre",
+        "default": "Commande reçue"
+      },
+      {
+        "type": "textarea",
+        "id": "ty_s1_text",
+        "label": "Étape 1 — texte",
+        "default": "Votre demande est enregistrée chez nous."
+      },
+      {
+        "type": "select",
+        "id": "ty_s1_icon",
+        "label": "Étape 1 — icône",
+        "options": [
+          {
+            "value": "check",
+            "label": "Coche"
+          },
+          {
+            "value": "headset",
+            "label": "Appel"
+          },
+          {
+            "value": "box-fill",
+            "label": "Colis"
+          },
+          {
+            "value": "truck-fast",
+            "label": "Camion"
+          },
+          {
+            "value": "cash-fill",
+            "label": "Espèces"
+          },
+          {
+            "value": "clock-fill",
+            "label": "Horloge"
+          }
+        ],
+        "default": "check"
+      },
+      {
+        "type": "checkbox",
+        "id": "ty_s1_done",
+        "label": "Étape 1 — déjà franchie",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "ty_s2_title",
+        "label": "Étape 2 — titre",
+        "default": "Appel de confirmation"
+      },
+      {
+        "type": "textarea",
+        "id": "ty_s2_text",
+        "label": "Étape 2 — texte",
+        "default": "Nous vous appelons pour vérifier l'adresse et la quantité. Gardez votre téléphone à portée."
+      },
+      {
+        "type": "select",
+        "id": "ty_s2_icon",
+        "label": "Étape 2 — icône",
+        "options": [
+          {
+            "value": "check",
+            "label": "Coche"
+          },
+          {
+            "value": "headset",
+            "label": "Appel"
+          },
+          {
+            "value": "box-fill",
+            "label": "Colis"
+          },
+          {
+            "value": "truck-fast",
+            "label": "Camion"
+          },
+          {
+            "value": "cash-fill",
+            "label": "Espèces"
+          },
+          {
+            "value": "clock-fill",
+            "label": "Horloge"
+          }
+        ],
+        "default": "headset"
+      },
+      {
+        "type": "checkbox",
+        "id": "ty_s2_done",
+        "label": "Étape 2 — déjà franchie",
+        "default": false
+      },
+      {
+        "type": "text",
+        "id": "ty_s3_title",
+        "label": "Étape 3 — titre",
+        "default": "Expédition"
+      },
+      {
+        "type": "textarea",
+        "id": "ty_s3_text",
+        "label": "Étape 3 — texte",
+        "default": "Le colis part vers votre wilaya dès la confirmation."
+      },
+      {
+        "type": "select",
+        "id": "ty_s3_icon",
+        "label": "Étape 3 — icône",
+        "options": [
+          {
+            "value": "check",
+            "label": "Coche"
+          },
+          {
+            "value": "headset",
+            "label": "Appel"
+          },
+          {
+            "value": "box-fill",
+            "label": "Colis"
+          },
+          {
+            "value": "truck-fast",
+            "label": "Camion"
+          },
+          {
+            "value": "cash-fill",
+            "label": "Espèces"
+          },
+          {
+            "value": "clock-fill",
+            "label": "Horloge"
+          }
+        ],
+        "default": "truck-fast"
+      },
+      {
+        "type": "checkbox",
+        "id": "ty_s3_done",
+        "label": "Étape 3 — déjà franchie",
+        "default": false
+      },
+      {
+        "type": "text",
+        "id": "ty_s4_title",
+        "label": "Étape 4 — titre",
+        "default": "Paiement à la réception"
+      },
+      {
+        "type": "textarea",
+        "id": "ty_s4_text",
+        "label": "Étape 4 — texte",
+        "default": "Vous vérifiez le colis, puis vous payez le livreur en espèces."
+      },
+      {
+        "type": "select",
+        "id": "ty_s4_icon",
+        "label": "Étape 4 — icône",
+        "options": [
+          {
+            "value": "check",
+            "label": "Coche"
+          },
+          {
+            "value": "headset",
+            "label": "Appel"
+          },
+          {
+            "value": "box-fill",
+            "label": "Colis"
+          },
+          {
+            "value": "truck-fast",
+            "label": "Camion"
+          },
+          {
+            "value": "cash-fill",
+            "label": "Espèces"
+          },
+          {
+            "value": "clock-fill",
+            "label": "Horloge"
+          }
+        ],
+        "default": "cash-fill"
+      },
+      {
+        "type": "checkbox",
+        "id": "ty_s4_done",
+        "label": "Étape 4 — déjà franchie",
+        "default": false
+      },
+      {
         "type": "text",
         "id": "ty_cta_label",
         "label": "Bouton",

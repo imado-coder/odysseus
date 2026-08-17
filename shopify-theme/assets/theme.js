@@ -327,12 +327,23 @@
          shopper pastes to a friend. sessionStorage dies with the tab, which
          is exactly the lifetime this data should have. */
       function handOver(reference) {
-        var place = [payload.commune, payload.wilaya].filter(Boolean).join(", ");
+        /* The wilaya field carries the code ("16"); the shopper needs the
+           name they picked. */
+        var wName = "";
+        if (wilaya && wilaya.selectedIndex > 0) {
+          wName = (wilaya.options[wilaya.selectedIndex].textContent || "")
+            .replace(/^\s*\d+\s*[—-]\s*/, "").trim();
+        }
+        var place = [payload.commune, wName || payload.wilaya].filter(Boolean).join(", ");
         try {
           sessionStorage.setItem("souq:lastOrder", JSON.stringify({
             ref: reference || "",
             name: [payload.prenom, payload.nom].filter(Boolean).join(" "),
-            phone: payload.telephone || "",
+            /* Grouped the way a phone number is read here, not as ten
+               unbroken digits — this line is what the shopper checks to be
+               sure we will reach them. */
+            phone: (payload.telephone || "").replace(/\D/g, "")
+              .replace(/^(\d{4})(\d{2})(\d{2})(\d{2})$/, "$1 $2 $3 $4") || (payload.telephone || ""),
             place: place,
             total: out.total ? out.total.textContent : "",
           }));
@@ -368,7 +379,7 @@
         var heading = overlay.querySelector(".ty__title");
         if (heading) {
           heading.setAttribute("tabindex", "-1");
-          heading.focus();
+          heading.focus({ preventScroll: true });
         }
       }
 

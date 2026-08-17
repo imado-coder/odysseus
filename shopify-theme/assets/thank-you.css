@@ -250,3 +250,19 @@ body:has(.ty--overlay:not([hidden])) .cartbub { display: none; }
     to { opacity: 1; transform: none; }
   }
 }
+
+/* [hidden] must win.
+
+   The reference chip and the summary ship hidden and are revealed only once
+   there is something to put in them. Both set display in their own rule,
+   which beats the UA stylesheet's [hidden] { display: none } — so an order
+   placed without a reference still printed an empty "Référence :" pill. */
+.ty__ref[hidden],
+.ty__summary[hidden] { display: none; }
+
+/* The confirmation moves focus to its heading so a screen reader lands on the
+   result rather than wherever the form left it. That is a programmatic focus,
+   not a keyboard one, and it should not draw the keyboard ring — a box around
+   the title reads to everyone else as a rendering fault. */
+.ty__title:focus { outline: none; box-shadow: none; }
+.ty__title:focus-visible { outline: none; box-shadow: none; }

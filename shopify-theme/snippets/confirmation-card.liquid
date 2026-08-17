@@ -32,6 +32,13 @@
     <span>{{ settings.ty_ref_label }} <b data-ty-ref-value></b></span>
   </p>
 
+  {%- comment -%}
+    The steps are the point of this screen — they are what turns "we got it"
+    into "here is what happens to you next". They came from section blocks,
+    which meant the overlay on the product page had none of them at all and
+    showed a stripped confirmation. They live in theme settings now so both
+    places render the same four, and a section that passes blocks still wins.
+  {%- endcomment -%}
   {%- if steps != blank and steps.size > 0 -%}
     <ol class="ty__steps" data-reveal-stagger>
       {%- for block in steps -%}
@@ -47,6 +54,30 @@
             {%- endif -%}
           </span>
         </li>
+      {%- endfor -%}
+    </ol>
+  {%- else -%}
+    <ol class="ty__steps" data-reveal-stagger>
+      {%- for i in (1..4) -%}
+        {%- liquid
+          assign tk = 'ty_s' | append: i | append: '_title'
+          assign xk = 'ty_s' | append: i | append: '_text'
+          assign ik = 'ty_s' | append: i | append: '_icon'
+          assign dk = 'ty_s' | append: i | append: '_done'
+          assign st = settings[tk]
+          assign sx = settings[xk]
+          assign si = settings[ik] | default: 'check'
+          assign sd = settings[dk]
+        -%}
+        {%- if st != blank -%}
+          <li class="ty__step{% if sd %} ty__step--done{% endif %}">
+            <span class="ty__step-dot" aria-hidden="true">{% render 'icon', name: si %}</span>
+            <span>
+              <span class="ty__step-title">{{ st }}</span>
+              {%- if sx != blank -%}<span class="ty__step-text">{{ sx }}</span>{%- endif -%}
+            </span>
+          </li>
+        {%- endif -%}
       {%- endfor -%}
     </ol>
   {%- endif -%}
