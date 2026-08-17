@@ -39,8 +39,11 @@
   .bar__row{display:flex;align-items:baseline;justify-content:space-between;
     gap:.5rem;margin-bottom:.5rem}
   h1{margin:0;font-size:1.0625rem;letter-spacing:-.01em}
-  .shop{font-size:.8125rem;color:var(--sub);overflow:hidden;
-    text-overflow:ellipsis;white-space:nowrap}
+  /* The domain gives way first: it is the least useful thing on the row, and
+     without min-width:0 a nowrap flex item refuses to shrink and shoves the
+     language button off the screen instead. */
+  .shop{flex:1 1 auto;min-width:0;font-size:.8125rem;color:var(--sub);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:end}
   .chips{display:flex;gap:.375rem;overflow-x:auto;padding-bottom:.25rem;
     scrollbar-width:none}
   .chips::-webkit-scrollbar{display:none}
@@ -94,10 +97,45 @@
     border-radius:10px;background:var(--ink);color:var(--card);font:inherit;
     font-weight:600;cursor:pointer}
   .err{color:var(--bad);font-size:.875rem;margin-top:.75rem}
+
+  /* The language switch: a chip, not a control that competes with the work.
+     It sits beside the title, and the pseudo-element gives it the 44px of
+     tappable area a thumb actually needs without the box looking heavy. */
+  .lang{position:relative;flex:0 0 auto;align-self:center;
+    min-width:34px;min-height:30px;
+    padding:0 .5rem;border:1px solid var(--line);border-radius:999px;
+    background:transparent;color:var(--sub);font:inherit;font-size:.8125rem;
+    font-weight:600;cursor:pointer}
+  .lang::after{content:"";position:absolute;inset:-7px;border-radius:999px}
+  .lang-row{margin-top:1.25rem}
+
+  /* Arabic. Two things break it if left alone: the negative tracking that a
+     Latin display face wants, which severs the joins between letters, and a
+     line-height tuned for Latin x-height, which crowds the ascenders and
+     descenders Arabic actually uses. */
+  :root[dir="rtl"] body{
+    font-family:"Segoe UI","Noto Naskh Arabic","Geeza Pro",system-ui,sans-serif;
+    line-height:1.7}
+  :root[dir="rtl"] h1,:root[dir="rtl"] .name{letter-spacing:normal}
+
+  /* Money, phone numbers and order references are Latin-digit runs inside
+     Arabic text. `plaintext` — not `isolate` — is what keeps a leading digit
+     from dragging the whole run to the wrong side. */
+  .num,.qty{unicode-bidi:plaintext}
+  .shop{unicode-bidi:plaintext}
 </style>
 </head>
 <body>
-<div id="root"><p class="note">Chargement…</p></div>
+<script>
+/* Direction before first paint. Set from the script below instead, and an
+   Arabic reader gets a frame of left-to-right layout on every visit. */
+try {
+  var d = localStorage.getItem("mitos:lang") === "ar";
+  document.documentElement.dir = d ? "rtl" : "ltr";
+  document.documentElement.lang = d ? "ar" : "fr";
+} catch (e) {}
+</script>
+<div id="root"><p class="note">…</p></div>
 
 <script>
 (function () {
@@ -107,11 +145,62 @@
   var KEY = "mitos:key";
   var root = document.getElementById("root");
 
-  var LABEL = {
-    PENDING: "À appeler", CONFIRMED: "Confirmée", SHIPPED: "Expédiée",
-    DELIVERED: "Livrée", CANCELLED: "Annulée", RETURNED: "Retournée",
-    NO_ANSWER: "Sans réponse"
+  /* Both languages, because the person working this list reads one or the
+     other and the tool cannot know which. The choice is remembered, and it is
+     applied before the first render so an Arabic reader never sees a French
+     frame first. */
+  var DICT = {
+    fr: {
+      dir: "ltr", other: "ع",
+      title: "Commandes", ask: "Entrez votre clé d'accès.",
+      keyPh: "clé d'accès", open: "Ouvrir", refused: "Clé refusée.",
+      loading: "Chargement…", offline: "Connexion impossible. Réessayez.",
+      none: "Aucune commande ici.", all: "Toutes",
+      home: "Domicile", desk: "Bureau", unsure: "à confirmer",
+      failed: "Commande non créée chez Shopify — ",
+      call: "Appeler", saveFail: "Échec de l'enregistrement. Réessayez.",
+      item: "article",
+      PENDING: "À appeler", CONFIRMED: "Confirmée", SHIPPED: "Expédiée",
+      DELIVERED: "Livrée", CANCELLED: "Annulée", RETURNED: "Retournée",
+      NO_ANSWER: "Sans réponse"
+    },
+    ar: {
+      dir: "rtl", other: "FR",
+      title: "الطلبيات", ask: "أدخل مفتاح الدخول.",
+      keyPh: "مفتاح الدخول", open: "دخول", refused: "المفتاح مرفوض.",
+      loading: "جارٍ التحميل…", offline: "تعذّر الاتصال. أعد المحاولة.",
+      none: "لا توجد طلبيات هنا.", all: "الكل",
+      home: "للمنزل", desk: "للمكتب", unsure: "للتأكيد",
+      failed: "لم تُنشأ الطلبية في Shopify — ",
+      call: "اتصل", saveFail: "لم يُسجّل التغيير. أعد المحاولة.",
+      item: "قطعة",
+      PENDING: "للاتصال", CONFIRMED: "مؤكّدة", SHIPPED: "أُرسلت",
+      DELIVERED: "سُلّمت", CANCELLED: "ملغاة", RETURNED: "مرتجعة",
+      NO_ANSWER: "بلا ردّ"
+    }
   };
+
+  var LANG = "mitos:lang";
+  var lang = (function () {
+    try { return DICT[localStorage.getItem(LANG)] ? localStorage.getItem(LANG) : "fr"; }
+    catch (e) { return "fr"; }
+  })();
+
+  function t() { return DICT[lang]; }
+
+  function applyLang() {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = t().dir;
+    /* The tab is how a merchant finds this again among open tabs. */
+    document.title = "MITOS — " + t().title;
+  }
+
+  function toggleLang() {
+    lang = lang === "fr" ? "ar" : "fr";
+    try { localStorage.setItem(LANG, lang); } catch (e) {}
+    applyLang();
+  }
+
   var ORDER = ["PENDING","CONFIRMED","SHIPPED","DELIVERED","NO_ANSWER","CANCELLED","RETURNED"];
   var filter = "";
 
@@ -133,15 +222,21 @@
     return fetch(API + (path || ""), options);
   }
 
+  function langButton() {
+    return '<button class="lang" type="button" data-lang lang="' +
+      (lang === "fr" ? "ar" : "fr") + '">' + t().other + "</button>";
+  }
+
   function gate(message) {
     root.innerHTML =
       '<form class="gate">' +
         '<h1>MITOS</h1>' +
-        '<p class="note" style="padding:.5rem 0">Entrez votre clé d\'accès.</p>' +
+        '<p class="note" style="padding:.5rem 0">' + esc(t().ask) + "</p>" +
         '<input type="password" name="k" autocomplete="current-password" ' +
-          'placeholder="clé d\'accès" required>' +
-        '<button type="submit">Ouvrir</button>' +
+          'placeholder="' + esc(t().keyPh) + '" required>' +
+        "<button type=\"submit\">" + esc(t().open) + "</button>" +
         (message ? '<p class="err">' + esc(message) + "</p>" : "") +
+        '<div class="lang-row">' + langButton() + "</div>" +
       "</form>";
 
     root.querySelector("form").addEventListener("submit", function (e) {
@@ -160,8 +255,11 @@
 
   function card(o, currency) {
     var items = Array.isArray(o.items) ? o.items : [];
+    /* The quantity is a digit next to a word that may be Arabic, so the run
+       is isolated — otherwise "3× قميص" reorders around the number. */
     var what = items.map(function (i) {
-      return esc(i.qty + "× " + (i.title || "article"));
+      return '<span class="qty">' + esc(i.qty + "× " + (i.title || t().item)) +
+        "</span>";
     }).join(", ");
 
     return '<article class="card" data-id="' + esc(o.id) + '">' +
@@ -169,13 +267,13 @@
         '<div class="name">' + esc(o.firstName) + " " + esc(o.lastName) + "</div>" +
         '<div class="place">' + esc(o.commune) + ", " + esc(o.wilayaName) + "</div>" +
       '</div><span class="pill s-' + esc(o.status) + '" data-pill>' +
-        esc(LABEL[o.status] || o.status) + "</span></header>" +
+        esc(t()[o.status] || o.status) + "</span></header>" +
 
       '<div class="meta">' +
-        "<span>" + (o.delivery === "DESK" ? "Bureau" : "Domicile") + "</span>" +
+        "<span>" + esc(o.delivery === "DESK" ? t().desk : t().home) + "</span>" +
         '<span class="dot"></span>' +
         '<span class="num">' + esc(money(o.total, currency)) + "</span>" +
-        (o.pricesVerified ? "" : '<span class="warn">à confirmer</span>') +
+        (o.pricesVerified ? "" : '<span class="warn">' + esc(t().unsure) + "</span>") +
         (o.shopifyName
           ? '<span class="dot"></span><span class="num">' + esc(o.shopifyName) + "</span>"
           : "") +
@@ -185,17 +283,18 @@
       '<div class="addr">' + esc(o.address) + "</div>" +
 
       (o.createFailed
-        ? '<div class="fail">Commande non créée chez Shopify — ' +
+        ? '<div class="fail">' + esc(t().failed) +
           esc(String(o.createError || "").slice(0, 140)) + "</div>"
         : "") +
 
-      '<a class="call" href="tel:' + esc(o.phone) + '">Appeler ' + esc(o.phone) + "</a>" +
+      '<a class="call" href="tel:' + esc(o.phone) + '">' + esc(t().call) +
+        ' <span class="num">' + esc(o.phone) + "</span></a>" +
 
       '<div class="acts">' +
         ["CONFIRMED","NO_ANSWER","DELIVERED","CANCELLED"].map(function (s) {
           return '<button type="button" data-set="' + s + '"' +
             (o.status === s ? ' aria-pressed="true"' : "") + ">" +
-            esc(LABEL[s]) + "</button>";
+            esc(t()[s]) + "</button>";
         }).join("") +
       "</div></article>";
   }
@@ -206,28 +305,30 @@
 
     var chips = '<button class="chip" data-filter=""' +
       (filter === "" ? ' aria-pressed="true"' : "") +
-      ">Toutes<b>" + total + "</b></button>" +
+      ">" + esc(t().all) + "<b>" + total + "</b></button>" +
       ORDER.filter(function (s) { return counts[s]; }).map(function (s) {
         return '<button class="chip" data-filter="' + s + '"' +
           (filter === s ? ' aria-pressed="true"' : "") + ">" +
-          esc(LABEL[s]) + "<b>" + counts[s] + "</b></button>";
+          esc(t()[s]) + "<b>" + counts[s] + "</b></button>";
       }).join("");
 
     var currency = (data.shop && data.shop.currency) || "DZD";
     var body = data.orders.length
       ? data.orders.map(function (o) { return card(o, currency); }).join("")
-      : '<p class="note">Aucune commande ici.</p>';
+      : '<p class="note">' + esc(t().none) + "</p>";
 
     root.innerHTML =
-      '<header class="bar"><div class="bar__row"><h1>Commandes</h1>' +
+      '<header class="bar"><div class="bar__row">' +
+        "<h1>" + esc(t().title) + "</h1>" +
         '<span class="shop">' + esc((data.shop && data.shop.domain) || "") + "</span>" +
+        langButton() +
       '</div><nav class="chips">' + chips + "</nav></header>" +
       "<main>" + body + "</main>";
   }
 
   function load() {
     if (!key()) return gate("");
-    root.innerHTML = '<p class="note">Chargement…</p>';
+    root.innerHTML = '<p class="note">' + esc(t().loading) + "</p>";
 
     api(filter ? "?s=" + encodeURIComponent(filter) : "")
       .then(function (r) {
@@ -241,13 +342,18 @@
       .catch(function (e) {
         if (e.message === "bad-key") {
           try { localStorage.removeItem(KEY); } catch (err) {}
-          return gate("Clé refusée.");
+          return gate(t().refused);
         }
-        root.innerHTML = '<p class="note">Connexion impossible. Réessayez.</p>';
+        root.innerHTML = '<p class="note">' + esc(t().offline) + "</p>";
       });
   }
 
   document.addEventListener("click", function (e) {
+    if (e.target.closest("[data-lang]")) {
+      toggleLang();
+      return key() ? load() : gate("");
+    }
+
     var chip = e.target.closest("[data-filter]");
     if (chip) {
       filter = chip.getAttribute("data-filter");
@@ -268,7 +374,7 @@
     card.querySelectorAll("[data-set]").forEach(function (b) {
       b.setAttribute("aria-pressed", b === btn ? "true" : "false");
     });
-    pill.textContent = LABEL[want] || want;
+    pill.textContent = t()[want] || want;
     pill.className = "pill s-" + want;
 
     api("", {
@@ -281,10 +387,11 @@
         pill.textContent = before.text;
         pill.className = before.cls;
         btn.setAttribute("aria-pressed", "false");
-        alert("Échec de l'enregistrement. Réessayez.");
+        alert(t().saveFail);
       });
   });
 
+  applyLang();
   load();
 })();
 </script>
