@@ -586,7 +586,13 @@
       { rootMargin: "0px 0px -8% 0px", threshold: 0.05 }
     );
 
-    var watched = document.querySelectorAll("[data-reveal], [data-reveal-stagger]");
+    /* Badges pop as they arrive rather than being there already. Same
+       observer, one class, so it costs nothing extra — and the same safety
+       net below, because a badge starts at opacity 0 exactly like a revealed
+       section and would otherwise be invisible forever if never reached. */
+    var watched = document.querySelectorAll(
+      "[data-reveal], [data-reveal-stagger], [data-pop]"
+    );
     watched.forEach(function (el) { io.observe(el); });
 
     /* Safety net.
@@ -959,6 +965,51 @@
   }
 
   /* ----------------------------------------------------------------------
+     Attention on the order button.
+
+     A shopper who has read the page and not acted is the one this nudge is
+     for. It waits until they have actually been here a while, fires three
+     times, and then never again — a button that pulses forever is a button
+     the eye learns to skip, and it is the last thing a storefront can afford
+     to teach. Any interaction at all cancels it: someone who is already
+     engaged does not need to be tapped on the shoulder.
+     ---------------------------------------------------------------------- */
+  function initCtaAttention(btn) {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    var rounds = 0;
+    var timer = null;
+    var cancelled = false;
+
+    function stop() {
+      cancelled = true;
+      clearTimeout(timer);
+      delete btn.dataset.attention;
+      ["pointerdown", "keydown", "scroll"].forEach(function (ev) {
+        window.removeEventListener(ev, stop, true);
+      });
+    }
+
+    function pulse() {
+      if (cancelled || rounds >= 3) return stop();
+      /* Only while the button is actually on screen. */
+      var r = btn.getBoundingClientRect();
+      if (r.bottom > 0 && r.top < window.innerHeight) {
+        rounds++;
+        btn.dataset.attention = "1";
+        setTimeout(function () { delete btn.dataset.attention; }, 900);
+      }
+      timer = setTimeout(pulse, 6000);
+    }
+
+    ["pointerdown", "keydown"].forEach(function (ev) {
+      window.addEventListener(ev, stop, true);
+    });
+
+    timer = setTimeout(pulse, 7000);
+  }
+
+  /* ----------------------------------------------------------------------
      Language switch.
 
      Direction and typeface are what the theme controls, so that is what this
@@ -1234,6 +1285,12 @@
       var mi = Math.floor((s % 3600) / 60);
       var se = s % 60;
       out.textContent = (d > 0 ? d + ":" : "") + pad(h) + ":" + pad(mi) + ":" + pad(se);
+
+      /* The one place a repeating flash is honest: the number really did
+         change. Retriggered per tick rather than left looping, so it stops
+         the instant the clock does. */
+      out.dataset.tick = "1";
+      setTimeout(function () { delete out.dataset.tick; }, 240);
     }
 
     var timer = setInterval(tick, 1000);
@@ -1296,6 +1353,7 @@
     initAddToCart();
     document.querySelectorAll("[data-cart-drawer]").forEach(initCartDrawer);
     document.querySelectorAll("[data-lang-switch]").forEach(initLangSwitch);
+    document.querySelectorAll("[data-cta-attention]").forEach(initCtaAttention);
     document.querySelectorAll("[data-ty]").forEach(initThanks);
     document.querySelectorAll("[data-price-count]").forEach(initPriceCount);
     document.querySelectorAll("[data-count-to]").forEach(initCountUp);

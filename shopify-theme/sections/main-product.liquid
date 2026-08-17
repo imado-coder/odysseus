@@ -134,7 +134,7 @@
                 <div class="bb__rank" {{ block.shopify_attributes }}>
                   <button class="bb__rank-head" type="button"
                           data-sheet-open aria-controls="RankSheet-{{ block.id }}">
-                    <span class="bb__rank-badge" style="{% if block.settings.badge_bg != blank %}background: {{ block.settings.badge_bg }};{% endif %}">
+                    <span class="bb__rank-badge" data-pop style="{% if block.settings.badge_bg != blank %}background: {{ block.settings.badge_bg }};{% endif %}">
                       {% render 'icon', name: 'trophy' %}{{ block.settings.badge }}
                     </span>
                     <span class="bb__rank-text">{{ block.settings.text }}</span>
@@ -180,7 +180,7 @@
                   <p class="bb__price-note">{{ block.settings.note }}</p>
                 {%- endif -%}
                 {%- if on_sale and block.settings.show_discount -%}
-                  <span class="bb__off bb__off--chip"
+                  <span class="bb__off bb__off--chip" data-pop
                         {% if block.settings.count_price %}data-count-to="{{ off }}"{% endif %}
                         style="{% if block.settings.off_bg != blank %}background: {{ block.settings.off_bg }};{% endif %}">
                     {{ block.settings.off_prefix }}{{ off }}{{ block.settings.off_suffix }}
@@ -188,7 +188,7 @@
                 {%- endif -%}
 
               {%- when 'notice' -%}
-                <span class="bb__notice bb__notice--inline" {{ block.shopify_attributes }}
+                <span class="bb__notice bb__notice--inline" data-pop {{ block.shopify_attributes }}
                       style="{% if block.settings.color != blank %}border-color: {{ block.settings.color }}; color: {{ block.settings.color }};{% endif %}">
                   {{ block.settings.text }}
                   {%- if block.settings.show_info %} <span aria-hidden="true">&#9432;</span>{% endif -%}
@@ -397,7 +397,7 @@
                 <div class="bb__pills" {{ block.shopify_attributes }}>
                   {%- assign pills = block.settings.items | split: ',' -%}
                   {%- for p in pills -%}
-                    <span class="bb__pill" style="{% if block.settings.bg != blank %}background: {{ block.settings.bg }};{% endif %}">{{ p | strip }}</span>
+                    <span class="bb__pill" data-pop style="{% if block.settings.bg != blank %}background: {{ block.settings.bg }};{% endif %}">{{ p | strip }}</span>
                   {%- endfor -%}
                 </div>
 
@@ -1071,7 +1071,7 @@
         {%- endif -%}
       {%- endcapture -%}
       {%- if cod_block_count > 0 -%}
-        <button class="order-float__btn" type="button"
+        <button class="order-float__btn" type="button" data-cta-attention
                 data-sheet-open aria-controls="CodSheet-{{ section.id }}">{{ float_inner }}</button>
       {%- else -%}
         <button class="order-float__btn" type="submit"
@@ -1085,7 +1085,7 @@
         {%- if on_sale -%}<s>{{ v.compare_at_price | money }}</s>{%- endif -%}
       </span>
       {%- if cod_block_count > 0 -%}
-        <button class="bb__cta" type="button" data-sheet-open aria-controls="CodSheet-{{ section.id }}">
+        <button class="bb__cta" type="button" data-cta-attention data-sheet-open aria-controls="CodSheet-{{ section.id }}">
           {{ section.settings.mobile_cta_label }}
         </button>
       {%- else -%}

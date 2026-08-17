@@ -45,7 +45,7 @@
     </a>
 
     {%- if on_sale and settings.card_show_discount -%}
-      <span class="pgc__ad">-{{ off }}%</span>
+      <span class="pgc__ad" data-pop>-{{ off }}%</span>
     {%- endif -%}
     {%- liquid
       # Filters are not allowed inside an `if` condition.
@@ -61,7 +61,7 @@
   <div class="pgc__price-row">
     <span class="pgc__price-wrap">
       {%- if settings.card_deal_label != blank -%}
-        <span class="pgc__deal">{{ settings.card_deal_label }}</span>
+        <span class="pgc__deal" data-pop>{{ settings.card_deal_label }}</span>
       {%- endif -%}
       <span class="pgc__price">{{ v.price | money }}</span>
       {%- if on_sale and settings.card_show_compare -%}

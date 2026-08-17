@@ -483,3 +483,97 @@
     72% { transform: translate3d(1px, 0, 0); }
   }
 }
+
+/* ==========================================================================
+   Badges arriving
+
+   A discount that was already on the page when you got there is a label. One
+   that lands as you reach it is an event. Fires once per badge — the observer
+   unobserves after the first intersection — because a badge that keeps
+   twitching is one the eye learns to skip, and a storefront cannot afford to
+   teach that about its own discounts.
+   ========================================================================== */
+@media (prefers-reduced-motion: no-preference) {
+  .js [data-pop] { opacity: 0; }
+
+  .js [data-pop].is-in {
+    opacity: 1;
+    animation: badge-pop 520ms cubic-bezier(0.2, 1.6, 0.35, 1);
+  }
+
+  @keyframes badge-pop {
+    0%   { opacity: 0; transform: scale(0.4) rotate(-6deg); }
+    45%  { opacity: 1; }
+    60%  { transform: scale(1.12) rotate(2deg); }
+    100% { transform: none; }
+  }
+}
+
+/* ==========================================================================
+   The order button asking once
+
+   Three pulses, spaced, and only while the button is on screen — then never
+   again. Any tap, key or interaction cancels it: someone already engaged does
+   not need to be tapped on the shoulder. This is the difference between a
+   nudge and a nag.
+   ========================================================================== */
+@media (prefers-reduced-motion: no-preference) {
+  [data-attention] {
+    animation: cta-attention 900ms cubic-bezier(0.3, 0, 0.2, 1);
+  }
+
+  @keyframes cta-attention {
+    0%, 100% { transform: none; box-shadow: 0 0 0 0 rgba(255, 109, 0, 0); }
+    12%  { transform: scale(1.035); box-shadow: 0 0 0 6px rgba(255, 109, 0, 0.28); }
+    26%  { transform: scale(0.995) translate3d(-2px, 0, 0); }
+    38%  { transform: scale(1.02) translate3d(2px, 0, 0); }
+    52%  { transform: none; box-shadow: 0 0 0 14px rgba(255, 109, 0, 0); }
+  }
+}
+
+/* ==========================================================================
+   Countdown
+   The seconds really did change, which is the only honest reason to flash.
+   Retriggered per tick rather than looping, so it stops when the clock does.
+   ========================================================================== */
+@media (prefers-reduced-motion: no-preference) {
+  [data-tick] { animation: tick-beat 240ms ease; }
+
+  @keyframes tick-beat {
+    0%   { transform: translate3d(0, -2px, 0); opacity: 0.55; }
+    100% { transform: none; opacity: 1; }
+  }
+}
+
+/* ==========================================================================
+   Order sheet opening from the button that opened it
+   The panel already rises; this is the button acknowledging the press before
+   it does, so the two read as one movement rather than two events.
+   ========================================================================== */
+@media (prefers-reduced-motion: no-preference) {
+  .bb__cta:active,
+  .order-float__btn:active,
+  .cod__submit:active { transform: scale(0.975); }
+
+  /* The submit button while the order is in flight: a determinate-looking
+     sweep rather than a spinner, because the wait is short and a spinner at
+     this size reads as an error state. */
+  .cod__submit[aria-busy="true"] {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cod__submit[aria-busy="true"]::after {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    inline-size: 45%;
+    inset-inline-start: -50%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.32), transparent);
+    animation: submit-sweep 900ms ease infinite;
+  }
+
+  @keyframes submit-sweep {
+    to { inset-inline-start: 120%; }
+  }
+}
