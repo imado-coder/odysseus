@@ -174,6 +174,53 @@
   .savebar button{width:100%;min-height:48px;border:0;border-radius:10px;
     background:var(--ok);color:#fff;font:inherit;font-weight:600;cursor:pointer}
   .savebar button:disabled{opacity:.65}
+
+  /* ── Carriers ─────────────────────────────────────────────────────────
+     A linking form on a phone: one field per line, every control at least
+     44px, and the inputs at 16px so iOS does not zoom in on focus and leave
+     the merchant stranded halfway through pasting an API key. */
+  .cform{display:grid;gap:.625rem;background:var(--card);
+    border:1px solid var(--line);border-radius:12px;padding:.875rem}
+  .fld{display:grid;gap:.25rem}
+  .fld span{font-size:.8125rem;color:var(--sub)}
+  .fld input,.fld select{min-height:44px;width:100%;padding:0 .625rem;
+    border:1px solid var(--line);border-radius:8px;background:var(--bg);
+    color:var(--ink);font:inherit;font-size:16px}
+  /* An API key is a Latin run the merchant reads character by character to
+     check it; leave it to the paragraph direction and it reorders on them. */
+  .fld input[type="password"],.fld input[type="url"]{direction:ltr;
+    text-align:start;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:15px}
+
+  .tog{display:flex;align-items:center;gap:.5rem;min-height:44px;
+    font-size:.9375rem;cursor:pointer}
+  .tog input{width:20px;height:20px;accent-color:var(--ok);flex:0 0 auto}
+
+  .frow{display:grid;grid-template-columns:1fr 1fr;gap:.375rem}
+  .frow button{min-height:46px;border-radius:10px;font:inherit;
+    font-weight:600;cursor:pointer;border:1px solid var(--line)}
+  .frow .ghost{background:transparent;color:var(--ink)}
+  .frow .primary{background:var(--ok);border-color:var(--ok);color:#fff}
+
+  .addbtn{min-height:48px;border:1px dashed var(--line);border-radius:12px;
+    background:transparent;color:var(--ink);font:inherit;font-weight:600;
+    cursor:pointer}
+
+  .tags{display:flex;flex-direction:column;gap:.25rem;align-items:flex-end}
+  .acts--3{grid-template-columns:repeat(3,minmax(0,1fr))}
+
+  /* The test result is the whole point of the test button, so it gets a line
+     of its own rather than an alert that vanishes. */
+  .testout{margin:.5rem 0 0;font-size:.8125rem;line-height:1.5;
+    unicode-bidi:plaintext}
+  .testout:empty{display:none}
+  .testout--ok{color:var(--ok)}
+  .testout--bad{color:var(--bad)}
+
+  .ship{width:100%;min-height:48px;margin-top:.375rem;border:0;
+    border-radius:10px;background:var(--ink);color:var(--card);font:inherit;
+    font-weight:600;cursor:pointer}
+  .ship:disabled{opacity:.7}
 </style>
 </head>
 <body>
@@ -192,7 +239,9 @@ try {
 (function () {
   "use strict";
 
-  var API = "https://gmgargxjomtaorqjvlyz.supabase.co/functions/v1/admin";
+  var ROOT = "https://gmgargxjomtaorqjvlyz.supabase.co/functions/v1";
+  var API = ROOT + "/admin";
+  var CARRIERS = ROOT + "/carriers";
   var KEY = "mitos:key";
   var root = document.getElementById("root");
 
@@ -215,6 +264,18 @@ try {
       ratesHelp: "Le prix que le client voit, et celui qui lui est facturé.",
       applyAll: "Appliquer à toutes les wilayas",
       save: "Enregistrer", saved: "Enregistré", saving: "Enregistrement…",
+      tabCarriers: "Transporteurs",
+      carriersHelp: "Le colis part au transporteur quand vous confirmez l'appel — jamais avant.",
+      addCarrier: "Ajouter un transporteur", provider: "Transporteur",
+      carrierName: "Nom", baseUrl: "Adresse de l'API",
+      fromWilaya: "Wilaya de départ",
+      setDefault: "Par défaut", autoPush: "Envoi automatique",
+      test: "Tester", testing: "Test…", edit: "Modifier", remove: "Supprimer",
+      cancel: "Annuler", noCarriers: "Aucun transporteur relié.",
+      send: "Envoyer au transporteur", sending: "Envoi…", sent: "Envoyé",
+      credsKept: "Laissez vide pour garder les identifiants enregistrés.",
+      confirmRemove: "Supprimer ce transporteur ?",
+      needName: "Donnez-lui un nom.",
       PENDING: "À appeler", CONFIRMED: "Confirmée", SHIPPED: "Expédiée",
       DELIVERED: "Livrée", CANCELLED: "Annulée", RETURNED: "Retournée",
       NO_ANSWER: "Sans réponse"
@@ -233,6 +294,18 @@ try {
       ratesHelp: "السعر الذي يراه العميل، وهو نفسه الذي يُحسب عليه.",
       applyAll: "طبّق على كل الولايات",
       save: "حفظ", saved: "تم الحفظ", saving: "جارٍ الحفظ…",
+      tabCarriers: "الناقلون",
+      carriersHelp: "الطرد يذهب للناقل عند تأكيدك للمكالمة — لا قبلها.",
+      addCarrier: "أضف ناقلًا", provider: "الناقل",
+      carrierName: "الاسم", baseUrl: "عنوان الـAPI",
+      fromWilaya: "ولاية الانطلاق",
+      setDefault: "الافتراضي", autoPush: "إرسال تلقائي",
+      test: "اختبر", testing: "جارٍ الاختبار…", edit: "تعديل", remove: "حذف",
+      cancel: "إلغاء", noCarriers: "لا يوجد ناقل مربوط.",
+      send: "أرسل للناقل", sending: "جارٍ الإرسال…", sent: "أُرسل",
+      credsKept: "اتركه فارغًا للإبقاء على البيانات المحفوظة.",
+      confirmRemove: "حذف هذا الناقل؟",
+      needName: "أعطه اسمًا.",
       PENDING: "للاتصال", CONFIRMED: "مؤكّدة", SHIPPED: "أُرسلت",
       DELIVERED: "سُلّمت", CANCELLED: "ملغاة", RETURNED: "مرتجعة",
       NO_ANSWER: "بلا ردّ"
@@ -280,6 +353,14 @@ try {
       { "x-mitos-key": key() }, options.headers || {}
     );
     return fetch(API + (path || ""), options);
+  }
+
+  function carrierApi(path, options) {
+    options = options || {};
+    options.headers = Object.assign(
+      { "x-mitos-key": key() }, options.headers || {}
+    );
+    return fetch(CARRIERS + (path || ""), options);
   }
 
   function langButton() {
@@ -356,7 +437,16 @@ try {
             (o.status === s ? ' aria-pressed="true"' : "") + ">" +
             esc(t()[s]) + "</button>";
         }).join("") +
-      "</div></article>";
+      "</div>" +
+
+      /* Only once the call has gone the merchant's way. A parcel handed to a
+         carrier before the customer confirms is a return the merchant pays
+         for, so the button does not exist until then. */
+      (o.status === "CONFIRMED"
+        ? '<button type="button" class="ship" data-send="' + esc(o.id) + '">' +
+          esc(t().send) + "</button>"
+        : "") +
+      "</article>";
   }
 
   function render(data) {
@@ -387,15 +477,18 @@ try {
      screen does. */
   function bar(data, below) {
     return '<header class="bar"><div class="bar__row">' +
-        "<h1>" + esc(view === "rates" ? t().tabRates : t().title) + "</h1>" +
+        "<h1>" + esc(view === "rates" ? t().tabRates
+          : view === "carriers" ? t().tabCarriers : t().title) + "</h1>" +
         '<span class="shop">' + esc((data.shop && data.shop.domain) || "") + "</span>" +
         langButton() +
       "</div>" +
       '<nav class="tabs">' +
-        ["orders","rates"].map(function (v) {
+        ["orders","rates","carriers"].map(function (v) {
+          var label = v === "rates" ? t().tabRates
+            : v === "carriers" ? t().tabCarriers : t().tabOrders;
           return '<button class="tab" type="button" data-view="' + v + '"' +
             (view === v ? ' aria-pressed="true"' : "") + ">" +
-            esc(v === "rates" ? t().tabRates : t().tabOrders) + "</button>";
+            esc(label) + "</button>";
         }).join("") +
       "</nav>" + (below || "") + "</header>";
   }
@@ -523,6 +616,251 @@ try {
       });
   }
 
+  /* ── Carriers ─────────────────────────────────────────────────────────
+     Kept in a variable so changing the provider in the form can redraw the
+     credential fields without a round trip — each provider asks for a
+     different pair, and refetching to learn that would make the select feel
+     broken. */
+  var carrierData = null;
+  var editing = null;   // carrier id being edited, or null for a new one
+  var formOpen = false;
+
+  function providerMeta(name) {
+    return ((carrierData && carrierData.providers) || []).filter(
+      function (p) { return p.provider === name; }
+    )[0] || { fields: [], needsBaseUrl: false };
+  }
+
+  function carrierForm() {
+    var editRow = (carrierData.carriers || []).filter(function (c) {
+      return c.id === editing;
+    })[0] || null;
+
+    var chosen = formOpen && formOpen !== true ? formOpen
+      : editRow ? editRow.provider : "YALIDINE";
+    var meta = providerMeta(chosen);
+
+    var creds = meta.fields.map(function (f) {
+      return '<label class="fld"><span>' + esc(f.label) + "</span>" +
+        '<input type="password" autocomplete="new-password" ' +
+          'data-cred="' + esc(f.key) + '" placeholder="' +
+          (editRow && editRow.hasCredentials ? "••••••••" : "") + '"></label>';
+    }).join("");
+
+    return '<form class="cform" novalidate>' +
+      '<label class="fld"><span>' + esc(t().provider) + "</span>" +
+        '<select data-provider>' +
+          ((carrierData.providers || []).map(function (p) {
+            return '<option value="' + esc(p.provider) + '"' +
+              (p.provider === chosen ? " selected" : "") + ">" +
+              esc(p.provider.replace(/_/g, " ")) + "</option>";
+          }).join("")) +
+        "</select></label>" +
+
+      '<label class="fld"><span>' + esc(t().carrierName) + "</span>" +
+        '<input type="text" data-name value="' +
+          esc(editRow ? editRow.name : "") + '"></label>' +
+
+      (meta.needsBaseUrl
+        ? '<label class="fld"><span>' + esc(t().baseUrl) + "</span>" +
+          '<input type="url" inputmode="url" data-baseurl dir="ltr" ' +
+            'placeholder="https://xxx.ecotrack.dz" value="' +
+            esc(editRow && editRow.baseUrl ? editRow.baseUrl : "") + '"></label>'
+        : "") +
+
+      (chosen === "YALIDINE" || chosen === "NOEST"
+        ? '<label class="fld"><span>' + esc(t().fromWilaya) + "</span>" +
+          '<input type="text" data-fromwilaya placeholder="Alger" value="' +
+            esc(editRow && editRow.fromWilaya ? editRow.fromWilaya : "") +
+            '"></label>'
+        : "") +
+
+      creds +
+      (meta.fields.length
+        ? '<p class="help">' + esc(t().credsKept) + "</p>" : "") +
+
+      '<label class="tog"><input type="checkbox" data-default' +
+        (editRow && editRow.isDefault ? " checked" : "") + "><span>" +
+        esc(t().setDefault) + "</span></label>" +
+      '<label class="tog"><input type="checkbox" data-autopush' +
+        (editRow && editRow.autoPush ? " checked" : "") + "><span>" +
+        esc(t().autoPush) + "</span></label>" +
+
+      '<div class="frow">' +
+        '<button type="button" class="ghost" data-cancel>' + esc(t().cancel) +
+        "</button>" +
+        '<button type="button" class="primary" data-save-carrier>' +
+          esc(t().save) + "</button>" +
+      "</div></form>";
+  }
+
+  function carrierCard(c) {
+    return '<article class="card" data-carrier="' + esc(c.id) + '">' +
+      '<header class="card__top"><div>' +
+        '<div class="name">' + esc(c.name) + "</div>" +
+        '<div class="place">' + esc(c.provider.replace(/_/g, " ")) + "</div>" +
+      "</div><div class=\"tags\">" +
+        (c.isDefault ? '<span class="pill s-DELIVERED">' + esc(t().setDefault) + "</span>" : "") +
+        (c.autoPush ? '<span class="pill s-CONFIRMED">' + esc(t().autoPush) + "</span>" : "") +
+        (c.enabled ? "" : '<span class="pill s-CANCELLED">off</span>') +
+      "</div></header>" +
+
+      '<div class="meta">' +
+        '<span class="num">' + c.ratedWilayas + "</span><span>wilayas</span>" +
+        '<span class="dot"></span>' +
+        '<span class="num">' + c.shipments + "</span><span>colis</span>" +
+      "</div>" +
+      '<p class="testout" data-testout></p>' +
+
+      '<div class="acts acts--3">' +
+        '<button type="button" data-test="' + esc(c.id) + '">' + esc(t().test) + "</button>" +
+        '<button type="button" data-edit="' + esc(c.id) + '">' + esc(t().edit) + "</button>" +
+        '<button type="button" data-remove="' + esc(c.id) + '">' + esc(t().remove) + "</button>" +
+      "</div></article>";
+  }
+
+  function renderCarriers(data) {
+    carrierData = data;
+    var list = (data.carriers || []).map(carrierCard).join("") ||
+      '<p class="note">' + esc(t().noCarriers) + "</p>";
+
+    root.innerHTML = bar(data) +
+      "<main>" +
+        '<p class="help">' + esc(t().carriersHelp) + "</p>" +
+        list +
+        (formOpen
+          ? carrierForm()
+          : '<button type="button" class="addbtn" data-add>' +
+            esc(t().addCarrier) + "</button>") +
+      "</main>";
+  }
+
+  function loadCarriers() {
+    root.innerHTML = '<p class="note">' + esc(t().loading) + "</p>";
+    carrierApi("")
+      .then(function (r) {
+        if (r.status === 404) throw new Error("bad-key");
+        if (!r.ok) throw new Error("http-" + r.status);
+        return r.json();
+      })
+      .then(renderCarriers)
+      .catch(function (e) {
+        if (e.message === "bad-key") {
+          try { localStorage.removeItem(KEY); } catch (err) {}
+          return gate(t().refused);
+        }
+        root.innerHTML = '<p class="note">' + esc(t().offline) + "</p>";
+      });
+  }
+
+  function submitCarrier(btn) {
+    var form = btn.closest(".cform");
+    var name = form.querySelector("[data-name]").value.trim();
+    if (!name) {
+      alert(t().needName);
+      form.querySelector("[data-name]").focus();
+      return;
+    }
+
+    /* Blank credential fields are omitted rather than sent empty, so saving a
+       name or a toggle from this form never wipes a working token. */
+    var creds = {};
+    [].forEach.call(form.querySelectorAll("[data-cred]"), function (i) {
+      if (i.value.trim()) creds[i.getAttribute("data-cred")] = i.value.trim();
+    });
+
+    var baseEl = form.querySelector("[data-baseurl]");
+    var fromEl = form.querySelector("[data-fromwilaya]");
+
+    var body = {
+      id: editing || undefined,
+      provider: form.querySelector("[data-provider]").value,
+      name: name,
+      baseUrl: baseEl ? baseEl.value.trim() : null,
+      fromWilaya: fromEl ? fromEl.value.trim() : null,
+      isDefault: form.querySelector("[data-default]").checked,
+      autoPush: form.querySelector("[data-autopush]").checked
+    };
+    if (Object.keys(creds).length) body.credentials = creds;
+
+    var was = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = t().saving;
+
+    carrierApi("", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    })
+      .then(function (r) { return r.json().then(function (d) { return { r: r, d: d }; }); })
+      .then(function (x) {
+        if (!x.r.ok) throw new Error(x.d.error || x.r.status);
+        formOpen = false; editing = null;
+        loadCarriers();
+      })
+      .catch(function (e) {
+        btn.disabled = false;
+        btn.textContent = was;
+        alert(t().saveFail + " (" + e.message + ")");
+      });
+  }
+
+  /* The button that turns a documented guess into a fact. Every adapter was
+     written from public documentation; this is how the merchant finds out in
+     one tap whether it matched their account. */
+  function runTest(btn, id) {
+    var card = btn.closest(".card");
+    var out = card.querySelector("[data-testout]");
+    var was = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = t().testing;
+    out.textContent = "";
+    out.className = "testout";
+
+    carrierApi("/test", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: id })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        out.textContent = d.detail || (d.ok ? "ok" : "");
+        out.className = "testout " + (d.ok ? "testout--ok" : "testout--bad");
+      })
+      .catch(function () {
+        out.textContent = t().offline;
+        out.className = "testout testout--bad";
+      })
+      .then(function () {
+        btn.disabled = false;
+        btn.textContent = was;
+      });
+  }
+
+  function sendToCarrier(btn, orderId) {
+    var was = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = t().sending;
+
+    carrierApi("/push", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderId: orderId })
+    })
+      .then(function (r) { return r.json().then(function (d) { return { r: r, d: d }; }); })
+      .then(function (x) {
+        if (!x.r.ok || x.d.ok === false) {
+          throw new Error(x.d.detail || x.d.error || x.r.status);
+        }
+        btn.textContent = t().sent + " · " + (x.d.trackingNumber || "");
+      })
+      .catch(function (e) {
+        btn.disabled = false;
+        btn.textContent = was;
+        alert(e.message);
+      });
+  }
+
   function load() {
     if (!key()) return gate("");
     root.innerHTML = '<p class="note">' + esc(t().loading) + "</p>";
@@ -547,7 +885,9 @@ try {
 
   function show() {
     if (!key()) return gate("");
-    return view === "rates" ? loadRates() : load();
+    return view === "rates" ? loadRates()
+      : view === "carriers" ? loadCarriers()
+      : load();
   }
 
   document.addEventListener("click", function (e) {
@@ -555,6 +895,40 @@ try {
       toggleLang();
       return show();
     }
+
+    var add = e.target.closest("[data-add]");
+    if (add) { formOpen = true; editing = null; return renderCarriers(carrierData); }
+
+    if (e.target.closest("[data-cancel]")) {
+      formOpen = false; editing = null;
+      return renderCarriers(carrierData);
+    }
+
+    var saveCarrierBtn = e.target.closest("[data-save-carrier]");
+    if (saveCarrierBtn) return submitCarrier(saveCarrierBtn);
+
+    var testBtn = e.target.closest("[data-test]");
+    if (testBtn) return runTest(testBtn, testBtn.getAttribute("data-test"));
+
+    var editBtn = e.target.closest("[data-edit]");
+    if (editBtn) {
+      editing = editBtn.getAttribute("data-edit");
+      formOpen = true;
+      return renderCarriers(carrierData);
+    }
+
+    var rmBtn = e.target.closest("[data-remove]");
+    if (rmBtn) {
+      if (!confirm(t().confirmRemove)) return;
+      return carrierApi("/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: rmBtn.getAttribute("data-remove") })
+      }).then(loadCarriers).catch(function () { alert(t().saveFail); });
+    }
+
+    var sendBtn = e.target.closest("[data-send]");
+    if (sendBtn) return sendToCarrier(sendBtn, sendBtn.getAttribute("data-send"));
 
     var tab = e.target.closest("[data-view]");
     if (tab) {
@@ -613,6 +987,15 @@ try {
         btn.setAttribute("aria-pressed", "false");
         alert(t().saveFail);
       });
+  });
+
+  /* The provider select changes which credentials are asked for, so the form
+     is redrawn from the cached provider list rather than refetched. */
+  document.addEventListener("change", function (e) {
+    var sel = e.target.closest("[data-provider]");
+    if (!sel || !carrierData) return;
+    formOpen = sel.value;
+    renderCarriers(carrierData);
   });
 
   applyLang();
