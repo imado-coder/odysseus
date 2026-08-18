@@ -116,16 +116,64 @@ string (their UI wraps it across two lines).
 - Latin digits inside Arabic text carry `unicode-bidi: plaintext`, never
   `isolate`.
 
-## Order of work (from the user's brief)
+## Where this is going
+
+The decision (2026-08-18): finish MITOS as a **custom / unlisted Shopify app**
+first, install it on real stores one at a time, keep iterating on it, and
+submit to the Shopify App Store later. Nothing here is throwaway — every item
+below is required for the App Store too, so building them now shortens that
+submission rather than duplicating it.
+
+The store currently connected (`test-test-1234123412341296`) is a **development
+store**. It is where things get proven. The merchant's real store comes after.
+
+What an App Store submission would still need today, from the audit:
+
+1. **No Theme App Extension.** The COD form only exists as
+   `shopify-theme/snippets/cod-form.liquid` — inside *our* theme. A merchant
+   installing the app on *their* theme gets nothing. This is the single largest
+   gap and it blocks the custom-app path as well.
+2. **Protected customer data.** Name, phone and address are protected. A public
+   app needs Shopify's review; a custom app does not. Scopes in
+   `shopify.app.toml` are already minimal (`write_orders,read_orders,read_products`)
+   — keep them that way.
+3. **Two of three mandatory GDPR webhooks are missing.** Only `app/uninstalled`
+   is subscribed. `customers/data_request`, `customers/redact` and `shop/redact`
+   are hard requirements for listing.
+4. **Credentials are a custom app's, not a Partners app's.** OAuth install does
+   not exist yet; the token lives in `Session` because it was pasted there.
+
+## Order of work
 
 Done: carriers · nav routes (`/app/shipping`, `/app/settings`) · Offers ·
 Dashboard.
 
-Next: **improve** the existing Orders page (tabs, search, filters, bulk
-actions, export, desktop table, detail view) — improve, not replace, and it
-must stay on the same canonical order data. Then Products, preferring Shopify
-as the source of truth rather than copying the catalogue. Operations last, and
-only once TREX's warehousing capabilities are confirmed.
+1. **Theme App Extension** (`extensions/`) — an App Block carrying the COD
+   form, so a merchant can drop it into any theme from the theme editor. Port
+   the existing markup and `theme.js` behaviour; do not rewrite the flow. It
+   must keep sending `shop`, the idempotency key, and quoting through
+   `/cod?shop=…`.
+2. **The three GDPR webhooks** — add the topics to `shopify.app.toml` and
+   handle them in `app/routes/webhooks.tsx`. `customers/redact` and
+   `shop/redact` must actually delete; a stub that returns 200 is a failed
+   review later and a lie now.
+3. **Partners app + deploy `mitos-app`** — this is what unlocks OAuth. Needs
+   the env vars set once in Vercel (they cannot be committed, and a previous
+   attempt to put them in `vercel.json` was correctly refused).
+4. **`install` edge function** — the install path for a second store. Read the
+   shop's currency from Shopify; do **not** assume DZD. Seed the 58 wilayas and
+   a default carrier, then hand the merchant the setup steps.
+5. **Deploy `mitos-dashboard/index.html`** (blocked: Vercel returns 403 on
+   `mitos-commandes` — the token can read the project but not deploy to it).
+   The repo copy carries the حفظ fix and the carriers tab; neither is live.
+   Then link TREX (`ECOTRACK`, `https://trexexpress.ecotrack.dz`) and press
+   Test.
+
+Then, from the original brief and still outstanding: **improve** the existing
+Orders page (tabs, search, filters, bulk actions, export, desktop table, detail
+view) — improve, not replace, on the same canonical order data. Then Products,
+preferring Shopify as the source of truth over copying the catalogue.
+Operations last, and only once TREX's warehousing capabilities are confirmed.
 
 Do not scaffold a new app, redesign the COD/call-centre flow, or create a
 second order system.
