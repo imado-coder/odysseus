@@ -11,7 +11,7 @@ Three directories, one system:
 
 | Path | What it is |
 |---|---|
-| `shopify-theme/` | The storefront theme. Mobile-first, French + Arabic, RTL. Holds the COD order form. |
+| `shopify-theme/` | The storefront theme — **a product, sold with the app**, not a demo. Mobile-first, French + Arabic, RTL. |
 | `mitos-app/` | The Shopify app: Prisma schema, embedded admin routes, and the Supabase edge functions under `supabase/functions/`. |
 | `mitos-dashboard/` | One static HTML file: the merchant's call list, live on Vercel. |
 
@@ -116,6 +116,47 @@ string (their UI wraps it across two lines).
 - Latin digits inside Arabic text carry `unicode-bidi: plaintext`, never
   `isolate`.
 
+## What the merchant is buying
+
+**The theme and the COD form ship together, and both come from the app.** A
+merchant installs MITOS, pays the subscription, and gets the storefront *and*
+the order form — not the form alone. This was misread once already, and the
+misreading is what produced two separate implementations of the same form; do
+not repeat it.
+
+The theme is not going to the Shopify Theme Store, and cannot: the Theme Store
+sells for a one-time price, not a subscription, and it refuses a theme that
+depends on an app to work — ours depends on the MITOS server to quote shipping
+and record an order. The distribution path is **the app installs the theme**
+through the Admin API, which is allowed and is what makes the subscription the
+thing being paid for.
+
+Two consequences:
+
+- **`write_themes` will be needed.** Scopes are `write_orders,read_orders,
+  read_products` today. Adding it widens what App Store review will ask about,
+  so add it when the install path is actually built, not before.
+- **Install, never publish.** The app uploads the theme unpublished; the
+  merchant previews it and publishes it themselves. An app that overwrites the
+  live theme of a store that is currently selling is a disaster, and review
+  rejects it.
+
+### One form, two homes
+
+`shopify-theme/snippets/cod-form.liquid` (+ its half of `theme.js`) and
+`mitos-app/extensions/mitos-cod/` are today two independent implementations of
+the same form. Both are wanted — the merchant who takes our theme and the
+merchant who keeps their own must both get a working form — but they must stop
+being two codebases, or a fix will land in one and not the other and the gap
+will be found by a merchant, not by us.
+
+The direction: **the App Block is the implementation**, and the theme consumes
+it. `sections/main-product.liquid` now accepts `@app` blocks, which is the
+prerequisite. What is *not* done, on purpose: the theme's own `cod_form` block
+is still there and still wired into `templates/product.json`. It is the form
+carrying real orders right now, and it does not come out until the App Block
+has been proven on the dev store — which needs the Partners app, item 3.
+
 ## Where this is going
 
 The decision (2026-08-18): finish MITOS as a **custom / unlisted Shopify app**
@@ -197,7 +238,20 @@ Dashboard · **Theme App Extension** · **GDPR webhooks**.
    this and no listing either. Not needed for the first trial stores, which are
    the merchant's own — but every screen built before it must not assume every
    shop is entitled.
-6. **Deploy `mitos-dashboard/index.html`** (blocked: Vercel returns 403 on
+6. **Collapse the two COD forms into one** — the theme renders the App Block
+   instead of its own snippet, and `snippets/cod-form.liquid` plus its part of
+   `theme.js` come out. Only after the App Block works on the dev store; the
+   theme's copy is what is taking orders until then.
+7. **Install the theme from the app** — `write_themes`, `themeCreate` from a
+   released zip, uploaded **unpublished**. The hard part is not the first
+   install but the second: once a merchant has set their colours and rewritten
+   their text, a new version cannot overwrite `settings_data.json` and the JSON
+   templates. It goes in beside the old one and the merchant switches.
+8. **Prove the theme against a catalogue that is not ours** — a product with no
+   image, one with no options, an empty collection, five hundred products. It
+   has 79 merchant settings and no MITOS branding baked in, so it is close;
+   what it has never seen is someone else's data.
+9. **Deploy `mitos-dashboard/index.html`** (blocked: Vercel returns 403 on
    `mitos-commandes` — the token can read the project but not deploy to it).
    The repo copy carries the حفظ fix and the carriers tab; neither is live.
    Then link TREX (`ECOTRACK`, `https://trexexpress.ecotrack.dz`) and press
