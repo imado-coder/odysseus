@@ -9,9 +9,10 @@ déployée chez Supabase, qui enregistre le lead puis crée la commande Shopify.
 |---|---|
 | Base de données | Supabase `mitos-cod`, région `eu-west-3` (Paris) |
 | Endpoint COD | `https://gmgargxjomtaorqjvlyz.supabase.co/functions/v1/cod` |
-| Liste d'appels | `https://mitos-commandes.vercel.app` |
+| Liste d'appels | `https://mitos-commandes.vercel.app` — **ancienne version en ligne**, voir plus bas |
 | API de la liste | `https://gmgargxjomtaorqjvlyz.supabase.co/functions/v1/admin` |
-| Code | `supabase/functions/{cod,admin}/index.ts`, `mitos-dashboard/index.html` |
+| API transporteurs | `https://gmgargxjomtaorqjvlyz.supabase.co/functions/v1/carriers` |
+| Code | `supabase/functions/{cod,admin,carriers}/index.ts`, `mitos-dashboard/index.html` |
 | Réglage du thème | `cod_endpoint`, déjà renseigné dans `config/settings_data.json` |
 
 Paris parce que c'est la latence la plus basse depuis l'Algérie pour la base.
@@ -102,6 +103,35 @@ courte qu'il faut donner.
 ---
 
 ## Ce qui reste
+
+**La liste d'appels elle-même n'est pas à jour.** Le fichier du dépôt fait
+42 ko, celui servi par Vercel 26 ko : c'est encore la version d'avant. Deux
+conséquences visibles pour le marchand — le bouton d'enregistrement arabe
+affiche toujours **حفط** au lieu de حفظ, et l'écran **Transporteurs** n'existe
+pas en ligne, donc TREX ne peut pas être relié depuis le téléphone tant que
+ceci n'est pas déployé.
+
+Le connecteur Vercel refuse les deux cibles :
+
+```
+403 You don't have permission to create a Preview/Production Deployment
+    for this Vercel project: mitos-commandes
+```
+
+Il voit le projet mais n'a pas le droit d'y déployer, et `list_projects`
+revient vide : c'est une question de portée du jeton, pas de code. Il faut
+soit accorder le droit de déploiement à ce jeton, soit téléverser
+`mitos-dashboard/index.html` à la main. **Ne pas** le déployer sous un autre
+nom de projet : l'adresse que le marchand a en favori est
+`mitos-commandes.vercel.app`.
+
+Une fois en ligne, vérifier comme la dernière fois que les octets servis sont
+identiques au fichier du dépôt :
+
+```bash
+curl -s https://mitos-commandes.vercel.app | md5sum
+md5sum mitos-dashboard/index.html
+```
 
 **Le tableau de bord embarqué** (`app/routes/app._index.tsx`), celui qui
 s'affiche dans l'admin Shopify, n'est pas en ligne. La liste d'appels

@@ -25,31 +25,47 @@ live, what is not, and why each decision was made.
 | Database | Supabase project `gmgargxjomtaorqjvlyz`, region `eu-west-3` (Paris) |
 | Order intake | `https://gmgargxjomtaorqjvlyz.supabase.co/functions/v1/cod` |
 | Call-list API | `…/functions/v1/admin` |
-| Call list (UI) | `https://mitos-commandes.vercel.app` |
+| Carriers API | `…/functions/v1/carriers` |
+| Call list (UI) | `https://mitos-commandes.vercel.app` — **serving an old build**, see below |
 
 Real orders have gone through end to end — Shopify `#1008`–`#1011`, created at
 `financialStatus: PENDING`.
 
-## ⚠️ Open regression — fix this first
+## Supabase is fully deployed — the backlog is cleared
 
-**`POST /functions/v1/admin/rates` returns 500.** The carriers migration
-dropped the `(shopId, wilayaCode)` unique index that the *deployed* admin
-function upserts on. The repo copy is already fixed; it has never been
-deployed. Order intake, the storefront quote and the call list are unaffected —
-only saving shipping rates.
+The Supabase connector came back and the whole Supabase side of the backlog
+went out. Verified live, not assumed:
 
-## Written, committed, NOT deployed
+- **`admin` v4** — the `/rates` 500 is **fixed**. The conflict target now
+  matches the index that actually exists, `(shopId, COALESCE(carrierId,''),
+  wilayaCode)`. `POST /rates` answers `{"ok":true,"saved":58}`.
+- **Migration `offer_enabled` applied** — `Offer.enabled` and
+  `Offer.updatedAt` exist. This had to land *before* `cod`, which selects
+  `Offer … WHERE enabled = true`; deploying `cod` first would have broken the
+  storefront quote.
+- **`cod` v4** — health, the 58-wilaya quote and the offers query all answer.
+- **`carriers` v1** — deployed for the **first time**. All five adapters are
+  listed, and a wrong key returns 404.
 
-The Supabase and Vercel MCP connectors were unreachable for several sessions,
-so a backlog accumulated. Deploy in this order:
+All three run `verify_jwt: false` and authenticate themselves (`x-mitos-key`,
+or the shop domain for `cod`). Keep that flag when redeploying — flipping it on
+would lock out the storefront and the call list.
 
-1. **`admin` edge function** — clears the 500 above.
-2. **Migration `20260817160000_offer_enabled`** — adds `Offer.enabled` and
-   `Offer.updatedAt`. (`20260817120000_carriers` is already applied.)
-3. **`cod` and `carriers` edge functions.**
-4. **`mitos-dashboard/index.html`** to Vercel — also ships a correction to the
-   Arabic save button, which currently reads حفط instead of حفظ.
-5. **Create the TREX carrier** and press Test — see below.
+## ⚠️ Still pending — both need the user
+
+1. **The dashboard is not deployed.** `mitos-dashboard/index.html` in the repo
+   is 42 kB; the copy live on Vercel is the old 26 kB one. So the live call
+   list still says **حفط** instead of حفظ *and* has no carriers screen at all —
+   which means the TREX carrier cannot be linked from the phone until this
+   ships. The connector refuses both targets:
+   `403 You don't have permission to create a Preview/Production Deployment for
+   this Vercel project: mitos-commandes`. It can see the project but cannot
+   deploy to it, and `list_projects` comes back empty — a token-scope problem,
+   not a code one. Needs deploy rights granted, or the file uploaded by hand.
+   Do **not** deploy it under a new project name: the merchant's bookmark is
+   `mitos-commandes.vercel.app`.
+2. **The TREX carrier does not exist yet.** Creating it requires the API token,
+   which is deliberately not in this repository — see below.
 
 Deploy is by MCP (`mcp__Supabase__deploy_edge_function`,
 `mcp__Vercel__deploy_to_vercel`). Verify migration state with
