@@ -1,0 +1,13 @@
+# The COD order form, as a block a merchant can drop into their own theme.
+#
+# Until this existed the form lived only in shopify-theme/snippets/cod-form.liquid
+# — inside *our* theme. A merchant installing the app on a theme they already
+# had got nothing at all. This is the same form, carried by the app instead of
+# by the theme, so it arrives with the install and survives a theme change.
+#
+# The configuration file for a theme extension is deliberately thin: the
+# behaviour lives in blocks/ and their schemas.
+
+name = "MITOS COD"
+type = "theme"
+handle = "mitos-cod"

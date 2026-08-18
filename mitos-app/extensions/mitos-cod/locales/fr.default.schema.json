@@ -1,0 +1,47 @@
+{
+  "name": "Formulaire COD",
+  "settings": {
+    "blank_info": "Laissez vide pour utiliser le texte traduit de l'application.",
+    "header_connection": "Connexion",
+    "header_copy": "Textes",
+    "header_fields": "Champs",
+    "header_colors": "Couleurs",
+    "product": {
+      "label": "Produit",
+      "info": "Laissez vide sur une page produit : le produit de la page est utilisé."
+    },
+    "endpoint": {
+      "label": "Adresse de l'application",
+      "info": "Reçoit la commande et renvoie les tarifs de livraison. Ne changez ceci que si l'application vous a donné une autre adresse."
+    },
+    "thanks_url": {
+      "label": "Page de confirmation",
+      "info": "Facultatif. Sans page, le formulaire affiche lui-même la confirmation."
+    },
+    "tariff_fallback": {
+      "label": "Tarifs de secours [domicile, bureau]",
+      "info": "Utilisés uniquement si l'application ne répond pas. Les vrais tarifs viennent de votre table de livraison."
+    },
+    "head_title": { "label": "Titre" },
+    "head_subtitle": { "label": "Sous-titre" },
+    "head_icon": { "label": "Icône" },
+    "submit_label": { "label": "Bouton de commande" },
+    "reassure": { "label": "Phrase de réassurance" },
+    "show_head": { "label": "Afficher l'en-tête" },
+    "show_delivery": { "label": "Afficher le mode de livraison" },
+    "show_qty": { "label": "Afficher la quantité" },
+    "show_summary": { "label": "Afficher le récapitulatif" },
+    "qty_max": { "label": "Quantité maximale" },
+    "phone_prefix": { "label": "Indicatif affiché" },
+    "phone_pattern": {
+      "label": "Format du téléphone",
+      "info": "Expression régulière. Par défaut : mobiles 05/06/07 et fixes algériens."
+    },
+    "currency_label": {
+      "label": "Devise affichée",
+      "info": "Laissez vide pour utiliser la devise de la boutique."
+    },
+    "head_bg": { "label": "Fond de l'en-tête" },
+    "submit_bg": { "label": "Fond du bouton" }
+  }
+}

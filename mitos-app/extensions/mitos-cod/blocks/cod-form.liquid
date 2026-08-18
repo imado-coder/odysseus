@@ -1,0 +1,413 @@
+{%- comment -%}
+  The cash-on-delivery order form, as a block a merchant drops into their own
+  product template from the theme editor.
+
+  This is the same form as shopify-theme/snippets/cod-form.liquid, carried by
+  the app instead of by the theme. The flow is unchanged — wilaya then commune,
+  home or desk, a total the shopper can check before committing — because the
+  flow is the part that has been proven against real orders.
+
+  Two differences are forced by living in someone else's theme:
+
+  * The endpoint is a setting on this block. In our theme it came from
+    settings.cod_endpoint, and a merchant's theme has no such setting. It is
+    pre-filled with the live endpoint, so the common case needs no typing.
+
+  * Copy falls back to this extension's locale files rather than to hardcoded
+    French. A shopper on the Arabic storefront gets Arabic without the merchant
+    duplicating a template, and a merchant who types their own wording still
+    wins — their setting is preferred whenever it is not blank.
+{%- endcomment -%}
+
+{%- liquid
+  assign s = block.settings
+
+  assign p = s.product | default: product
+  assign v = p.selected_or_first_available_variant
+  assign unit = v.price | divided_by: 100
+
+  assign id = 'mitos-cod-' | append: block.id
+
+  # A literal "{}" inside an output tag closes the tag early — Liquid sees the
+  # "}}" and stops. The default is built from characters instead.
+  assign brace_open = '{'
+  assign brace_close = '}'
+  assign empty_object = brace_open | append: brace_close
+
+  assign tariff_fallback = s.tariff_fallback | default: '[600,350]'
+
+  # Copy: the merchant's wording when they have set any, the translated string
+  # otherwise. `default` treats an empty setting as missing, which is what
+  # makes "leave it blank to use ours" work.
+  assign d_head_title = 'mitos.cod.head_title' | t
+  assign d_head_subtitle = 'mitos.cod.head_subtitle' | t
+  assign d_label_first = 'mitos.cod.label_first' | t
+  assign d_ph_first = 'mitos.cod.ph_first' | t
+  assign d_label_last = 'mitos.cod.label_last' | t
+  assign d_ph_last = 'mitos.cod.ph_last' | t
+  assign d_label_phone = 'mitos.cod.label_phone' | t
+  assign d_ph_phone = 'mitos.cod.ph_phone' | t
+  assign d_hint_phone = 'mitos.cod.hint_phone' | t
+  assign d_label_wilaya = 'mitos.cod.label_wilaya' | t
+  assign d_ph_wilaya = 'mitos.cod.ph_wilaya' | t
+  assign d_label_commune = 'mitos.cod.label_commune' | t
+  assign d_ph_commune = 'mitos.cod.ph_commune' | t
+  assign d_ph_commune_empty = 'mitos.cod.ph_commune_empty' | t
+  assign d_label_address = 'mitos.cod.label_address' | t
+  assign d_ph_address = 'mitos.cod.ph_address' | t
+  assign d_hint_address = 'mitos.cod.hint_address' | t
+  assign d_label_delivery = 'mitos.cod.label_delivery' | t
+  assign d_label_home = 'mitos.cod.label_home' | t
+  assign d_label_desk = 'mitos.cod.label_desk' | t
+  assign d_label_qty = 'mitos.cod.label_qty' | t
+  assign d_label_subtotal = 'mitos.cod.label_subtotal' | t
+  assign d_label_shipping = 'mitos.cod.label_shipping' | t
+  assign d_label_total = 'mitos.cod.label_total' | t
+  assign d_submit_label = 'mitos.cod.submit_label' | t
+  assign d_reassure = 'mitos.cod.reassure' | t
+  assign d_msg_required = 'mitos.cod.msg_required' | t
+  assign d_msg_phone = 'mitos.cod.msg_phone' | t
+  assign d_msg_invalid = 'mitos.cod.msg_invalid' | t
+  assign d_msg_success = 'mitos.cod.msg_success' | t
+  assign d_msg_fail = 'mitos.cod.msg_fail' | t
+  assign d_msg_pending = 'mitos.cod.msg_pending' | t
+
+  assign f_head_title = s.head_title | default: d_head_title
+  assign f_head_subtitle = s.head_subtitle | default: d_head_subtitle
+  assign f_submit_label = s.submit_label | default: d_submit_label
+  assign f_reassure = s.reassure | default: d_reassure
+
+  assign f_head_icon = s.head_icon | default: '💵'
+  assign f_phone_prefix = s.phone_prefix | default: '+213'
+  assign f_phone_pattern = s.phone_pattern | default: '^0[567][0-9]{8}$|^0[1-4][0-9]{7,8}$'
+  assign f_qty_max = s.qty_max | default: 10
+
+  # The shopper is charged in the shop's currency, so the form quotes in it.
+  # The theme could hardcode "DA" because it served one shop; a block cannot.
+  assign f_currency = s.currency_label | default: shop.currency
+-%}
+
+<div class="mitos-cod-root" {{ block.shopify_attributes }}>
+  {%- if p == blank -%}
+    {%- comment -%}
+      Placed somewhere with no product to sell. Say so in the editor, where the
+      merchant can act on it, and render nothing at all to the shopper.
+    {%- endcomment -%}
+    {%- if request.design_mode -%}
+      <p class="mitos-cod__reassure">{{ 'mitos.cod.no_product' | t }}</p>
+    {%- endif -%}
+  {%- else -%}
+    <form class="mitos-cod" data-mitos-cod-form id="{{ id }}"
+          data-unit-price="{{ unit }}"
+          data-currency="{{ f_currency | escape }}"
+          data-tariffs='{{ empty_object }}'
+          data-tariff-fallback='{{ tariff_fallback }}'
+          data-locations-url="{{ 'mitos-dz-locations.js' | asset_url }}"
+          {% if s.endpoint != blank %}data-endpoint="{{ s.endpoint }}"{% endif %}
+          {% if s.thanks_url != blank %}data-thanks-url="{{ s.thanks_url }}"{% endif %}
+          data-msg-invalid="{{ d_msg_invalid | escape }}"
+          data-msg-success="{{ d_msg_success | escape }}"
+          data-msg-fail="{{ d_msg_fail | escape }}"
+          data-msg-pending="{{ d_msg_pending | escape }}"
+          novalidate>
+      {%- comment -%}
+        The app serves many stores from one endpoint and identifies the caller
+        by this field, so an order without it is rejected outright. It has to
+        be permanent_domain, not domain: a store on a custom domain would
+        otherwise announce itself as something the app has never heard of.
+      {%- endcomment -%}
+      <input type="hidden" name="shop" value="{{ shop.permanent_domain }}">
+      <input type="hidden" name="product_id" value="{{ p.id }}">
+      <input type="hidden" name="variant_id" value="{{ v.id }}">
+      <input type="hidden" name="product_title" value="{{ p.title | escape }}">
+
+      {%- if s.show_head -%}
+        <div class="mitos-cod__head" style="{% if s.head_bg != blank %}background: {{ s.head_bg }};{% endif %}">
+          {%- if f_head_icon != blank -%}
+            <span class="mitos-cod__head-icon" aria-hidden="true">{{ f_head_icon }}</span>
+          {%- endif -%}
+          <span class="mitos-cod__head-text">
+            <span class="mitos-cod__title">{{ f_head_title }}</span>
+            {%- if f_head_subtitle != blank -%}
+              <span class="mitos-cod__subtitle">{{ f_head_subtitle }}</span>
+            {%- endif -%}
+          </span>
+        </div>
+      {%- endif -%}
+
+      <div class="mitos-cod__body" data-mitos-cod-body>
+        <div class="mitos-cod__row mitos-cod__row--2">
+          <div class="mitos-field">
+            <label class="mitos-field__label" for="{{ id }}-prenom">{{ d_label_first }} <span class="mitos-field__req" aria-hidden="true">*</span></label>
+            <input class="mitos-field__control" id="{{ id }}-prenom" name="prenom" type="text"
+                   autocomplete="given-name" placeholder="{{ d_ph_first | escape }}" data-mitos-cod-required>
+            <span class="mitos-field__error"><span aria-hidden="true">&#9888;</span> {{ d_msg_required }}</span>
+          </div>
+          <div class="mitos-field">
+            <label class="mitos-field__label" for="{{ id }}-nom">{{ d_label_last }} <span class="mitos-field__req" aria-hidden="true">*</span></label>
+            <input class="mitos-field__control" id="{{ id }}-nom" name="nom" type="text"
+                   autocomplete="family-name" placeholder="{{ d_ph_last | escape }}" data-mitos-cod-required>
+            <span class="mitos-field__error"><span aria-hidden="true">&#9888;</span> {{ d_msg_required }}</span>
+          </div>
+        </div>
+
+        <div class="mitos-cod__row">
+          <div class="mitos-field">
+            <label class="mitos-field__label" for="{{ id }}-tel">{{ d_label_phone }} <span class="mitos-field__req" aria-hidden="true">*</span></label>
+            <span class="mitos-field__affix">
+              <span class="mitos-field__affix-label" aria-hidden="true">{{ f_phone_prefix }}</span>
+              <input class="mitos-field__control" id="{{ id }}-tel" name="telephone" type="tel"
+                     inputmode="numeric" autocomplete="tel-national" placeholder="{{ d_ph_phone | escape }}"
+                     data-mitos-cod-required data-mitos-cod-pattern="{{ f_phone_pattern }}">
+            </span>
+            {%- if d_hint_phone != blank -%}<span class="mitos-field__hint">{{ d_hint_phone }}</span>{%- endif -%}
+            <span class="mitos-field__error"><span aria-hidden="true">&#9888;</span> {{ d_msg_phone }}</span>
+          </div>
+        </div>
+
+        <div class="mitos-cod__row mitos-cod__row--2">
+          <div class="mitos-field">
+            <label class="mitos-field__label" for="{{ id }}-wilaya">{{ d_label_wilaya }} <span class="mitos-field__req" aria-hidden="true">*</span></label>
+            <select class="mitos-field__control" id="{{ id }}-wilaya" name="wilaya"
+                    autocomplete="address-level1" data-mitos-cod-wilaya data-mitos-cod-required>
+              <option value="">{{ d_ph_wilaya }}</option>
+            </select>
+            <span class="mitos-field__error"><span aria-hidden="true">&#9888;</span> {{ d_msg_required }}</span>
+          </div>
+          <div class="mitos-field">
+            <label class="mitos-field__label" for="{{ id }}-commune">{{ d_label_commune }} <span class="mitos-field__req" aria-hidden="true">*</span></label>
+            <select class="mitos-field__control" id="{{ id }}-commune" name="commune"
+                    autocomplete="address-level2" data-mitos-cod-commune data-mitos-cod-required
+                    data-placeholder="{{ d_ph_commune | escape }}"
+                    data-placeholder-empty="{{ d_ph_commune_empty | escape }}" disabled>
+              <option value="">{{ d_ph_commune_empty }}</option>
+            </select>
+            <span class="mitos-field__error"><span aria-hidden="true">&#9888;</span> {{ d_msg_required }}</span>
+          </div>
+        </div>
+
+        <div class="mitos-cod__row">
+          <div class="mitos-field">
+            <label class="mitos-field__label" for="{{ id }}-adresse">{{ d_label_address }} <span class="mitos-field__req" aria-hidden="true">*</span></label>
+            <textarea class="mitos-field__control" id="{{ id }}-adresse" name="adresse"
+                      autocomplete="street-address" placeholder="{{ d_ph_address | escape }}" data-mitos-cod-required></textarea>
+            {%- if d_hint_address != blank -%}<span class="mitos-field__hint">{{ d_hint_address }}</span>{%- endif -%}
+            <span class="mitos-field__error"><span aria-hidden="true">&#9888;</span> {{ d_msg_required }}</span>
+          </div>
+        </div>
+
+        {%- if s.show_delivery -%}
+          <fieldset class="mitos-cod__fieldset">
+            <legend class="mitos-cod__legend">{{ d_label_delivery }}</legend>
+            <div class="mitos-cod__delivery">
+              <label class="mitos-dopt">
+                <input class="mitos-dopt__input" type="radio" name="livraison" value="home" data-mitos-cod-delivery checked>
+                <span class="mitos-dopt__mark" aria-hidden="true"></span>
+                <span class="mitos-dopt__text">
+                  <span class="mitos-dopt__name">{{ d_label_home }}</span>
+                  <span class="mitos-dopt__price" data-mitos-cod-opt-price data-idle="—">—</span>
+                </span>
+              </label>
+              <label class="mitos-dopt">
+                <input class="mitos-dopt__input" type="radio" name="livraison" value="desk" data-mitos-cod-delivery>
+                <span class="mitos-dopt__mark" aria-hidden="true"></span>
+                <span class="mitos-dopt__text">
+                  <span class="mitos-dopt__name">{{ d_label_desk }}</span>
+                  <span class="mitos-dopt__price" data-mitos-cod-opt-price data-idle="—">—</span>
+                </span>
+              </label>
+            </div>
+          </fieldset>
+        {%- endif -%}
+
+        {%- if s.show_qty -%}
+          {%- comment -%}
+            Quantity breaks land next to the quantity control rather than
+            beside a second one — two places to choose a quantity is two
+            chances to send a number the customer did not mean. Hidden until
+            the app answers, and it stays hidden for a product with no offers,
+            so a shop that never sets any sees exactly the form it saw before.
+          {%- endcomment -%}
+          <div class="mitos-cod-offers" data-mitos-cod-offers hidden></div>
+
+          <div class="mitos-cod__row mitos-cod__row--2">
+            <div class="mitos-field">
+              <label class="mitos-field__label" for="{{ id }}-qte">{{ d_label_qty }}</label>
+              <select class="mitos-field__control" id="{{ id }}-qte" name="quantite" data-mitos-cod-qty>
+                {%- for i in (1..f_qty_max) -%}<option>{{ i }}</option>{%- endfor -%}
+              </select>
+            </div>
+          </div>
+        {%- endif -%}
+
+        {%- if s.show_summary -%}
+          <dl class="mitos-cod__summary">
+            <div class="mitos-cod__line"><dt>{{ d_label_subtotal }}</dt><dd data-mitos-cod-out-sub>—</dd></div>
+            <div class="mitos-cod__line"><dt>{{ d_label_shipping }}</dt><dd data-mitos-cod-out-ship class="mitos-cod__muted">—</dd></div>
+            <div class="mitos-cod__line mitos-cod__line--total"><dt>{{ d_label_total }}</dt><dd data-mitos-cod-out-total>—</dd></div>
+          </dl>
+        {%- endif -%}
+
+        <button class="mitos-cod__submit" type="submit" data-mitos-cod-submit
+                style="{% if s.submit_bg != blank %}background: {{ s.submit_bg }};{% endif %}">
+          <span class="mitos-cod__spinner" aria-hidden="true" hidden></span>
+          {{ f_submit_label }}
+        </button>
+
+        {%- if f_reassure != blank -%}
+          <p class="mitos-cod__reassure"><span aria-hidden="true">&#128274;</span> {{ f_reassure }}</p>
+        {%- endif -%}
+
+        <p class="mitos-cod__status" data-mitos-cod-status role="status" aria-live="polite"></p>
+      </div>
+    </form>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "t:name",
+  "target": "section",
+  "stylesheet": "mitos-cod.css",
+  "javascript": "mitos-cod.js",
+  "enabled_on": {
+    "templates": ["product", "index", "page"]
+  },
+  "settings": [
+    {
+      "type": "product",
+      "id": "product",
+      "label": "t:settings.product.label",
+      "info": "t:settings.product.info"
+    },
+    {
+      "type": "header",
+      "content": "t:settings.header_connection"
+    },
+    {
+      "type": "text",
+      "id": "endpoint",
+      "label": "t:settings.endpoint.label",
+      "info": "t:settings.endpoint.info",
+      "default": "https://gmgargxjomtaorqjvlyz.supabase.co/functions/v1/cod"
+    },
+    {
+      "type": "url",
+      "id": "thanks_url",
+      "label": "t:settings.thanks_url.label",
+      "info": "t:settings.thanks_url.info"
+    },
+    {
+      "type": "text",
+      "id": "tariff_fallback",
+      "label": "t:settings.tariff_fallback.label",
+      "info": "t:settings.tariff_fallback.info",
+      "default": "[600,350]"
+    },
+    {
+      "type": "header",
+      "content": "t:settings.header_copy"
+    },
+    {
+      "type": "text",
+      "id": "head_title",
+      "label": "t:settings.head_title.label",
+      "info": "t:settings.blank_info"
+    },
+    {
+      "type": "text",
+      "id": "head_subtitle",
+      "label": "t:settings.head_subtitle.label",
+      "info": "t:settings.blank_info"
+    },
+    {
+      "type": "text",
+      "id": "head_icon",
+      "label": "t:settings.head_icon.label",
+      "default": "💵"
+    },
+    {
+      "type": "text",
+      "id": "submit_label",
+      "label": "t:settings.submit_label.label",
+      "info": "t:settings.blank_info"
+    },
+    {
+      "type": "text",
+      "id": "reassure",
+      "label": "t:settings.reassure.label",
+      "info": "t:settings.blank_info"
+    },
+    {
+      "type": "header",
+      "content": "t:settings.header_fields"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_head",
+      "label": "t:settings.show_head.label",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_delivery",
+      "label": "t:settings.show_delivery.label",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_qty",
+      "label": "t:settings.show_qty.label",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_summary",
+      "label": "t:settings.show_summary.label",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "qty_max",
+      "label": "t:settings.qty_max.label",
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "default": 10
+    },
+    {
+      "type": "text",
+      "id": "phone_prefix",
+      "label": "t:settings.phone_prefix.label",
+      "default": "+213"
+    },
+    {
+      "type": "text",
+      "id": "phone_pattern",
+      "label": "t:settings.phone_pattern.label",
+      "info": "t:settings.phone_pattern.info",
+      "default": "^0[567][0-9]{8}$|^0[1-4][0-9]{7,8}$"
+    },
+    {
+      "type": "text",
+      "id": "currency_label",
+      "label": "t:settings.currency_label.label",
+      "info": "t:settings.currency_label.info"
+    },
+    {
+      "type": "header",
+      "content": "t:settings.header_colors"
+    },
+    {
+      "type": "color",
+      "id": "head_bg",
+      "label": "t:settings.head_bg.label"
+    },
+    {
+      "type": "color",
+      "id": "submit_bg",
+      "label": "t:settings.submit_bg.label"
+    }
+  ]
+}
+{% endschema %}

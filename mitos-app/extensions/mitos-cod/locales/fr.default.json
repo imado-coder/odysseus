@@ -1,0 +1,39 @@
+{
+  "mitos": {
+    "cod": {
+      "head_title": "Commander — paiement à la livraison",
+      "head_subtitle": "Remplissez le formulaire, payez à la réception",
+      "label_first": "Prénom",
+      "ph_first": "Nassim",
+      "label_last": "Nom",
+      "ph_last": "Benali",
+      "label_phone": "Téléphone",
+      "ph_phone": "0555 00 00 00",
+      "hint_phone": "Nous vous appelons pour confirmer.",
+      "label_wilaya": "Wilaya",
+      "ph_wilaya": "Choisir la wilaya…",
+      "label_commune": "Commune",
+      "ph_commune": "Choisir la commune…",
+      "ph_commune_empty": "Choisissez d'abord la wilaya",
+      "label_address": "Adresse de livraison",
+      "ph_address": "Cité, rue, numéro, point de repère…",
+      "hint_address": "Plus l'adresse est précise, plus la livraison est rapide.",
+      "label_delivery": "Mode de livraison",
+      "label_home": "À domicile",
+      "label_desk": "Bureau de livraison",
+      "label_qty": "Quantité",
+      "label_subtotal": "Sous-total",
+      "label_shipping": "Livraison",
+      "label_total": "Total à payer",
+      "submit_label": "Confirmer la commande",
+      "reassure": "Aucun paiement en ligne — vous payez à la réception.",
+      "msg_required": "Ce champ est obligatoire",
+      "msg_phone": "Numéro invalide. Exemple : 0555 00 00 00",
+      "msg_invalid": "Merci de corriger les champs signalés en rouge.",
+      "msg_success": "Commande enregistrée. Nous vous appelons bientôt.",
+      "msg_fail": "Envoi impossible. Réessayez ou appelez-nous.",
+      "msg_pending": "Formulaire valide. Connectez l'application COD pour enregistrer la commande.",
+      "no_product": "Choisissez un produit dans les réglages de ce bloc, ou placez-le sur une page produit."
+    }
+  }
+}

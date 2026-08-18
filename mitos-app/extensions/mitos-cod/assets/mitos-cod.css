@@ -1,0 +1,625 @@
+/* ==========================================================================
+   mitos-cod.css — the cash-on-delivery form, as an app block.
+
+   Ported from the theme's cod-form.css. Two things had to change for it to
+   survive inside a theme nobody here wrote:
+
+   1. Every class is namespaced `mitos-`. The original used `.field`,
+      `.field__label`, `.field__control` — names Dawn and most themes already
+      define. Unprefixed, the host theme restyles our inputs and we restyle
+      theirs, and which one wins depends on stylesheet order.
+
+   2. The tokens are defined here rather than inherited. The theme set
+      --c-accent and friends in theme-tokens.liquid; a merchant's theme has
+      never heard of them. They are declared on the form root below, so the
+      form looks the way it is meant to out of the box, and a merchant who
+      wants it to match their own palette overrides two settings on the block.
+
+   The bidi rules that used to live in the theme's base.css are folded in at
+   the bottom. Losing them is not cosmetic: Arabic with Latin digits reorders
+   and the shopper reads a different phone number than the one they typed.
+   ========================================================================== */
+
+/* The token defaults, scoped to the form so nothing leaks into the theme.
+   Each is still written as var(--c-x, literal) further down, so a theme that
+   *does* define these keeps its own values. */
+.mitos-cod {
+  --c-accent: #ff6d00;
+  --c-accent-btn: #ff6d00;
+  --c-accent-light: #fff3e8;
+  --c-accent-text: #8a3b00;
+  --c-bg: #f4f5f6;
+  --c-surface: #ffffff;
+  --c-border: #e4e6e8;
+  --c-border-strong: #c9ced3;
+  --c-ink: #14181c;
+  --c-ink-2: #4a5560;
+  --c-ink-3: #79838d;
+  --c-sale: #d72c0d;
+  --c-sale-light: #fdecea;
+  --c-sale-text: #c9271c;
+  --c-trust: #0a8800;
+  --c-trust-deep: #076200;
+  --c-trust-tint: #eaf6ee;
+  --ease: cubic-bezier(.4, 0, .2, 1);
+}
+
+.mitos-cod {
+  border: 2px solid var(--c-accent, #ff6d00);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+
+/* --- header --- */
+.mitos-cod__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--c-accent, #ff6d00);
+  color: #fff;
+}
+
+.mitos-cod__head-icon {
+  flex: none;
+  inline-size: 32px;
+  block-size: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.24);
+  font-size: 16px;
+}
+
+.mitos-cod__head-text { min-inline-size: 0; line-height: 1.25; }
+
+.mitos-cod__title,
+.mitos-cod__subtitle {
+  display: block; /* spans in a flex child still run inline without this */
+}
+
+.mitos-cod__title {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.mitos-cod__subtitle {
+  font-size: 12px;
+  opacity: 0.95;
+  margin-block-start: 1px;
+}
+
+.mitos-cod__body { padding: 14px; }
+
+/* --- fields --- */
+.mitos-cod__row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 480px) {
+  .mitos-cod__row--2 { grid-template-columns: 1fr 1fr; }
+}
+
+.mitos-cod__row + .mitos-cod__row,
+.mitos-cod__row + .mitos-cod__fieldset,
+.mitos-cod__fieldset + .mitos-cod__row {
+  margin-block-start: 12px;
+}
+
+.mitos-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-inline-size: 0;
+}
+
+.mitos-field__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--c-ink, #101418);
+}
+
+.mitos-field__req {
+  color: var(--c-sale-text, #c9271c);
+  margin-inline-start: 2px;
+}
+
+.mitos-field__control {
+  min-block-size: 48px; /* thumb-sized on mobile */
+  padding-inline: 12px;
+  border: 1.5px solid var(--c-border-strong, #d3d8dc);
+  border-radius: 8px;
+  background: #fff;
+  /* 16px is not a style choice here. Safari on iOS zooms the page whenever a
+     focused field is under 16px, and it does not zoom back out — so on a
+     seven-field order form the shopper is fighting a magnified, sideways-
+     scrolling page from the first tap to the last. That is the form this
+     whole theme exists to get completed. */
+  font-size: 16px;
+  color: var(--c-ink, #101418);
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.mitos-field__control::placeholder { color: var(--c-ink-3, #6e7781); }
+
+.mitos-field__control:focus {
+  border-color: var(--c-accent, #ff6d00);
+  box-shadow: 0 0 0 3px var(--c-accent-light, #fff1e6);
+  outline: none;
+}
+
+select.mitos-field__control {
+  appearance: none;
+  padding-inline-end: 38px;
+  /* Caret drawn as a gradient pair so no image request is needed. */
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    right 16px center,
+    right 11px center;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
+[dir="rtl"] select.mitos-field__control {
+  background-position: left 16px center, left 11px center;
+}
+
+select.mitos-field__control:disabled {
+  background-color: var(--c-bg, #f4f5f6);
+  color: var(--c-ink-3, #6e7781);
+  cursor: not-allowed;
+}
+
+textarea.mitos-field__control {
+  min-block-size: 76px;
+  padding-block: 10px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+/* Phone gets a fixed country affix so the customer never types +213 */
+.mitos-field__affix {
+  display: flex;
+  align-items: stretch;
+}
+
+.mitos-field__affix-label {
+  display: grid;
+  place-items: center;
+  padding-inline: 12px;
+  border: 1.5px solid var(--c-border-strong, #d3d8dc);
+  border-inline-end: 0;
+  border-start-start-radius: 8px;
+  border-end-start-radius: 8px;
+  background: var(--c-bg, #f4f5f6);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--c-ink-2, #5b6570);
+  white-space: nowrap;
+}
+
+.mitos-field__affix .mitos-field__control {
+  flex: 1;
+  min-inline-size: 0;
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+  /* Phone numbers read left-to-right in both storefront languages. */
+  direction: ltr;
+  text-align: start;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+[dir="rtl"] .mitos-field__affix .mitos-field__control { text-align: end; }
+
+.mitos-field__hint {
+  font-size: 12px;
+  color: var(--c-ink-2, #5b6570);
+}
+
+/* --- validation --- */
+.mitos-field__error {
+  display: none;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--c-sale-text, #c9271c);
+}
+
+.mitos-field[data-invalid] .mitos-field__error { display: flex; }
+
+.mitos-field[data-invalid] .mitos-field__control,
+.mitos-field[data-invalid] .mitos-field__affix .mitos-field__control {
+  border-color: var(--c-sale-text, #c9271c);
+}
+
+.mitos-field[data-invalid] .mitos-field__affix-label {
+  border-color: var(--c-sale-text, #c9271c);
+}
+
+/* --- delivery choice --- */
+.mitos-cod__fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-inline-size: 0;
+}
+
+.mitos-cod__legend {
+  padding: 0;
+  margin-block-end: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.mitos-cod__delivery {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 400px) {
+  .mitos-cod__delivery { grid-template-columns: 1fr; }
+}
+
+.mitos-dopt {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 11px;
+  border: 1.5px solid var(--c-border-strong, #d3d8dc);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.mitos-dopt__input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mitos-dopt__mark {
+  flex: none;
+  inline-size: 18px;
+  block-size: 18px;
+  margin-block-start: 1px;
+  border: 2px solid var(--c-border-strong, #d3d8dc);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+}
+
+.mitos-dopt__mark::after {
+  content: "";
+  inline-size: 8px;
+  block-size: 8px;
+  border-radius: 50%;
+  background: var(--c-accent, #ff6d00);
+  transform: scale(0);
+  transition: transform 120ms ease;
+}
+
+.mitos-dopt__text { min-inline-size: 0; line-height: 1.3; }
+
+.mitos-dopt__name {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.mitos-dopt__price {
+  display: block;
+  font-size: 12px;
+  color: var(--c-ink-2, #5b6570);
+  margin-block-start: 2px;
+}
+
+.mitos-dopt__input:checked + .mitos-dopt__mark { border-color: var(--c-accent, #ff6d00); }
+.mitos-dopt__input:checked + .mitos-dopt__mark::after { transform: scale(1); }
+
+.mitos-dopt:has(.mitos-dopt__input:checked) {
+  border-color: var(--c-accent, #ff6d00);
+  background: var(--c-accent-light, #fff1e6);
+}
+
+.mitos-dopt:has(.mitos-dopt__input:focus-visible) {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px #101418;
+}
+
+.mitos-dopt__input:disabled ~ .mitos-dopt__text { opacity: 0.5; }
+
+/* --- summary --- */
+.mitos-cod__summary {
+  margin-block-start: 14px;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--c-bg, #f4f5f6);
+  font-size: 14px;
+}
+
+.mitos-cod__line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-block: 4px;
+}
+
+.mitos-cod__line dt { color: var(--c-ink-2, #5b6570); }
+
+.mitos-cod__line dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.mitos-cod__line--total {
+  margin-block-start: 6px;
+  padding-block-start: 10px;
+  border-block-start: 1px solid var(--c-border-strong, #d3d8dc);
+  font-size: 16px;
+}
+
+.mitos-cod__line--total dt {
+  color: var(--c-ink, #101418);
+  font-weight: 700;
+}
+
+.mitos-cod__line--total dd {
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--c-accent-text, #c24e00);
+}
+
+.mitos-cod__muted { color: var(--c-ink-3, #6e7781); font-weight: 500; }
+
+/* --- submit --- */
+.mitos-cod__submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  inline-size: 100%;
+  min-block-size: 56px;
+  margin-block-start: 12px;
+  padding-inline: 20px;
+  border-radius: 999px;
+  background: var(--c-accent-btn, #c85000);
+  color: #fff;
+  font-size: 17px;
+  font-weight: 800;
+  transition: filter 120ms ease, transform 120ms ease;
+}
+
+@media (hover: hover) {
+  .mitos-cod__submit:hover { filter: brightness(0.94); }
+}
+
+.mitos-cod__submit:active { transform: scale(0.99); }
+
+.mitos-cod__submit[aria-busy="true"] {
+  pointer-events: none;
+  opacity: 0.75;
+}
+
+.mitos-cod__spinner {
+  inline-size: 15px;
+  block-size: 15px;
+  border: 2px solid currentColor;
+  border-block-start-color: transparent;
+  border-radius: 50%;
+  animation: cod-spin 700ms linear infinite;
+}
+
+@keyframes cod-spin { to { transform: rotate(360deg); } }
+
+.mitos-cod__reassure {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-block-start: 10px;
+  font-size: 12px;
+  color: var(--c-ink-2, #5b6570);
+  text-align: center;
+}
+
+/* --- form-level status --- */
+.mitos-cod__status {
+  display: none;
+  align-items: flex-start;
+  gap: 8px;
+  margin-block-start: 12px;
+  padding: 11px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.mitos-cod__status[data-state="error"] {
+  display: flex;
+  background: var(--c-sale-light, #ffecea);
+  color: var(--c-sale-text, #c9271c);
+}
+
+.mitos-cod__status[data-state="success"] {
+  display: flex;
+  background: #eaf6ee;
+  color: var(--c-trust-deep, #076200);
+}
+
+/* Neither success nor failure: the app is not connected, so the form has
+   nowhere to send the lead. Amber because green would tell the shopper an
+   order was placed and red would tell them they did something wrong — and
+   neither is true. */
+.mitos-cod__status[data-state="notice"] {
+  display: flex;
+  background: #fff4e5;
+  color: var(--c-accent-text, #8a3b00);
+}
+
+/* ==========================================================================
+   Inline confirmation
+
+   Shown when the merchant has not configured a confirmation page. An order is
+   the one action on this storefront that must never leave the shopper
+   guessing, so the form gives up its whole panel rather than reporting the
+   result in a line of text beneath fields the shopper has stopped reading.
+   ========================================================================== */
+.mitos-cod-done {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding: 44px 20px 48px;
+  text-align: center;
+}
+
+.mitos-cod-done__mark {
+  inline-size: 68px;
+  block-size: 68px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--c-trust-tint, #eaf7e6);
+  color: var(--c-trust, #0a8800);
+}
+
+.mitos-cod-done__mark svg { inline-size: 34px; block-size: 34px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .mitos-cod-done__mark { animation: cod-done-pop 420ms cubic-bezier(0.2, 1.5, 0.4, 1); }
+  .mitos-cod-done__mark path {
+    stroke-dasharray: 24;
+    stroke-dashoffset: 24;
+    animation: cod-done-draw 420ms 140ms ease forwards;
+  }
+  @keyframes cod-done-pop { from { transform: scale(0.7); } to { transform: none; } }
+  @keyframes cod-done-draw { to { stroke-dashoffset: 0; } }
+}
+
+.mitos-cod-done__title {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.4;
+  max-inline-size: 26ch;
+}
+
+/* ── Quantity breaks ────────────────────────────────────────────────────────
+   Cards, not a second select. They sit above the quantity control and drive
+   it, so whichever the shopper touches there is one number leaving the form.
+
+   `hidden` is honoured explicitly: a component that sets its own display wins
+   over the user-agent rule, and this one would otherwise show an empty strip
+   on every product without offers. */
+.mitos-cod-offers[hidden] { display: none; }
+
+.mitos-cod-offers {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(5.5rem, 1fr);
+  gap: .5rem;
+  margin-bottom: .75rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.mitos-cod-offers::-webkit-scrollbar { display: none; }
+
+.mitos-cod-offer {
+  position: relative;
+  display: grid;
+  gap: .125rem;
+  justify-items: center;
+  min-height: 64px;
+  padding: .5rem .375rem;
+  border: 1.5px solid var(--c-border, #e4e6e8);
+  border-radius: 12px;
+  background: var(--c-surface, #ffffff);
+  color: var(--c-ink, #14181c);
+  font: inherit;
+  cursor: pointer;
+}
+.mitos-cod-offer[aria-pressed="true"] {
+  border-color: var(--c-accent-btn, var(--c-accent, #ff6d00));
+  background: var(--c-trust-tint, #f4f8f2);
+}
+
+.mitos-cod-offer__n {
+  font-weight: 700;
+  font-size: .9375rem;
+  /* A digit next to a times sign inside Arabic copy reorders without this. */
+  unicode-bidi: plaintext;
+}
+.mitos-cod-offer__p {
+  font-weight: 600;
+  font-size: .8125rem;
+  font-variant-numeric: tabular-nums;
+  unicode-bidi: plaintext;
+}
+.mitos-cod-offer__badge {
+  position: absolute;
+  inset-block-start: -.5rem;
+  inset-inline-end: -.25rem;
+  padding: .0625rem .3125rem;
+  border-radius: 999px;
+  background: var(--c-sale, #ff4438);
+  color: #fff;
+  font-size: .625rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   Right-to-left and mixed digits
+
+   These rules lived in the theme's base.css, so they did not travel with the
+   form. Without them an Arabic storefront renders "0555 12 34 56" with its
+   groups reordered, and a shopper checking the number they just typed sees a
+   different one. `plaintext` lets each run decide its own direction from its
+   first strong character; `isolate` would force the paragraph direction onto
+   it and cause exactly the reordering it looks like it prevents.
+
+   The +213 affix is the deliberate exception: it is a standalone Latin run
+   that must always read left-to-right, whatever surrounds it.
+   ========================================================================== */
+.mitos-field__control,
+.mitos-field__hint,
+.mitos-field__error,
+.mitos-field__label,
+.mitos-cod__legend,
+.mitos-cod__muted,
+.mitos-cod__reassure,
+.mitos-cod__status,
+.mitos-cod__title,
+.mitos-cod__subtitle,
+.mitos-dopt__name,
+.mitos-dopt__price,
+.mitos-cod-offer__n,
+.mitos-cod-offer__p,
+.mitos-cod__line,
+.mitos-cod__line > * {
+  unicode-bidi: plaintext;
+}
+
+.mitos-field__affix-label,
+.mitos-field__affix > span:first-child {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+/* The host theme owns the page direction; the form follows it rather than
+   asserting one, so a shop running Arabic on some templates and French on
+   others gets the right layout on each without a second block. */
+.mitos-cod {
+  text-align: start;
+}

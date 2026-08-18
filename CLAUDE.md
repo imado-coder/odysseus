@@ -129,10 +129,10 @@ store**. It is where things get proven. The merchant's real store comes after.
 
 What an App Store submission would still need today, from the audit:
 
-1. **No Theme App Extension.** The COD form only exists as
-   `shopify-theme/snippets/cod-form.liquid` — inside *our* theme. A merchant
-   installing the app on *their* theme gets nothing. This is the single largest
-   gap and it blocks the custom-app path as well.
+1. ~~**No Theme App Extension.**~~ **Closed** — `mitos-app/extensions/mitos-cod/`
+   carries the COD form as an App Block, so a merchant installing the app on
+   their own theme now gets the form. Written and tested; still to be deployed
+   with the Partners link.
 2. **Protected customer data.** Name, phone and address are protected. A public
    app needs Shopify's review; a custom app does not. Scopes in
    `shopify.app.toml` are already minimal (`write_orders,read_orders,read_products`)
@@ -146,13 +146,24 @@ What an App Store submission would still need today, from the audit:
 ## Order of work
 
 Done: carriers · nav routes (`/app/shipping`, `/app/settings`) · Offers ·
-Dashboard.
+Dashboard · **Theme App Extension**.
 
-1. **Theme App Extension** (`extensions/`) — an App Block carrying the COD
-   form, so a merchant can drop it into any theme from the theme editor. Port
-   the existing markup and `theme.js` behaviour; do not rewrite the flow. It
-   must keep sending `shop`, the idempotency key, and quoting through
-   `/cod?shop=…`.
+1. ~~**Theme App Extension**~~ — **built**, in `mitos-app/extensions/mitos-cod/`.
+   An App Block a merchant adds from the theme editor. The flow is the port,
+   not a rewrite: it still sends `shop`, still mints one idempotency key per
+   order, still quotes through `/cod?shop=…&product=…`. The endpoint is a block
+   setting (a merchant's theme has no `settings.cod_endpoint`) and ships
+   pre-filled. `npm run test:extension` runs 57 assertions against the real
+   rendered block. Not deployed yet — `npx shopify app deploy` needs the
+   Partners link, which is item 3.
+
+   Three things had to change on the way out of our theme, and they are the
+   things to preserve if this is ever touched: classes are prefixed `mitos-`
+   (`.field` collides with Dawn), the `unicode-bidi` rules travel in the
+   block's own stylesheet (they lived in the theme's `base.css`, and without
+   them Arabic reorders a phone number), and the JS hooks are
+   `data-mitos-cod-*` so our own theme's `theme.js` cannot double-bind the
+   same form.
 2. **The three GDPR webhooks** — add the topics to `shopify.app.toml` and
    handle them in `app/routes/webhooks.tsx`. `customers/redact` and
    `shop/redact` must actually delete; a stub that returns 200 is a failed

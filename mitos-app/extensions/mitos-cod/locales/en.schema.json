@@ -1,0 +1,47 @@
+{
+  "name": "COD order form",
+  "settings": {
+    "blank_info": "Leave empty to use the app's translated wording.",
+    "header_connection": "Connection",
+    "header_copy": "Wording",
+    "header_fields": "Fields",
+    "header_colors": "Colours",
+    "product": {
+      "label": "Product",
+      "info": "Leave empty on a product page: the page's product is used."
+    },
+    "endpoint": {
+      "label": "App endpoint",
+      "info": "Receives the order and returns your delivery rates. Only change this if the app gave you a different address."
+    },
+    "thanks_url": {
+      "label": "Confirmation page",
+      "info": "Optional. Without one, the form shows the confirmation itself."
+    },
+    "tariff_fallback": {
+      "label": "Fallback rates [home, desk]",
+      "info": "Used only if the app does not answer. Real rates come from your delivery table."
+    },
+    "head_title": { "label": "Title" },
+    "head_subtitle": { "label": "Subtitle" },
+    "head_icon": { "label": "Icon" },
+    "submit_label": { "label": "Order button" },
+    "reassure": { "label": "Reassurance line" },
+    "show_head": { "label": "Show the header" },
+    "show_delivery": { "label": "Show delivery choice" },
+    "show_qty": { "label": "Show quantity" },
+    "show_summary": { "label": "Show the summary" },
+    "qty_max": { "label": "Maximum quantity" },
+    "phone_prefix": { "label": "Displayed dialling code" },
+    "phone_pattern": {
+      "label": "Phone format",
+      "info": "Regular expression. Default: Algerian mobiles 05/06/07 and landlines."
+    },
+    "currency_label": {
+      "label": "Displayed currency",
+      "info": "Leave empty to use the shop's currency."
+    },
+    "head_bg": { "label": "Header background" },
+    "submit_bg": { "label": "Button background" }
+  }
+}

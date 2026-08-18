@@ -17,7 +17,8 @@
     "verify": "tsx prisma/verify.ts",
     "demo:shop": "tsx prisma/demo-shop.ts",
     "setup": "prisma generate && prisma migrate deploy",
-    "vercel-build": "prisma generate && prisma migrate deploy && react-router build"
+    "vercel-build": "prisma generate && prisma migrate deploy && react-router build",
+    "test:extension": "node tests/cod-extension.test.mjs"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -42,6 +43,7 @@
     "@types/node": "^22.10.2",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
+    "jsdom": "^30.0.1",
     "prisma": "^6.19.3",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",

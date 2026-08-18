@@ -56,6 +56,54 @@ moitiés reliées :
 
 ---
 
+## Le formulaire dans le thème du marchand
+
+`extensions/mitos-cod/` — une **extension de thème**, c'est-à-dire un bloc que
+le marchand ajoute depuis l'éditeur de thème : **Personnaliser → Ajouter un
+bloc → Applications → Formulaire COD**.
+
+C'était le plus gros trou de l'application. Le formulaire n'existait que dans
+`shopify-theme/snippets/cod-form.liquid`, à l'intérieur de *notre* thème : un
+marchand qui installait l'application sur son propre thème n'obtenait rien. Le
+flux n'a pas changé — c'est le portage du même formulaire et du même
+`theme.js`, parce que c'est ce flux-là qui a fait passer de vraies commandes.
+
+L'adresse de l'application est **déjà renseignée** dans le bloc, donc le cas
+courant ne demande aucune saisie. Détails et réglages :
+`extensions/mitos-cod/README.md`.
+
+Trois adaptations forcées par la sortie de notre thème, toutes vérifiées :
+
+- les classes sont préfixées `mitos-` (l'original utilisait `.field`, un nom
+  que Dawn définit déjà — sans préfixe, les deux thèmes se restylent l'un
+  l'autre) ;
+- les règles `unicode-bidi` sont embarquées dans la feuille du bloc ; elles
+  vivaient dans le `base.css` du thème et, sans elles, une vitrine arabe
+  réordonne les chiffres latins d'un numéro de téléphone ;
+- les crochets JS sont `data-mitos-cod-*`, pour qu'un marchand utilisant notre
+  thème *et* l'application n'ait pas deux initialiseurs sur le même formulaire.
+
+> **Déployer l'extension** demande un compte Partners lié
+> (`npx shopify app deploy`). Le code est prêt et testé ; le lien Partners
+> reste à faire — c'est le point 3 de l'ordre de travail.
+
+```bash
+npm run test:extension   # 57 assertions sur le bloc réellement rendu
+```
+
+Deux défauts trouvés en écrivant ces tests, tous deux corrigés :
+
+- la clé d'idempotence était effacée **après** l'affichage de la confirmation.
+  Tout ce qui aurait échoué pendant ce rendu laissait la clé sur le formulaire,
+  et la commande *suivante* du même client aurait été écartée comme doublon.
+  Elle est maintenant effacée dès que la commande est acceptée.
+- sans adresse d'application configurée, le formulaire affichait le panneau de
+  succès : on annonçait au client une commande enregistrée alors que rien
+  n'avait été envoyé nulle part, et il aurait attendu un appel qui ne venait
+  pas. C'est désormais un avis orange, et la saisie du client est conservée.
+
+---
+
 ## L'installation d'une boutique
 
 Une boutique dont l'application a été créée **dans son propre admin** détient
