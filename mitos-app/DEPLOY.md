@@ -104,6 +104,73 @@ Deux défauts trouvés en écrivant ces tests, tous deux corrigés :
 
 ---
 
+## Confidentialité — les trois webhooks obligatoires
+
+Shopify impose `customers/data_request`, `customers/redact` et `shop/redact` à
+toute application publique, et un examinateur les envoie sur une boutique de
+test pour regarder ce qui a changé. Renvoyer 200 sans rien faire passe le
+contrôle de livraison et rate l'examen — et surtout, c'est un mensonge fait au
+client qui a demandé à être oublié.
+
+Ils sont déclarés dans `shopify.app.toml` avec `compliance_topics` (pas
+`topics` : Shopify les configure par application et non par boutique, c'est ce
+qui leur permet d'arriver *après* la désinstallation). Le récepteur reste
+`app/routes/webhooks.tsx` ; la logique est isolée dans
+`app/lib/gdpr.server.ts` pour que `npm run test:gdpr` la fasse tourner contre
+une base en mémoire — **58 assertions**.
+
+**`customers/redact` vide la fiche, il ne la supprime pas.** `Lead` cascade
+vers `CodOrder` puis vers `Shipment` : supprimer réécrirait le chiffre
+d'affaires du marchand et effacerait la trace d'un colis que le transporteur a
+peut-être encore en main. Le RGPD demande que la donnée personnelle disparaisse,
+pas que la comptabilité soit falsifiée. Donc nom, téléphone, commune, adresse,
+note, IP et user-agent sont vidés ; les montants et la wilaya restent — une
+wilaya, c'est un million de personnes, elle n'identifie personne et c'est elle
+qui donne encore un sens à la ligne. `Lead.redactedAt` marque le passage, sans
+quoi une fiche effacée est indiscernable d'une fiche cassée dans la liste
+d'appels.
+
+**Le téléphone est la seule jointure possible**, et les deux côtés ne l'écrivent
+pas pareil : `Lead` n'a pas de colonne e-mail, nous stockons `0…`, Shopify
+envoie `+213…`. Comparer les chaînes brutes ne trouve rien — et ne rien trouver
+ressemble exactement, vu de l'extérieur, à une suppression réussie.
+
+**`Shipment.request` et `Shipment.response` sont nettoyés aussi.** C'est le JSON
+échangé avec le transporteur : il contient le nom, le téléphone et la rue. C'est
+la copie la plus facile à oublier.
+
+**`shop/redact` supprime pour de bon**, 48 h après la désinstallation. Deux
+choses ne pendent pas à `Shop` et lui survivraient : les `Session` (indexées par
+domaine, elles contiennent le jeton Admin) et les secrets Vault des
+transporteurs. `Carrier.credentialsRef` est le seul pointeur vers eux, donc ils
+partent *avant* la ligne — sinon un jeton d'API courrier valide reste chiffré
+dans `vault.secrets`, sans rien qui le référence et sans moyen de le retrouver.
+
+> Le même trou existait dans `carriers/index.ts` : supprimer un transporteur
+> laissait son secret derrière. Corrigé — la fonction lit `credentialsRef`
+> avant le `DELETE`, puis supprime le secret. **Cette fonction doit être
+> redéployée** pour que le correctif soit actif.
+
+**`customers/data_request` enregistre la demande ; l'export est assemblé au
+moment où le marchand l'ouvre**, dans Réglages → Confidentialité. Shopify
+n'offre aucun moyen d'y répondre par API — l'application remet les données au
+marchand, qui les remet au client. Stocker la réponse toute faite recopierait le
+client dans une seconde table qu'une suppression ultérieure devrait retrouver.
+Assemblée à la demande, une suppression arrivée entre-temps ne laisse simplement
+rien à exporter, ce qui est le bon résultat.
+
+### Une migration à appliquer
+
+`prisma/migrations/20260818090000_gdpr/` ajoute `Lead.redactedAt` et la table
+`DataRequest`. Purement additive, donc sans danger pour les fonctions déjà en
+ligne.
+
+> ⚠️ Les migrations précédentes ont été appliquées à la main par le connecteur
+> Supabase. Si elles ne sont pas inscrites dans `_prisma_migrations`,
+> `prisma migrate deploy` — que `vercel-build` lance — essaiera de les rejouer
+> et échouera. **Vérifier le contenu de `_prisma_migrations` avant le premier
+> déploiement**, et y insérer les migrations déjà appliquées si elles manquent.
+
 ## L'installation d'une boutique
 
 Une boutique dont l'application a été créée **dans son propre admin** détient

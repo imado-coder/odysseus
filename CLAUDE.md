@@ -137,16 +137,16 @@ What an App Store submission would still need today, from the audit:
    app needs Shopify's review; a custom app does not. Scopes in
    `shopify.app.toml` are already minimal (`write_orders,read_orders,read_products`)
    — keep them that way.
-3. **Two of three mandatory GDPR webhooks are missing.** Only `app/uninstalled`
-   is subscribed. `customers/data_request`, `customers/redact` and `shop/redact`
-   are hard requirements for listing.
+3. ~~**Two of three mandatory GDPR webhooks are missing.**~~ **Closed** — all
+   three are declared with `compliance_topics` in `shopify.app.toml` and do
+   real work, not a 200.
 4. **Credentials are a custom app's, not a Partners app's.** OAuth install does
    not exist yet; the token lives in `Session` because it was pasted there.
 
 ## Order of work
 
 Done: carriers · nav routes (`/app/shipping`, `/app/settings`) · Offers ·
-Dashboard · **Theme App Extension**.
+Dashboard · **Theme App Extension** · **GDPR webhooks**.
 
 1. ~~**Theme App Extension**~~ — **built**, in `mitos-app/extensions/mitos-cod/`.
    An App Block a merchant adds from the theme editor. The flow is the port,
@@ -164,17 +164,40 @@ Dashboard · **Theme App Extension**.
    them Arabic reorders a phone number), and the JS hooks are
    `data-mitos-cod-*` so our own theme's `theme.js` cannot double-bind the
    same form.
-2. **The three GDPR webhooks** — add the topics to `shopify.app.toml` and
-   handle them in `app/routes/webhooks.tsx`. `customers/redact` and
-   `shop/redact` must actually delete; a stub that returns 200 is a failed
-   review later and a lie now.
+2. ~~**The three GDPR webhooks**~~ — **built and tested**, undeployed for the
+   same reason as item 1. Logic in `mitos-app/app/lib/gdpr.server.ts`, kept out
+   of the route so `npm run test:gdpr` can drive all three against an in-memory
+   database: 58 assertions.
+
+   Three decisions worth not undoing. **`customers/redact` empties the lead
+   and does not delete it** — `Lead` cascades to `CodOrder` and to `Shipment`,
+   so deleting would rewrite the merchant's revenue and erase the record of a
+   parcel a carrier may still hold. Personal fields go, amounts and wilaya
+   stay, `Lead.redactedAt` marks it so the call list shows an erasure rather
+   than what looks like a broken row. **Phone is the only join that can work**
+   — `Lead` has no email, we store `0…`, Shopify sends `+213…`, and matching
+   raw finds nothing, which is indistinguishable from a redaction that worked.
+   **`Shipment.request`/`response` are scrubbed too**; they hold the JSON
+   posted to the courier, name and street included, and are the copy that is
+   easiest to miss. `shop/redact` deletes for real, and deletes the carriers'
+   Vault secrets first — `credentialsRef` is the only pointer to them.
+
+   `customers/data_request` records the request and Réglages assembles the
+   export on demand. Storing the assembled answer would copy the shopper into a
+   second table that a later redaction would have to find again.
 3. **Partners app + deploy `mitos-app`** — this is what unlocks OAuth. Needs
    the env vars set once in Vercel (they cannot be committed, and a previous
    attempt to put them in `vercel.json` was correctly refused).
 4. **`install` edge function** — the install path for a second store. Read the
    shop's currency from Shopify; do **not** assume DZD. Seed the 58 wilayas and
    a default carrier, then hand the merchant the setup steps.
-5. **Deploy `mitos-dashboard/index.html`** (blocked: Vercel returns 403 on
+5. **Billing (`appSubscriptionCreate`)** — nothing charges anyone today. The
+   `Subscription` model exists and not one line writes it. Shopify requires app
+   payments to run through its Billing API, so there is no monthly plan without
+   this and no listing either. Not needed for the first trial stores, which are
+   the merchant's own — but every screen built before it must not assume every
+   shop is entitled.
+6. **Deploy `mitos-dashboard/index.html`** (blocked: Vercel returns 403 on
    `mitos-commandes` — the token can read the project but not deploy to it).
    The repo copy carries the حفظ fix and the carriers tab; neither is live.
    Then link TREX (`ECOTRACK`, `https://trexexpress.ecotrack.dz`) and press

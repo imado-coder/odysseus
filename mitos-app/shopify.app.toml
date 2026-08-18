@@ -25,5 +25,25 @@ api_version = "2026-10"
   topics = [ "app/uninstalled" ]
   uri = "/webhooks"
 
+  # The three mandatory privacy topics. They are declared with
+  # `compliance_topics` rather than `topics` — Shopify configures them per app
+  # instead of subscribing them per shop, so they arrive even after the app has
+  # been uninstalled, which is the whole point of shop/redact.
+  #
+  # All three land on the same receiver as everything else; the topic is in the
+  # header. Handled in app/routes/webhooks.tsx, and what each one does is in
+  # app/lib/gdpr.server.ts.
+  [[webhooks.subscriptions]]
+  uri = "/webhooks"
+  compliance_topics = [ "customers/data_request" ]
+
+  [[webhooks.subscriptions]]
+  uri = "/webhooks"
+  compliance_topics = [ "customers/redact" ]
+
+  [[webhooks.subscriptions]]
+  uri = "/webhooks"
+  compliance_topics = [ "shop/redact" ]
+
 [pos]
 embedded = false

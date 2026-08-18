@@ -10,6 +10,7 @@ import { Form, useActionData, useLoaderData, useNavigation } from "react-router"
 import { TitleBar } from "@shopify/app-bridge-react";
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
+import { buildCustomerExport } from "../lib/gdpr.server";
 
 const DASHBOARD_URL = "https://mitos-commandes.vercel.app";
 
@@ -18,7 +19,15 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   const shop = await prisma.shop.findUnique({
     where: { domain: session.shop },
-    include: { settings: true, carriers: { orderBy: { name: "asc" } } },
+    include: {
+      settings: true,
+      carriers: { orderBy: { name: "asc" } },
+      /* Shopify gives the merchant 30 days to answer one of these, and no
+         way to answer it through the API. Showing them here is the whole
+         mechanism — an unanswered request that nobody can see is a breach
+         waiting to be discovered by someone else. */
+      dataRequests: { orderBy: { createdAt: "desc" }, take: 25 },
+    },
   });
 
   if (!shop) return { ready: false as const };
@@ -42,6 +51,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
       isDefault: c.isDefault,
       enabled: c.enabled,
       linked: Boolean(c.credentialsRef),
+    })),
+    dataRequests: shop.dataRequests.map((r) => ({
+      id: r.id,
+      customerId: r.customerId,
+      customerPhone: r.customerPhone,
+      orderIds: r.orderIds,
+      createdAt: r.createdAt.toISOString().slice(0, 10),
+      deliveredAt: r.deliveredAt ? r.deliveredAt.toISOString().slice(0, 10) : null,
     })),
   };
 }
@@ -68,6 +85,36 @@ export async function action({ request }: ActionFunctionArgs) {
     });
 
     return { ok: true, link: `${DASHBOARD_URL}/?k=${token}` };
+  }
+
+  /* Assemble the export now rather than when the webhook arrived, so a
+     shopper who asked to be forgotten in between is not handed back by a
+     copy we made earlier. See app/lib/gdpr.server.ts. */
+  if (intent === "export-request") {
+    const id = String(form.get("requestId") ?? "");
+    const req = await prisma.dataRequest.findFirst({ where: { id, shopId: shop.id } });
+    if (!req) return { ok: false, error: "unknown_request" };
+
+    const data = await buildCustomerExport(prisma, shop.id, {
+      customer: { id: req.customerId ?? undefined, phone: req.customerPhone ?? undefined },
+      orders_requested: req.orderIds,
+    });
+
+    await prisma.dataRequest.update({
+      where: { id: req.id },
+      data: { deliveredAt: new Date() },
+    });
+
+    return { ok: true, requestId: req.id, export: JSON.stringify(data, null, 2) };
+  }
+
+  /* Deleting the row also deletes the phone number stored on it, which is the
+     only personal data this table holds. */
+  if (intent === "forget-request") {
+    await prisma.dataRequest.deleteMany({
+      where: { id: String(form.get("requestId") ?? ""), shopId: shop.id },
+    });
+    return { ok: true, forgot: true };
   }
 
   const int = (name: string, fallback: number) => {
@@ -116,7 +163,7 @@ export default function Settings() {
     );
   }
 
-  const { settings, carriers, domain, currency } = data;
+  const { settings, carriers, domain, currency, dataRequests } = data;
 
   return (
     <s-page heading="Réglages">
@@ -221,6 +268,52 @@ export default function Settings() {
         )}
       </s-section>
 
+      <s-section heading="Confidentialité (RGPD)">
+        <s-paragraph>
+          Quand un client demande à Shopify les données que nous détenons sur
+          lui, la demande arrive ici. Shopify n'offre aucun moyen d'y répondre
+          automatiquement : vous avez 30 jours pour lui transmettre le contenu
+          ci-dessous.
+        </s-paragraph>
+
+        {dataRequests.length === 0 ? (
+          <s-paragraph>Aucune demande en attente.</s-paragraph>
+        ) : (
+          <s-stack gap="base">
+            {dataRequests.map((r) => (
+              <s-stack key={r.id} gap="small-200">
+                <s-stack direction="inline" gap="small-200">
+                  <s-text type="strong">{r.customerPhone ?? r.customerId ?? "Client inconnu"}</s-text>
+                  <s-text color="subdued">reçue le {r.createdAt}</s-text>
+                  {r.deliveredAt ? (
+                    <s-badge tone="success">Transmise le {r.deliveredAt}</s-badge>
+                  ) : (
+                    <s-badge tone="warning">À transmettre</s-badge>
+                  )}
+                </s-stack>
+
+                <s-stack direction="inline" gap="small-200">
+                  <Form method="post">
+                    <input type="hidden" name="intent" value="export-request" />
+                    <input type="hidden" name="requestId" value={r.id} />
+                    <s-button type="submit">Afficher les données</s-button>
+                  </Form>
+                  <Form method="post">
+                    <input type="hidden" name="intent" value="forget-request" />
+                    <input type="hidden" name="requestId" value={r.id} />
+                    <s-button type="submit" variant="tertiary">Effacer la demande</s-button>
+                  </Form>
+                </s-stack>
+
+                {result && "requestId" in result && result.requestId === r.id ? (
+                  <pre style={code}>{(result as { export: string }).export}</pre>
+                ) : null}
+              </s-stack>
+            ))}
+          </s-stack>
+        )}
+      </s-section>
+
       <s-section heading="Liste d'appels">
         <s-paragraph>
           L'écran d'appel s'ouvre sur le téléphone, hors de l'admin Shopify.
@@ -273,6 +366,22 @@ const field: React.CSSProperties = { display: "grid", gap: ".25rem" };
 const lbl: React.CSSProperties = { fontSize: ".8125rem", color: "#616161" };
 /* 16px, for the same reason as everywhere else: anything smaller and iOS
    zooms in on focus and does not zoom back. */
+/* The export is JSON the merchant copies out. Wrapping rather than scrolling,
+   because an address that runs off the right edge is an address they will
+   forget to send. */
+const code: React.CSSProperties = {
+  margin: 0,
+  padding: ".75rem",
+  background: "#f6f6f7",
+  border: "1px solid #e3e3e3",
+  borderRadius: "8px",
+  fontSize: ".8125rem",
+  lineHeight: 1.5,
+  whiteSpace: "pre-wrap",
+  wordBreak: "break-word",
+  maxHeight: "24rem",
+  overflowY: "auto",
+};
 const input: React.CSSProperties = {
   minHeight: "36px",
   padding: "0 .5rem",

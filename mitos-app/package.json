@@ -18,7 +18,9 @@
     "demo:shop": "tsx prisma/demo-shop.ts",
     "setup": "prisma generate && prisma migrate deploy",
     "vercel-build": "prisma generate && prisma migrate deploy && react-router build",
-    "test:extension": "node tests/cod-extension.test.mjs"
+    "test:extension": "node tests/cod-extension.test.mjs",
+    "test:gdpr": "tsx tests/gdpr.test.ts",
+    "test": "npm run test:extension && npm run test:gdpr"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

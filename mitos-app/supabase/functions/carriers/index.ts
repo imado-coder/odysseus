@@ -1004,7 +1004,18 @@ async function deleteCarrier(shop: any, body: Record<string, any>) {
     `;
     return json({ ok: true, disabled: true, shipments: used.n });
   }
+  /* The row is only a pointer. Deleting it without deleting what it points at
+     leaves the courier's API token encrypted in vault.secrets with nothing
+     referencing it — unreachable by any screen, and still valid at the
+     carrier. Read the ref first, because after the DELETE there is no way
+     back to it. */
+  const [row] = await sql`
+    SELECT "credentialsRef" FROM "Carrier" WHERE id = ${id} AND "shopId" = ${shop.id}
+  `;
   await sql`DELETE FROM "Carrier" WHERE id = ${id} AND "shopId" = ${shop.id}`;
+  if (row?.credentialsRef) {
+    await sql`DELETE FROM vault.secrets WHERE id = ${row.credentialsRef}::uuid`;
+  }
   return json({ ok: true, deleted: true });
 }
 

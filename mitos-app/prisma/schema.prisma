@@ -54,6 +54,7 @@ model Shop {
   subscription Subscription?
   carriers     Carrier[]
   shipments    Shipment[]
+  dataRequests DataRequest[]
 
   @@index([domain])
 }
@@ -284,6 +285,13 @@ model Lead {
   idempotencyKey String?
   createdAt      DateTime @default(now())
 
+  /// Set when a `customers/redact` webhook erased the personal fields above.
+  /// The row survives because the money did: the merchant's revenue, the
+  /// wilaya breakdown and the carrier's parcel all reference it. Without this
+  /// column a redacted lead is indistinguishable from a broken one, and the
+  /// call list would show a blank customer that looks like a bug.
+  redactedAt DateTime?
+
   order CodOrder?
 
   @@unique([shopId, idempotencyKey])
@@ -323,6 +331,37 @@ model CodOrder {
   @@index([shopId, status])
   @@index([shopId, createdAt])
   @@index([shopifyOrderId])
+}
+
+/// A `customers/data_request` webhook that Shopify delivered.
+///
+/// Only the *request* is stored, never the answer. Shopify gives no API to
+/// reply to one — the app has to hand the data to the merchant, who hands it
+/// to the shopper — so the obvious design is to assemble the export here and
+/// keep it. That would copy the shopper's name, phone and address into a
+/// second table, and a later `customers/redact` would then have to find and
+/// erase the copy too. Instead the export is assembled on demand from the
+/// rows that already exist, which means a redaction that arrives first simply
+/// leaves nothing to export — which is the correct outcome, not a bug.
+model DataRequest {
+  id     String @id @default(cuid())
+  shopId String
+  shop   Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  /// Shopify's own id for the request, so a redelivery is not a second row.
+  shopifyRequestId String? @unique
+  customerId       String?
+  /// Kept because it is the only field that can find the shopper's leads —
+  /// Lead has no email column. Cleared when that customer is redacted.
+  customerPhone    String?
+  /// Numeric Shopify order ids the shopper asked about; empty means "all".
+  orderIds         String[]
+
+  createdAt   DateTime  @default(now())
+  /// Stamped when the merchant has downloaded the export.
+  deliveredAt DateTime?
+
+  @@index([shopId, createdAt])
 }
 
 model Subscription {
