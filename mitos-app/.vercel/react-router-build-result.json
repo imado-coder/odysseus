@@ -15,6 +15,7 @@
       "routes/api.cod": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/_index": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/auth.$": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/app.dashboard": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/app.settings": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/app.shipping": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/app._index": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
@@ -78,6 +79,15 @@
         "file": "app/routes/app.tsx",
         "path": "app",
         "config": {}
+      },
+      "routes/app.dashboard": {
+        "id": "routes/app.dashboard",
+        "parentId": "routes/app",
+        "file": "app/routes/app.dashboard.tsx",
+        "path": "dashboard",
+        "config": {
+          "runtime": "nodejs"
+        }
       },
       "routes/app.settings": {
         "id": "routes/app.settings",
@@ -172,6 +182,12 @@
         "file": "routes/app.tsx",
         "path": "app"
       },
+      "routes/app.dashboard": {
+        "id": "routes/app.dashboard",
+        "parentId": "routes/app",
+        "file": "routes/app.dashboard.tsx",
+        "path": "dashboard"
+      },
       "routes/app.settings": {
         "id": "routes/app.settings",
         "parentId": "routes/app",
@@ -242,6 +258,11 @@
             "file": "routes/app.tsx",
             "path": "app",
             "children": [
+              {
+                "id": "routes/app.dashboard",
+                "file": "routes/app.dashboard.tsx",
+                "path": "dashboard"
+              },
               {
                 "id": "routes/app.settings",
                 "file": "routes/app.settings.tsx",
