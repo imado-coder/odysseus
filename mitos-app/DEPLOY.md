@@ -159,17 +159,32 @@ client dans une seconde table qu'une suppression ultérieure devrait retrouver.
 Assemblée à la demande, une suppression arrivée entre-temps ne laisse simplement
 rien à exporter, ce qui est le bon résultat.
 
-### Une migration à appliquer
+### La migration est appliquée — et le registre a été redressé
 
 `prisma/migrations/20260818090000_gdpr/` ajoute `Lead.redactedAt` et la table
 `DataRequest`. Purement additive, donc sans danger pour les fonctions déjà en
-ligne.
+ligne. **Appliquée le 18/08/2026** : `Lead.redactedAt` existe, `DataRequest`
+existe avec ses trois index et sa clé étrangère vers `Shop` — vérifié par
+`information_schema`, pas supposé.
 
-> ⚠️ Les migrations précédentes ont été appliquées à la main par le connecteur
-> Supabase. Si elles ne sont pas inscrites dans `_prisma_migrations`,
-> `prisma migrate deploy` — que `vercel-build` lance — essaiera de les rejouer
-> et échouera. **Vérifier le contenu de `_prisma_migrations` avant le premier
-> déploiement**, et y insérer les migrations déjà appliquées si elles manquent.
+L'avertissement qui était ici n'était pas théorique. `_prisma_migrations` ne
+contenait que **quatre** lignes pour **six** migrations : celles appliquées à
+la main par le connecteur n'y avaient jamais été inscrites. Au premier build
+Vercel, `prisma migrate deploy` aurait rejoué `20260817160000_offer_enabled`
+sur une base où les colonnes existaient déjà, et le déploiement aurait échoué
+— précisément au moment où l'on croit enfin mettre l'application en ligne.
+
+Les deux lignes manquantes ont été insérées avec le vrai `sha256` de leur
+`migration.sql`. La méthode a été **prouvée d'abord** contre les quatre lignes
+déjà présentes, dont les sommes calculées localement correspondaient
+exactement. Une somme inventée aurait fait échouer `migrate deploy` sur un
+« checksum mismatch » : le même mur, simplement déplacé.
+
+Les six migrations sont désormais alignées, donc `prisma migrate deploy` ne
+fera rien — ce qui est exactement le but.
+
+Contrôle de non-régression après le changement de schéma : `cod` (santé et
+devis 58 wilayas), `admin` (liste et rates) et `carriers` répondent tous.
 
 ## L'installation d'une boutique
 
@@ -358,6 +373,21 @@ première fonctionne ici.
   Sans cela le transporteur ajoute son propre tarif et le client se voit
   réclamer plus que ce que la boutique a annoncé. C'est le détail le plus cher
   à rater.
+
+### La fuite de jeton à la suppression — fermée (v2)
+
+Supprimer un transporteur laissait son jeton d'API chiffré dans
+`vault.secrets`, sans rien qui le référence : introuvable depuis n'importe quel
+écran, et **toujours valide chez le transporteur**. `Carrier.credentialsRef`
+est le seul pointeur vers le secret, donc il faut le lire *avant* le DELETE —
+après, il n'y a plus de chemin de retour.
+
+Prouvé de bout en bout sur la fonction en ligne, pas seulement en lisant le
+code : un transporteur jetable a écrit un secret (vault 0 → 1), la suppression
+a emporté la ligne *et* le secret (vault 1 → 0), sans résidu.
+
+> `verify_jwt: false` conservé au redéploiement. L'activer couperait la vitrine
+> et la liste d'appels.
 
 ### Les identifiants
 

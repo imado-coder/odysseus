@@ -44,32 +44,59 @@ went out. Verified live, not assumed:
   `Offer … WHERE enabled = true`; deploying `cod` first would have broken the
   storefront quote.
 - **`cod` v4** — health, the 58-wilaya quote and the offers query all answer.
-- **`carriers` v1** — deployed for the **first time**. All five adapters are
-  listed, and a wrong key returns 404.
+- **`carriers` v2** — all five adapters listed, a wrong key returns 404, and
+  the Vault leak on delete is **closed**. Deleting a carrier used to leave its
+  API token encrypted in `vault.secrets` with nothing pointing at it —
+  unreachable by any screen and still valid at the courier, because
+  `Carrier.credentialsRef` is the only pointer. v2 reads the ref before the
+  DELETE and removes the secret after. Proved end to end against the live
+  function: a throwaway carrier wrote one secret, the delete took the row *and*
+  the secret, and the vault went back to 0.
 
 All three run `verify_jwt: false` and authenticate themselves (`x-mitos-key`,
 or the shop domain for `cod`). Keep that flag when redeploying — flipping it on
 would lock out the storefront and the call list.
 
-## ⚠️ Still pending — both need the user
+## ⚠️ Still pending — all three need the user
 
-1. **The dashboard is not deployed.** `mitos-dashboard/index.html` in the repo
-   is 42 kB; the copy live on Vercel is the old 26 kB one. So the live call
-   list still says **حفط** instead of حفظ *and* has no carriers screen at all —
-   which means the TREX carrier cannot be linked from the phone until this
-   ships. The connector refuses both targets:
-   `403 You don't have permission to create a Preview/Production Deployment for
-   this Vercel project: mitos-commandes`. It can see the project but cannot
-   deploy to it, and `list_projects` comes back empty — a token-scope problem,
-   not a code one. Needs deploy rights granted, or the file uploaded by hand.
-   Do **not** deploy it under a new project name: the merchant's bookmark is
+1. **The dashboard is still not deployed.** `mitos-dashboard/index.html` is
+   42,635 bytes; the copy on `mitos-commandes.vercel.app` is still the old
+   26,725-byte build. Confirmed live again on 2026-08-18: the Arabic save
+   button reads **حفط** where the repo has حفظ, and `tabCarriers` appears
+   **0** times in the served page against 4 in the repo — so the carriers
+   screen does not exist for the merchant, which is what blocks linking TREX
+   from a phone.
+
+   The Vercel connector refuses both targets, unchanged:
+   `403 You don't have permission to create a Preview Deployment for this
+   Vercel project: mitos-commandes`, and `list_projects` returns an empty
+   array for team `patrondzds-projects`. The token can resolve the project by
+   name but holds no deploy scope on it. This is a permissions problem, not a
+   code one. Grant that token deploy rights, or upload the file by hand.
+   Do **not** deploy under a second project name — the merchant's bookmark is
    `mitos-commandes.vercel.app`.
-2. **The TREX carrier does not exist yet.** Creating it requires the API token,
+
+2. **No Partners app exists.** `shopify.app.toml` still has no `client_id`
+   (the only mention is the comment saying `shopify app config link` fills it
+   in), and `application_url` is still `https://example.com`. Creating it
+   means signing in to partners.shopify.com — a human action.
+
+3. **The TREX carrier does not exist yet.** Creating it requires the API token,
    which is deliberately not in this repository — see below.
 
-Deploy is by MCP (`mcp__Supabase__deploy_edge_function`,
-`mcp__Vercel__deploy_to_vercel`). Verify migration state with
-`mcp__Supabase__execute_sql` rather than assuming.
+Deploy is by MCP (`deploy_edge_function`, `deploy_to_vercel`). Verify migration
+state with `execute_sql` rather than assuming.
+
+### The migration ledger is now consistent
+
+`_prisma_migrations` had **four** rows for **six** migrations — the earlier
+hand-applied ones were never recorded. `vercel-build` runs
+`prisma migrate deploy`, so the first Vercel build would have tried to replay
+`20260817160000_offer_enabled` against a database that already had the columns,
+and failed. Both missing rows were inserted with the real sha256 of their
+`migration.sql` (the method was proved first against the four rows already
+there, which matched byte for byte). All six now line up, so
+`prisma migrate deploy` is a no-op rather than a failure waiting for item 3.
 
 ## TREX Express
 
