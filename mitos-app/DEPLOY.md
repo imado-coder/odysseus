@@ -12,7 +12,8 @@ déployée chez Supabase, qui enregistre le lead puis crée la commande Shopify.
 | Liste d'appels | `https://mitos-commandes.vercel.app` — **ancienne version en ligne**, voir plus bas |
 | API de la liste | `https://gmgargxjomtaorqjvlyz.supabase.co/functions/v1/admin` |
 | API transporteurs | `https://gmgargxjomtaorqjvlyz.supabase.co/functions/v1/carriers` |
-| Code | `supabase/functions/{cod,admin,carriers}/index.ts`, `mitos-dashboard/index.html` |
+| API installation | `https://gmgargxjomtaorqjvlyz.supabase.co/functions/v1/install` — **inerte** sans `MITOS_INSTALL_KEY` |
+| Code | `supabase/functions/{cod,admin,carriers,install}/index.ts`, `mitos-dashboard/index.html` |
 | Réglage du thème | `cod_endpoint`, déjà renseigné dans `config/settings_data.json` |
 
 Paris parce que c'est la latence la plus basse depuis l'Algérie pour la base.
@@ -185,6 +186,73 @@ fera rien — ce qui est exactement le but.
 
 Contrôle de non-régression après le changement de schéma : `cod` (santé et
 devis 58 wilayas), `admin` (liste et rates) et `carriers` répondent tous.
+
+## Installer une deuxième boutique — `install`
+
+`supabase/functions/install/` — `POST /functions/v1/install`.
+
+Pourquoi une fonction Edge et pas une route : `api.admin.bootstrap.tsx` écrit
+déjà presque les mêmes lignes, mais elle vit dans l'application React Router,
+qui **n'est pas déployée**. Autrement dit, le seul chemin qui met une boutique
+en service n'était joignable de nulle part. Celle-ci tourne à côté de `cod`,
+`admin` et `carriers`, sur une infrastructure à qui l'on n'a aucun secret à
+confier : l'URL de la base est injectée par la plateforme.
+
+### La devise est demandée, jamais supposée
+
+La route bootstrap met `DZD` par défaut. C'est juste pour cette boutique-ci et
+faux pour la suivante, et la panne est **silencieuse** : la vitrine annonce et
+la commande se crée dans une devise que le marchand ne vend pas, et personne
+ne le voit avant qu'un client se fasse réclamer le mauvais montant. La devise
+est donc lue chez Shopify, et une installation dont le jeton ne sait pas
+répondre **ne va pas plus loin**.
+
+Cela fait aussi office de contrôle du jeton : un jeton qui ne peut pas lire
+`shop` ne pourra pas créer de commande non plus. Le découvrir maintenant, avec
+quelqu'un devant l'écran, coûte infiniment moins cher que de le découvrir sur
+la commande d'un client. **Rien n'est écrit avant que Shopify ait répondu.**
+
+### Ce qu'elle sème
+
+- les **58 wilayas** (données de référence, partagées par toutes les boutiques) ;
+- un transporteur **`MANUEL`** par défaut — il ne demande aucun identifiant,
+  donc le marchand a un transporteur qui marche dès le premier jour et relie un
+  vrai quand il a son jeton d'API ;
+- la **table de livraison** (58 lignes) aux tarifs par défaut de la boutique.
+
+Les deux derniers **seulement si la boutique n'en a aucun**. Relancer après une
+rotation de jeton remplace le jeton et ne touche à rien d'autre.
+
+### Inerte tant qu'elle n'est pas configurée
+
+Elle répond **404** — jamais 401 — sans `MITOS_INSTALL_KEY`, avec une clé
+fausse, et sur GET. C'est le seul endpoint capable de créer une boutique : un
+déploiement non configuré ne signale même pas qu'il existe. Vérifié en ligne
+sur les trois cas.
+
+> Pour l'activer : ajouter le secret `MITOS_INSTALL_KEY` dans Supabase
+> (Edge Functions → Secrets). Aucun redéploiement n'est nécessaire.
+
+```bash
+curl -X POST "$SUPABASE_URL/functions/v1/install" \
+  -H "x-mitos-key: $MITOS_INSTALL_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"shop":"la-boutique.myshopify.com","accessToken":"shpat_..."}'
+```
+
+La réponse renvoie la devise **lue** chez Shopify, ce qui a été semé, la clé de
+la liste d'appels, et les étapes suivantes dans l'ordre où le marchand les fait.
+
+### La copie des wilayas
+
+La fonction embarque sa propre copie des 58 wilayas : une fonction Edge ne peut
+pas importer `app/lib/`. Une copie, ça dérive — et ce dépôt s'est déjà fait
+mordre par deux implémentations de la même chose. `npm run test:install` échoue
+si cette copie s'écarte de `wilayas.server.ts`, ou si le `dz-locations.js` du
+thème cesse d'être d'accord sur les codes. **C'est la seule raison pour
+laquelle cette duplication est tolérée.**
+
+---
 
 ## L'installation d'une boutique
 

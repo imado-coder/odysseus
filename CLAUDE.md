@@ -26,6 +26,7 @@ live, what is not, and why each decision was made.
 | Order intake | `https://gmgargxjomtaorqjvlyz.supabase.co/functions/v1/cod` |
 | Call-list API | `…/functions/v1/admin` |
 | Carriers API | `…/functions/v1/carriers` |
+| Install API | `…/functions/v1/install` — **inert** until `MITOS_INSTALL_KEY` is set |
 | Call list (UI) | `https://mitos-commandes.vercel.app` — **serving an old build**, see below |
 
 Real orders have gone through end to end — Shopify `#1008`–`#1011`, created at
@@ -53,9 +54,10 @@ went out. Verified live, not assumed:
   function: a throwaway carrier wrote one secret, the delete took the row *and*
   the secret, and the vault went back to 0.
 
-All three run `verify_jwt: false` and authenticate themselves (`x-mitos-key`,
-or the shop domain for `cod`). Keep that flag when redeploying — flipping it on
-would lock out the storefront and the call list.
+All four run `verify_jwt: false` and authenticate themselves (`x-mitos-key`
+for `admin`/`carriers`, `MITOS_INSTALL_KEY` for `install`, the shop domain for
+`cod`). Keep that flag when redeploying — flipping it on would lock out the
+storefront and the call list.
 
 ## ⚠️ Still pending — all three need the user
 
@@ -214,7 +216,7 @@ What an App Store submission would still need today, from the audit:
 ## Order of work
 
 Done: carriers · nav routes (`/app/shipping`, `/app/settings`) · Offers ·
-Dashboard · **Theme App Extension** · **GDPR webhooks**.
+Dashboard · **Theme App Extension** · **GDPR webhooks** · **`install`**.
 
 1. ~~**Theme App Extension**~~ — **built**, in `mitos-app/extensions/mitos-cod/`.
    An App Block a merchant adds from the theme editor. The flow is the port,
@@ -256,9 +258,31 @@ Dashboard · **Theme App Extension** · **GDPR webhooks**.
 3. **Partners app + deploy `mitos-app`** — this is what unlocks OAuth. Needs
    the env vars set once in Vercel (they cannot be committed, and a previous
    attempt to put them in `vercel.json` was correctly refused).
-4. **`install` edge function** — the install path for a second store. Read the
-   shop's currency from Shopify; do **not** assume DZD. Seed the 58 wilayas and
-   a default carrier, then hand the merchant the setup steps.
+4. ~~**`install` edge function**~~ — **built and deployed**, in
+   `mitos-app/supabase/functions/install/`. It runs beside `cod`/`admin`/
+   `carriers` precisely because the equivalent route
+   (`api.admin.bootstrap.tsx`) lives in the undeployed app, so the one path
+   that onboards a store was unreachable from anywhere.
+
+   **The currency is read from Shopify, never defaulted** — the bootstrap
+   route defaults it to `DZD`, which is right for this shop and wrong for the
+   next one, and the failure is silent until a customer is asked for the wrong
+   amount. Asking Shopify doubles as the token check: a token that cannot read
+   `shop` cannot create an order either, and nothing is written until it
+   answers. It seeds the 58 wilayas, a `MANUAL` default carrier (no
+   credentials, so every merchant has a working one on day one), and the
+   58-row shipping table from the shop's own defaults — the last two only when
+   the shop has none, so a re-run after a token rotation touches nothing else.
+
+   It is **inert until `MITOS_INSTALL_KEY` is set** as a Supabase secret, and
+   answers 404 — never 401 — to a missing or wrong key, because this is the
+   one endpoint that can create a store. Verified live: 404 with no key, with
+   a wrong key, and on GET.
+
+   It carries its own copy of the 58 wilayas (an edge function cannot import
+   `app/lib/`). `npm run test:install` fails if that copy ever drifts from
+   `wilayas.server.ts`, or if the theme's `dz-locations.js` stops agreeing on
+   the codes — that test is the only reason the duplication is allowed.
 5. **Billing (`appSubscriptionCreate`)** — nothing charges anyone today. The
    `Subscription` model exists and not one line writes it. Shopify requires app
    payments to run through its Billing API, so there is no monthly plan without
