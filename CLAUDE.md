@@ -298,10 +298,49 @@ Dashboard · **Theme App Extension** · **GDPR webhooks** · **`install`**.
    install but the second: once a merchant has set their colours and rewritten
    their text, a new version cannot overwrite `settings_data.json` and the JSON
    templates. It goes in beside the old one and the merchant switches.
-8. **Prove the theme against a catalogue that is not ours** — a product with no
-   image, one with no options, an empty collection, five hundred products. It
-   has 79 merchant settings and no MITOS branding baked in, so it is close;
-   what it has never seen is someone else's data.
+8. ~~**Prove the theme against a catalogue that is not ours**~~ — **audited**,
+   four real defects found and fixed. Shopify's own `theme-check` now reports
+   **zero errors** (`npx @shopify/theme-check-node`), and the four cases named
+   here were each walked by hand, because a linter does not know what data a
+   shop has.
+
+   **A product with no image showed nothing on a phone.** The placeholder lives
+   in the desktop stage, and `.gallery__stage` is `display:none` below 990px;
+   the phone slider was wrapped in `if media_count > 0`. The same guard also
+   held the floating back/search/cart buttons — the whole of that page's
+   navigation on a phone — so an imageless product lost its way out as well as
+   its photo. Slider and controls now always render; a missing photo gets the
+   placeholder, styled to fill the slide (it is an `<svg>`, so the `img` rule
+   never reached it).
+
+   **An empty collection served the whole catalogue.** The `collections.all`
+   fallback exists so an unconfigured *home page* is not blank, but it was also
+   reaching the collection page: a merchant with an empty "Manteaux d'hiver"
+   would have shown every product they sell under that heading, pill still
+   reading "Manteaux d'hiver". The fallback is now confined to the teaser path,
+   and a real empty collection says so and offers a way to all products.
+
+   **Five hundred products meant fifty.** `collection.products` stops at 50
+   without a `paginate` tag and the theme had none anywhere — 450 products with
+   no link, no page two, nothing. The load-more button had been designed and
+   styled (`catalog-system.css`, part 9) and never built. The collection page
+   now paginates and renders it as a plain `<a>` to the next page: it works
+   before JavaScript arrives, and page three is a real URL a search engine can
+   land on.
+
+   **The add-to-cart form did not parse.** `{% form 'product', product, id:
+   'AddToCart-' | append: section.id %}` — a filter cannot be applied to a tag
+   argument, so Liquid failed the whole tag. Unnoticed because orders come
+   through the COD form, not the cart. The id is assigned first now.
+
+   Also fixed: a `"//"` pseudo-comment inside the `@app` block's section schema.
+   Section schemas are strict JSON, Shopify rejects the property, and a rejected
+   schema is a section the theme editor will not load — the `@app` block would
+   never have appeared, and item 6 would have been debugged in the extension.
+
+   Not done, and deliberate: `product.has_only_default_variant` is already
+   guarded at all three call sites, so a product with no options was correct
+   before this pass.
 9. **Deploy `mitos-dashboard/index.html`** (blocked: Vercel returns 403 on
    `mitos-commandes` — the token can read the project but not deploy to it).
    The repo copy carries the حفظ fix and the carriers tab; neither is live.

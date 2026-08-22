@@ -15,6 +15,9 @@
     "header": {
       "cart_count": "السلة، {{ count }} منتج",
       "all_categories": "كل الفئات"
+    },
+    "cart": {
+      "title": "السلة"
     }
   },
   "products": {
@@ -29,7 +32,10 @@
       }
     },
     "facets": {
-      "product_count_simple": "{{ count }} منتج"
+      "product_count_simple": "{{ count }} منتج",
+      "load_more": "عرض المزيد من المنتجات",
+      "empty_collection": "لا توجد منتجات في هذه الفئة حالياً.",
+      "browse_all": "تصفّح كل المنتجات"
     }
   },
   "onboarding": {

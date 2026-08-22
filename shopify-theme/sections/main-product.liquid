@@ -254,7 +254,13 @@
                 </div>
 
               {%- when 'cta' -%}
-                {%- form 'product', product, id: 'AddToCart-' | append: section.id -%}
+                {%- liquid
+                  # A filter cannot be applied to a tag argument — Liquid fails
+                  # to parse the whole `form` tag, and the add-to-cart form
+                  # silently does not render. Build the id first.
+                  assign cta_form_id = 'AddToCart-' | append: section.id
+                -%}
+                {%- form 'product', product, id: cta_form_id -%}
                   <input type="hidden" name="id" value="{{ v.id }}">
                   <button class="bb__cta" type="submit" name="add"
                           {% unless v.available %}disabled{% endunless %}
@@ -1136,6 +1142,20 @@
   {%- endfor -%}
 {%- endif -%}
 
+{%- comment -%}
+  The schema below opens this section to `@app` blocks.
+
+  That is what lets MITOS's COD form be dropped into the product page from the
+  theme editor, and it is the road to the form being one implementation carried
+  by the app instead of two — the theme's own copy and the extension's — which
+  would drift apart.
+
+  This note lives out here on purpose: a section schema is strict JSON, and it
+  has no comments. It was written as a `"//"` key, which Shopify rejects as a
+  property that is not allowed — and a schema Shopify rejects is a section the
+  theme editor refuses to load, so the `@app` block would never have appeared
+  at all.
+{%- endcomment -%}
 {% schema %}
 {
   "name": "Page produit",
@@ -2929,7 +2949,6 @@
       ]
     },
     {
-      "//": "Les blocs d'application. Le formulaire COD de MITOS est un App Block; l'ouvrir ici est ce qui permet de le poser dans la page produit depuis l'éditeur, et c'est par là que le formulaire deviendra unique — une seule implémentation, portée par l'application, au lieu de la copie du thème et de celle de l'extension qui divergeraient.",
       "type": "@app"
     }
   ],

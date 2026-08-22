@@ -7,11 +7,18 @@
   theme editor, where the merchant needs to see the layout while choosing a
   collection. With nothing to show and nobody editing, the section renders
   nothing at all rather than an empty heading.
+
+  Two jobs, and they are not the same job. On the home page this is a teaser
+  row: a handful of products and a link to the rest. On a collection page it
+  is the catalogue itself and has to be able to show all of it — so that path
+  paginates and the teaser path does not.
 {%- endcomment -%}
 {%- liquid
   assign col = collections[section.settings.collection]
+  assign on_collection_page = false
   if section.settings.source == 'current' and collection
     assign col = collection
+    assign on_collection_page = true
   endif
 
   # Nothing chosen is the state every shop starts in, and it was rendering an
@@ -19,9 +26,17 @@
   # nothing to show and printed nothing at all. Every Shopify store has the
   # "all" collection, so an unconfigured grid falls back to it and the shop
   # has products on its front page from the first minute.
-  if col == blank or col.products.size == 0
-    assign col = collections.all
-  endif
+  #
+  # That fallback must not reach a collection page. A merchant with an empty
+  # "Manteaux d'hiver" would have had the whole catalogue served under that
+  # heading, with the category pill still reading "Manteaux d'hiver" — the
+  # shopper told these are winter coats when they are not. On a real
+  # collection, empty is an answer, and it is given below.
+  unless on_collection_page
+    if col == blank or col.products.size == 0
+      assign col = collections.all
+    endif
+  endunless
 
   assign shown = col.products.size
   if shown > section.settings.count
@@ -29,7 +44,57 @@
   endif
 -%}
 
-{%- if shown > 0 -%}
+{%- if on_collection_page -%}
+  {%- comment -%}
+    The catalogue page. `collection.products` stops at 50 without a paginate
+    tag, so a merchant with five hundred products had four hundred and fifty
+    of them unreachable — no link, no page two, nothing. The load-more button
+    was designed and styled (catalog-system.css, part 9) and never built.
+
+    It is a plain link to the next page rather than a script: it works before
+    JavaScript arrives, it works if JavaScript never arrives, and a shopper
+    landing on page three from a search engine still gets a real page.
+  {%- endcomment -%}
+  {%- paginate col.products by section.settings.count -%}
+    <section class="section" aria-labelledby="Grid-{{ section.id }}">
+      {%- if section.settings.title != blank -%}
+        <div class="section__head">
+          <h2 class="section__title" id="Grid-{{ section.id }}">{{ section.settings.title }}</h2>
+        </div>
+      {%- else -%}
+        <h2 class="visually-hidden" id="Grid-{{ section.id }}">{{ 'products.facets.product_count_simple' | t: count: col.products_count }}</h2>
+      {%- endif -%}
+
+      {%- if col.products_count > 0 -%}
+        <div class="cgrid" data-reveal-stagger>
+          {%- for product in col.products -%}
+            {% render 'product-card', card: product, index: forloop.index0 %}
+          {%- endfor -%}
+        </div>
+
+        {%- if paginate.next -%}
+          <div class="loadmore">
+            <a class="loadmore__btn" href="{{ paginate.next.url }}" rel="next">
+              {{ 'products.facets.load_more' | t }}
+            </a>
+          </div>
+        {%- endif -%}
+      {%- else -%}
+        {%- comment -%}
+          An empty collection is a fact, not a failure. Say so, and give the
+          shopper the way to something that does have products.
+        {%- endcomment -%}
+        <p class="section__empty-note">{{ 'products.facets.empty_collection' | t }}</p>
+        <div class="loadmore">
+          <a class="loadmore__btn" href="{{ routes.all_products_collection_url }}">
+            {{ 'products.facets.browse_all' | t }}
+          </a>
+        </div>
+      {%- endif -%}
+    </section>
+  {%- endpaginate -%}
+
+{%- elsif shown > 0 -%}
   <section class="section" aria-labelledby="Grid-{{ section.id }}">
     {%- if section.settings.title != blank -%}
       <div class="section__head">

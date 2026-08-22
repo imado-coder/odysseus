@@ -45,10 +45,23 @@
     {%- endif -%}
   </div>
 
-  {%- comment -%} Phone slider. {%- endcomment -%}
-  {%- if media_count > 0 -%}
-    <div class="gallery__slider" data-gallery-slider
-         role="group" aria-label="{{ 'products.product.media.gallery_viewer' | t }}">
+  {%- comment -%}
+    Phone slider.
+
+    Rendered even when the product has no media at all. Below 990px the desktop
+    stage — which carries the placeholder — is display:none, so guarding this
+    whole block on `media_count > 0` left a product with no photo showing
+    nothing whatever on a phone. Our own catalogue always has photos; someone
+    else's does not.
+
+    The floating controls below are outside that question entirely: they are
+    the back, search and cart buttons, which is the whole of this page's
+    navigation on a phone. They used to sit inside the same guard, so an
+    imageless product lost its navigation with its photo.
+  {%- endcomment -%}
+  <div class="gallery__slider" data-gallery-slider
+       role="group" aria-label="{{ 'products.product.media.gallery_viewer' | t }}">
+    {%- if media_count > 0 -%}
       {%- for media in product.media -%}
         <div class="gallery__slide">
           <img src="{{ media | image_url: width: 800 }}"
@@ -62,36 +75,40 @@
                decoding="async">
         </div>
       {%- endfor -%}
-    </div>
-
-    {%- comment -%}
-      Controls float over the photo instead of sitting in a bar above it, so
-      the image starts at the top of the screen. Back first, because on a
-      phone this page is usually reached from a list the shopper wants back.
-    {%- endcomment -%}
-    <div class="gallery__float">
-      <div class="gallery__float-group">
-        <a class="gfab gfab--back" href="{{ collection.url | default: routes.all_products_collection_url }}"
-           aria-label="{{ 'general.breadcrumbs.home' | t }}">
-          {% render 'icon', name: 'chevron' %}
-        </a>
+    {%- else -%}
+      <div class="gallery__slide gallery__slide--empty">
+        {{ 'product-1' | placeholder_svg_tag }}
       </div>
-      <div class="gallery__float-group">
-        <a class="gfab" href="{{ routes.search_url }}"
-           aria-label="{{ 'general.search.search' | t }}">
-          {% render 'icon', name: 'search' %}
-        </a>
-        <a class="gfab" href="{{ routes.cart_url }}" data-cart-open
-           aria-label="{{ 'sections.header.cart_count' | t: count: cart.item_count }}">
-          {% render 'icon', name: 'cart' %}
-        </a>
-      </div>
-    </div>
-
-    {%- if media_count > 1 -%}
-      <span class="gallery__count" aria-hidden="true">
-        <b data-gallery-index>1</b>/{{ media_count }}
-      </span>
     {%- endif -%}
+  </div>
+
+  {%- comment -%}
+    Controls float over the photo instead of sitting in a bar above it, so
+    the image starts at the top of the screen. Back first, because on a
+    phone this page is usually reached from a list the shopper wants back.
+  {%- endcomment -%}
+  <div class="gallery__float">
+    <div class="gallery__float-group">
+      <a class="gfab gfab--back" href="{{ collection.url | default: routes.all_products_collection_url }}"
+         aria-label="{{ 'general.breadcrumbs.home' | t }}">
+        {% render 'icon', name: 'chevron' %}
+      </a>
+    </div>
+    <div class="gallery__float-group">
+      <a class="gfab" href="{{ routes.search_url }}"
+         aria-label="{{ 'general.search.search' | t }}">
+        {% render 'icon', name: 'search' %}
+      </a>
+      <a class="gfab" href="{{ routes.cart_url }}" data-cart-open
+         aria-label="{{ 'sections.header.cart_count' | t: count: cart.item_count }}">
+        {% render 'icon', name: 'cart' %}
+      </a>
+    </div>
+  </div>
+
+  {%- if media_count > 1 -%}
+    <span class="gallery__count" aria-hidden="true">
+      <b data-gallery-index>1</b>/{{ media_count }}
+    </span>
   {%- endif -%}
 </div>

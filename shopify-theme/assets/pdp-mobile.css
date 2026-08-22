@@ -61,6 +61,17 @@
     object-fit: cover;
   }
 
+  /* A product with no photo gets Shopify's placeholder, which is an <svg> and
+     not an <img> — the rule above does not reach it, and without this it
+     renders at its intrinsic size in the corner of an otherwise empty slide.
+     Our own catalogue always has photos; a merchant's does not always. */
+  .gallery__slide--empty svg {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    fill: var(--c-border, #e4e6e8);
+  }
+
   /* Dots sit above the counter for a quick sense of position. */
   .gallery__dots {
     position: absolute;
