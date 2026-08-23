@@ -347,11 +347,37 @@ Dashboard · **Theme App Extension** · **GDPR webhooks** · **`install`**.
    Then link TREX (`ECOTRACK`, `https://trexexpress.ecotrack.dz`) and press
    Test.
 
-Then, from the original brief and still outstanding: **improve** the existing
-Orders page (tabs, search, filters, bulk actions, export, desktop table, detail
-view) — improve, not replace, on the same canonical order data. Then Products,
-preferring Shopify as the source of truth over copying the catalogue.
-Operations last, and only once TREX's warehousing capabilities are confirmed.
+~~Then, from the original brief: **improve** the existing Orders page.~~
+**Done** — tabs, search, filters, bulk actions, export, and a detail view, on
+the same `CodOrder`-joined-to-`Lead` data read the same way. The table, the two
+quick actions and the call-first ordering are untouched; what is new is being
+able to *find* the row to call.
+
+Every one of those is a URL — the tabs are links, the filters a GET form, the
+page a query parameter, the export the same query with `export=csv`. So the
+back button works, a filtered list can be sent to someone, and nothing needs
+JavaScript except selecting rows for a bulk action, which cannot be anything
+else. Filtering and paging happen in the database, so ten thousand orders read
+the same as ten.
+
+The detail view is a route (`/app/orders/:id`), not a modal: linkable, and it
+does not depend on driving a web component imperatively from React. It shows
+the items with their quantity breaks, the amounts, the timeline, and the
+shipment — and states a redaction in words, because a blank name is otherwise
+indistinguishable from a broken row.
+
+`buildWhere` and the CSV live in `app/lib/orders.server.ts` so
+`npm run test:orders` can drive them: **57 assertions**, of which the ones that
+matter are that every filter combination still carries `shopId`, and that a
+formula typed into the order form is defused before it reaches the merchant's
+Excel. The status words are in `app/lib/orders.ts` — **not** the `.server`
+file, because a component that imports a `.server` module fails the build;
+React Router only strips server code out of `loader` and `action`. That one is
+invisible to `tsc` and only `npm run build` catches it.
+
+Still outstanding from the brief: **Products**, preferring Shopify as the
+source of truth over copying the catalogue. Operations last, and only once
+TREX's warehousing capabilities are confirmed.
 
 Do not scaffold a new app, redesign the COD/call-centre flow, or create a
 second order system.

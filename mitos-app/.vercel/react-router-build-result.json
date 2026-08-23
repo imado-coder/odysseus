@@ -15,6 +15,7 @@
       "routes/api.cod": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/_index": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/auth.$": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/app.orders.$id": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/app.dashboard": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/app.settings": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/app.shipping": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
@@ -79,6 +80,15 @@
         "file": "app/routes/app.tsx",
         "path": "app",
         "config": {}
+      },
+      "routes/app.orders.$id": {
+        "id": "routes/app.orders.$id",
+        "parentId": "routes/app",
+        "file": "app/routes/app.orders.$id.tsx",
+        "path": "orders/:id",
+        "config": {
+          "runtime": "nodejs"
+        }
       },
       "routes/app.dashboard": {
         "id": "routes/app.dashboard",
@@ -182,6 +192,12 @@
         "file": "routes/app.tsx",
         "path": "app"
       },
+      "routes/app.orders.$id": {
+        "id": "routes/app.orders.$id",
+        "parentId": "routes/app",
+        "file": "routes/app.orders.$id.tsx",
+        "path": "orders/:id"
+      },
       "routes/app.dashboard": {
         "id": "routes/app.dashboard",
         "parentId": "routes/app",
@@ -258,6 +274,11 @@
             "file": "routes/app.tsx",
             "path": "app",
             "children": [
+              {
+                "id": "routes/app.orders.$id",
+                "file": "routes/app.orders.$id.tsx",
+                "path": "orders/:id"
+              },
               {
                 "id": "routes/app.dashboard",
                 "file": "routes/app.dashboard.tsx",
