@@ -375,9 +375,37 @@ file, because a component that imports a `.server` module fails the build;
 React Router only strips server code out of `loader` and `action`. That one is
 invisible to `tsc` and only `npm run build` catches it.
 
-Still outstanding from the brief: **Products**, preferring Shopify as the
-source of truth over copying the catalogue. Operations last, and only once
-TREX's warehousing capabilities are confirmed.
+~~Still outstanding from the brief: **Products**.~~ **Done** —
+`/app/products`. The catalogue is fetched live from the Admin API on every
+load and **nothing about a product is stored**: no title, no price, no stock.
+There is no `Product` model in the schema and there should not be — a copy is
+wrong within a day of the merchant editing anything, and then there are two
+answers to "what does this cost". The only product data this app keeps is the
+id on an `Offer` row. The paging is Shopify's cursor for the same reason: the
+list is theirs.
+
+Repeating Shopify's product list would be pointless, so the screen earns its
+place with the column that exists nowhere else — **what each product did after
+the call**. For a COD shop that is the whole business: a product with fifty
+orders and forty refused at the door loses money on every one, because the
+merchant pays the return leg, while Shopify's own reports call it a bestseller
+— to Shopify the order was created and that is all it knows.
+
+Two rules make that number honest, and both are tested. Only *decided* orders
+count, so a product listed this morning is not branded a failure for having
+unanswered calls; and no rate is shown below three decided orders, because one
+refusal out of one is 100 % and means nothing. `npm run test:products` —
+**22 assertions**, including that more losses can never read as a better
+product.
+
+**The image field was removed on purpose.** `featuredMedia { preview { image } }`
+looks free; validated against Shopify's schema it turns the required scopes
+from `read_products` alone into `read_products, read_files, read_images,
+read_themes, read_draft_orders, read_quick_sale`. Six extra scopes for a
+thumbnail on a table read for its numbers — and every extra scope is something
+App Store review asks about. Scopes stay at three.
+
+Operations last, and only once TREX's warehousing capabilities are confirmed.
 
 Do not scaffold a new app, redesign the COD/call-centre flow, or create a
 second order system.

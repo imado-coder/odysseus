@@ -20,9 +20,10 @@
     "vercel-build": "prisma generate && prisma migrate deploy && react-router build",
     "test:extension": "node tests/cod-extension.test.mjs",
     "test:gdpr": "tsx tests/gdpr.test.ts",
-    "test": "npm run test:extension && npm run test:gdpr && npm run test:install && npm run test:orders",
+    "test": "npm run test:extension && npm run test:gdpr && npm run test:install && npm run test:orders && npm run test:products",
     "test:install": "node tests/install.test.mjs",
-    "test:orders": "tsx tests/orders.test.ts"
+    "test:orders": "tsx tests/orders.test.ts",
+    "test:products": "tsx tests/products.test.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

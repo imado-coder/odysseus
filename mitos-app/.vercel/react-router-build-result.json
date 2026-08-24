@@ -17,6 +17,7 @@
       "routes/auth.$": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/app.orders.$id": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/app.dashboard": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/app.products": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/app.settings": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/app.shipping": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/app._index": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
@@ -95,6 +96,15 @@
         "parentId": "routes/app",
         "file": "app/routes/app.dashboard.tsx",
         "path": "dashboard",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/app.products": {
+        "id": "routes/app.products",
+        "parentId": "routes/app",
+        "file": "app/routes/app.products.tsx",
+        "path": "products",
         "config": {
           "runtime": "nodejs"
         }
@@ -204,6 +214,12 @@
         "file": "routes/app.dashboard.tsx",
         "path": "dashboard"
       },
+      "routes/app.products": {
+        "id": "routes/app.products",
+        "parentId": "routes/app",
+        "file": "routes/app.products.tsx",
+        "path": "products"
+      },
       "routes/app.settings": {
         "id": "routes/app.settings",
         "parentId": "routes/app",
@@ -283,6 +299,11 @@
                 "id": "routes/app.dashboard",
                 "file": "routes/app.dashboard.tsx",
                 "path": "dashboard"
+              },
+              {
+                "id": "routes/app.products",
+                "file": "routes/app.products.tsx",
+                "path": "products"
               },
               {
                 "id": "routes/app.settings",

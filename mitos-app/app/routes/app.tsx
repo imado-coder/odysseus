@@ -28,6 +28,7 @@ export default function App() {
           Commandes
         </a>
         <a href="/app/dashboard">Tableau de bord</a>
+        <a href="/app/products">Produits</a>
         <a href="/app/offers">Offres</a>
         <a href="/app/shipping">Frais de livraison</a>
         <a href="/app/settings">Réglages</a>
