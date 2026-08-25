@@ -59,6 +59,82 @@ for `admin`/`carriers`, `MITOS_INSTALL_KEY` for `install`, the shop domain for
 `cod`). Keep that flag when redeploying — flipping it on would lock out the
 storefront and the call list.
 
+## The call list is the whole application now
+
+`mitos-dashboard/index.html` is one static file and it is the **only screen a
+merchant actually has**, because the embedded app needs the Partners link.
+So the things a merchant needs daily are in it, not waiting behind that.
+
+Four screens: **Commandes** (call, confirm, hand over) · **Chiffres** ·
+**Livraison** (the 58 wilayas) · **Transporteurs**.
+
+### Auto-push: `Carrier.autoPush` used to be a lie
+
+The column had been stored, saved and rendered as a switch since carriers were
+built, and **nothing read it**. A merchant who turned it on got a checkbox
+that stayed on and a parcel that was never created.
+
+`admin` v5 reads it: confirming an order now hands it to the courier. Three
+decisions hold it together.
+
+- **The adapters are not copied.** `admin` calls `carriers/push` over HTTP with
+  the merchant's own `dashboardToken` — the key this request already arrived
+  with and that `admin` has already proved. No new secret, and the 1,200 lines
+  of courier adapters stay in one place.
+- **Confirming never depends on the courier.** The order is CONFIRMED before
+  the push is attempted and stays confirmed whatever happens. A failure leaves
+  the `Shipment` in FAILED with the courier's own words on it, which is what
+  the manual retry button acts on. Ten-second timeout, because a courier that
+  never answers must not hold the merchant's screen.
+- **MANUAL is excluded, in both halves.** Its adapter rejects every push by
+  definition — that carrier is for a merchant who writes the tracking number in
+  themselves. Ticking "automatique" on it would have turned every single
+  confirmation into a FAILED shipment. The screen hides the switch; the SQL
+  refuses it anyway.
+
+The call list also **shows the parcel** now (`admin` v5 LEFT JOINs `Shipment`).
+A confirmed order whose push failed was previously indistinguishable from a
+healthy one, and it is the most expensive row on the screen — a customer is
+waiting for a parcel nobody created. It is red, with the courier's reason.
+"Envoyer au transporteur" disappears once the parcel is actually there.
+
+### `/stats` — what a COD shop earned, not what Shopify counted
+
+Shopify calls an order revenue the moment it is created. Half of these will not
+survive the phone call or the doorstep, and the merchant pays the return leg on
+every refusal. So every number on **Chiffres** is money or a *decided* order:
+encaissé is delivered, perdues is cancelled + returned, and anything still
+waiting for the call is counted apart and never folded into a rate — a shop
+that opened this morning must not read as a catastrophe.
+
+Six queries in one `Promise.all` (a phone on mobile data, and six sequential
+round trips to Paris is a screen nobody waits for). `days` is clamped to
+1–365. A rate with nothing to divide by is `null`, not `0` — **0 % is a claim**.
+
+Goods and delivery are shown apart: the delivery fee is collected from the
+customer and handed straight to the courier, so folding it into revenue
+overstates what the merchant earned.
+
+No chart library. This file has no network dependency and a CDN script is a
+blank screen the day the CDN is blocked; the bars are `div`s with a width. The
+daily chart is forced `direction: ltr` in both languages — **time does not
+mirror**.
+
+### Tested in a real browser
+
+`npm run test:dashboard` — **23 assertions**, Chromium at 320/360/390/430 px in
+French and Arabic. The file has no modules and no exports, so it is tested the
+way it is used. Fixtures in `mitos-app/tests/dashboard/`: `live-*.json` were
+captured from the deployed function, so a field the server renames breaks the
+test; `rich-*.json` carries the history the dev store has not got yet — a
+pushed parcel, a refused one, a queued one, a product losing more than it
+delivers.
+
+It **skips rather than fails** without a browser, so the other 238 assertions
+still run. That suite is what caught the tab bar: four equal columns are 85 px
+on a 390 px phone and "Transporteurs" needs 97, so two of four labels were
+clipped at *every* width. Tabs are sized to their own text and wrap now.
+
 ## ⚠️ Still pending — all three need the user
 
 1. **The dashboard is still not deployed.** `mitos-dashboard/index.html` is

@@ -1,0 +1,141 @@
+{
+ "ok": true,
+ "shop": {
+  "domain": "test-test-1234123412341296.myshopify.com",
+  "currency": "USD"
+ },
+ "counts": {
+  "CANCELLED": 1,
+  "CONFIRMED": 3
+ },
+ "orders": [
+  {
+   "id": "c0f198b2-9435-4408-91f0-e89dd6f93b05",
+   "status": "CANCELLED",
+   "shopifyName": "#1011",
+   "createFailed": false,
+   "createError": null,
+   "createdAt": "2026-08-17T17:18:38.713Z",
+   "firstName": "Amina",
+   "lastName": "Test",
+   "phone": "0500000000",
+   "commune": "Hydra",
+   "wilayaName": "Alger",
+   "delivery": "HOME",
+   "total": 1450,
+   "pricesVerified": true,
+   "address": "Adresse de test 1",
+   "items": [
+    {
+     "qty": 1,
+     "price": 950,
+     "title": "The Inventory Not Tracked Snowboard",
+     "option": "Default Title",
+     "productId": "gid://shopify/Product/9131771756797",
+     "variantId": "gid://shopify/ProductVariant/47186520015101"
+    }
+   ],
+   "shipState": null,
+   "trackingNumber": null,
+   "shipError": null,
+   "shipStatus": null,
+   "carrierName": null
+  },
+  {
+   "id": "7db8f5c2-cf37-4821-a231-4a88cdabdb08",
+   "status": "CONFIRMED",
+   "shopifyName": "#1010",
+   "createFailed": false,
+   "createError": null,
+   "createdAt": "2026-08-17T03:23:05.030Z",
+   "firstName": "Karim",
+   "lastName": "Essai",
+   "phone": "0500000001",
+   "commune": "El Eulma",
+   "wilayaName": "Sétif",
+   "delivery": "HOME",
+   "total": 3450,
+   "pricesVerified": true,
+   "address": "Adresse de test 2",
+   "items": [
+    {
+     "qty": 3,
+     "price": 950,
+     "title": "The Inventory Not Tracked Snowboard",
+     "option": "Default Title",
+     "productId": "gid://shopify/Product/9131771756797",
+     "variantId": "gid://shopify/ProductVariant/47186520015101"
+    }
+   ],
+   "shipState": null,
+   "trackingNumber": null,
+   "shipError": null,
+   "shipStatus": null,
+   "carrierName": null
+  },
+  {
+   "id": "dd0435fa-91c8-47b4-bf73-e21ba42bf43f",
+   "status": "CONFIRMED",
+   "shopifyName": "#1009",
+   "createFailed": false,
+   "createError": null,
+   "createdAt": "2026-08-17T03:20:53.427Z",
+   "firstName": "Yasmine",
+   "lastName": "Demo",
+   "phone": "0500000002",
+   "commune": "Es Senia",
+   "wilayaName": "Oran",
+   "delivery": "DESK",
+   "total": 2250,
+   "pricesVerified": true,
+   "address": "Adresse de test 3",
+   "items": [
+    {
+     "qty": 2,
+     "price": 950,
+     "title": "The Inventory Not Tracked Snowboard",
+     "option": "Default Title",
+     "productId": "gid://shopify/Product/9131771756797",
+     "variantId": "gid://shopify/ProductVariant/47186520015101"
+    }
+   ],
+   "shipState": null,
+   "trackingNumber": null,
+   "shipError": null,
+   "shipStatus": null,
+   "carrierName": null
+  },
+  {
+   "id": "a463660b-21ad-448a-bf31-06fe3372e912",
+   "status": "CONFIRMED",
+   "shopifyName": "#1008",
+   "createFailed": false,
+   "createError": null,
+   "createdAt": "2026-08-17T03:17:10.975Z",
+   "firstName": "Sofiane",
+   "lastName": "Exemple",
+   "phone": "0500000003",
+   "commune": "Bab Ezzouar",
+   "wilayaName": "Alger",
+   "delivery": "HOME",
+   "total": 1550,
+   "pricesVerified": true,
+   "address": "Adresse de test 4",
+   "items": [
+    {
+     "qty": 1,
+     "price": 950,
+     "title": "The Inventory Not Tracked Snowboard",
+     "option": "Default Title",
+     "productId": "gid://shopify/Product/9131771756797",
+     "variantId": "gid://shopify/ProductVariant/47186520015101"
+    }
+   ],
+   "shipState": null,
+   "trackingNumber": null,
+   "shipError": null,
+   "shipStatus": null,
+   "carrierName": null
+  }
+ ]
+}

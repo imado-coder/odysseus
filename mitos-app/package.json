@@ -20,11 +20,12 @@
     "vercel-build": "prisma generate && prisma migrate deploy && react-router build",
     "test:extension": "node tests/cod-extension.test.mjs",
     "test:gdpr": "tsx tests/gdpr.test.ts",
-    "test": "npm run test:extension && npm run test:gdpr && npm run test:install && npm run test:orders && npm run test:products && npm run test:billing",
+    "test": "npm run test:extension && npm run test:gdpr && npm run test:install && npm run test:orders && npm run test:products && npm run test:billing && npm run test:dashboard",
     "test:install": "node tests/install.test.mjs",
     "test:orders": "tsx tests/orders.test.ts",
     "test:products": "tsx tests/products.test.ts",
-    "test:billing": "tsx tests/billing.test.ts"
+    "test:billing": "tsx tests/billing.test.ts",
+    "test:dashboard": "node tests/dashboard.test.mjs"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -50,6 +51,7 @@
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "jsdom": "^30.0.1",
+    "playwright-core": "^1.62.1",
     "prisma": "^6.19.3",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",

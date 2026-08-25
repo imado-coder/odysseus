@@ -3,8 +3,12 @@
  *
  * A cash-on-delivery merchant's day is a call list: ring the customer,
  * confirm, hand to the courier. They do it from a phone, standing up, not
- * from a desk with the Shopify admin open. This serves exactly that data,
- * and nothing else.
+ * from a desk with the Shopify admin open. This serves exactly that data —
+ * the list, the shipping table, and `/stats`, which is the same orders read
+ * as a result rather than as a queue.
+ *
+ * Confirming an order also hands it to the courier when the merchant has
+ * asked for that: see `autoPush` below.
  *
  * It exists because the embedded dashboard in app/routes/app._index.tsx
  * needs Vercel, and Vercel needs environment variables that cannot be set
@@ -50,6 +54,93 @@ const SETTABLE = new Set([
   "RETURNED",
   "NO_ANSWER",
 ]);
+
+/**
+ * Handing a confirmed order to the courier, without anyone pressing anything.
+ *
+ * ── Why this lives here and the adapters do not ──────────────────────────
+ *
+ * `Carrier.autoPush` has been stored, saved and rendered as a switch since
+ * carriers were built, and nothing ever read it. A merchant who turned it on
+ * got a checkbox that stayed on and a parcel that was never created — the
+ * worst kind of setting, because it looks like it worked.
+ *
+ * The five courier adapters live in the `carriers` function and are 1,200
+ * lines of them. Copying any of that here would mean a fix landing in one
+ * copy and not the other, so this calls that function over HTTP instead. The
+ * key it sends is the merchant's own `dashboardToken`, which this request
+ * already arrived with and which this function has already proved — no new
+ * secret exists, and nothing is trusted that was not trusted a line earlier.
+ *
+ * ── Confirming must not depend on the courier being up ───────────────────
+ *
+ * The order is already CONFIRMED before this is called, and stays confirmed
+ * whatever happens next. A courier's API being down, slow, or answering with
+ * nonsense cannot undo a merchant's phone call. The push result is reported
+ * beside the status rather than instead of it, and a failure leaves the
+ * `Shipment` row in FAILED with the reason on it — which is exactly the state
+ * the manual button retries from.
+ *
+ * The timeout is here for the same reason: a courier that never answers must
+ * not hold the merchant's screen. Ten seconds, then the confirm returns and
+ * the parcel is a FAILED shipment they can retry with one tap.
+ */
+const PUSH_TIMEOUT_MS = 10_000;
+
+// deno-lint-ignore no-explicit-any
+async function autoPush(shop: any, token: string, orderId: string) {
+  /* Only a carrier the merchant asked to be automatic. `isDefault` first, so
+     a shop with two automatic carriers behaves the same way the manual push
+     does rather than picking whichever row sorted first.
+
+     MANUAL is excluded because its adapter rejects every push by definition —
+     it is the carrier for a merchant who writes the tracking number in
+     themselves. Without this line, ticking "automatique" on a manual carrier
+     would turn every confirmation into a FAILED shipment, which is the same
+     kind of lie this function exists to remove. The screen hides the switch
+     for MANUAL as well; this is the half a crafted request cannot get around. */
+  const [carrier] = await sql`
+    SELECT id, name FROM "Carrier"
+     WHERE "shopId" = ${shop.id} AND enabled AND "autoPush"
+       AND provider <> 'MANUAL'::"CarrierProvider"
+     ORDER BY "isDefault" DESC, name
+     LIMIT 1
+  `;
+  if (!carrier) return null;
+
+  const base = Deno.env.get("SUPABASE_URL");
+  if (!base) return { ok: false, error: "no_functions_url" };
+
+  const stop = AbortSignal.timeout(PUSH_TIMEOUT_MS);
+
+  try {
+    const res = await fetch(`${base}/functions/v1/carriers/push`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-mitos-key": token },
+      body: JSON.stringify({ orderId, carrierId: carrier.id }),
+      signal: stop,
+    });
+
+    const body = await res.json().catch(() => ({}));
+    return {
+      ok: res.ok && body?.ok === true,
+      carrier: carrier.name,
+      trackingNumber: body?.trackingNumber ?? null,
+      duplicate: body?.duplicate === true,
+      error: res.ok ? null : (body?.error ?? `http_${res.status}`),
+      detail: body?.detail ?? null,
+    };
+  } catch (e) {
+    /* Includes the timeout. The Shipment row is already claimed as QUEUED by
+       the carriers function, so the manual retry finds it and pushes it. */
+    return {
+      ok: false,
+      carrier: carrier.name,
+      error: "push_unreachable",
+      detail: e instanceof Error ? e.message : String(e),
+    };
+  }
+}
 
 /** Length-independent comparison, so a wrong token leaks nothing by timing. */
 function tokenMatches(given: string, expected: string) {
@@ -121,7 +212,11 @@ async function handle(request: Request) {
     return new Response("Method Not Allowed", { status: 405, headers: CORS });
   }
 
-  if (request.method === "POST") return await setStatus(request, shop);
+  if (request.method === "GET" && url.pathname.endsWith("/stats")) {
+    return await stats(url, shop);
+  }
+
+  if (request.method === "POST") return await setStatus(request, shop, token);
   if (request.method !== "GET") {
     return new Response("Method Not Allowed", { status: 405, headers: CORS });
   }
@@ -130,7 +225,7 @@ async function handle(request: Request) {
 }
 
 // deno-lint-ignore no-explicit-any
-async function setStatus(request: Request, shop: any) {
+async function setStatus(request: Request, shop: any, token: string) {
   let body: { id?: string; status?: string };
   try {
     body = await request.json();
@@ -160,7 +255,16 @@ async function setStatus(request: Request, shop: any) {
   `;
 
   if (!done.length) return json({ error: "not_found" }, 404);
-  return json({ ok: true, status });
+
+  /* CONFIRMED is the only status that creates a parcel — the invariant the
+     whole system is built on. A PENDING order is never handed to a courier,
+     and re-confirming an order that already has a shipment is caught at the
+     unique key on Shipment.codOrderId, not here. */
+  const push = status === "CONFIRMED"
+    ? await autoPush(shop, token, String(body.id ?? ""))
+    : null;
+
+  return json({ ok: true, status, push });
 }
 
 /**
@@ -233,13 +337,24 @@ async function list(url: URL, shop: any) {
   const filter = url.searchParams.get("s") ?? "";
   const only = SETTABLE.has(filter) ? filter : null;
 
+  /* The shipment is joined rather than fetched per row: without it the call
+     list cannot tell an order that reached the courier from one that only
+     looks like it did. A confirmed order whose push failed is the single most
+     expensive row on this screen — the customer is expecting a parcel that
+     was never created — and it was previously indistinguishable from a
+     healthy one. LEFT JOIN because most orders have no shipment and must
+     still appear. */
   const orders = await sql`
     SELECT o.id, o.status, o."shopifyName", o."createFailed", o."createError",
            o."createdAt",
            l."firstName", l."lastName", l.phone, l.commune, l."wilayaName",
-           l.delivery, l.total, l."pricesVerified", l.address, l.items
+           l.delivery, l.total, l."pricesVerified", l.address, l.items,
+           s.state AS "shipState", s."trackingNumber", s."lastError" AS "shipError",
+           s."mappedStatus" AS "shipStatus", c.name AS "carrierName"
       FROM "CodOrder" o
       JOIN "Lead" l ON l.id = o."leadId"
+      LEFT JOIN "Shipment" s ON s."codOrderId" = o.id
+      LEFT JOIN "Carrier" c ON c.id = s."carrierId"
      WHERE o."shopId" = ${shop.id}
        ${only ? sql`AND o.status = ${only}::"CodStatus"` : sql``}
      ORDER BY o."createdAt" DESC
@@ -258,6 +373,169 @@ async function list(url: URL, shop: any) {
       counts.map((c: { status: string; n: number }) => [c.status, c.n]),
     ),
     orders,
+  });
+}
+
+/**
+ * What the shop actually did, over a window the merchant chooses.
+ *
+ * ── Why this is not Shopify's analytics ──────────────────────────────────
+ *
+ * Shopify counts an order the moment it is created. In cash on delivery that
+ * is the least interesting moment of its life: nothing has been paid, nobody
+ * has been called, and roughly half of them will not survive the phone call
+ * or the doorstep. A merchant reading Shopify's revenue for a COD shop is
+ * reading a number they will not receive.
+ *
+ * So everything here counts *decided* orders. Delivered is money in hand.
+ * Cancelled and returned are money spent — the merchant pays the return leg
+ * on a refusal, which is why a product with a high refusal rate loses more
+ * than it earns while Shopify calls it a bestseller.
+ *
+ * ── One round trip ───────────────────────────────────────────────────────
+ *
+ * Six queries, issued together. The merchant opens this on a phone on mobile
+ * data, and six sequential round trips to Paris is the difference between a
+ * screen that appears and one they navigate away from.
+ *
+ * The window is clamped: an unbounded `days` from the query string is a table
+ * scan anyone holding the key can ask for repeatedly.
+ */
+// deno-lint-ignore no-explicit-any
+async function stats(url: URL, shop: any) {
+  const asked = Number(url.searchParams.get("days") ?? 30);
+  const days = Number.isFinite(asked) ? Math.min(Math.max(Math.trunc(asked), 1), 365) : 30;
+
+  /* One expression, used by every query below, so a row cannot be inside the
+     window for one number on the screen and outside it for another. */
+  const since = new Date(Date.now() - days * 86_400_000);
+
+  const [funnel, series, wilayas, products, money, carriers] = await Promise.all([
+    sql`
+      SELECT o.status::text AS status, count(*)::int AS n,
+             COALESCE(sum(l.total), 0)::int AS value
+        FROM "CodOrder" o
+        JOIN "Lead" l ON l.id = o."leadId"
+       WHERE o."shopId" = ${shop.id} AND o."createdAt" >= ${since}
+       GROUP BY 1
+    `,
+
+    sql`
+      SELECT date_trunc('day', o."createdAt")::date::text AS day,
+             count(*)::int AS orders,
+             count(*) FILTER (WHERE o.status <> 'PENDING' AND o.status <> 'NO_ANSWER')::int AS decided,
+             count(*) FILTER (WHERE o.status = 'DELIVERED')::int AS delivered,
+             COALESCE(sum(l.total) FILTER (WHERE o.status = 'DELIVERED'), 0)::int AS revenue
+        FROM "CodOrder" o
+        JOIN "Lead" l ON l.id = o."leadId"
+       WHERE o."shopId" = ${shop.id} AND o."createdAt" >= ${since}
+       GROUP BY 1 ORDER BY 1
+    `,
+
+    sql`
+      SELECT l."wilayaCode" AS code, min(l."wilayaName") AS name,
+             count(*)::int AS orders,
+             count(*) FILTER (WHERE o.status = 'DELIVERED')::int AS delivered,
+             count(*) FILTER (WHERE o.status IN ('CANCELLED','RETURNED'))::int AS lost,
+             COALESCE(sum(l.total) FILTER (WHERE o.status = 'DELIVERED'), 0)::int AS revenue
+        FROM "CodOrder" o
+        JOIN "Lead" l ON l.id = o."leadId"
+       WHERE o."shopId" = ${shop.id} AND o."createdAt" >= ${since}
+         AND l."wilayaCode" IS NOT NULL
+       GROUP BY 1 ORDER BY orders DESC, code LIMIT 15
+    `,
+
+    /* count(DISTINCT o.id), not count(*): a shopper ordering two variants of
+       the same product is one order for that product. Counting the lines
+       would inflate every rate on this screen. */
+    sql`
+      SELECT COALESCE(item->>'title', 'article') AS title,
+             count(DISTINCT o.id)::int AS orders,
+             count(DISTINCT o.id) FILTER (WHERE o.status = 'DELIVERED')::int AS delivered,
+             count(DISTINCT o.id) FILTER (WHERE o.status IN ('CANCELLED','RETURNED'))::int AS lost,
+             COALESCE(sum((item->>'lineTotal')::int) FILTER (WHERE o.status = 'DELIVERED'), 0)::int AS revenue
+        FROM "CodOrder" o
+        JOIN "Lead" l ON l.id = o."leadId"
+        CROSS JOIN LATERAL jsonb_array_elements(l.items) AS item
+       WHERE o."shopId" = ${shop.id} AND o."createdAt" >= ${since}
+       GROUP BY 1 ORDER BY orders DESC, title LIMIT 15
+    `,
+
+    /* `Lead.delivery` is HOME or DESK — the method, not an amount; the money
+       is split across `subtotal` and `shipping`. The split matters: the
+       delivery fee is collected from the customer and paid straight out to
+       the courier, so counting it as revenue overstates what the merchant
+       earned. Kept out of the SQL because a backtick inside a tagged template
+       ends the template — which is exactly how the first version of this
+       query failed to bundle. */
+    sql`
+      SELECT
+        COALESCE(sum(l.total) FILTER (WHERE o.status = 'DELIVERED'), 0)::int AS collected,
+        COALESCE(sum(l.total) FILTER (WHERE o.status IN ('CONFIRMED','SHIPPED')), 0)::int AS "inFlight",
+        COALESCE(sum(l.shipping) FILTER (WHERE o.status = 'DELIVERED'), 0)::int AS "deliveryCollected",
+        COALESCE(sum(l.subtotal) FILTER (WHERE o.status = 'DELIVERED'), 0)::int AS "goodsCollected",
+        count(*) FILTER (WHERE l.delivery = 'HOME')::int AS home,
+        count(*) FILTER (WHERE l.delivery = 'DESK')::int AS desk,
+        count(*) FILTER (WHERE o.status = 'DELIVERED')::int AS "deliveredCount",
+        count(*)::int AS orders
+        FROM "CodOrder" o
+        JOIN "Lead" l ON l.id = o."leadId"
+       WHERE o."shopId" = ${shop.id} AND o."createdAt" >= ${since}
+    `,
+
+    /* Shipments are counted by when they were pushed, not when the order was
+       taken: a parcel handed over today for an order from last month belongs
+       to today's courier workload. */
+    sql`
+      SELECT c.name, c.provider::text AS provider,
+             count(*)::int AS pushed,
+             count(*) FILTER (WHERE s.state = 'FAILED')::int AS failed,
+             count(*) FILTER (WHERE s."mappedStatus" = 'DELIVERED')::int AS delivered,
+             count(*) FILTER (WHERE s."mappedStatus" = 'RETURNED')::int AS returned
+        FROM "Shipment" s
+        JOIN "Carrier" c ON c.id = s."carrierId"
+       WHERE s."shopId" = ${shop.id} AND s."updatedAt" >= ${since}
+       GROUP BY 1, 2 ORDER BY pushed DESC
+    `,
+  ]);
+
+  const by = Object.fromEntries(
+    funnel.map((f: { status: string; n: number }) => [f.status, f.n]),
+  );
+  const n = (k: string) => by[k] ?? 0;
+
+  const total = funnel.reduce((a: number, f: { n: number }) => a + f.n, 0);
+  const decided = n("DELIVERED") + n("CANCELLED") + n("RETURNED");
+  const reached = total - n("PENDING") - n("NO_ANSWER");
+
+  return json({
+    ok: true,
+    days,
+    since: since.toISOString(),
+    shop: { domain: shop.domain, currency: shop.currency },
+    counts: by,
+    totals: {
+      orders: total,
+      /* Answered the phone. A shop with many NO_ANSWER has a phone problem,
+         not a product problem, and the two look identical in a single rate. */
+      reached,
+      decided,
+      /* Null rather than 0 when there is nothing to divide by: 0 % is a
+         claim, and "no orders yet" is not the same claim. */
+      confirmRate: total ? reached / total : null,
+      deliveryRate: decided ? n("DELIVERED") / decided : null,
+      lossRate: decided ? (n("CANCELLED") + n("RETURNED")) / decided : null,
+    },
+    money: {
+      ...(money[0] ?? {}),
+      basket: money[0]?.deliveredCount
+        ? Math.round(money[0].collected / money[0].deliveredCount)
+        : null,
+    },
+    series,
+    wilayas,
+    products,
+    carriers,
   });
 }
 

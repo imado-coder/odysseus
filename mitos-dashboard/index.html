@@ -141,10 +141,25 @@
   /* Two screens, one header. The tabs sit where the filter chips used to be
      the only thing under the title, so they read as navigation rather than as
      another filter. */
-  .tabs{display:flex;gap:.375rem;margin-bottom:.5rem}
-  .tab{flex:1 1 0;min-height:40px;border:1px solid var(--line);
+  /* Four tabs, and the longest French label is "Transporteurs". min-width:0
+     is what lets a flex item shrink below its text at all — without it the
+     row overflows the header on a 360 px phone and the last tab is cut off
+     the screen. The ellipsis is the floor, not the plan: the sizes below are
+     chosen so nothing is actually clipped in either language. */
+  /* Four tabs, and the longest French label is "Transporteurs". Sized to
+     their own text rather than to an equal quarter — an equal quarter is 85 px
+     on a 390 px phone and that word needs 97, so equal columns clipped two of
+     the four labels at every width tested.
+
+     flex-basis:auto lets each tab ask for what it needs and grow into the
+     slack; wrap lets the row become two on a narrow phone instead of pushing
+     a tab off the screen. Nothing is ever cut off, and on most phones it is
+     still one row. */
+  .tabs{display:flex;flex-wrap:wrap;gap:.25rem;margin-bottom:.5rem}
+  .tab{flex:1 1 auto;min-height:40px;padding:0 .5rem;
+    border:1px solid var(--line);
     border-radius:10px;background:transparent;color:var(--sub);font:inherit;
-    font-size:.9375rem;cursor:pointer}
+    font-size:.8125rem;white-space:nowrap;cursor:pointer}
   .tab[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);
     color:var(--card);font-weight:600}
 
@@ -235,6 +250,68 @@
     border-radius:10px;background:var(--ink);color:var(--card);font:inherit;
     font-weight:600;cursor:pointer}
   .ship:disabled{opacity:.7}
+
+  /* ── The parcel, on the order it belongs to ──────────────────────────────
+     A confirmed order whose push failed is the most expensive row on this
+     screen: the customer is waiting for a parcel nobody created. It gets a
+     line, in colour, rather than being indistinguishable from a healthy one. */
+  .ship-line{display:flex;flex-wrap:wrap;gap:.375rem .5rem;align-items:center;
+    margin-top:.5rem;font-size:.8125rem;unicode-bidi:plaintext}
+  .ship-line .num{font-variant-numeric:tabular-nums}
+  .ship-line--bad{color:var(--bad)}
+  .ship-line--ok{color:var(--ok)}
+  .ship-why{width:100%;color:var(--bad);line-height:1.45;
+    unicode-bidi:plaintext}
+
+  /* ── Statistiques ───────────────────────────────────────────────────────
+     No chart library: this page is one file with no network dependency, and
+     a CDN script is a blank screen the day the CDN is blocked. Bars are divs
+     with a width, which is all a bar has ever been. */
+  .range{display:flex;gap:.375rem;padding:0 0 .75rem;flex-wrap:wrap}
+  .range button{flex:1 1 0;min-width:64px;min-height:40px;border:1px solid var(--line);
+    border-radius:999px;background:var(--card);color:var(--ink);font:inherit;
+    font-size:.875rem;cursor:pointer}
+  .range button[aria-pressed="true"]{background:var(--ink);color:var(--card);
+    border-color:var(--ink)}
+
+  .kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:.75rem}
+  .kpi__n{font-size:1.375rem;font-weight:700;font-variant-numeric:tabular-nums;
+    line-height:1.2;unicode-bidi:plaintext}
+  .kpi__l{font-size:.75rem;color:var(--soft);margin-top:.125rem}
+  .kpi--wide{grid-column:1 / -1}
+  .kpi--good .kpi__n{color:var(--ok)}
+  .kpi--bad .kpi__n{color:var(--bad)}
+
+  .sec{margin-top:1rem}
+  .sec__h{font-size:.8125rem;font-weight:600;color:var(--soft);
+    margin:0 0 .5rem;text-transform:uppercase;letter-spacing:.04em}
+
+  .rows{background:var(--card);border:1px solid var(--line);border-radius:12px;
+    overflow:hidden}
+  .row{display:grid;grid-template-columns:1fr auto;gap:.125rem .5rem;
+    padding:.625rem .75rem;border-bottom:1px solid var(--line)}
+  .row:last-child{border-bottom:0}
+  .row__t{font-size:.875rem;min-width:0;overflow:hidden;text-overflow:ellipsis;
+    white-space:nowrap}
+  .row__n{font-size:.875rem;font-variant-numeric:tabular-nums;
+    unicode-bidi:plaintext}
+  .row__bar{grid-column:1 / -1;height:4px;border-radius:2px;
+    background:var(--line);overflow:hidden}
+  .row__bar i{display:block;height:100%;background:var(--ink)}
+  .row__bar i.bad{background:var(--bad)}
+  .row__sub{grid-column:1 / -1;font-size:.75rem;color:var(--soft);
+    unicode-bidi:plaintext}
+
+  /* The daily chart is read left to right in both languages: it is a time
+     axis, and time does not mirror. */
+  .spark{display:flex;align-items:flex-end;gap:2px;height:72px;padding:.75rem;
+    background:var(--card);border:1px solid var(--line);border-radius:12px;
+    direction:ltr}
+  .spark i{flex:1 1 0;min-width:2px;background:var(--ink);border-radius:2px 2px 0 0;
+    min-height:2px}
+  .spark i.none{background:var(--line)}
 </style>
 </head>
 <body>
@@ -274,7 +351,20 @@ try {
       failed: "Commande non créée chez Shopify — ",
       call: "Appeler", saveFail: "Échec de l'enregistrement. Réessayez.",
       item: "article",
-      tabOrders: "Commandes", tabRates: "Livraison",
+      tabOrders: "Commandes", tabRates: "Livraison", tabStats: "Chiffres",
+      statsHelp: "Ce que la boutique a réellement encaissé — pas ce que Shopify a compté.",
+      d7: "7 j", d30: "30 j", d90: "90 j", noData: "Rien sur cette période.",
+      kOrders: "commandes", kReached: "ont répondu", kDelivered: "livrées",
+      kLoss: "perdues", kCollected: "encaissé", kInFlight: "en route",
+      kBasket: "panier moyen", kGoods: "marchandise", kShipping: "livraison",
+      secDaily: "Par jour", secWilayas: "Wilayas", secProducts: "Produits",
+      secCarriers: "Transporteurs", secSplit: "Domicile / Bureau",
+      sync: "Actualiser les statuts", syncing: "Actualisation…",
+      synced: "Statuts à jour",
+      shipQUEUED: "en attente d'envoi", shipPUSHED: "chez le transporteur",
+      shipFAILED: "non envoyé au transporteur",
+      autoSent: "Envoyé au transporteur", autoFailed: "Non envoyé — ",
+      autoOnlyApi: "Le transporteur manuel ne peut pas envoyer tout seul : vous saisissez le suivi vous-même.",
       ratesHelp: "Le prix que le client voit, et celui qui lui est facturé.",
       applyAll: "Appliquer à toutes les wilayas",
       save: "Enregistrer", saved: "Enregistré", saving: "Enregistrement…",
@@ -304,7 +394,21 @@ try {
       failed: "لم تُنشأ الطلبية في Shopify — ",
       call: "اتصل", saveFail: "لم يُسجّل التغيير. أعد المحاولة.",
       item: "قطعة",
-      tabOrders: "الطلبيات", tabRates: "التوصيل",
+      tabOrders: "الطلبيات", tabRates: "التوصيل", tabStats: "الأرقام",
+      statsHelp: "ما قبضه المتجر فعلًا — لا ما حسبته Shopify.",
+      d7: "٧ أيام", d30: "٣٠ يومًا", d90: "٩٠ يومًا",
+      noData: "لا شيء في هذه المدّة.",
+      kOrders: "طلبية", kReached: "ردّوا", kDelivered: "سُلّمت",
+      kLoss: "ضاعت", kCollected: "المقبوض", kInFlight: "في الطريق",
+      kBasket: "متوسّط السلّة", kGoods: "البضاعة", kShipping: "التوصيل",
+      secDaily: "يوميًّا", secWilayas: "الولايات", secProducts: "المنتجات",
+      secCarriers: "الناقلون", secSplit: "منزل / مكتب",
+      sync: "حدّث الحالات", syncing: "جارٍ التحديث…",
+      synced: "الحالات محدّثة",
+      shipQUEUED: "في انتظار الإرسال", shipPUSHED: "عند الناقل",
+      shipFAILED: "لم تُرسل للناقل",
+      autoSent: "أُرسلت للناقل", autoFailed: "لم تُرسل — ",
+      autoOnlyApi: "الناقل اليدوي لا يرسل وحده: تكتب رقم التتبّع بنفسك.",
       ratesHelp: "السعر الذي يراه العميل، وهو نفسه الذي يُحسب عليه.",
       applyAll: "طبّق على كل الولايات",
       save: "حفظ", saved: "تم الحفظ", saving: "جارٍ الحفظ…",
@@ -377,6 +481,19 @@ try {
     return fetch(CARRIERS + (path || ""), options);
   }
 
+  /* The screens, named once. The heading and the tab label are different
+     words for the same view — "Commandes" is the tab, the title is the shop's
+     own word — so both are looked up here rather than in three conditionals
+     that a new screen has to be remembered into. */
+  var VIEWS = ["orders", "stats", "rates", "carriers"];
+  var TAB = {
+    orders: "tabOrders", stats: "tabStats",
+    rates: "tabRates", carriers: "tabCarriers"
+  };
+  var HEADING = {
+    stats: "tabStats", rates: "tabRates", carriers: "tabCarriers"
+  };
+
   function langButton() {
     return '<button class="lang" type="button" data-lang lang="' +
       (lang === "fr" ? "ar" : "fr") + '">' + t().other + "</button>";
@@ -407,6 +524,37 @@ try {
   function money(n, currency) {
     var suffix = currency === "DZD" ? "DA" : currency;
     return new Intl.NumberFormat("fr-FR").format(n) + " " + suffix;
+  }
+
+  /* What happened to the parcel, on the order it belongs to.
+   *
+   * Before this line existed, a confirmed order whose push failed looked
+   * exactly like one that reached the courier — and it is the most expensive
+   * row on the screen, because the customer is waiting for a parcel nobody
+   * ever created. The courier's own words are shown for a failure rather than
+   * a generic message: "wilaya not served" and "token expired" need different
+   * things done about them, and only the merchant can tell which.
+   */
+  function shipLine(o) {
+    if (!o.shipState) return "";
+
+    var bad = o.shipState === "FAILED";
+    var label = t()["ship" + o.shipState] || o.shipState;
+
+    return '<div class="ship-line' + (bad ? " ship-line--bad" : "") +
+      (o.shipStatus === "DELIVERED" ? " ship-line--ok" : "") + '">' +
+      "<span>" + esc(label) + "</span>" +
+      (o.carrierName ? '<span class="dot"></span><span>' + esc(o.carrierName) + "</span>" : "") +
+      (o.trackingNumber
+        ? '<span class="dot"></span><span class="num">' + esc(o.trackingNumber) + "</span>"
+        : "") +
+      (o.shipStatus && o.shipStatus !== o.status
+        ? '<span class="dot"></span><span>' + esc(t()[o.shipStatus] || o.shipStatus) + "</span>"
+        : "") +
+      (bad && o.shipError
+        ? '<span class="ship-why">' + esc(String(o.shipError).slice(0, 160)) + "</span>"
+        : "") +
+      "</div>";
   }
 
   function card(o, currency) {
@@ -443,6 +591,8 @@ try {
           esc(String(o.createError || "").slice(0, 140)) + "</div>"
         : "") +
 
+      shipLine(o) +
+
       '<a class="call" href="tel:' + esc(o.phone) + '">' + esc(t().call) +
         ' <span class="num">' + esc(o.phone) + "</span></a>" +
 
@@ -457,7 +607,13 @@ try {
       /* Only once the call has gone the merchant's way. A parcel handed to a
          carrier before the customer confirms is a return the merchant pays
          for, so the button does not exist until then. */
-      (o.status === "CONFIRMED"
+      /* …and not once it is already there. Pushing a second time is harmless —
+         the carriers function answers `duplicate` off the unique key on
+         Shipment.codOrderId — but a button offering to do something that has
+         been done reads as though the first attempt did not work, and a
+         merchant will press it. It stays for FAILED and for QUEUED, which are
+         exactly the states a retry is for. */
+      (o.status === "CONFIRMED" && o.shipState !== "PUSHED"
         ? '<button type="button" class="ship" data-send="' + esc(o.id) + '">' +
           esc(t().send) + "</button>"
         : "") +
@@ -492,15 +648,13 @@ try {
      screen does. */
   function bar(data, below) {
     return '<header class="bar"><div class="bar__row">' +
-        "<h1>" + esc(view === "rates" ? t().tabRates
-          : view === "carriers" ? t().tabCarriers : t().title) + "</h1>" +
+        "<h1>" + esc(HEADING[view] ? t()[HEADING[view]] : t().title) + "</h1>" +
         '<span class="shop">' + esc((data.shop && data.shop.domain) || "") + "</span>" +
         langButton() +
       "</div>" +
       '<nav class="tabs">' +
-        ["orders","rates","carriers"].map(function (v) {
-          var label = v === "rates" ? t().tabRates
-            : v === "carriers" ? t().tabCarriers : t().tabOrders;
+        VIEWS.map(function (v) {
+          var label = t()[TAB[v]];
           return '<button class="tab" type="button" data-view="' + v + '"' +
             (view === v ? ' aria-pressed="true"' : "") + ">" +
             esc(label) + "</button>";
@@ -697,9 +851,16 @@ try {
       '<label class="tog"><input type="checkbox" data-default' +
         (editRow && editRow.isDefault ? " checked" : "") + "><span>" +
         esc(t().setDefault) + "</span></label>" +
-      '<label class="tog"><input type="checkbox" data-autopush' +
-        (editRow && editRow.autoPush ? " checked" : "") + "><span>" +
-        esc(t().autoPush) + "</span></label>" +
+      /* The manual carrier's adapter rejects every push by definition — the
+         merchant types the tracking number in themselves. Offering the switch
+         would guarantee a failed shipment on every confirmation, so the
+         reason is shown in its place. The server refuses it as well; this is
+         only the half that stops the merchant asking. */
+      (chosen === "MANUAL"
+        ? '<p class="help">' + esc(t().autoOnlyApi) + "</p>"
+        : '<label class="tog"><input type="checkbox" data-autopush' +
+          (editRow && editRow.autoPush ? " checked" : "") + "><span>" +
+          esc(t().autoPush) + "</span></label>") +
 
       '<div class="frow">' +
         '<button type="button" class="ghost" data-cancel>' + esc(t().cancel) +
@@ -747,6 +908,13 @@ try {
           ? carrierForm()
           : '<button type="button" class="addbtn" data-add>' +
             esc(t().addCarrier) + "</button>") +
+        /* Only when there is a courier to ask. On a shop with none it would
+           be a button that can only ever report nothing. */
+        ((data.carriers || []).length && !formOpen
+          ? '<button type="button" class="ghost" data-sync ' +
+            'style="width:100%;min-height:44px;margin-top:.5rem">' +
+            esc(t().sync) + "</button>"
+          : "") +
       "</main>";
   }
 
@@ -794,7 +962,10 @@ try {
       baseUrl: baseEl ? baseEl.value.trim() : null,
       fromWilaya: fromEl ? fromEl.value.trim() : null,
       isDefault: form.querySelector("[data-default]").checked,
-      autoPush: form.querySelector("[data-autopush]").checked
+      /* Absent for a manual carrier, where the switch is not offered at all.
+         Reading `.checked` off null would throw inside the submit handler and
+         the merchant would get a button that does nothing and says nothing. */
+      autoPush: !!(form.querySelector("[data-autopush]") || {}).checked
     };
     if (Object.keys(creds).length) body.credentials = creds;
 
@@ -898,14 +1069,224 @@ try {
       });
   }
 
+  /* ── Statistiques ────────────────────────────────────────────────────────
+   *
+   * Shopify already counts orders. What it cannot count is what a
+   * cash-on-delivery shop lives on: of the orders taken, how many survived
+   * the phone call and how many survived the doorstep. Shopify calls an order
+   * revenue the moment it is created; here, half of those will be refused and
+   * the merchant pays the return leg on every one.
+   *
+   * So every number on this screen is money or a decided order, never a
+   * created one. `encaissé` is delivered. `perdues` is cancelled plus
+   * returned. Anything still waiting for the call is counted separately and
+   * never folded into a rate, or a shop that opened this morning reads as a
+   * catastrophe.
+   */
+  var statsDays = 30;
+
+  function loadStats() {
+    root.innerHTML = '<p class="note">' + esc(t().loading) + "</p>";
+    return api("/stats?days=" + statsDays)
+      .then(function (r) {
+        if (r.status === 404) throw new Error("bad-key");
+        if (!r.ok) throw new Error("http-" + r.status);
+        return r.json();
+      })
+      .then(renderStats)
+      .catch(function (e) {
+        /* Same two outcomes as the call list, and the same words: a wrong key
+           sends the merchant back to the gate, anything else is the network. */
+        if (e.message === "bad-key") {
+          try { localStorage.removeItem(KEY); } catch (err) {}
+          return gate(t().refused);
+        }
+        root.innerHTML = '<p class="note">' + esc(t().offline) + "</p>";
+      });
+  }
+
+  /* Null means "nothing to divide by", which is not the same claim as 0 %.
+     A shop with no decided orders yet gets a dash, not a perfect score. */
+  function pct(v) {
+    return v == null ? "—" : Math.round(v * 100) + " %";
+  }
+
+  function kpi(n, label, tone) {
+    return '<div class="kpi' + (tone ? " kpi--" + tone : "") + '">' +
+      '<div class="kpi__n">' + esc(n) + "</div>" +
+      '<div class="kpi__l">' + esc(label) + "</div></div>";
+  }
+
+  /* One row of a ranked list: a label, a number, and a bar that is a share of
+     the biggest row rather than of the total — with a long tail, shares of the
+     total are all invisible and the list stops saying anything. */
+  function statRow(title, n, max, sub, lost) {
+    var w = max > 0 ? Math.round((n / max) * 100) : 0;
+    return '<div class="row">' +
+      '<div class="row__t">' + esc(title) + "</div>" +
+      '<div class="row__n">' + esc(n) + "</div>" +
+      '<div class="row__bar"><i class="' + (lost ? "bad" : "") +
+        '" style="width:' + w + '%"></i></div>' +
+      (sub ? '<div class="row__sub">' + esc(sub) + "</div>" : "") +
+      "</div>";
+  }
+
+  function section(heading, inner) {
+    return '<section class="sec"><h2 class="sec__h">' + esc(heading) + "</h2>" +
+      inner + "</section>";
+  }
+
+  function renderStats(data) {
+    var cur = (data.shop && data.shop.currency) || "DZD";
+    var T = data.totals || {};
+    var M = data.money || {};
+
+    var ranges =
+      '<nav class="range">' +
+        [[7, "d7"], [30, "d30"], [90, "d90"]].map(function (r) {
+          return '<button type="button" data-days="' + r[0] + '"' +
+            (statsDays === r[0] ? ' aria-pressed="true"' : "") + ">" +
+            esc(t()[r[1]]) + "</button>";
+        }).join("") +
+      "</nav>";
+
+    if (!T.orders) {
+      root.innerHTML = bar(data, "") + "<main>" + ranges +
+        '<p class="note">' + esc(t().noData) + "</p></main>";
+      return;
+    }
+
+    var kpis = '<div class="kpis">' +
+      kpi(money(M.collected || 0, cur), t().kCollected, "good") +
+      kpi(money(M.inFlight || 0, cur), t().kInFlight) +
+      kpi(T.orders, t().kOrders) +
+      kpi(pct(T.deliveryRate), t().kDelivered, "good") +
+      kpi(pct(T.lossRate), t().kLoss, "bad") +
+      kpi(M.basket == null ? "—" : money(M.basket, cur), t().kBasket) +
+      "</div>";
+
+    /* The daily bars are scaled to the busiest day, and a day with no orders
+       is drawn in the line colour rather than left blank — a gap in the row
+       and a zero-height bar look identical, and only one of them is true. */
+    var series = data.series || [];
+    var peak = series.reduce(function (a, d) {
+      return Math.max(a, d.orders || 0);
+    }, 0);
+    var spark = series.length
+      ? section(t().secDaily, '<div class="spark">' +
+          series.map(function (d) {
+            var h = peak > 0 ? Math.round((d.orders / peak) * 100) : 0;
+            return '<i class="' + (d.orders ? "" : "none") +
+              '" style="height:' + Math.max(h, 3) + '%" title="' +
+              esc(d.day + " · " + d.orders) + '"></i>';
+          }).join("") + "</div>")
+      : "";
+
+    var wMax = (data.wilayas || []).reduce(function (a, w) {
+      return Math.max(a, w.orders);
+    }, 0);
+    var wilayas = (data.wilayas || []).length
+      ? section(t().secWilayas, '<div class="rows">' +
+          data.wilayas.map(function (w) {
+            return statRow(w.name || w.code, w.orders, wMax,
+              w.delivered + " " + t().kDelivered + " · " +
+              w.lost + " " + t().kLoss, w.lost > w.delivered);
+          }).join("") + "</div>")
+      : "";
+
+    var pMax = (data.products || []).reduce(function (a, x) {
+      return Math.max(a, x.orders);
+    }, 0);
+    var products = (data.products || []).length
+      ? section(t().secProducts, '<div class="rows">' +
+          data.products.map(function (x) {
+            return statRow(x.title, x.orders, pMax,
+              x.delivered + " " + t().kDelivered + " · " +
+              x.lost + " " + t().kLoss +
+              (x.revenue ? " · " + money(x.revenue, cur) : ""),
+              x.lost > x.delivered);
+          }).join("") + "</div>")
+      : "";
+
+    var cMax = (data.carriers || []).reduce(function (a, c) {
+      return Math.max(a, c.pushed);
+    }, 0);
+    var carriers = (data.carriers || []).length
+      ? section(t().secCarriers, '<div class="rows">' +
+          data.carriers.map(function (c) {
+            return statRow(c.name, c.pushed, cMax,
+              c.delivered + " " + t().kDelivered + " · " +
+              c.returned + " " + t().kLoss +
+              (c.failed ? " · " + c.failed + " " + t().shipFAILED : ""),
+              c.failed > 0);
+          }).join("") + "</div>")
+      : "";
+
+    /* Goods and delivery are kept apart on purpose: the delivery fee is
+       collected from the customer and handed straight to the courier, so
+       folding it into revenue overstates what the merchant earned. */
+    var split = section(t().secSplit, '<div class="kpis">' +
+      kpi(M.home || 0, t().home) +
+      kpi(M.desk || 0, t().desk) +
+      kpi(money(M.goodsCollected || 0, cur), t().kGoods) +
+      kpi(money(M.deliveryCollected || 0, cur), t().kShipping) +
+      "</div>");
+
+    root.innerHTML = bar(data, "") + "<main>" + ranges +
+      '<p class="note" style="padding:0 0 .75rem">' + esc(t().statsHelp) + "</p>" +
+      kpis + spark + wilayas + products + carriers + split +
+      "</main>";
+  }
+
+  /* Ask each courier what happened to the parcels we gave it.
+   *
+   * Polling, because only some of this family offers webhooks and a merchant
+   * should not have to know which. It is a button rather than a timer: it
+   * costs a call to every courier the shop uses, and a merchant who is not
+   * looking at the screen does not need it to have happened.
+   */
+  function runSync(btn) {
+    var before = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = t().syncing;
+
+    carrierApi("/sync", { method: "POST" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        btn.textContent = d && d.ok
+          ? t().synced + (d.changed ? " · " + d.changed : "")
+          : t().saveFail;
+      })
+      .catch(function () { btn.textContent = t().saveFail; })
+      .then(function () {
+        setTimeout(function () {
+          btn.disabled = false;
+          btn.textContent = before;
+          /* Statuses may have moved, so the list the merchant is looking at
+             is redrawn rather than left showing what it showed before. */
+          show();
+        }, 1400);
+      });
+  }
+
   function show() {
     if (!key()) return gate("");
     return view === "rates" ? loadRates()
       : view === "carriers" ? loadCarriers()
+      : view === "stats" ? loadStats()
       : load();
   }
 
   document.addEventListener("click", function (e) {
+    var range = e.target.closest("[data-days]");
+    if (range) {
+      statsDays = Number(range.getAttribute("data-days"));
+      return loadStats();
+    }
+
+    var syncBtn = e.target.closest("[data-sync]");
+    if (syncBtn) return runSync(syncBtn);
+
     if (e.target.closest("[data-lang]")) {
       toggleLang();
       return show();
@@ -995,7 +1376,25 @@ try {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: card.dataset.id, status: want })
     })
-      .then(function (r) { if (!r.ok) throw new Error(r.status); })
+      .then(function (r) {
+        if (!r.ok) throw new Error(r.status);
+        return r.json();
+      })
+      .then(function (d) {
+        /* The server may have handed this to the courier on the way through.
+           When it did, the merchant is told here rather than finding out on
+           the next refresh — and when it could not, they are told that too,
+           because a customer is now expecting a parcel that does not exist. */
+        if (!d || !d.push) return;
+        var line = document.createElement("div");
+        line.className = "ship-line " +
+          (d.push.ok ? "ship-line--ok" : "ship-line--bad");
+        line.textContent = d.push.ok
+          ? t().autoSent + (d.push.trackingNumber ? " · " + d.push.trackingNumber : "")
+          : t().autoFailed + String(d.push.detail || d.push.error || "");
+        var old = card.querySelector(".ship-line");
+        if (old) old.replaceWith(line); else card.appendChild(line);
+      })
       .catch(function () {
         pill.textContent = before.text;
         pill.className = before.cls;
