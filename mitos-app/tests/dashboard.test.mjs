@@ -346,7 +346,48 @@ console.log("\n8. Réglages");
   await p5.close();
 }
 
-console.log("\n9. A shop with no orders says so instead of showing zeros");
+console.log("\n9. A card says one thing in one colour");
+{
+  /* The pressed status button used to wear the brand, whatever the status
+     was: a cancelled order showed a red stripe, a red badge and a violet
+     button — three elements describing one fact, in two colours.
+
+     One order per status is driven through the real render and the button is
+     checked against the badge each time. The brand is for navigation and for
+     the action; a status is never the brand. */
+  const states = ["CONFIRMED", "NO_ANSWER", "DELIVERED", "CANCELLED"];
+  const base = JSON.parse(F("rich-orders.json"));
+  base.orders = states.map((st, i) => ({
+    ...base.orders[0], id: "o" + i, status: st,
+    shipState: null, trackingNumber: null, shipError: null,
+    shipStatus: null, carrierName: null,
+  }));
+  base.counts = Object.fromEntries(states.map(s2 => [s2, 1]));
+
+  const p6 = await b.newPage({ viewport: { width: 390, height: 900 } });
+  await p6.route("**/functions/v1/**", r => r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(base) }));
+  await p6.goto(`http://localhost:${PORT}/index.html`);
+  await p6.evaluate(() => { localStorage.setItem("mitos:key", "x".repeat(40)); localStorage.setItem("mitos:lang", "fr"); });
+  await p6.reload({ waitUntil: "networkidle" });
+  await p6.waitForTimeout(300);
+
+  const rows = await p6.evaluate(() => [...document.querySelectorAll(".card")].map(c => {
+    const on = c.querySelector('.acts button[aria-pressed="true"]');
+    return {
+      status: on ? on.dataset.set : null,
+      button: on ? getComputedStyle(on).color : null,
+      badge: getComputedStyle(c.querySelector(".pill")).color,
+    };
+  }));
+  ok("every status has its button pressed", rows.length === 4 && rows.every(r => r.status));
+  for (const r of rows) {
+    ok(`${r.status}: the chosen button matches its badge`, r.button === r.badge,
+       `${r.button} vs ${r.badge}`);
+  }
+  await p6.close();
+}
+
+console.log("\n10. A shop with no orders says so instead of showing zeros");
 {
   const p2 = await b.newPage({ viewport: { width: 390, height: 900 } });
   const shop = { domain: "neuf.myshopify.com", currency: "DZD" };

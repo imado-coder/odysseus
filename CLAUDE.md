@@ -260,6 +260,27 @@ have not chosen.
 `color-scheme: dark` is what makes the parts the page does not draw — form
 controls, scrollbars, the tap-and-hold menu — come out dark too.
 
+### Where the brand is allowed, and where it is not
+
+The brand is for **navigation and for the action** — the call button, the
+active tab's icon, the sign-in button that works. It is never a **status**.
+
+The pressed status button used to wear it regardless of which status it was,
+so a cancelled order showed a red stripe, a red badge and a violet button:
+three elements describing one fact in two colours. Each pressed button now
+takes its own status colour, and a test drives one order per status through
+the real render and compares the button against the badge.
+
+The tab bar was three shades of the same violet at once — gradient icon,
+violet wash, violet label. The icon keeps the gradient, because that is the
+one place it reads as a mark rather than as decoration; the pill is a neutral
+fill and the label is full-contrast. Selection shows by being **stronger**,
+not by being purple.
+
+"Envoyer au transporteur" is neutral for the same reason: it sits directly
+under the gradient call button, and two violet buttons stacked left the eye
+unable to tell which one the card was for.
+
 ### Tested in a real browser
 
 `npm run test:dashboard` — **23 assertions**, Chromium at 320/360/390/430 px in

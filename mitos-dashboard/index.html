@@ -162,8 +162,13 @@
                width .34s cubic-bezier(.32,.72,0,1)}
   .seg__thumb{top:2px;bottom:2px;left:0}
 
+  /* A neutral pill. The icon already carries the gradient; a violet wash and
+     a violet label on top of it made the selected tab three shades of the
+     same colour and the heaviest thing on the screen. Selection is shown by
+     being *stronger* — full-contrast label, plain fill — and the brand shows
+     in the one place it reads as a mark rather than as decoration. */
   .tabbar__thumb{top:.25rem;bottom:.25rem;left:0;border-radius:21px;
-    background:var(--brand-soft);box-shadow:none}
+    background:var(--fill);box-shadow:none}
 
   .seg{position:relative;display:flex;gap:2px;padding:2px;margin-bottom:.125rem;
     border-radius:9px;background:var(--fill);
@@ -264,8 +269,21 @@
   .acts button{min-height:44px;border:1px solid var(--line);
     background:transparent;border-radius:10px;font:inherit;font-size:.875rem;
     color:var(--ink);cursor:pointer}
-  .acts button[aria-pressed="true"]{border-color:var(--brand-ink);
-    background:var(--brand-soft);color:var(--brand-ink);font-weight:600}
+  /* The chosen status wears its own colour. It used to wear the brand, so a
+     cancelled order showed a red stripe, a red badge and a violet button —
+     three things describing one fact in two colours. The brand is for
+     navigation and for the action; a status is never the brand. */
+  .acts button[aria-pressed="true"]{font-weight:600}
+  .acts button[aria-pressed="true"][data-set="CONFIRMED"],
+  .acts button[aria-pressed="true"][data-set="SHIPPED"]{
+    border-color:var(--info);background:var(--info-bg);color:var(--info)}
+  .acts button[aria-pressed="true"][data-set="DELIVERED"]{
+    border-color:var(--ok);background:var(--ok-bg);color:var(--ok)}
+  .acts button[aria-pressed="true"][data-set="NO_ANSWER"]{
+    border-color:var(--warn);background:var(--warn-bg);color:var(--warn)}
+  .acts button[aria-pressed="true"][data-set="CANCELLED"],
+  .acts button[aria-pressed="true"][data-set="RETURNED"]{
+    border-color:var(--bad);background:var(--bad-bg);color:var(--bad)}
   .note{padding:2.5rem 1.25rem;text-align:center;color:var(--sub)}
   form.gate{max-width:22rem;margin:15vh auto;padding:0 1.25rem;text-align:center}
   /* alt="" on purpose: the <h1> underneath already says MITOS, and a
@@ -364,7 +382,7 @@
     cursor:pointer;transition:background-color .2s ease,color .2s ease}
   .tabbar__item svg{width:25px;height:25px;flex:0 0 auto;display:block}
   .tabbar__item span{max-width:100%;overflow:hidden;text-overflow:ellipsis}
-  .tabbar__item[aria-current="page"]{color:var(--brand-ink)}
+  .tabbar__item[aria-current="page"]{color:var(--ink)}
   /* A press should answer instantly; the transition above is for the release. */
   .tabbar__item:active{transform:scale(.94);transition:transform .08s ease}
 
@@ -455,9 +473,13 @@
   .testout--ok{color:var(--ok)}
   .testout--bad{color:var(--bad)}
 
-  .ship{width:100%;min-height:46px;margin-top:.5rem;border:1px solid var(--brand-ink);
-    border-radius:13px;background:transparent;color:var(--brand-ink);font:inherit;
+  /* Neutral. It is the rarer action and it sits directly under the gradient
+     call button — in the brand colour there were two violet buttons stacked,
+     and the eye could not tell which one the card was for. */
+  .ship{width:100%;min-height:46px;margin-top:.5rem;border:1px solid var(--line);
+    border-radius:13px;background:transparent;color:var(--ink);font:inherit;
     font-weight:600;cursor:pointer}
+  .ship:active{background:var(--fill)}
   .ship:disabled{opacity:.7}
 
   /* ── The way in ──────────────────────────────────────────────────────────
