@@ -130,14 +130,59 @@
   html{-webkit-text-size-adjust:100%}
   body{margin:0;background:var(--bg);color:var(--ink);
     font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-  .bar{position:sticky;top:0;z-index:5;background:var(--card);
-    border-bottom:1px solid var(--line);padding:.75rem 1rem .5rem;
-    padding-top:max(.75rem,env(safe-area-inset-top))}
-  .bar__row{display:flex;align-items:center;justify-content:space-between;
-    gap:.5rem;margin-bottom:.5rem}
-  /* A large title, the way an iOS screen names itself. */
-  h1{margin:0;font-size:1.625rem;font-weight:700;letter-spacing:-.022em;
-    line-height:1.15}
+  /* ── The header floats too ───────────────────────────────────────────────
+   *
+   * It was a solid bar stuck to the top with a hairline under it, which meant
+   * the list ended at a wall. It is glass now, over the list rather than
+   * above it, so a merchant scrolling can see there is more underneath — the
+   * same material and the same reasoning as the bar at the bottom.
+   *
+   * The bar itself takes no taps; only the pills inside it do. Otherwise the
+   * transparent gap between them would swallow a tap meant for the card
+   * showing through it.
+   */
+  .bar{position:fixed;top:0;inset-inline:0;z-index:30;pointer-events:none;
+    padding:.5rem .75rem .375rem;
+    padding-top:calc(.5rem + env(safe-area-inset-top))}
+  .bar > *{pointer-events:auto}
+  .bar__row{display:flex;align-items:center;gap:.5rem;margin-bottom:.375rem;
+    max-width:44rem;margin-inline:auto}
+
+  /* The screen names itself in the middle, with the one number worth knowing
+     under it — how many are still waiting to be called, how long a window the
+     figures cover. Centred, so the eye finds it in the same place on every
+     screen, and the controls sit either side of it. */
+  .bar__title{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:1px;
+    padding:.375rem 1rem;border-radius:999px;
+    background:var(--glass);border:.5px solid var(--glass-line);
+    box-shadow:var(--glass-shadow);
+    -webkit-backdrop-filter:saturate(180%) blur(30px);
+    backdrop-filter:saturate(180%) blur(30px)}
+  h1{margin:0;font-size:1.0625rem;font-weight:650;letter-spacing:-.015em;
+    line-height:1.2;max-width:100%;overflow:hidden;text-overflow:ellipsis;
+    white-space:nowrap}
+  .bar__sub{font-size:.75rem;color:var(--sub);line-height:1.2;
+    max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    unicode-bidi:plaintext}
+
+  /* The shop's own circle. Initials for now, because nothing in this system
+     stores a logo yet — but the slot is the one a merchant expects to find
+     theirs in, and it is the way into Réglages, which is where they would
+     set it. */
+  .avatar{flex:0 0 auto;width:40px;height:40px;border:0;border-radius:50%;
+    padding:0;background:var(--brand);color:#fff;font:inherit;
+    font-size:.9375rem;font-weight:700;letter-spacing:.01em;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 14px -4px rgba(167,0,255,.55)}
+  .avatar:active{transform:scale(.93)}
+
+  /* The segmented control travels with the header, on the same glass. */
+  .bar .seg{max-width:44rem;margin-inline:auto;
+    background:var(--glass);border:.5px solid var(--glass-line);
+    box-shadow:var(--glass-shadow);
+    -webkit-backdrop-filter:saturate(180%) blur(30px);
+    backdrop-filter:saturate(180%) blur(30px)}
   /* ── Filtering, as a segmented control ───────────────────────────────
    *
    * The filters were free-floating pills, which on a phone read as seven
@@ -190,6 +235,11 @@
   .seg__item:active{transform:scale(.96);transition:transform .08s ease}
   main{padding:.75rem;display:grid;gap:.625rem;max-width:44rem;margin:0 auto;
     padding-bottom:max(1rem,env(safe-area-inset-bottom))}
+  /* The header is out of the flow now, so the list has to be pushed clear of
+     it. Its height changes with the screen — some have a segmented control,
+     some do not — so it is measured after every render rather than guessed at
+     with a constant that would be wrong on three screens out of four. */
+  body.has-tabbar main{padding-top:var(--chrome-top,5rem)}
   /* A card, not a boxed row: the hairline border made a list of orders read as
      a table, and this is a stack of things to act on. A soft shadow lifts each
      one off the page instead. */
@@ -494,45 +544,78 @@
    * say what is missing when pressed, and the key field beneath them is the
    * path that actually works today.
    */
-  .signin{max-width:22rem;margin:0 auto;padding:0 1.25rem
-    calc(2rem + env(safe-area-inset-bottom));min-height:100svh;
-    display:flex;flex-direction:column;justify-content:center;gap:.625rem}
-  .signin__mark{display:block;margin:0 auto .75rem;height:auto}
-  .signin h1{margin:0;text-align:center;font-size:1.75rem;font-weight:700;
-    letter-spacing:-.022em}
-  .signin__sub{margin:.25rem 0 1.25rem;text-align:center;color:var(--sub);
-    font-size:.9375rem}
+  /* Centred while it fits, scrolled from the top once it does not — with
+     plain centring a screen one line too tall clips the logo off the top and
+     there is no way to scroll back up to it. */
+  .signin{max-width:22rem;margin:0 auto;
+    padding:calc(1.25rem + env(safe-area-inset-top)) 1.25rem
+      calc(1.25rem + env(safe-area-inset-bottom));
+    min-height:100svh;display:flex;flex-direction:column;
+    justify-content:safe center;gap:.5rem}
+  .signin__mark{display:block;margin:0 auto .5rem;height:auto}
+  /* Three lines, the second and third in the mark's own gradient. It is the
+     one place on the screen where the brand is allowed to be decorative,
+     because it is the only place with nothing to do. */
+  .signin__pitch{margin:0;text-align:center;font-size:1.5rem;font-weight:700;
+    letter-spacing:-.022em;line-height:1.22}
+  .signin__pitch span{display:block;background:var(--brand);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  /* A gradient clipped to text has no colour of its own if the clip is not
+     supported, so the fallback is the solid stand-in rather than nothing. */
+  @supports not ((-webkit-background-clip:text) or (background-clip:text)){
+    .signin__pitch span{color:var(--brand-ink);background:none}
+  }
+  .signin__sub{margin:.5rem 0 .875rem;text-align:center;color:var(--sub);
+    font-size:.875rem;line-height:1.45}
 
   /* The label is centred and the badge is taken out of the flow, so a long
      translation ("Continuer avec Facebook") stays on one line instead of
      wrapping into a two-line button. */
-  .sso{position:relative;display:flex;align-items:center;justify-content:center;
-    gap:.5rem;width:100%;min-height:50px;padding:0 .875rem;border-radius:13px;
+  .sso{position:relative;display:flex;align-items:center;
+    gap:.625rem;width:100%;min-height:52px;padding:0 1rem;border-radius:14px;
     border:1px solid transparent;font:inherit;font-size:.9375rem;
     font-weight:600;white-space:nowrap;cursor:pointer}
-  .sso span:not(.sso__soon){overflow:hidden;text-overflow:ellipsis}
+  /* The label takes the middle and the chevron sits at the end, so the row
+     reads icon → what it does → where it goes. */
+  .sso__l{flex:1 1 auto;text-align:start;overflow:hidden;
+    text-overflow:ellipsis}
+  .sso__go{width:16px;height:16px;flex:0 0 auto;opacity:.5}
+  /* The chevron points the way out of the screen, so it turns around with the
+     screen. */
+  [dir="rtl"] .sso__go{transform:scaleX(-1)}
   .sso svg{width:19px;height:19px;flex:0 0 auto}
   .sso--apple{background:#000;color:#fff}
   .sso--google{background:#fff;color:#1f1f1f;border-color:#dadce0}
-  .sso--fb{background:#1877f2;color:#fff}
+  /* Shopify's own surface: their green bag on a neutral card, which is how it
+     appears in their own product. */
+  .sso--shopify{background:var(--card);color:var(--ink);border-color:var(--line)}
   /* Their brands do not follow our theme: Apple's button is black on a dark
      screen too, and Google's stays white. Only the hairline is lifted so the
      white button does not float edgeless on black. */
   :root[data-theme="dark"] .sso--apple{background:#fff;color:#000}
-  :root[data-theme="dark"] .sso--google{border-color:rgba(0,0,0,.2)}
+  /* Google ships a dark variant and this is it — #131314 with their grey
+     hairline. Keeping the white button on a black screen would be the one
+     thing on the page bright enough to read as an alert. */
+  :root[data-theme="dark"] .sso--google{background:#131314;color:#e3e3e3;
+    border-color:#8e918f}
   .sso:active{transform:scale(.985)}
   /* One line under the group rather than a badge on each button: an absolutely
      positioned badge sat on top of a centred label, and reserving room for it
      on every button would have squeezed the longest translation instead. */
-  .signin__soon{margin:.125rem 0 .25rem;text-align:center;color:var(--sub);
-    font-size:.8125rem;line-height:1.45}
+  .signin__soon{margin:.125rem 0 0;text-align:center;color:var(--sub);
+    font-size:.75rem;line-height:1.4}
 
-  .signin__or{display:flex;align-items:center;gap:.75rem;margin:.5rem 0;
+  .signin__or{display:flex;align-items:center;gap:.75rem;margin:.25rem 0;
     color:var(--sub);font-size:.8125rem}
   .signin__or::before,.signin__or::after{content:"";flex:1 1 0;height:1px;
     background:var(--line)}
-  .signin__legal{margin:.75rem 0 0;text-align:center;color:var(--sub);
-    font-size:.75rem;line-height:1.5}
+  .signin__trust{display:flex;align-items:center;justify-content:center;
+    gap:.4375rem;margin:.875rem 0 0;color:var(--sub);font-size:.75rem;
+    text-align:center;line-height:1.45}
+  .signin__trust svg{width:16px;height:16px;flex:0 0 auto;
+    color:var(--brand-ink)}
+  .signin__legal{margin:.5rem 0 0;text-align:center;color:var(--sub);
+    font-size:.6875rem;line-height:1.5;opacity:.8}
 
   /* The key form predates this screen and brought its own centring, its own
      15vh margin and a full-width black button that competed with Apple's for
@@ -546,7 +629,7 @@
     border-radius:13px;background:var(--brand);color:#fff;
     box-shadow:0 6px 16px -6px rgba(167,0,255,.5)}
   .signin .lang-row{display:flex;justify-content:center;gap:.5rem;
-    margin-top:1rem}
+    margin-top:.75rem}
   .signin .lang{min-height:34px;padding:0 .875rem;border-radius:999px;
     border:1px solid var(--line);background:transparent;color:var(--sub);
     font:inherit;font-size:.8125rem;cursor:pointer}
@@ -765,10 +848,15 @@ try {
       item: "article",
       welcome: "Le carnet d'appels de votre boutique.",
       contApple: "Continuer avec Apple", contGoogle: "Continuer avec Google",
-      contFb: "Continuer avec Facebook", orKey: "ou",
+      contShopify: "Continuer avec Shopify", orKey: "ou",
+      pitch1: "Tout gérer.", pitch2: "Tout confirmer.", pitch3: "Tout livrer.",
+      trust: "Sécurisé. Fiable. Fait pour le paiement à la livraison.",
       soonTitle: "Bientôt",
       soon: "La connexion par compte n'est pas encore ouverte. Utilisez votre clé d'accès en attendant.",
       legal: "En continuant, vous acceptez que MITOS traite les commandes de votre boutique.",
+      subToCall: "à appeler", subNothing: "rien à appeler",
+      subWilayas: "wilayas", subCarriers: "transporteurs",
+      subDays: "derniers jours",
       settings: "Réglages", done: "Terminé",
       grpGeneral: "Général", grpAccount: "Boutique", grpAbout: "À propos",
       language: "Langue", appearance: "Apparence",
@@ -823,10 +911,15 @@ try {
       item: "قطعة",
       welcome: "دفتر مكالمات متجرك.",
       contApple: "تابع بـApple", contGoogle: "تابع بـGoogle",
-      contFb: "تابع بـFacebook", orKey: "أو",
+      contShopify: "تابع بـShopify", orKey: "أو",
+      pitch1: "سيّر كل شيء.", pitch2: "أكّد كل شيء.", pitch3: "وصّل كل شيء.",
+      trust: "آمن. موثوق. مصنوع للدفع عند الاستلام.",
       soonTitle: "قريبًا",
       soon: "الدخول بحساب لم يُفتح بعد. استعمل مفتاح الدخول في الأثناء.",
       legal: "بالمتابعة، توافق على أن يعالج MITOS طلبيات متجرك.",
+      subToCall: "للاتصال", subNothing: "لا مكالمات",
+      subWilayas: "ولاية", subCarriers: "ناقلًا",
+      subDays: "آخر يوم",
       settings: "الإعدادات", done: "تمّ",
       grpGeneral: "عامّ", grpAccount: "المتجر", grpAbout: "حول",
       language: "اللغة", appearance: "المظهر",
@@ -1164,10 +1257,34 @@ try {
     }, 420);
   }
 
-  /* The header used to carry a FR/ع toggle. Language is a setting, not a
-     control a merchant needs at arm's reach forty times a day, and it was
-     sitting where the way into every other setting should be. */
+  /* What the screen says about itself under its own name. Never decoration:
+     each of these is the one number a merchant would otherwise have to count
+     by hand. */
+  var barSub = "";
+
+  /* Two letters from the shop's own name — the same thing Contacts does when
+     there is no photograph. It is a real value derived from real data rather
+     than a placeholder graphic, and it is the slot a merchant will expect
+     their own logo to go into. */
+  function initials(domain) {
+    var name = String(domain || "").split(".")[0].replace(/[-_]+/g, " ").trim();
+    var parts = name.split(/\s+/).filter(Boolean);
+    if (!parts.length) return "M";
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+
+  /* The header used to carry a FR/ع toggle, then a gear. It carries the
+     shop's circle now: tapping your own avatar to reach your settings is
+     where every app has trained a merchant to look, and it is one control
+     instead of two. */
   function langButton() {
+    return '<button class="avatar" type="button" data-open-settings ' +
+      'aria-label="' + esc(t().settings) + '">' +
+      esc(initials(sheetShop)) + "</button>";
+  }
+
+  function gearButton() {
     return '<button class="lang" type="button" data-open-settings ' +
       'aria-label="' + esc(t().settings) + '">' +
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
@@ -1194,26 +1311,40 @@ try {
       '<path fill="#34A853" d="M12 23.5c3.1 0 5.7-1 7.6-2.8l-3.7-2.9c-1 .7-2.3 1.1-3.9 1.1-3 0-5.6-2-6.5-4.8H1.7v3A11.5 11.5 0 0 0 12 23.5z"/>' +
       '<path fill="#FBBC05" d="M5.5 14.1a6.9 6.9 0 0 1 0-4.4v-3H1.7a11.5 11.5 0 0 0 0 10.4l3.8-3z"/>' +
       '<path fill="#EA4335" d="M12 5.4c1.7 0 3.2.6 4.4 1.7l3.3-3.3A11.5 11.5 0 0 0 1.7 6.7l3.8 3c.9-2.8 3.5-4.3 6.5-4.3z"/></svg>',
-    fb: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
-      '<path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.7-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.7l-.4 2.9h-2.3v7A10 10 0 0 0 22 12z"/></svg>',
+    /* Shopify rather than Facebook. This is a Shopify app: signing in with the
+       shop is the one of the three that is actually on the roadmap, and it is
+       the account a merchant already has. Facebook was three logos for the
+       sake of three logos. */
+    shopify: '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+      '<path fill="#95BF47" d="M17.6 4.6c-.1-.1-.2-.1-.3-.1l-1.5-.1-1.1-1.1c-.1-.1-.3-.2-.5-.1l-.6.2A3.4 3.4 0 0 0 12 1.6c-1 0-1.9.7-2.6 2-.5 1-.9 2.2-1 2.6l-1.9.6c-.6.2-.6.2-.7.8L4.2 21l10 1.9 5.4-1.3-2-16.8v-.2z"/>' +
+      '<path fill="#5E8E3E" d="M17.3 4.5 17 4.4V22l2.6-.6-2-16.8s0-.1-.3-.1z"/>' +
+      '<path fill="#FFF" d="M12.3 9.1l-.7 2.4s-.7-.3-1.5-.3c-1.2 0-1.3.7-1.3 1 0 1.2 3.2 1.7 3.2 4.6 0 2.2-1.4 3.7-3.3 3.7-2.3 0-3.5-1.4-3.5-1.4l.6-2.1s1.2 1 2.2 1c.7 0 1-.5 1-.9 0-1.6-2.6-1.7-2.6-4.4 0-2.2 1.5-4.3 4.7-4.3.8 0 1.2.2 1.2.2z"/></svg>',
   };
 
+  /* Icon, label, chevron — the shape iOS uses for "this leads somewhere",
+     which is exactly what each of these does: it hands the merchant to
+     somebody else's sign-in page and brings them back. */
   function ssoButton(kind, labelKey, cls) {
     return '<button class="sso ' + cls + '" type="button" data-sso="' + kind + '">' +
-      SSO[kind] + "<span>" + esc(t()[labelKey]) + "</span></button>";
+      SSO[kind] + '<span class="sso__l">' + esc(t()[labelKey]) + "</span>" +
+      '<svg class="sso__go" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+        'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ' +
+        'aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>';
   }
 
   function gate(message) {
     setChrome(false);
     root.innerHTML =
       '<div class="signin">' +
-        '<img class="signin__mark" src="icons/mark.png" alt="" width="112" height="75" decoding="async">' +
-        "<h1>MITOS</h1>" +
+        '<img class="signin__mark" src="icons/mark.png" alt="" width="92" height="62" decoding="async">' +
+        '<h1 class="signin__pitch">' + esc(t().pitch1) +
+          '<span>' + esc(t().pitch2) + "</span>" +
+          '<span>' + esc(t().pitch3) + "</span></h1>" +
         '<p class="signin__sub">' + esc(t().welcome) + "</p>" +
 
         ssoButton("apple", "contApple", "sso--apple") +
         ssoButton("google", "contGoogle", "sso--google") +
-        ssoButton("fb", "contFb", "sso--fb") +
+        ssoButton("shopify", "contShopify", "sso--shopify") +
         '<p class="signin__soon">' + esc(t().soon) + "</p>" +
 
         '<div class="signin__or">' + esc(t().orKey) + "</div>" +
@@ -1225,6 +1356,12 @@ try {
           (message ? '<p class="err">' + esc(message) + "</p>" : "") +
         "</form>" +
 
+        '<p class="signin__trust">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+            'stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" ' +
+            'aria-hidden="true"><path d="M12 2.6l7.5 2.8v5.9c0 4.6-3.1 8.5-7.5 9.8' +
+            '-4.4-1.3-7.5-5.2-7.5-9.8V5.4z"/><path d="M9 12.2l2.1 2.1L15.4 10"/>' +
+            "</svg>" + esc(t().trust) + "</p>" +
         '<p class="signin__legal">' + esc(t().legal) + "</p>" +
         '<div class="lang-row">' +
           LANGS.map(function (l) {
@@ -1371,6 +1508,8 @@ try {
        is opened. */
     sheetShop = (data.shop && data.shop.domain) || sheetShop;
     var counts = data.counts || {};
+    var waiting = (counts.PENDING || 0) + (counts.NO_ANSWER || 0);
+    barSub = waiting ? waiting + " " + t().subToCall : t().subNothing;
     var total = Object.keys(counts).reduce(function (a, k) { return a + counts[k]; }, 0);
 
     var chips = '<button class="seg__item" data-filter=""' +
@@ -1414,12 +1553,16 @@ try {
     if (full !== barKey) {
       barKey = full;
       el.innerHTML = '<div class="bar__row">' +
-          "<h1>" + esc(HEADING[view] ? t()[HEADING[view]] : t().title) + "</h1>" +
+          '<div class="bar__title">' +
+            "<h1>" + esc(HEADING[view] ? t()[HEADING[view]] : t().title) + "</h1>" +
+            (barSub ? '<span class="bar__sub">' + esc(barSub) + "</span>" : "") +
+          "</div>" +
           langButton() +
         "</div>" + (below || "");
       /* First paint of a track: the thumb is placed, not animated. Sliding in
          from the left edge on arrival looks like a bug, not a flourish. */
       slide(el.querySelector(".seg"), false);
+      measureChrome();
       return "";
     }
 
@@ -1441,7 +1584,20 @@ try {
       }
     }
     slide(track, true);
+    measureChrome();
     return "";
+  }
+
+  /* How far down the list has to start. The header is fixed, so it is out of
+     the flow and the list would otherwise begin underneath it — and its height
+     is not a constant: Commandes carries a segmented control, the other three
+     do not. Measured after each render, which is also what makes it survive a
+     rotation or a font-size change. */
+  function measureChrome() {
+    var el = document.getElementById("topbar");
+    if (!el || el.hidden) return;
+    var h = Math.ceil(el.getBoundingClientRect().height);
+    document.documentElement.style.setProperty("--chrome-top", h + 8 + "px");
   }
 
   /**
@@ -1491,6 +1647,7 @@ try {
    * the distinction stays visible.
    */
   function renderRates(data) {
+    barSub = (data.wilayas || []).length + " " + t().subWilayas;
     var fb = data.fallback || [600, 350];
     var cur = (data.shop && data.shop.currency) === "DZD"
       ? "DA" : (data.shop && data.shop.currency) || "DA";
@@ -1717,6 +1874,7 @@ try {
 
   function renderCarriers(data) {
     carrierData = data;
+    barSub = (data.carriers || []).length + " " + t().subCarriers;
     var list = (data.carriers || []).map(carrierCard).join("") ||
       '<p class="note">' + esc(t().noCarriers) + "</p>";
 
@@ -1958,6 +2116,7 @@ try {
   }
 
   function renderStats(data) {
+    barSub = (data.days || statsDays) + " " + t().subDays;
     var cur = (data.shop && data.shop.currency) || "DZD";
     var T = data.totals || {};
     var M = data.money || {};
@@ -2303,6 +2462,15 @@ try {
     if (!sel || !carrierData) return;
     formOpen = sel.value;
     renderCarriers(carrierData);
+  });
+
+  /* A rotation, a split view, a larger system font — all change how tall the
+     header is, and the list has to be pushed clear of whatever it becomes. */
+  window.addEventListener("resize", function () {
+    measureChrome();
+    slide(document.querySelector("#topbar .seg"), false);
+    var track = document.querySelector(".tabbar__in");
+    if (track) slideTab(track, false);
   });
 
   document.addEventListener("keydown", function (e) {

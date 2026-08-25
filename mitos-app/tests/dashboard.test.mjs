@@ -293,9 +293,15 @@ console.log("\n7. The way in");
         }).length,
         hOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
         keyField: !!document.querySelector('.signin input[type="password"]'),
+        chevrons: ssos.every(n => n.querySelector(".sso__go")),
+        markTop: Math.round(document.querySelector(".signin__mark").getBoundingClientRect().top),
       };
     });
+    /* On a screen one line too short, plain centring pushes the logo off the
+       top with no way to scroll back to it. safe centring stops at the edge. */
+    ok(`[${lang}] the mark is never pushed off the top`, r.markTop >= 0, String(r.markTop));
     ok(`[${lang}] three providers are offered`, r.count === 3);
+    ok(`[${lang}] every one leads somewhere visibly`, r.chevrons);
     ok(`[${lang}] none of them wrapped to two lines`,
        r.heights.every(h => h <= 56), JSON.stringify(r.heights));
     ok(`[${lang}] none of the labels is cut off`, r.clipped === 0);
@@ -306,7 +312,34 @@ console.log("\n7. The way in");
   }
 }
 
-console.log("\n8. Réglages");
+console.log("\n8. The header floats, and the list clears it");
+for (const lang of ["fr", "ar"]) {
+  /* The header is fixed now, so it is out of the flow and the list would
+     start underneath it. Its height is not a constant either — Commandes
+     carries a segmented control and the other three screens do not — so it is
+     measured after every render. This is what fails if that measurement is
+     ever replaced by a guess. */
+  const { p } = await page(lang, { rich: true });
+  const r = await p.evaluate(() => {
+    const bar = document.getElementById("topbar").getBoundingClientRect();
+    const pad = parseFloat(getComputedStyle(document.querySelector("main")).paddingTop);
+    return {
+      fixed: getComputedStyle(document.getElementById("topbar")).position,
+      barH: bar.height, pad,
+      sub: (document.querySelector(".bar__sub") || {}).textContent || "",
+      avatar: (document.querySelector(".avatar") || {}).textContent || "",
+    };
+  });
+  ok(`[${lang}] the header floats over the list`, r.fixed === "fixed", r.fixed);
+  ok(`[${lang}] the list starts below it`, r.pad >= r.barH,
+     `pad ${Math.round(r.pad)} vs bar ${Math.round(r.barH)}`);
+  /* Never decoration: it is the one number a merchant would otherwise count. */
+  ok(`[${lang}] the screen says something true about itself`, r.sub.length > 0, r.sub);
+  ok(`[${lang}] the shop has a circle of its own`, /^[A-Z]{1,2}$/.test(r.avatar), r.avatar);
+  await p.close();
+}
+
+console.log("\n9. Réglages");
 {
   const p5 = await b.newPage({ viewport: { width: 390, height: 844 } });
   await p5.route("**/functions/v1/**", r => r.fulfill({ status: 200, contentType: "application/json", body: F("rich-orders.json") }));
@@ -346,7 +379,7 @@ console.log("\n8. Réglages");
   await p5.close();
 }
 
-console.log("\n9. A card says one thing in one colour");
+console.log("\n10. A card says one thing in one colour");
 {
   /* The pressed status button used to wear the brand, whatever the status
      was: a cancelled order showed a red stripe, a red badge and a violet
@@ -387,7 +420,7 @@ console.log("\n9. A card says one thing in one colour");
   await p6.close();
 }
 
-console.log("\n10. A shop with no orders says so instead of showing zeros");
+console.log("\n11. A shop with no orders says so instead of showing zeros");
 {
   const p2 = await b.newPage({ viewport: { width: 390, height: 900 } });
   const shop = { domain: "neuf.myshopify.com", currency: "DZD" };

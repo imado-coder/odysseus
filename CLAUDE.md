@@ -281,6 +281,53 @@ not by being purple.
 under the gradient call button, and two violet buttons stacked left the eye
 unable to tell which one the card was for.
 
+### The header floats too
+
+It was a solid bar stuck to the top with a hairline under it, so the list
+ended at a wall. It is glass now — the same material and the same reasoning as
+the bar at the bottom — and the list runs under it.
+
+Three pieces: a **centred title pill** with the screen's name and, under it,
+the one number worth knowing (how many still need a call, how many wilayas,
+how long a window the figures cover — never decoration); the **segmented
+control** on the same glass; and the **shop's own circle**, which opens
+Réglages.
+
+The circle shows **initials derived from the shop's domain**, the way Contacts
+does when there is no photograph. Nothing in this system stores a logo yet,
+but that is the slot a merchant expects theirs to go in, and Réglages is where
+they would set it.
+
+**The bar takes no taps; only the pills inside it do.** Otherwise the
+transparent gap between them swallows a tap meant for the card showing
+through.
+
+**The list's top padding is measured, not guessed.** The header is fixed, so
+it is out of the flow, and its height is not a constant — Commandes carries a
+segmented control and the other three screens do not. `measureChrome()` runs
+after every render and on resize; a test asserts the padding is at least the
+header's measured height, on every screen and in both languages.
+
+### The way in, redrawn
+
+**Shopify replaced Facebook.** This is a Shopify app: signing in with the shop
+is the one of the three actually on the roadmap, and it is the account a
+merchant already has. Facebook was a third logo for the sake of a third logo.
+
+Each button is icon → label → chevron, the shape iOS uses for "this leads
+somewhere", which is exactly what these do. Google gets its official dark
+variant (`#131314` with their grey hairline) rather than a white button that
+would be the brightest thing on a black screen.
+
+The headline is three lines with the last two in the mark's gradient — the one
+place on the screen where the brand may be decorative, because it is the only
+place with nothing to do. `background-clip: text` has no colour of its own
+where it is unsupported, so the fallback is the solid stand-in.
+
+`justify-content: safe center` rather than `center`: on a screen one line too
+short, plain centring pushes the logo off the top with no way to scroll back
+to it. A test checks the mark's top edge is never negative.
+
 ### Tested in a real browser
 
 `npm run test:dashboard` — **23 assertions**, Chromium at 320/360/390/430 px in
