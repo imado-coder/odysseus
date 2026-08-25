@@ -110,8 +110,24 @@ async function page(lang, { rich }) {
 console.log("\n1. The four tabs exist, in both languages");
 for (const lang of ["fr", "ar"]) {
   const { p, errs } = await page(lang, { rich: true });
-  const tabs = await p.$$eval(".tab", n => n.map(x => x.textContent.trim()));
+  const tabs = await p.$$eval(".tabbar__item", n => n.map(x => x.textContent.trim()));
   ok(`[${lang}] four tabs: ${JSON.stringify(tabs)}`, tabs.length === 4);
+
+  /* The bar floats over the list. If the content does not clear it, the last
+     order on the screen is the one a merchant cannot reach — which is the bug
+     every floating tab bar ships with at least once. */
+  const clearance = await p.evaluate(() => {
+    const bar = document.querySelector(".tabbar__in").getBoundingClientRect();
+    const main = getComputedStyle(document.querySelector("main"));
+    return { barH: Math.round(bar.height), pad: parseFloat(main.paddingBottom) };
+  });
+  ok(`[${lang}] the list scrolls clear of the floating bar`,
+     clearance.pad > clearance.barH, JSON.stringify(clearance));
+
+  /* Navigation is a sibling of #root, so a data reload must not destroy it. */
+  const outside = await p.evaluate(() =>
+    !document.getElementById("root").contains(document.getElementById("tabbar")));
+  ok(`[${lang}] the bar is not rebuilt with the data`, outside);
   ok(`[${lang}] no console errors`, errs.length === 0, JSON.stringify(errs));
   await p.close();
 }

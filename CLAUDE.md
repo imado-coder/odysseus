@@ -120,6 +120,42 @@ blank screen the day the CDN is blocked; the bars are `div`s with a width. The
 daily chart is forced `direction: ltr` in both languages — **time does not
 mirror**.
 
+### Moving between sections is at the bottom
+
+The tabs used to sit at the top of the header. A merchant works this list
+standing up, one-handed, on a phone that is now 6.7 inches — the top of the
+screen is the part a thumb cannot reach, and it held the only way between the
+four screens. Navigation is a floating bar at the bottom now, where the hand
+already is.
+
+Three things about it are load-bearing:
+
+- **It lives outside `#root`.** Every screen replaces `root.innerHTML`
+  wholesale, so a bar inside it was rebuilt — and flickered — each time data
+  arrived. It is a sibling, redrawn only when the section or the language
+  changes.
+- **The list must clear it.** `body.has-tabbar main` carries a bottom padding
+  larger than the bar, plus `env(safe-area-inset-bottom)` for the home
+  indicator. Without it the last order on the screen is the one that cannot be
+  reached, which is the bug every floating bar ships with once. A test asserts
+  the padding exceeds the bar's measured height.
+- **The gate has no bar.** A sign-in screen offering three destinations that
+  would all be refused is worse than no navigation at all.
+
+### The brand is in the interface, not only on the icon
+
+`--brand-a` / `--brand-b` are sampled from `brand/mitos-mark.png` — the two
+most saturated pixels at each end of the logo's gradient — so the app cannot
+drift away from the mark it ships with. The active tab's icon is stroked with
+`url(#mitos-g)`, a real gradient defined once in the document, because an SVG
+gradient cannot be set from CSS and a flat approximation is exactly how a
+product's logo and its UI slowly stop matching.
+
+`--brand-ink` is a solid stand-in for text and anything that cannot carry a
+gradient: neither end of the mark passes contrast on white on its own. Dark
+mode lifts it rather than reusing it, because the violet end goes muddy on a
+dark ground.
+
 ### Tested in a real browser
 
 `npm run test:dashboard` — **23 assertions**, Chromium at 320/360/390/430 px in

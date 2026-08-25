@@ -36,9 +36,30 @@
   :root{
     --ink:#101418; --sub:#5c6672; --line:#e7eaec; --bg:#f4f5f6; --card:#fff;
     --ok:#0a8800; --bad:#d72c0d; --warn:#a35b00; --info:#1a56b3;
+
+    /* The brand, sampled from brand/mitos-mark.png rather than guessed: these
+       are the two most saturated pixels at each end of the logo's gradient.
+       Everything branded on this screen is one of these three tokens, so the
+       app cannot drift away from the mark it ships with. */
+    --brand-a:#a700ff; --brand-b:#00dfff;
+    --brand:linear-gradient(120deg,var(--brand-a),var(--brand-b));
+    /* A solid stand-in for the gradient, for text and icons that cannot carry
+       one. Dark enough to pass contrast on white, which neither end is. */
+    --brand-ink:#6d1fd6;
+    --brand-soft:rgba(167,0,255,.09);
+
+    /* The floating bar is translucent over whatever scrolls under it. */
+    --glass:rgba(255,255,255,.82);
+    --glass-line:rgba(16,20,24,.08);
+    --glass-shadow:0 8px 30px rgba(16,20,24,.13);
   }
   @media (prefers-color-scheme: dark){
-    :root{--ink:#e9edf1;--sub:#9aa5b1;--line:#2a3138;--bg:#14181c;--card:#1b2126}
+    :root{--ink:#e9edf1;--sub:#9aa5b1;--line:#2a3138;--bg:#14181c;--card:#1b2126;
+      /* The mark is drawn for white. On a dark ground the violet end goes
+         muddy, so the solid stand-in is lifted rather than reused. */
+      --brand-ink:#c79bff; --brand-soft:rgba(167,0,255,.18);
+      --glass:rgba(27,33,38,.82); --glass-line:rgba(255,255,255,.10);
+      --glass-shadow:0 8px 30px rgba(0,0,0,.45)}
   }
   *{box-sizing:border-box}
   html{-webkit-text-size-adjust:100%}
@@ -90,7 +111,11 @@
   .addr{color:var(--sub)}
   .fail{margin-top:.5rem;padding:.5rem .625rem;border-radius:8px;
     background:#fdecea;color:var(--bad);font-size:.8125rem}
-  .call{display:flex;align-items:center;justify-content:center;min-height:48px;
+  /* gap, not a space in the markup: the label and the number are two flex
+     children and the whitespace between them is discarded, which is why this
+     read "Appeler0770889900" for as long as the button has existed. */
+  .call{display:flex;align-items:center;justify-content:center;gap:.5rem;
+    min-height:48px;
     margin-top:.75rem;border-radius:10px;background:var(--ok);color:#fff;
     font-weight:600;text-decoration:none;unicode-bidi:plaintext}
   .acts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.375rem;
@@ -146,22 +171,56 @@
      row overflows the header on a 360 px phone and the last tab is cut off
      the screen. The ellipsis is the floor, not the plan: the sizes below are
      chosen so nothing is actually clipped in either language. */
-  /* Four tabs, and the longest French label is "Transporteurs". Sized to
-     their own text rather than to an equal quarter — an equal quarter is 85 px
-     on a 390 px phone and that word needs 97, so equal columns clipped two of
-     the four labels at every width tested.
+  /* ── Moving between sections ─────────────────────────────────────────────
+   *
+   * The tabs used to sit at the top of the header. A merchant works this list
+   * standing up, one-handed, on a phone that is now 6.7 inches — the top of
+   * the screen is the part of it a thumb cannot reach, and it held the only
+   * way between the four screens.
+   *
+   * So navigation lives at the bottom, where the hand already is. It floats
+   * above the content rather than sitting in a bar of its own, so the list
+   * keeps the full height of the screen and the last card is never the one
+   * hidden behind the furniture.
+   *
+   * Translucent: the merchant can see that there is more list underneath, so
+   * the bar reads as floating over the page rather than as its end.
+   */
+  .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;
+    padding:.5rem .75rem;
+    /* The home indicator on a modern iPhone lives in this strip. Without it
+       the labels sit under it and the whole bar looks mis-aligned. */
+    padding-bottom:calc(.5rem + env(safe-area-inset-bottom));
+    /* The padded area is not a target — only the pill itself is, or a tap
+       beside the bar would be swallowed. */
+    pointer-events:none}
+  .tabbar__in{display:flex;gap:.25rem;max-width:26rem;margin:0 auto;
+    padding:.3125rem;border-radius:22px;pointer-events:auto;
+    background:var(--glass);border:1px solid var(--glass-line);
+    box-shadow:var(--glass-shadow);
+    -webkit-backdrop-filter:saturate(180%) blur(20px);
+    backdrop-filter:saturate(180%) blur(20px)}
+  /* A browser without backdrop-filter would show the list straight through a
+     translucent bar and make the labels unreadable, so it gets an opaque one. */
+  @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+    .tabbar__in{background:var(--card)}
+  }
+  .tabbar__item{flex:1 1 0;min-width:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:1px;
+    /* 48 px tall including the label: the same thumb target as every other
+       control on this screen. */
+    min-height:48px;padding:.25rem .125rem;border:0;border-radius:17px;
+    background:transparent;color:var(--sub);font:inherit;font-size:.625rem;
+    line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .tabbar__item svg{width:23px;height:23px;flex:0 0 auto;display:block}
+  .tabbar__item span{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+  .tabbar__item[aria-current="page"]{color:var(--brand-ink);
+    background:var(--brand-soft);font-weight:600}
 
-     flex-basis:auto lets each tab ask for what it needs and grow into the
-     slack; wrap lets the row become two on a narrow phone instead of pushing
-     a tab off the screen. Nothing is ever cut off, and on most phones it is
-     still one row. */
-  .tabs{display:flex;flex-wrap:wrap;gap:.25rem;margin-bottom:.5rem}
-  .tab{flex:1 1 auto;min-height:40px;padding:0 .5rem;
-    border:1px solid var(--line);
-    border-radius:10px;background:transparent;color:var(--sub);font:inherit;
-    font-size:.8125rem;white-space:nowrap;cursor:pointer}
-  .tab[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);
-    color:var(--card);font-weight:600}
+  /* The list must be able to scroll clear of the floating bar, or its last
+     row is unreachable — the one bug a floating bar always ships with. */
+  body.has-tabbar main{padding-bottom:calc(5.5rem + env(safe-area-inset-bottom))}
 
   .help{margin:0;color:var(--sub);font-size:.875rem}
 
@@ -325,6 +384,23 @@ try {
 } catch (e) {}
 </script>
 <div id="root"><p class="note">…</p></div>
+
+<!-- The brand gradient, defined once and referenced by the active tab's icon.
+     An SVG gradient cannot be set from CSS, and the alternative — a flat
+     approximation of the mark — is the thing that makes a product's own logo
+     and its own UI slowly stop matching. -->
+<svg width="0" height="0" aria-hidden="true" focusable="false"
+     style="position:absolute"><defs>
+  <linearGradient id="mitos-g" x1="0" y1="1" x2="1" y2="0">
+    <stop offset="0" stop-color="#a700ff"/>
+    <stop offset="1" stop-color="#00dfff"/>
+  </linearGradient>
+</defs></svg>
+
+<!-- Navigation is a sibling of #root rather than part of it: every screen
+     replaces root.innerHTML wholesale, and rebuilding the bar on each load
+     made the one fixed thing on the screen flicker every time data arrived. -->
+<nav class="tabbar" id="tabbar" hidden></nav>
 
 <script>
 (function () {
@@ -494,12 +570,60 @@ try {
     stats: "tabStats", rates: "tabRates", carriers: "tabCarriers"
   };
 
+  /* One glyph per section, drawn as strokes so a single stroke attribute
+     switches the whole icon between the muted colour and the brand gradient.
+     Each silhouette is deliberately unlike the others — at 23 px a merchant
+     recognises the shape, not the detail. */
+  var ICON_PATHS = {
+    orders: '<rect x="4" y="3" width="16" height="18" rx="2.5"/>' +
+            '<path d="M8.5 8.5h7M8.5 12h7M8.5 15.5h4"/>',
+    stats:  '<path d="M3.5 20.5h17"/>' +
+            '<rect x="5" y="11" width="3.6" height="6.5" rx="1.2"/>' +
+            '<rect x="10.2" y="6.5" width="3.6" height="11" rx="1.2"/>' +
+            '<rect x="15.4" y="13.5" width="3.6" height="4" rx="1.2"/>',
+    rates:  '<path d="M12 21.2s6.8-5.9 6.8-11.2a6.8 6.8 0 1 0-13.6 0c0 5.3 6.8 11.2 6.8 11.2z"/>' +
+            '<circle cx="12" cy="9.8" r="2.6"/>',
+    carriers: '<rect x="2.5" y="6.5" width="11.5" height="9.5" rx="1.5"/>' +
+              '<path d="M14 10h3.6l3.9 3.4V16H14z"/>' +
+              '<circle cx="7" cy="18.2" r="1.9"/><circle cx="17.4" cy="18.2" r="1.9"/>'
+  };
+
+  function icon(name, active) {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="' +
+      (active ? "url(#mitos-g)" : "currentColor") +
+      '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" ' +
+      'aria-hidden="true">' + ICON_PATHS[name] + "</svg>";
+  }
+
+  /* Rebuilt only when the section or the language changes — never when data
+     arrives, which is what made it flicker while it lived inside #root. */
+  function renderTabbar() {
+    var el = document.getElementById("tabbar");
+    if (!el) return;
+    el.innerHTML = '<div class="tabbar__in">' +
+      VIEWS.map(function (v) {
+        var on = view === v;
+        return '<button class="tabbar__item" type="button" data-view="' + v + '"' +
+          (on ? ' aria-current="page"' : "") + ">" + icon(v, on) +
+          "<span>" + esc(t()[TAB[v]]) + "</span></button>";
+      }).join("") + "</div>";
+  }
+
+  /* The gate has no sections to move between, and a navigation bar over a
+     sign-in screen offers three destinations that would all be refused. */
+  function setChrome(on) {
+    var el = document.getElementById("tabbar");
+    if (el) el.hidden = !on;
+    document.body.classList.toggle("has-tabbar", on);
+  }
+
   function langButton() {
     return '<button class="lang" type="button" data-lang lang="' +
       (lang === "fr" ? "ar" : "fr") + '">' + t().other + "</button>";
   }
 
   function gate(message) {
+    setChrome(false);
     root.innerHTML =
       '<form class="gate">' +
         '<img class="gate__mark" src="icons/mark.png" alt="" width="128" height="86" decoding="async">' +
@@ -651,15 +775,7 @@ try {
         "<h1>" + esc(HEADING[view] ? t()[HEADING[view]] : t().title) + "</h1>" +
         '<span class="shop">' + esc((data.shop && data.shop.domain) || "") + "</span>" +
         langButton() +
-      "</div>" +
-      '<nav class="tabs">' +
-        VIEWS.map(function (v) {
-          var label = t()[TAB[v]];
-          return '<button class="tab" type="button" data-view="' + v + '"' +
-            (view === v ? ' aria-pressed="true"' : "") + ">" +
-            esc(label) + "</button>";
-        }).join("") +
-      "</nav>" + (below || "") + "</header>";
+      "</div>" + (below || "") + "</header>";
   }
 
   /**
@@ -1271,6 +1387,8 @@ try {
 
   function show() {
     if (!key()) return gate("");
+    setChrome(true);
+    renderTabbar();
     return view === "rates" ? loadRates()
       : view === "carriers" ? loadCarriers()
       : view === "stats" ? loadStats()
