@@ -35,7 +35,14 @@
 <style>
   :root{
     --ink:#101418; --sub:#5c6672; --line:#e7eaec; --bg:#f4f5f6; --card:#fff;
-    --ok:#0a8800; --bad:#d72c0d; --warn:#a35b00; --info:#1a56b3;
+    /* Status colours, chosen to sit beside a violet-to-cyan brand rather than
+       against it — the previous set was a brown amber and a brick red, and a
+       stripe of #a35b00 down the edge of a card reads as dirt. Each one is
+       dark enough for bold small text on its own tint: measured on white at
+       4.8:1 or better, which is where a status word stops being decoration
+       and starts being readable. */
+    --ok:#047857; --bad:#dc2626; --warn:#b45309; --info:#2563eb;
+    --ok-bg:#ecfdf5; --bad-bg:#fef2f2; --warn-bg:#fffbeb; --info-bg:#eff6ff;
 
     /* The brand, sampled from brand/mitos-mark.png rather than guessed: these
        are the two most saturated pixels at each end of the logo's gradient.
@@ -59,7 +66,12 @@
          muddy, so the solid stand-in is lifted rather than reused. */
       --brand-ink:#c79bff; --brand-soft:rgba(167,0,255,.18);
       --glass:rgba(27,33,38,.82); --glass-line:rgba(255,255,255,.10);
-      --glass-shadow:0 8px 30px rgba(0,0,0,.45)}
+      --glass-shadow:0 8px 30px rgba(0,0,0,.45);
+      /* Lifted for a dark ground, and the tints are near-black washes: the
+         light ones would each become a glowing block on a dark card. */
+      --ok:#34d399; --bad:#f87171; --warn:#fbbf24; --info:#60a5fa;
+      --ok-bg:rgba(52,211,153,.13); --bad-bg:rgba(248,113,113,.13);
+      --warn-bg:rgba(251,191,36,.13); --info-bg:rgba(96,165,250,.13)}
   }
   *{box-sizing:border-box}
   html{-webkit-text-size-adjust:100%}
@@ -92,29 +104,53 @@
   /* A card, not a boxed row: the hairline border made a list of orders read as
      a table, and this is a stack of things to act on. A soft shadow lifts each
      one off the page instead. */
-  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  .card{--accent:#ccd3da;position:relative;overflow:hidden;
+    background:var(--card);border:1px solid var(--line);border-radius:16px;
     padding:1rem;box-shadow:0 1px 2px rgba(16,20,24,.04),
     0 6px 16px -8px rgba(16,20,24,.10)}
-  .card__top{display:flex;justify-content:space-between;align-items:flex-start;
-    gap:.5rem}
-  .name{font-weight:600;letter-spacing:-.01em}
-  .place{color:var(--sub);font-size:.875rem}
+
+  /* A stripe down the leading edge in the status colour. Scrolling a list of
+     forty orders, this is the only thing that can be read at a glance without
+     stopping — the words all look alike at speed, the colours do not.
+     inset-inline-start, so it moves to the right edge in Arabic instead of
+     sitting on the wrong side of every card. */
+  .card::before{content:"";position:absolute;top:0;bottom:0;
+    inset-inline-start:0;width:3px;background:var(--accent)}
+  .c-PENDING{--accent:var(--info)}
+  .c-CONFIRMED,.c-SHIPPED{--accent:var(--warn)}
+  .c-DELIVERED{--accent:var(--ok)}
+  .c-CANCELLED,.c-RETURNED,.c-NO_ANSWER{--accent:var(--bad)}
+
+  .card__top{display:flex;justify-content:space-between;align-items:baseline;
+    gap:.75rem}
+  .name{font-weight:650;letter-spacing:-.01em;min-width:0;overflow:hidden;
+    text-overflow:ellipsis;white-space:nowrap}
+
+  /* The money, given the size it deserves. This is a cash-on-delivery shop:
+     the amount is what the merchant will be handed at the door, and it used
+     to sit in the middle of a grey row between the delivery method and the
+     order number, at the same weight as both. */
+  .amount{flex:0 0 auto;font-size:1.125rem;font-weight:700;
+    letter-spacing:-.02em;font-variant-numeric:tabular-nums;
+    unicode-bidi:plaintext}
+  .amount--unsure{color:var(--warn)}
+
   .pill{flex:0 0 auto;font-size:.75rem;font-weight:600;padding:.1875rem .5rem;
     border-radius:999px;background:#eef1f3;color:var(--sub)}
-  .s-PENDING{background:#e8f0fe;color:var(--info)}
-  .s-CONFIRMED,.s-SHIPPED{background:#fff2e0;color:var(--warn)}
-  .s-DELIVERED{background:#e7f6e9;color:var(--ok)}
-  .s-CANCELLED,.s-RETURNED,.s-NO_ANSWER{background:#fdecea;color:var(--bad)}
-  .meta{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;
-    margin-top:.5rem;font-size:.875rem;color:var(--sub)}
+  .s-PENDING{background:var(--info-bg);color:var(--info)}
+  .s-CONFIRMED,.s-SHIPPED{background:var(--warn-bg);color:var(--warn)}
+  .s-DELIVERED{background:var(--ok-bg);color:var(--ok)}
+  .s-CANCELLED,.s-RETURNED,.s-NO_ANSWER{background:var(--bad-bg);color:var(--bad)}
+  .meta{display:flex;align-items:center;gap:.375rem .5rem;flex-wrap:wrap;
+    margin-top:.375rem;font-size:.8125rem;color:var(--sub)}
   .num{font-variant-numeric:tabular-nums;color:var(--ink);font-weight:600;
     unicode-bidi:plaintext}
   .dot{width:3px;height:3px;border-radius:50%;background:#ccd3da;flex:0 0 auto}
   .warn{color:var(--warn);font-weight:600}
   .what,.addr{margin-top:.375rem;font-size:.875rem}
   .addr{color:var(--sub)}
-  .fail{margin-top:.5rem;padding:.5rem .625rem;border-radius:8px;
-    background:#fdecea;color:var(--bad);font-size:.8125rem}
+  .fail{margin-top:.5rem;padding:.5rem .625rem;border-radius:11px;
+    background:var(--bad-bg);color:var(--bad);font-size:.8125rem}
   /* gap, not a space in the markup: the label and the number are two flex
      children and the whitespace between them is discarded, which is why this
      read "Appeler0770889900" for as long as the button has existed. */
@@ -132,7 +168,7 @@
      is part of the label here, so it takes the label's colour. */
   .call .num{color:inherit}
   .acts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.375rem;
-    margin-top:.5rem}
+    margin-top:.625rem}
   .acts button{min-height:44px;border:1px solid var(--line);
     background:transparent;border-radius:10px;font:inherit;font-size:.875rem;
     color:var(--ink);cursor:pointer}
@@ -328,13 +364,20 @@
      A confirmed order whose push failed is the most expensive row on this
      screen: the customer is waiting for a parcel nobody created. It gets a
      line, in colour, rather than being indistinguishable from a healthy one. */
-  .ship-line{display:flex;flex-wrap:wrap;gap:.375rem .5rem;align-items:center;
-    margin-top:.5rem;font-size:.8125rem;unicode-bidi:plaintext}
-  .ship-line .num{font-variant-numeric:tabular-nums}
-  .ship-line--bad{color:var(--bad)}
-  .ship-line--ok{color:var(--ok)}
-  .ship-why{width:100%;color:var(--bad);line-height:1.45;
-    unicode-bidi:plaintext}
+  /* A tinted block rather than a line of text: the parcel's state is a
+     different kind of fact from the address above it — it is the courier
+     speaking, not the customer — and as plain text it read as one more grey
+     row and wrapped into the middle of a sentence. */
+  .ship-line{display:flex;flex-wrap:wrap;gap:.25rem .5rem;align-items:center;
+    margin-top:.625rem;padding:.4375rem .625rem;border-radius:11px;
+    background:#f1f3f5;color:var(--sub);
+    font-size:.8125rem;unicode-bidi:plaintext}
+  .ship-line svg{width:15px;height:15px;flex:0 0 auto}
+  .ship-line .num{font-variant-numeric:tabular-nums;color:inherit;
+    font-weight:600}
+  .ship-line--bad{background:var(--bad-bg);color:var(--bad)}
+  .ship-line--ok{background:var(--ok-bg);color:var(--ok)}
+  .ship-why{width:100%;line-height:1.45;unicode-bidi:plaintext}
 
   /* ── Statistiques ───────────────────────────────────────────────────────
      No chart library: this page is one file with no network dependency, and
@@ -681,6 +724,12 @@ try {
 
     return '<div class="ship-line' + (bad ? " ship-line--bad" : "") +
       (o.shipStatus === "DELIVERED" ? " ship-line--ok" : "") + '">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+        'stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" ' +
+        'aria-hidden="true"><rect x="2.5" y="6.5" width="11.5" height="9.5" ' +
+        'rx="1.5"/><path d="M14 10h3.6l3.9 3.4V16H14z"/>' +
+        '<circle cx="7" cy="18.2" r="1.9"/>' +
+        '<circle cx="17.4" cy="18.2" r="1.9"/></svg>' +
       "<span>" + esc(label) + "</span>" +
       (o.carrierName ? '<span class="dot"></span><span>' + esc(o.carrierName) + "</span>" : "") +
       (o.trackingNumber
@@ -704,18 +753,27 @@ try {
         "</span>";
     }).join(", ");
 
-    return '<article class="card" data-id="' + esc(o.id) + '">' +
-      '<header class="card__top"><div>' +
-        '<div class="name">' + esc(o.firstName) + " " + esc(o.lastName) + "</div>" +
-        '<div class="place">' + esc(o.commune) + ", " + esc(o.wilayaName) + "</div>" +
-      '</div><span class="pill s-' + esc(o.status) + '" data-pill>' +
-        esc(t()[o.status] || o.status) + "</span></header>" +
+    /* Name and money on the top line, everything else demoted under it.
+       A cash-on-delivery merchant is about to ring this person and, if it goes
+       well, collect that amount at their door — those are the two facts the
+       card is for. Place, method and order number are context, and they used
+       to compete with both at the same weight. */
+    return '<article class="card c-' + esc(o.status) + '" data-id="' +
+        esc(o.id) + '">' +
+      '<header class="card__top">' +
+        '<span class="name">' + esc(o.firstName) + " " + esc(o.lastName) + "</span>" +
+        '<span class="amount' + (o.pricesVerified ? "" : " amount--unsure") +
+          '">' + esc(money(o.total, currency)) + "</span>" +
+      "</header>" +
 
       '<div class="meta">' +
-        "<span>" + esc(o.delivery === "DESK" ? t().desk : t().home) + "</span>" +
+        '<span class="pill s-' + esc(o.status) + '" data-pill>' +
+          esc(t()[o.status] || o.status) + "</span>" +
+        "<span>" + esc(o.commune) + ", " + esc(o.wilayaName) + "</span>" +
         '<span class="dot"></span>' +
-        '<span class="num">' + esc(money(o.total, currency)) + "</span>" +
-        (o.pricesVerified ? "" : '<span class="warn">' + esc(t().unsure) + "</span>") +
+        "<span>" + esc(o.delivery === "DESK" ? t().desk : t().home) + "</span>" +
+        (o.pricesVerified ? "" :
+          '<span class="dot"></span><span class="warn">' + esc(t().unsure) + "</span>") +
         (o.shopifyName
           ? '<span class="dot"></span><span class="num">' + esc(o.shopifyName) + "</span>"
           : "") +
@@ -1502,13 +1560,18 @@ try {
     var card = btn.closest(".card");
     var pill = card.querySelector("[data-pill]");
     var want = btn.getAttribute("data-set");
-    var before = { text: pill.textContent, cls: pill.className };
+    var before = { text: pill.textContent, cls: pill.className,
+                   card: card.className };
 
     card.querySelectorAll("[data-set]").forEach(function (b) {
       b.setAttribute("aria-pressed", b === btn ? "true" : "false");
     });
     pill.textContent = t()[want] || want;
     pill.className = "pill s-" + want;
+    /* The stripe is the thing a merchant actually reads when scanning, so it
+       has to move with the badge. Leaving it on the old status would make the
+       card they just marked still look unhandled. */
+    card.className = "card c-" + want;
 
     api("", {
       method: "POST",
@@ -1537,6 +1600,7 @@ try {
       .catch(function () {
         pill.textContent = before.text;
         pill.className = before.cls;
+        card.className = before.card;
         btn.setAttribute("aria-pressed", "false");
         alert(t().saveFail);
       });

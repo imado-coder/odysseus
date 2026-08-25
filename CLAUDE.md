@@ -156,6 +156,34 @@ gradient: neither end of the mark passes contrast on white on its own. Dark
 mode lifts it rather than reusing it, because the violet end goes muddy on a
 dark ground.
 
+### The order card, and what a merchant actually reads
+
+Everything on it used to be the same weight, so a card was one grey block.
+Three changes fixed that, and each is about the job rather than the styling.
+
+**The money is the headline.** This is cash on delivery: the amount is what
+the merchant will be handed at the door. It sat in the middle of a grey row
+between the delivery method and the order number, at the same weight as both.
+It is now on the top line opposite the name, and nothing else competes.
+
+**A stripe down the leading edge carries the status.** Scrolling forty orders,
+this is the only thing readable without stopping — the words all look alike at
+speed, the colours do not. `inset-inline-start`, so it moves to the right edge
+in Arabic instead of sitting on the wrong side of every card. It is repainted
+with the badge when a status is tapped, and rolled back with it when the write
+fails: a card the merchant just marked must not still look unhandled.
+
+**The parcel is a tinted block, not another line of text.** It is the courier
+speaking, not the customer, and as plain grey text it wrapped into the middle
+of a sentence and read as one more row.
+
+The status palette was replaced at the same time. The old one was a brown
+amber (`#a35b00`) and a brick red; a stripe of that down a card reads as dirt,
+and neither sat beside a violet-to-cyan brand. Each new colour is dark enough
+for bold small text on its own tint — 4.8:1 or better on white, which is where
+a status word stops being decoration. Dark mode gets lifted colours and
+near-black washes, since the light tints would each glow on a dark card.
+
 ### Tested in a real browser
 
 `npm run test:dashboard` — **23 assertions**, Chromium at 320/360/390/430 px in
