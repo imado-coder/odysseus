@@ -359,6 +359,27 @@ npx shopify app deploy
 l'affichage de l'app dans le cadre de l'admin. C'est la première chose à
 confirmer, et la plus susceptible de demander un ajustement.
 
+### `MITOS_BILLING_TEST` — la variable qui décide si quelqu'un paie
+
+L'abonnement (`app/routes/app.billing.tsx`) tourne en **mode test tant que
+`MITOS_BILLING_TEST` ne vaut pas exactement `false`**, variable absente
+comprise. Un abonnement de test ne facture personne et ressemble en tout
+point à un vrai partout ailleurs dans l'API.
+
+C'est le bon mode sur une boutique de développement. Sur une vraie boutique,
+l'oublier veut dire un marchand abonné qui ne paie rien — et rien ne le
+signale, sauf l'argent qui n'arrive pas. L'écran `/app/billing` affiche donc
+la bannière « Mode test » en toutes lettres.
+
+Le défaut penche volontairement du mauvais côté pour nous : le pire cas d'un
+déploiement mal configuré est un marchand non facturé, pas un marchand
+facturé par une application qui n'était pas censée être en ligne.
+
+> `/app` redirige vers `/app/billing` tant que la boutique n'a pas
+> d'abonnement `ACTIVE`. La boutique de développement n'en a aucun : elle
+> demandera l'approbation d'une facture de test — gratuite, un clic — à la
+> première ouverture après le déploiement.
+
 **Les 58 wilayas et 1 541 communes** sont chargées. Les communes sont entrées
 par `POST /functions/v1/admin/communes`, corps = `prisma/algeria.json`, ce qui
 évite de les embarquer dans le bundle : aucun chemin de requête n'en lit une —

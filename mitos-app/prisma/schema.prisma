@@ -369,8 +369,14 @@ model Subscription {
   shopId           String    @unique
   shop             Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
   chargeId         String? // Shopify AppSubscription GID
-  plan             String    @default("trial")
-  status           String    @default("active")
+  plan             String    @default("Essentiel")
+  /// Shopify's own vocabulary, upper case: ACTIVE, CANCELLED, FROZEN, EXPIRED…
+  /// plus NONE, which is this app's word for "Shopify lists no subscription".
+  status           String    @default("NONE")
+  /// A test subscription charges nobody. Stored so the pricing screen can say
+  /// so — a shop billed in test mode by mistake is otherwise invisible until
+  /// the money does not arrive.
+  isTest           Boolean   @default(false)
   trialEndsAt      DateTime?
   currentPeriodEnd DateTime?
   updatedAt        DateTime  @updatedAt

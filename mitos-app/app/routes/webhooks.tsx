@@ -19,6 +19,7 @@
 import type { ActionFunctionArgs } from "react-router";
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
+import { syncFromWebhook } from "../lib/billing.server";
 import {
   recordDataRequest,
   redactCustomer,
@@ -36,6 +37,13 @@ export async function action({ request }: ActionFunctionArgs) {
         where: { domain: shop },
         data: { uninstalledAt: new Date() },
       });
+      break;
+
+    /* The merchant approved a charge, cancelled it, or Shopify froze it
+       because their own Shopify bill went unpaid. All three arrive here, and
+       all three change whether this shop may use the app. */
+    case "APP_SUBSCRIPTIONS_UPDATE":
+      await syncFromWebhook(prisma, shop, payload as Parameters<typeof syncFromWebhook>[2]);
       break;
 
     /* The shopper asked what is held about them. Shopify offers no way to

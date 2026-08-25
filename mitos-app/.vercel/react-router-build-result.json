@@ -20,6 +20,7 @@
       "routes/app.products": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/app.settings": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/app.shipping": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/app.billing": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/app._index": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/app.offers": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0"
     },
@@ -123,6 +124,15 @@
         "parentId": "routes/app",
         "file": "app/routes/app.shipping.tsx",
         "path": "shipping",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/app.billing": {
+        "id": "routes/app.billing",
+        "parentId": "routes/app",
+        "file": "app/routes/app.billing.tsx",
+        "path": "billing",
         "config": {
           "runtime": "nodejs"
         }
@@ -232,6 +242,12 @@
         "file": "routes/app.shipping.tsx",
         "path": "shipping"
       },
+      "routes/app.billing": {
+        "id": "routes/app.billing",
+        "parentId": "routes/app",
+        "file": "routes/app.billing.tsx",
+        "path": "billing"
+      },
       "routes/app._index": {
         "id": "routes/app._index",
         "parentId": "routes/app",
@@ -314,6 +330,11 @@
                 "id": "routes/app.shipping",
                 "file": "routes/app.shipping.tsx",
                 "path": "shipping"
+              },
+              {
+                "id": "routes/app.billing",
+                "file": "routes/app.billing.tsx",
+                "path": "billing"
               },
               {
                 "id": "routes/app._index",

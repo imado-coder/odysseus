@@ -25,6 +25,12 @@ api_version = "2026-10"
   topics = [ "app/uninstalled" ]
   uri = "/webhooks"
 
+  # Approve, cancel, freeze. This is what keeps a shop that cancelled from
+  # keeping access until someone happens to open the pricing screen.
+  [[webhooks.subscriptions]]
+  topics = [ "app_subscriptions/update" ]
+  uri = "/webhooks"
+
   # The three mandatory privacy topics. They are declared with
   # `compliance_topics` rather than `topics` — Shopify configures them per app
   # instead of subscribing them per shop, so they arrive even after the app has

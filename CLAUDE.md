@@ -245,7 +245,8 @@ What an App Store submission would still need today, from the audit:
 ## Order of work
 
 Done: carriers · nav routes (`/app/shipping`, `/app/settings`) · Offers ·
-Dashboard · **Theme App Extension** · **GDPR webhooks** · **`install`**.
+Dashboard · **Theme App Extension** · **GDPR webhooks** · **`install`** ·
+**Billing** · **the brand and its icons**.
 
 1. ~~**Theme App Extension**~~ — **built**, in `mitos-app/extensions/mitos-cod/`.
    An App Block a merchant adds from the theme editor. The flow is the port,
@@ -312,12 +313,58 @@ Dashboard · **Theme App Extension** · **GDPR webhooks** · **`install`**.
    `app/lib/`). `npm run test:install` fails if that copy ever drifts from
    `wilayas.server.ts`, or if the theme's `dz-locations.js` stops agreeing on
    the codes — that test is the only reason the duplication is allowed.
-5. **Billing (`appSubscriptionCreate`)** — nothing charges anyone today. The
-   `Subscription` model exists and not one line writes it. Shopify requires app
-   payments to run through its Billing API, so there is no monthly plan without
-   this and no listing either. Not needed for the first trial stores, which are
-   the merchant's own — but every screen built before it must not assume every
-   shop is entitled.
+5. ~~**Billing (`appSubscriptionCreate`)**~~ — **built and tested**, undeployed
+   like everything else that needs the Partners link. `npm run test:billing`
+   is 29 assertions on the one decision that either gives the app away or
+   locks a paying merchant out of their order list mid-shift.
+
+   **⚠ The price is a placeholder: `PRICE` in `app/lib/plans.ts`, 19 USD/month,
+   14 days' trial.** Change it there and nowhere else — the pricing screen
+   renders the same constant Shopify is configured from, so the two cannot
+   disagree. USD because Shopify's Billing API will not take DZD.
+
+   **One plan, not three.** The merchant gets the theme, the form, the call
+   list, the shipping table, the carriers, the offers. Nothing is held back
+   for a higher tier, so there is no higher tier — inventing one means gating
+   something that works today and charging to switch it back on.
+
+   **Shopify is the only source of truth about money.** The `Subscription` row
+   is a copy of their last answer, nothing more. It exists so the layout
+   loader can gate a screen on one indexed read instead of a GraphQL round
+   trip per page. Two things keep it honest and both are needed:
+   `app_subscriptions/update` (approve, cancel, freeze) writes it, and
+   `/app/billing` re-asks Shopify directly, because a webhook can be missed
+   and that is the screen a locked-out merchant will open.
+
+   **`FROZEN` is not access.** It means the merchant's own Shopify bill is
+   unpaid and Shopify has suspended our charge — so we are not being paid
+   either. The webhook sends the status in lower case and GraphQL in upper;
+   it is normalised on the way in, and a test asserts that a raw `"active"`
+   does **not** pass.
+
+   **The plan key is the merchant-facing name.** Shopify prints `Essentiel`
+   on the approval screen and on their invoice, and `billing.check` matches
+   subscriptions on it. Renaming it orphans every live subscription.
+
+   **Test mode defaults to on.** `MITOS_BILLING_TEST=false` is what makes
+   charges real; anything else, including the variable being unset, bills
+   nobody. The worst case of a misconfigured deploy is then a merchant who is
+   not charged rather than one charged by an app that was not meant to be
+   live. `/app/billing` prints which mode it is in — a shop billed in test
+   mode looks identical everywhere else in the API, and is otherwise
+   invisible until the money does not arrive.
+
+   **`/app` now redirects to `/app/billing` unless the shop is entitled.**
+   That is a real behaviour change for the dev store, which has no
+   subscription: the first thing it will ask for after deploy is approval of
+   a test charge, which is free and takes one click.
+
+   Migration `20260825030000_subscription_billing` adds `isTest` and fixes
+   the two placeholder defaults — `status` defaulted to `"active"`, which
+   would have granted access free to any row created by a path that forgot to
+   set it. **Not hand-applied.** Nothing reads the column until the app
+   deploys, so `prisma migrate deploy` applies it on the first Vercel build
+   and the ledger stays consistent by itself.
 6. **Collapse the two COD forms into one** — the theme renders the App Block
    instead of its own snippet, and `snippets/cod-form.liquid` plus its part of
    `theme.js` come out. Only after the App Block works on the dev store; the
