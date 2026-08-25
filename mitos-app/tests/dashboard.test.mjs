@@ -193,7 +193,49 @@ console.log("\n4. The range buttons refetch");
   await p.close();
 }
 
-console.log("\n5. Dark mode: nothing on a card is lighter than the card");
+console.log("\n5. The selection slides rather than jumping");
+for (const lang of ["fr", "ar"]) {
+  /* A background that switches is instant and tells the eye nothing about
+     where the selection went. This asserts three separate things, because
+     each has broken on its own: the thumb ends up on the pressed segment, it
+     actually moved, and it was still in flight partway through — the last one
+     is what fails if the header is ever rebuilt on a filter tap, which resets
+     the thumb to its destination with no animation to run. */
+  const { p } = await page(lang, { rich: true });
+  const thumb = () => p.$eval(".seg__thumb", n => {
+    const t = n.parentElement.getBoundingClientRect(), a = n.getBoundingClientRect();
+    return { x: Math.round(a.left - t.left), w: Math.round(a.width) };
+  });
+
+  const start = await thumb();
+  const first = await p.$eval('.seg__item[aria-pressed="true"]', n => {
+    const t = n.parentElement.getBoundingClientRect(), a = n.getBoundingClientRect();
+    return { x: Math.round(a.left - t.left), w: Math.round(a.width) };
+  });
+  ok(`[${lang}] it starts on the pressed segment`,
+     Math.abs(start.x - first.x) < 3 && Math.abs(start.w - first.w) < 3,
+     JSON.stringify({ start, first }));
+
+  await p.click('.seg__item[data-filter="CONFIRMED"]');
+  await p.waitForTimeout(80);
+  const mid = await thumb();
+  await p.waitForTimeout(600);
+  const end = await thumb();
+  const on = await p.$eval('.seg__item[aria-pressed="true"]', n => {
+    const t = n.parentElement.getBoundingClientRect(), a = n.getBoundingClientRect();
+    return { x: Math.round(a.left - t.left), w: Math.round(a.width) };
+  });
+
+  ok(`[${lang}] it travels`, start.x !== end.x, JSON.stringify({ start, end }));
+  ok(`[${lang}] it is still moving 80 ms in`, mid.x !== end.x || mid.w !== end.w,
+     JSON.stringify({ mid, end }));
+  ok(`[${lang}] it lands on the segment, not near it`,
+     Math.abs(end.x - on.x) < 3 && Math.abs(end.w - on.w) < 3,
+     JSON.stringify({ end, on }));
+  await p.close();
+}
+
+console.log("\n6. Dark mode: nothing on a card is lighter than the card");
 {
   /* A literal like #f1f3f5 baked into a rule is invisible to a media query,
      so the shipment block shipped as a white slab on a black card with grey
@@ -227,7 +269,7 @@ console.log("\n5. Dark mode: nothing on a card is lighter than the card");
   await p3.close();
 }
 
-console.log("\n6. A shop with no orders says so instead of showing zeros");
+console.log("\n7. A shop with no orders says so instead of showing zeros");
 {
   const p2 = await b.newPage({ viewport: { width: 390, height: 900 } });
   const shop = { domain: "neuf.myshopify.com", currency: "DZD" };

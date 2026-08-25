@@ -140,11 +140,28 @@
    * alternative is segments too narrow to read, and a merchant filtering on
    * "Sans réponse" needs to see the words.
    */
-  .seg{display:flex;gap:2px;padding:2px;margin-bottom:.125rem;
+  /* The curve is the one iOS uses when a sheet settles: it leaves quickly and
+     arrives slowly, which reads as weight rather than as a linear slide. */
+  @media (prefers-reduced-motion:reduce){
+    .seg__thumb,.tabbar__thumb{transition:none}
+    .seg__item:active,.tabbar__item:active{transform:none}
+  }
+  .seg__thumb,.tabbar__thumb{position:absolute;border-radius:7px;
+    background:var(--card);pointer-events:none;
+    box-shadow:0 3px 8px rgba(0,0,0,.12),0 3px 1px rgba(0,0,0,.04);
+    transition:transform .34s cubic-bezier(.32,.72,0,1),
+               width .34s cubic-bezier(.32,.72,0,1)}
+  .seg__thumb{top:2px;bottom:2px;left:0}
+
+  .tabbar__thumb{top:.25rem;bottom:.25rem;left:0;border-radius:21px;
+    background:var(--brand-soft);box-shadow:none}
+
+  .seg{position:relative;display:flex;gap:2px;padding:2px;margin-bottom:.125rem;
     border-radius:9px;background:var(--fill);
     overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
   .seg::-webkit-scrollbar{display:none}
-  .seg__item{flex:1 0 auto;display:inline-flex;align-items:center;
+  .seg__item{position:relative;z-index:1;
+    flex:1 0 auto;display:inline-flex;align-items:center;
     justify-content:center;gap:.3125rem;min-height:30px;padding:0 .625rem;
     border:0;border-radius:7px;background:transparent;color:var(--ink);
     font:inherit;font-size:.8125rem;font-weight:500;white-space:nowrap;
@@ -152,11 +169,11 @@
   .seg__item b{font-weight:600;color:var(--sub);
     font-variant-numeric:tabular-nums;unicode-bidi:plaintext}
 
-  /* The raised segment: white on the track in light, a lifted grey in dark,
-     with the shadow iOS actually uses under the thumb. */
-  .seg__item[aria-pressed="true"]{background:var(--card);font-weight:600;
-    box-shadow:0 3px 8px rgba(0,0,0,.12),0 3px 1px rgba(0,0,0,.04)}
+  /* The raised look is the thumb's job now — an item that painted its own
+     background would leave a second white pill behind while the first slid. */
+  .seg__item[aria-pressed="true"]{font-weight:600}
   .seg__item[aria-pressed="true"] b{color:var(--brand-ink)}
+  .seg__item:active{transform:scale(.96);transition:transform .08s ease}
   main{padding:.75rem;display:grid;gap:.625rem;max-width:44rem;margin:0 auto;
     padding-bottom:max(1rem,env(safe-area-inset-bottom))}
   /* A card, not a boxed row: the hairline border made a list of orders read as
@@ -310,7 +327,7 @@
     /* The padded area is not a target — only the pill itself is, or a tap
        beside the bar would be swallowed. */
     pointer-events:none}
-  .tabbar__in{display:flex;gap:.125rem;max-width:25rem;margin:0 auto;
+  .tabbar__in{position:relative;display:flex;gap:.125rem;max-width:25rem;margin:0 auto;
     padding:.25rem;border-radius:26px;pointer-events:auto;
     background:var(--glass);border:.5px solid var(--glass-line);
     box-shadow:var(--glass-shadow);
@@ -324,7 +341,8 @@
   @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
     .tabbar__in{background:var(--card)}
   }
-  .tabbar__item{flex:1 1 0;min-width:0;display:flex;flex-direction:column;
+  .tabbar__item{position:relative;z-index:1;
+    flex:1 1 0;min-width:0;display:flex;flex-direction:column;
     align-items:center;justify-content:center;gap:2px;
     /* 49 px including the label — the height of a real iOS tab item, and the
        same thumb target as every other control on this screen. */
@@ -337,8 +355,7 @@
     cursor:pointer;transition:background-color .2s ease,color .2s ease}
   .tabbar__item svg{width:25px;height:25px;flex:0 0 auto;display:block}
   .tabbar__item span{max-width:100%;overflow:hidden;text-overflow:ellipsis}
-  .tabbar__item[aria-current="page"]{color:var(--brand-ink);
-    background:var(--brand-soft)}
+  .tabbar__item[aria-current="page"]{color:var(--brand-ink)}
   /* A press should answer instantly; the transition above is for the release. */
   .tabbar__item:active{transform:scale(.94);transition:transform .08s ease}
 
@@ -514,6 +531,14 @@ try {
   document.documentElement.lang = d ? "ar" : "fr";
 } catch (e) {}
 </script>
+<!-- The header is a sibling of #root for the same reason the tab bar is: a
+     sliding thumb cannot slide if the element it lives in is thrown away and
+     rebuilt every time data arrives. The filter counts are shop-wide, not
+     per-filter, so tapping a segment changes nothing in this header — only
+     which segment is raised, which is exactly what makes the animation
+     possible. -->
+<header class="bar" id="topbar" hidden></header>
+
 <div id="root"><p class="note">…</p></div>
 
 <!-- The brand gradient, defined once and referenced by the active tab's icon.
@@ -731,13 +756,50 @@ try {
   function renderTabbar() {
     var el = document.getElementById("tabbar");
     if (!el) return;
+    var first = !el.querySelector(".tabbar__in");
     el.innerHTML = '<div class="tabbar__in">' +
+      '<span class="tabbar__thumb" aria-hidden="true"></span>' +
       VIEWS.map(function (v) {
         var on = view === v;
         return '<button class="tabbar__item" type="button" data-view="' + v + '"' +
           (on ? ' aria-current="page"' : "") + ">" + icon(v, on) +
           "<span>" + esc(t()[TAB[v]]) + "</span></button>";
       }).join("") + "</div>";
+
+    /* The icons are re-stroked on every section change — the gradient is an
+       attribute, not something CSS can switch — so the bar is rebuilt and the
+       thumb has to be re-placed. It still animates: the transition runs from
+       whatever transform the previous thumb had, which is why the position is
+       carried over rather than left at zero. */
+    var track = el.querySelector(".tabbar__in");
+    var thumb = track.querySelector(".tabbar__thumb");
+    if (!first && lastTab) thumb.style.transform = lastTab;
+    slideTab(track, !first);
+  }
+
+  /* Where the tab thumb was before this rebuild. */
+  var lastTab = null;
+
+  function slideTab(track, animate) {
+    var thumb = track.querySelector(".tabbar__thumb");
+    var on = track.querySelector('[aria-current="page"]');
+    if (!thumb || !on) return;
+    var t = track.getBoundingClientRect();
+    var a = on.getBoundingClientRect();
+    if (!a.width) return;
+
+    if (!animate) thumb.style.transition = "none";
+    thumb.style.width = a.width + "px";
+    lastTab = "translateX(" + (a.left - t.left) + "px)";
+    /* Two frames: the carried-over position has to be painted before the new
+       one is set, or the browser collapses both into a single style change
+       and there is nothing to animate between. */
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        thumb.style.transform = lastTab;
+        if (!animate) { void thumb.offsetWidth; thumb.style.transition = ""; }
+      });
+    });
   }
 
   /* The gate has no sections to move between, and a navigation bar over a
@@ -745,6 +807,8 @@ try {
   function setChrome(on) {
     var el = document.getElementById("tabbar");
     if (el) el.hidden = !on;
+    var top = document.getElementById("topbar");
+    if (top && !on) { top.hidden = true; barKey = null; }
     document.body.classList.toggle("has-tabbar", on);
   }
 
@@ -915,19 +979,98 @@ try {
       ? data.orders.map(function (o) { return card(o, currency); }).join("")
       : '<p class="note">' + esc(t().none) + "</p>";
 
-    root.innerHTML =
-      bar(data, '<nav class="seg">' + chips + "</nav>") +
-      "<main>" + body + "</main>";
+    /* Keyed on which segments exist and what they count — never on the
+       rendered markup, which carries the pressed state and would make every
+       tap look like a brand new header. */
+    bar(data,
+        '<nav class="seg"><span class="seg__thumb" aria-hidden="true"></span>' +
+          chips + "</nav>",
+        "seg:" + ORDER.filter(function (x) { return counts[x]; })
+          .map(function (x) { return x + counts[x]; }).join(",") + ":" + total);
+    root.innerHTML = "<main>" + body + "</main>";
   }
 
   /* The header is identical on both screens, so it is built once — the tabs
      are the only way between them and must not move or change shape when the
      screen does. */
-  function bar(data, below) {
-    return '<header class="bar"><div class="bar__row">' +
-        "<h1>" + esc(HEADING[view] ? t()[HEADING[view]] : t().title) + "</h1>" +
-        langButton() +
-      "</div>" + (below || "") + "</header>";
+  /* What the header currently shows. Rebuilding it on every data load would
+     reset the thumb mid-slide, so it is rebuilt only when something in it has
+     actually changed — the section, the language, or the counts. */
+  var barKey = null;
+
+  function bar(data, below, key) {
+    var el = document.getElementById("topbar");
+    var full = view + "|" + lang + "|" + (key || below || "");
+    el.hidden = false;
+
+    if (full !== barKey) {
+      barKey = full;
+      el.innerHTML = '<div class="bar__row">' +
+          "<h1>" + esc(HEADING[view] ? t()[HEADING[view]] : t().title) + "</h1>" +
+          langButton() +
+        "</div>" + (below || "");
+      /* First paint of a track: the thumb is placed, not animated. Sliding in
+         from the left edge on arrival looks like a bug, not a flourish. */
+      slide(el.querySelector(".seg"), false);
+      return "";
+    }
+
+    /* Same header, different answer. The markup is left alone — rebuilding it
+       is what would reset the thumb to its new home instantly — and only the
+       pressed segment changes, which is the state the thumb animates towards.
+
+       This is the whole reason the key is built from the segments a shop has
+       rather than from the rendered HTML: the HTML carries aria-pressed, so
+       keying on it made every tap look like a different header and took the
+       instant path every time. */
+    var track = el.querySelector(".seg");
+    if (track) {
+      var items = track.querySelectorAll("[data-filter]");
+      for (var i = 0; i < items.length; i++) {
+        var mine = items[i].getAttribute("data-filter") === filter;
+        if (mine) items[i].setAttribute("aria-pressed", "true");
+        else items[i].removeAttribute("aria-pressed");
+      }
+    }
+    slide(track, true);
+    return "";
+  }
+
+  /**
+   * The raised segment, as a thing that moves.
+   *
+   * A background that switches from one segment to another is instant and
+   * tells the eye nothing about where the selection went. A thumb that
+   * travels shows the relationship: it was there, it is here now, and the two
+   * are the same control. That is the whole difference between a row of
+   * buttons and a segmented control.
+   *
+   * Measured with getBoundingClientRect rather than offsetLeft: in a
+   * right-to-left, horizontally scrollable track, offsetLeft is inconsistent
+   * across browsers, while the difference between two rects is not. Adding
+   * scrollLeft converts a viewport position back to a position in the track's
+   * own content, which is what the thumb is placed against.
+   */
+  function slide(track, animate) {
+    if (!track) return;
+    var thumb = track.querySelector(".seg__thumb");
+    var on = track.querySelector('[aria-pressed="true"]');
+    if (!thumb || !on) return;
+
+    var t = track.getBoundingClientRect();
+    var a = on.getBoundingClientRect();
+    if (!a.width) return;
+
+    if (!animate) thumb.style.transition = "none";
+    thumb.style.width = a.width + "px";
+    thumb.style.transform =
+      "translateX(" + (a.left - t.left + track.scrollLeft) + "px)";
+    if (!animate) {
+      /* Force the browser to adopt the new position before transitions are
+         allowed again, or re-enabling them animates from the old one. */
+      void thumb.offsetWidth;
+      thumb.style.transition = "";
+    }
   }
 
   /**
@@ -959,7 +1102,8 @@ try {
       "</tr>";
     }).join("");
 
-    root.innerHTML = bar(data) +
+    bar(data);
+    root.innerHTML =
       "<main>" +
         '<p class="help">' + esc(t().ratesHelp) + "</p>" +
 
@@ -1168,7 +1312,8 @@ try {
     var list = (data.carriers || []).map(carrierCard).join("") ||
       '<p class="note">' + esc(t().noCarriers) + "</p>";
 
-    root.innerHTML = bar(data) +
+    bar(data);
+    root.innerHTML =
       "<main>" +
         '<p class="help">' + esc(t().carriersHelp) + "</p>" +
         list +
@@ -1419,7 +1564,8 @@ try {
       "</nav>";
 
     if (!T.orders) {
-      root.innerHTML = bar(data, "") + "<main>" + ranges +
+      bar(data, "");
+      root.innerHTML = "<main>" + ranges +
         '<p class="note">' + esc(t().noData) + "</p></main>";
       return;
     }
@@ -1500,7 +1646,8 @@ try {
       kpi(money(M.deliveryCollected || 0, cur), t().kShipping) +
       "</div>");
 
-    root.innerHTML = bar(data, "") + "<main>" + ranges +
+    bar(data, "");
+    root.innerHTML = "<main>" + ranges +
       '<p class="note" style="padding:0 0 .75rem">' + esc(t().statsHelp) + "</p>" +
       kpis + spark + wilayas + products + carriers + split +
       "</main>";

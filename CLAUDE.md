@@ -184,6 +184,38 @@ for bold small text on its own tint — 4.8:1 or better on white, which is where
 a status word stops being decoration. Dark mode gets lifted colours and
 near-black washes, since the light tints would each glow on a dark card.
 
+### The selection is a thing that moves
+
+Both navigation bars carry a **thumb**: a single element that travels to the
+segment or tab you chose, rather than a background that switches off in one
+place and on in another. The switching version is instant and tells the eye
+nothing about where the selection went; a thumb that travels shows that the
+two are the same control.
+
+This is why the header lives outside `#root`. An element cannot slide if it is
+destroyed and rebuilt every time data arrives — and the header is rebuilt only
+when the section, the language, or the *set of segments* changes.
+
+**The key is built from the segments, never from the rendered markup.** The
+markup carries `aria-pressed`, so keying on it made every tap look like a
+brand-new header and took the instant path every single time. The filter
+counts are shop-wide rather than per-filter, which is exactly what makes this
+possible: tapping a segment changes nothing in the header but which one is
+raised.
+
+Positions come from `getBoundingClientRect`, not `offsetLeft`: in a
+right-to-left, horizontally scrollable track `offsetLeft` is inconsistent
+across browsers and the difference between two rects is not. `scrollLeft` is
+added to convert a viewport position back into the track's own content.
+
+A test asserts three things separately, because each has broken alone: the
+thumb lands on the pressed segment, it actually moved, and it was **still in
+flight 80 ms in** — that last one is what fails the moment the header starts
+being rebuilt on a tap again.
+
+`prefers-reduced-motion` removes the travel and the press-scale; the thumb
+still ends up in the right place, it just gets there at once.
+
 ### Tested in a real browser
 
 `npm run test:dashboard` — **23 assertions**, Chromium at 320/360/390/430 px in
