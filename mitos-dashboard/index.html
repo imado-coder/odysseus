@@ -6,6 +6,16 @@
 <meta name="robots" content="noindex,nofollow">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#101418">
+
+<!-- Installable on a phone's home screen. The merchant works this list all
+     day, standing up, and a tab among twenty tabs is not that. -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MITOS">
+<meta name="mobile-web-app-capable" content="yes">
+
 <title>MITOS — Commandes</title>
 <!--
   The merchant's call list, and the shipping table behind it.
@@ -1001,6 +1011,20 @@ try {
   applyLang();
   show();
 })();
+</script>
+
+<script>
+/* The service worker only makes the app open without signal — it caches the
+   shell and never the orders. Registration is deliberately last and wrapped:
+   a browser that does not support it, or a private window that refuses it,
+   must not stop the call list from working. */
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("sw.js").catch(function () {
+      /* Nothing to tell the merchant. The page works either way. */
+    });
+  });
+}
 </script>
 </body>
 </html>
