@@ -81,6 +81,11 @@
     --brand-soft:rgba(167,0,255,.09);
 
     /* The floating bar is translucent over whatever scrolls under it. */
+    /* The lens is lighter than the bar it sits in, in both themes: a
+       selection that is darker than its track reads as a hole. */
+    --lens:rgba(255,255,255,.86);
+    --lens-top:rgba(255,255,255,.9);
+    --lens-bot:rgba(255,255,255,.35);
     --glass:rgba(255,255,255,.72);
     --glass-line:rgba(255,255,255,.5);
     --glass-shadow:0 10px 34px rgba(0,0,0,.14),0 2px 8px rgba(0,0,0,.06);
@@ -110,6 +115,9 @@
       /* The mark is drawn for white. On a dark ground the violet end goes
          muddy, so the solid stand-in is lifted rather than reused. */
       --brand-ink:#c79bff; --brand-soft:rgba(167,0,255,.18);
+      --lens:rgba(120,120,128,.34);
+      --lens-top:rgba(255,255,255,.24);
+      --lens-bot:rgba(255,255,255,.06);
       --glass:rgba(30,30,32,.72); --glass-line:rgba(255,255,255,.10);
       --glass-shadow:0 10px 34px rgba(0,0,0,.6);
       /* Lifted for a dark ground, and the tints are near-black washes: the
@@ -203,13 +211,56 @@
      arrives slowly, which reads as weight rather than as a linear slide. */
   @media (prefers-reduced-motion:reduce){
     .seg__thumb,.tabbar__thumb{transition:none}
+    .seg__thumb::after,.tabbar__thumb::after{display:none}
     .seg__item:active,.tabbar__item:active{transform:none}
   }
+  /* ── The selection, as a lens ────────────────────────────────────────────
+   *
+   * Three things separate a glass lens from a coloured rectangle, and all
+   * three are what the eye is actually reading:
+   *
+   *   It refracts. backdrop-filter on the thumb itself means it samples and
+   *   brightens what is behind it rather than covering it — a pill with a
+   *   flat fill sits *on* the bar, this one sits *in* it.
+   *
+   *   It has a lit rim. A one-pixel inset highlight along the top edge and a
+   *   fainter one along the bottom is what glass does with a light source
+   *   above it, and it is the cheapest, most convincing part of the whole
+   *   effect.
+   *
+   *   It disperses while it moves. Real glass splits light at its edges, and
+   *   that fringe is only visible when the lens is travelling — so the
+   *   chromatic ring below fades in for the length of the journey and back
+   *   out when it lands. Left on permanently it would read as a rainbow
+   *   border, which is a very different and much worse thing.
+   */
   .seg__thumb,.tabbar__thumb{position:absolute;border-radius:7px;
-    background:var(--card);pointer-events:none;
-    box-shadow:0 3px 8px rgba(0,0,0,.12),0 3px 1px rgba(0,0,0,.04);
-    transition:transform .34s cubic-bezier(.32,.72,0,1),
-               width .34s cubic-bezier(.32,.72,0,1)}
+    pointer-events:none;
+    background:linear-gradient(180deg,
+      rgba(255,255,255,.14),rgba(255,255,255,.04)),var(--lens);
+    -webkit-backdrop-filter:blur(6px) saturate(150%) brightness(1.06);
+    backdrop-filter:blur(6px) saturate(150%) brightness(1.06);
+    box-shadow:inset 0 1px 0 var(--lens-top),
+               inset 0 -1px 0 var(--lens-bot),
+               0 3px 8px rgba(0,0,0,.12),0 1px 1px rgba(0,0,0,.05);
+    /* Transform and width travel; the dispersion fades on its own clock. */
+    transition:transform .38s cubic-bezier(.32,.72,0,1),
+               width .38s cubic-bezier(.32,.72,0,1)}
+
+  /* The dispersion ring: a gradient border made by masking a filled box so
+     only its 1px frame survives. */
+  .seg__thumb::after,.tabbar__thumb::after{content:"";position:absolute;
+    inset:0;border-radius:inherit;padding:1px;opacity:0;
+    background:linear-gradient(115deg,
+      rgba(167,0,255,.85),rgba(0,223,255,.85) 45%,
+      rgba(255,149,0,.55) 75%,rgba(167,0,255,.7));
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;
+    mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    mask-composite:exclude;
+    transition:opacity .22s ease}
+  .is-travelling.seg__thumb::after,
+  .is-travelling.tabbar__thumb::after{opacity:1}
   .seg__thumb{top:2px;bottom:2px;left:0}
 
   /* A neutral pill. The icon already carries the gradient; a violet wash and
@@ -217,8 +268,7 @@
      same colour and the heaviest thing on the screen. Selection is shown by
      being *stronger* — full-contrast label, plain fill — and the brand shows
      in the one place it reads as a mark rather than as decoration. */
-  .tabbar__thumb{top:.25rem;bottom:.25rem;left:0;border-radius:21px;
-    background:var(--fill);box-shadow:none}
+  .tabbar__thumb{top:.25rem;bottom:.25rem;left:0;border-radius:21px}
 
   .seg{position:relative;display:flex;gap:2px;padding:2px;margin-bottom:.125rem;
     border-radius:9px;background:var(--fill);
@@ -535,6 +585,57 @@
 
   .tags{display:flex;flex-direction:column;gap:.25rem;align-items:flex-end}
   .acts--3{grid-template-columns:repeat(3,minmax(0,1fr))}
+
+  .secondary{width:100%;min-height:46px;margin-top:.625rem;
+    border:1px solid var(--line);border-radius:13px;background:transparent;
+    color:var(--ink);font:inherit;font-weight:600;cursor:pointer}
+  .secondary:active{background:var(--fill)}
+  .secondary:disabled{opacity:.6}
+
+  /* A carrier's attributes are not statuses. "Par défaut" in delivered-green
+     and "Envoi automatique" in confirmed-blue borrowed two meanings that
+     belong to orders, and on a screen with no orders on it they read as
+     states that something had reached. */
+  .tag{font-size:.75rem;font-weight:600;padding:.1875rem .5rem;
+    border-radius:999px;background:var(--fill);color:var(--sub)}
+  .tag--on{background:var(--brand-soft);color:var(--brand-ink)}
+
+  /* ── The menu ────────────────────────────────────────────────────────────
+   *
+   * Three buttons for three rare actions gave a carrier card a row of
+   * furniture as heavy as the card itself. Test, rename and delete are
+   * things a merchant does once and then not again for months, so they live
+   * behind one dot-dot-dot — which is where iOS has trained everyone to look
+   * for exactly this kind of list.
+   *
+   * It grows out of the corner it was opened from rather than fading in
+   * place: an origin is what tells the eye which control produced it, and
+   * without one a menu reads as a dialogue that arrived on its own.
+   */
+  .kebab{flex:0 0 auto;width:34px;height:34px;border:0;border-radius:50%;
+    padding:0;background:transparent;color:var(--sub);cursor:pointer;
+    display:flex;align-items:center;justify-content:center}
+  .kebab:active{background:var(--fill)}
+  .kebab svg{width:20px;height:20px}
+
+  .menu{position:fixed;z-index:60;min-width:13rem;max-width:min(18rem,86vw);
+    padding:.25rem;border-radius:14px;
+    background:var(--glass);border:.5px solid var(--glass-line);
+    box-shadow:0 12px 40px rgba(0,0,0,.34),0 2px 8px rgba(0,0,0,.16);
+    -webkit-backdrop-filter:saturate(180%) blur(30px);
+    backdrop-filter:saturate(180%) blur(30px);
+    opacity:0;transform:scale(.86);transform-origin:var(--from,100% 0);
+    transition:opacity .18s ease,transform .26s cubic-bezier(.32,.72,0,1)}
+  .menu.is-open{opacity:1;transform:scale(1)}
+
+  .menu button{display:flex;align-items:center;gap:.75rem;width:100%;
+    min-height:44px;padding:0 .75rem;border:0;border-radius:11px;
+    background:transparent;color:var(--ink);font:inherit;font-size:.9375rem;
+    text-align:start;cursor:pointer}
+  .menu button:active{background:var(--fill)}
+  .menu button svg{width:19px;height:19px;flex:0 0 auto;opacity:.85}
+  .menu hr{margin:.1875rem .5rem;border:0;border-top:.5px solid var(--line)}
+  .menu .danger{color:var(--bad)}
 
   /* The test result is the whole point of the test button, so it gets a line
      of its own rather than an alert that vanishes. */
@@ -892,6 +993,11 @@ try {
      merchant opens, changes one thing in, and closes — not a fifth place to
      work, which is what the tab bar is for. -->
 <div class="scrim" id="scrim" hidden></div>
+<!-- One menu, moved and refilled. Fifty carriers would otherwise mean fifty
+     hidden menus in the document, rebuilt on every render, and only one is
+     ever open. -->
+<div class="menu" id="menu" role="menu" hidden></div>
+
 <aside class="sheet" id="sheet" hidden role="dialog" aria-modal="true"
        aria-labelledby="sheet-title"></aside>
 
@@ -1231,16 +1337,22 @@ try {
     var a = on.getBoundingClientRect();
     if (!a.width) return;
 
+    var x = a.left - t.left;
+    var wasAt = lastTab ? parseFloat(lastTab.replace(/[^\d.-]/g, "")) : x;
     if (!animate) thumb.style.transition = "none";
     thumb.style.width = a.width + "px";
-    lastTab = "translateX(" + (a.left - t.left) + "px)";
+    lastTab = "translateX(" + x + "px)";
     /* Two frames: the carried-over position has to be painted before the new
        one is set, or the browser collapses both into a single style change
        and there is nothing to animate between. */
     requestAnimationFrame(function () {
       requestAnimationFrame(function () {
-        thumb.style.transform = lastTab;
-        if (!animate) { void thumb.offsetWidth; thumb.style.transition = ""; }
+        if (animate) lens(thumb, x, wasAt);
+        else {
+          thumb.style.transform = lastTab;
+          void thumb.offsetWidth;
+          thumb.style.transition = "";
+        }
       });
     });
   }
@@ -1780,16 +1892,56 @@ try {
     var a = on.getBoundingClientRect();
     if (!a.width) return;
 
-    if (!animate) thumb.style.transition = "none";
-    thumb.style.width = a.width + "px";
-    thumb.style.transform =
-      "translateX(" + (a.left - t.left + track.scrollLeft) + "px)";
+    var x = a.left - t.left + track.scrollLeft;
+
     if (!animate) {
+      thumb.style.transition = "none";
+      thumb.style.width = a.width + "px";
+      thumb.style.transform = "translateX(" + x + "px)";
       /* Force the browser to adopt the new position before transitions are
          allowed again, or re-enabling them animates from the old one. */
       void thumb.offsetWidth;
       thumb.style.transition = "";
+      return;
     }
+
+    thumb.style.width = a.width + "px";
+    lens(thumb, x, thumb.getBoundingClientRect().left - t.left);
+  }
+
+  /**
+   * The travelling part.
+   *
+   * A lens that slides at a fixed width is a rectangle that changed position.
+   * A lens that stretches along its path and settles is one that has weight —
+   * it is the difference between a selection that moved and a selection that
+   * *travelled*, which is the whole thing being asked for here.
+   *
+   * The stretch is applied on the way and released a beat before the journey
+   * ends, so the lens arrives already gathering itself rather than snapping
+   * back after it has stopped. The dispersion ring is on for exactly that
+   * window: glass only splits light while it is moving through it.
+   */
+  function lens(thumb, to, from) {
+    var travel = Math.abs(to - from);
+    if (travel < 2) {
+      thumb.style.transform = "translateX(" + to + "px)";
+      return;
+    }
+
+    /* Longer journeys stretch more, but never past a point where the lens
+       stops looking like the thing it was. */
+    var stretch = Math.min(1 + travel / 900, 1.14);
+
+    thumb.classList.add("is-travelling");
+    thumb.style.transform =
+      "translateX(" + to + "px) scaleX(" + stretch + ")";
+
+    clearTimeout(thumb._settle);
+    thumb._settle = setTimeout(function () {
+      thumb.style.transform = "translateX(" + to + "px)";
+      thumb.classList.remove("is-travelling");
+    }, 210);
   }
 
   /**
@@ -2002,16 +2154,94 @@ try {
       "</div></form>";
   }
 
+  var MENU_ICONS = {
+    test: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+    edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14 6.5 17.5 10"/></svg>',
+    remove: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9.5 7V5.2A1.2 1.2 0 0 1 10.7 4h2.6a1.2 1.2 0 0 1 1.2 1.2V7"/><path d="M6.5 7l.8 12.1A1.5 1.5 0 0 0 8.8 20.5h6.4a1.5 1.5 0 0 0 1.5-1.4L17.5 7"/></svg>',
+  };
+
+  function kebab(id) {
+    return '<button class="kebab" type="button" data-menu="' + esc(id) + '" ' +
+      'aria-haspopup="menu" aria-label="…">' +
+      '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+      '<circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/>' +
+      '<circle cx="19" cy="12" r="1.9"/></svg></button>';
+  }
+
+  /**
+   * One menu element, moved and refilled rather than one per card.
+   *
+   * Fifty carriers would otherwise mean fifty hidden menus in the document,
+   * all of them re-created on every render. There is only ever one open.
+   */
+  function openMenu(btn, id) {
+    var el = document.getElementById("menu");
+    var row = function (action, key, cls) {
+      return '<button type="button" data-menu-do="' + action + '" ' +
+        'data-menu-id="' + esc(id) + '"' + (cls ? ' class="' + cls + '"' : "") +
+        ">" + MENU_ICONS[action] + "<span>" + esc(t()[key]) + "</span></button>";
+    };
+
+    el.innerHTML = row("test", "test") + row("edit", "edit") +
+      "<hr>" + row("remove", "remove", "danger");
+    el.hidden = false;
+
+    /* Placed against the button that opened it, flipped to whichever side has
+       room, and clamped so it never hangs off the screen. */
+    var b = btn.getBoundingClientRect();
+    /* offsetWidth, not getBoundingClientRect: the menu starts at scale(.86)
+       so its rect is 14 % smaller than the box it will occupy, and placing it
+       against that measurement pushed it off the edge of the screen the
+       moment it finished growing. Layout sizes ignore transforms. */
+    var mw = el.offsetWidth, mh = el.offsetHeight;
+    var pad = 8;
+    var left = Math.min(Math.max(pad, b.right - mw), innerWidth - mw - pad);
+    var below = b.bottom + 6;
+    var flip = below + mh > innerHeight - pad;
+    el.style.left = left + "px";
+    el.style.top = (flip ? b.top - mh - 6 : below) + "px";
+    el.style.setProperty("--from",
+      (b.left + b.width / 2 - left) + "px " + (flip ? "100%" : "0"));
+
+    void el.offsetHeight;
+    el.classList.add("is-open");
+    menuOwner = btn;
+  }
+
+  var menuOwner = null;
+
+  function closeMenu() {
+    var el = document.getElementById("menu");
+    if (!el || el.hidden) return;
+    el.classList.remove("is-open");
+    menuOwner = null;
+    setTimeout(function () {
+      if (!el.classList.contains("is-open")) el.hidden = true;
+    }, 260);
+  }
+
+  /* Deleting a carrier also removes its API token from the Vault — the
+     Carrier row holds the only pointer to it — so this is one call, not two,
+     and it is the carriers function that owns both halves. */
+  function removeCarrier(id) {
+    if (!confirm(t().confirmRemove)) return;
+    return carrierApi("/delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: id })
+    }).then(loadCarriers).catch(function () { alert(t().saveFail); });
+  }
+
   function carrierCard(c) {
     return '<article class="card" data-carrier="' + esc(c.id) + '">' +
       '<header class="card__top"><div>' +
         '<div class="name">' + esc(c.name) + "</div>" +
         '<div class="place">' + esc(c.provider.replace(/_/g, " ")) + "</div>" +
       "</div><div class=\"tags\">" +
-        (c.isDefault ? '<span class="pill s-DELIVERED">' + esc(t().setDefault) + "</span>" : "") +
-        (c.autoPush ? '<span class="pill s-CONFIRMED">' + esc(t().autoPush) + "</span>" : "") +
-        (c.enabled ? "" : '<span class="pill s-CANCELLED">off</span>') +
-      "</div></header>" +
+        (c.isDefault ? '<span class="tag tag--on">' + esc(t().setDefault) + "</span>" : "") +
+        (c.autoPush ? '<span class="tag tag--on">' + esc(t().autoPush) + "</span>" : "") +
+        (c.enabled ? "" : '<span class="tag" style="color:var(--bad)">off</span>') +
+      "</div>" + kebab(c.id) + "</header>" +
 
       '<div class="meta">' +
         '<span class="num">' + c.ratedWilayas + "</span><span>wilayas</span>" +
@@ -2020,11 +2250,7 @@ try {
       "</div>" +
       '<p class="testout" data-testout></p>' +
 
-      '<div class="acts acts--3">' +
-        '<button type="button" data-test="' + esc(c.id) + '">' + esc(t().test) + "</button>" +
-        '<button type="button" data-edit="' + esc(c.id) + '">' + esc(t().edit) + "</button>" +
-        '<button type="button" data-remove="' + esc(c.id) + '">' + esc(t().remove) + "</button>" +
-      "</div></article>";
+      "</article>";
   }
 
   function renderCarriers(data) {
@@ -2045,8 +2271,7 @@ try {
         /* Only when there is a courier to ask. On a shop with none it would
            be a button that can only ever report nothing. */
         ((data.carriers || []).length && !formOpen
-          ? '<button type="button" class="ghost" data-sync ' +
-            'style="width:100%;min-height:44px;margin-top:.5rem">' +
+          ? '<button type="button" class="secondary" data-sync>' +
             esc(t().sync) + "</button>"
           : "") +
       "</main>";
@@ -2417,6 +2642,30 @@ try {
   }
 
   document.addEventListener("click", function (e) {
+    var kb = e.target.closest("[data-menu]");
+    if (kb) {
+      /* A second tap on the same dots closes it, the way a menu button
+         behaves everywhere else. */
+      if (menuOwner === kb) return closeMenu();
+      closeMenu();
+      return openMenu(kb, kb.getAttribute("data-menu"));
+    }
+
+    var pick = e.target.closest("[data-menu-do]");
+    if (pick) {
+      var act = pick.getAttribute("data-menu-do");
+      var cid = pick.getAttribute("data-menu-id");
+      closeMenu();
+      if (act === "test") return runTest(pick, cid);
+      if (act === "edit") { editing = cid; formOpen = true; return renderCarriers(carrierData); }
+      if (act === "remove") return removeCarrier(cid);
+      return;
+    }
+
+    /* Anywhere else dismisses it — including the control that opened it,
+       which is handled above. */
+    if (menuOwner) closeMenu();
+
     if (e.target.closest("[data-open-settings]")) return openSheet();
 
     /* Pressed, and honest about it. Nothing is wired to a provider yet, so it
@@ -2512,16 +2761,6 @@ try {
       editing = editBtn.getAttribute("data-edit");
       formOpen = true;
       return renderCarriers(carrierData);
-    }
-
-    var rmBtn = e.target.closest("[data-remove]");
-    if (rmBtn) {
-      if (!confirm(t().confirmRemove)) return;
-      return carrierApi("/delete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: rmBtn.getAttribute("data-remove") })
-      }).then(loadCarriers).catch(function () { alert(t().saveFail); });
     }
 
     var sendBtn = e.target.closest("[data-send]");
@@ -2621,7 +2860,10 @@ try {
 
   /* A rotation, a split view, a larger system font — all change how tall the
      header is, and the list has to be pushed clear of whatever it becomes. */
+  window.addEventListener("scroll", closeMenu, { passive: true });
+
   window.addEventListener("resize", function () {
+    closeMenu();
     measureChrome();
     slide(document.querySelector("#topbar .seg"), false);
     var track = document.querySelector(".tabbar__in");
@@ -2629,9 +2871,9 @@ try {
   });
 
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && document.body.classList.contains("sheet-open")) {
-      closeSheet();
-    }
+    if (e.key !== "Escape") return;
+    if (menuOwner) return closeMenu();
+    if (document.body.classList.contains("sheet-open")) closeSheet();
   });
 
   applyTheme();

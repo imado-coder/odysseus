@@ -388,7 +388,82 @@ console.log("\n9. Réglages");
   await p5.close();
 }
 
-console.log("\n10. Two things a screenshot caught that no assertion had");
+console.log("\n10. The selection is a lens, not a rectangle");
+{
+  /* Three things separate a glass lens from a coloured pill, and each is
+     measurable: it refracts what is behind it, it stretches along the path
+     it travels, and it disperses light only while it is moving. All three
+     are off at rest, which is the part that is easy to get wrong. */
+  const { p } = await page("fr", { rich: true });
+  const read = () => p.evaluate(() => {
+    const n = document.querySelector(".tabbar__thumb");
+    const cs = getComputedStyle(n);
+    const m = new DOMMatrix(cs.transform);
+    return {
+      scaleX: m.a,
+      ring: parseFloat(getComputedStyle(n, "::after").opacity),
+      refracts: (cs.backdropFilter || cs.webkitBackdropFilter || "").includes("blur"),
+    };
+  });
+
+  const rest = await read();
+  ok("at rest it is not stretched", Math.abs(rest.scaleX - 1) < 0.01, String(rest.scaleX));
+  ok("at rest it does not disperse", rest.ring < 0.05, String(rest.ring));
+  ok("it refracts what is behind it", rest.refracts);
+
+  await p.click('[data-view="carriers"]');
+  await p.waitForTimeout(110);
+  const flight = await read();
+  ok("in flight it stretches along its path", flight.scaleX > 1.02, String(flight.scaleX));
+  ok("in flight the rim disperses", flight.ring > 0.2, String(flight.ring));
+
+  await p.waitForTimeout(700);
+  const landed = await read();
+  ok("it settles back to its own shape", Math.abs(landed.scaleX - 1) < 0.01, String(landed.scaleX));
+  ok("and the dispersion goes with it", landed.ring < 0.05, String(landed.ring));
+  await p.close();
+}
+
+console.log("\n11. The carrier menu");
+{
+  const carriers = JSON.stringify({ ok: true, shop: { domain: "boutique-dz.myshopify.com", currency: "DZD" },
+    providers: [{ provider: "ECOTRACK", fields: [], needsBaseUrl: true }],
+    carriers: [{ id: "c1", provider: "ECOTRACK", name: "TREX Express", enabled: true,
+      isDefault: true, autoPush: true, baseUrl: "", fromWilaya: "16",
+      hasCredentials: true, ratedWilayas: 58, shipments: 74 }] });
+
+  const p8 = await b.newPage({ viewport: { width: 390, height: 844 } });
+  await p8.route("**/functions/v1/**", r => r.fulfill({ status: 200, contentType: "application/json",
+    body: r.request().url().includes("/carriers") ? carriers : F("rich-orders.json") }));
+  await p8.goto(`http://localhost:${PORT}/index.html`);
+  await p8.evaluate(() => { localStorage.setItem("mitos:key", "x".repeat(40)); localStorage.setItem("mitos:lang", "fr"); });
+  await p8.reload({ waitUntil: "networkidle" });
+  await p8.waitForTimeout(300);
+  await p8.click('[data-view="carriers"]');
+  await p8.waitForSelector(".kebab");
+  await p8.waitForTimeout(400);
+
+  await p8.click(".kebab");
+  await p8.waitForTimeout(400);
+  const m = await p8.evaluate(() => {
+    const n = document.querySelector("#menu"), r = n.getBoundingClientRect();
+    return { open: n.classList.contains("is-open"), rows: n.querySelectorAll("button").length,
+             onScreen: r.left >= 0 && r.right <= innerWidth && r.top >= 0 && r.bottom <= innerHeight };
+  });
+  ok("the dots open a menu", m.open);
+  ok("with the three actions the buttons used to be", m.rows === 3, String(m.rows));
+  /* The menu starts at scale(.86); measuring it through that transform put
+     it off the edge of the screen the moment it finished growing. */
+  ok("and it fits on the screen", m.onScreen);
+
+  await p8.keyboard.press("Escape");
+  await p8.waitForTimeout(400);
+  ok("escape closes it",
+     !(await p8.evaluate(() => document.querySelector("#menu").classList.contains("is-open"))));
+  await p8.close();
+}
+
+console.log("\n12. Two things a screenshot caught that no assertion had");
 {
   const p7 = await b.newPage({ viewport: { width: 390, height: 844 }, colorScheme: "dark" });
 
@@ -432,7 +507,7 @@ console.log("\n10. Two things a screenshot caught that no assertion had");
   await p7.close();
 }
 
-console.log("\n11. A card says one thing in one colour");
+console.log("\n13. A card says one thing in one colour");
 {
   /* The pressed status button used to wear the brand, whatever the status
      was: a cancelled order showed a red stripe, a red badge and a violet
@@ -473,7 +548,7 @@ console.log("\n11. A card says one thing in one colour");
   await p6.close();
 }
 
-console.log("\n12. A shop with no orders says so instead of showing zeros");
+console.log("\n14. A shop with no orders says so instead of showing zeros");
 {
   const p2 = await b.newPage({ viewport: { width: 390, height: 900 } });
   const shop = { domain: "neuf.myshopify.com", currency: "DZD" };

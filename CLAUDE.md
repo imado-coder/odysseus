@@ -373,6 +373,53 @@ and its green bled up through the glass and turned the whole tab bar green.
 It clears the bar now, and a test measures the button's bottom edge against
 the bar's top edge.
 
+### The selection is a lens
+
+Three things separate a glass lens from a coloured pill, and the eye reads all
+three:
+
+- **It refracts.** `backdrop-filter` on the thumb itself samples and brightens
+  what is behind it. A flat fill sits *on* the bar; this sits *in* it.
+- **It has a lit rim.** A one-pixel inset highlight along the top edge and a
+  fainter one along the bottom — what glass does with a light source above it,
+  and the cheapest convincing part of the whole effect.
+- **It disperses while it moves.** Real glass splits light at its edges, and
+  that fringe is only visible in motion. The chromatic ring fades in for the
+  length of the journey and back out on arrival. Left on permanently it reads
+  as a rainbow border, which is a very different and much worse thing.
+
+And it **stretches along its path**: the scale grows with the distance
+travelled (capped at 1.14) and is released a beat before the journey ends, so
+the lens arrives already gathering itself rather than snapping back after it
+has stopped. That is the difference between a selection that moved and one
+that travelled.
+
+A test measures all four at rest, in flight and on landing. At rest the stretch
+is 1 and the ring is 0 — which is the part that is easy to get wrong.
+
+### Menus, not rows of buttons
+
+Test, rename and delete are things a merchant does to a carrier once and then
+not again for months, and three buttons for them gave the card a row of
+furniture as heavy as the card itself. They live behind one `···` now.
+
+The menu **grows out of the corner it was opened from**: an origin is what
+tells the eye which control produced it, and without one a menu reads as a
+dialogue that arrived on its own.
+
+There is **one menu element**, moved and refilled. Fifty carriers would
+otherwise mean fifty hidden menus rebuilt on every render, and only one is ever
+open.
+
+**It is measured with `offsetWidth`, not `getBoundingClientRect`.** The menu
+starts at `scale(.86)`, so its rect is 14 % smaller than the box it will
+occupy — placing it against that measurement pushed it off the edge of the
+screen the moment it finished growing.
+
+A carrier's attributes stopped borrowing status colours at the same time.
+"Par défaut" in delivered-green and "Envoi automatique" in confirmed-blue took
+two meanings that belong to orders, on a screen that has none.
+
 ### Tested in a real browser
 
 `npm run test:dashboard` — **23 assertions**, Chromium at 320/360/390/430 px in
