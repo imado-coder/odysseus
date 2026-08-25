@@ -40,6 +40,17 @@ WHITE = (255, 255, 255)
 mark = Image.open(HERE / "mitos-mark.png").convert("RGBA")
 
 
+def save(im: Image.Image, path) -> None:
+    """Every icon is written the same way, or one of them drifts.
+
+    optimize + compress_level 9 is lossless — the pixels are identical, only
+    the deflate window changes — and it takes about 2.5 % off each file. That
+    matters more than it sounds: these bytes are uploaded on every deploy and
+    downloaded by every phone that installs the app.
+    """
+    im.save(path, optimize=True, compress_level=9)
+
+
 def icon(size: int, coverage: float, *, flatten: bool = False) -> Image.Image:
     """The mark centred on white, occupying `coverage` of the square."""
     canvas = Image.new("RGBA", (size, size), WHITE + (255,))
@@ -56,26 +67,26 @@ def icon(size: int, coverage: float, *, flatten: bool = False) -> Image.Image:
 ICONS.mkdir(parents=True, exist_ok=True)
 
 # purpose: any — drawn as-is by the platform.
-icon(192, 0.82).save(ICONS / "icon-192.png")
-icon(512, 0.82).save(ICONS / "icon-512.png")
+save(icon(192, 0.82), ICONS / "icon-192.png")
+save(icon(512, 0.82), ICONS / "icon-512.png")
 
 # purpose: maskable — only the middle 80 % is guaranteed to survive the crop.
-icon(192, 0.58).save(ICONS / "icon-maskable-192.png")
-icon(512, 0.58).save(ICONS / "icon-maskable-512.png")
+save(icon(192, 0.58), ICONS / "icon-maskable-192.png")
+save(icon(512, 0.58), ICONS / "icon-maskable-512.png")
 
 # iOS home screen. No alpha, and iOS rounds the corners itself.
-icon(180, 0.82, flatten=True).save(ICONS / "apple-touch-icon.png")
+save(icon(180, 0.82, flatten=True), ICONS / "apple-touch-icon.png")
 
 # The gate screen draws the mark itself, on the page's own background, so
 # this one keeps its transparency and is not squared off.
 _g = mark.resize((256, round(256 * mark.height / mark.width)), Image.LANCZOS)
-_g.save(ICONS / "mark.png")
+save(_g, ICONS / "mark.png")
 
 # Browser tab.
-icon(32, 0.90).save(ICONS / "favicon-32.png")
+save(icon(32, 0.90), ICONS / "favicon-32.png")
 
 # Shopify App Store listing. Their spec is 1200×1200 PNG or JPEG.
-icon(1200, 0.78, flatten=True).save(HERE / "mitos-app-icon-1200.png")
+save(icon(1200, 0.78, flatten=True), HERE / "mitos-app-icon-1200.png")
 
 for f in sorted([*ICONS.glob("*.png"), HERE / "mitos-app-icon-1200.png"]):
     im = Image.open(f)
