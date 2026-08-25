@@ -294,9 +294,18 @@ console.log("\n7. The way in");
         hOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
         keyField: !!document.querySelector('.signin input[type="password"]'),
         chevrons: ssos.every(n => n.querySelector(".sso__go")),
-        markTop: Math.round(document.querySelector(".signin__mark").getBoundingClientRect().top),
+        markTop: Math.round(document.querySelector(".orbit__mark").getBoundingClientRect().top),
+        /* The hero is CSS and inline SVG, never a video or a Lottie file:
+           this page has no network dependency by design, and the first thing
+           a merchant sees must not be a blank rectangle on a slow morning. */
+        orbitTiles: document.querySelectorAll(".orbit__tile").length,
+        remoteAssets: [...document.querySelectorAll("img,script,link[rel=stylesheet],video")]
+          .map(n => n.getAttribute("src") || n.getAttribute("href") || "")
+          .filter(u => /^https?:|^\/\//.test(u)).length,
       };
     });
+    ok(`[${lang}] the hero is drawn, not fetched`, r.remoteAssets === 0, String(r.remoteAssets));
+    ok(`[${lang}] the constellation has its tiles`, r.orbitTiles === 6, String(r.orbitTiles));
     /* On a screen one line too short, plain centring pushes the logo off the
        top with no way to scroll back to it. safe centring stops at the edge. */
     ok(`[${lang}] the mark is never pushed off the top`, r.markTop >= 0, String(r.markTop));
@@ -379,7 +388,51 @@ console.log("\n9. Réglages");
   await p5.close();
 }
 
-console.log("\n10. A card says one thing in one colour");
+console.log("\n10. Two things a screenshot caught that no assertion had");
+{
+  const p7 = await b.newPage({ viewport: { width: 390, height: 844 }, colorScheme: "dark" });
+
+  /* ONE. A shop on its first day has one day of data, and flex:1 1 0 gave
+     that day the entire width — a full-height bar at --ink, which in dark
+     mode is a white slab across the card. It is not a chart, it is a bug
+     that looks like a design choice. */
+  const oneDay = JSON.parse(F("rich-stats.json"));
+  oneDay.series = [{ day: "2026-08-25", orders: 4, decided: 4, delivered: 0, revenue: 0 }];
+  await p7.route("**/functions/v1/**", r => r.fulfill({ status: 200, contentType: "application/json",
+    body: r.request().url().includes("/stats") ? JSON.stringify(oneDay) : F("rich-orders.json") }));
+  await p7.goto(`http://localhost:${PORT}/index.html`);
+  await p7.evaluate(() => { localStorage.setItem("mitos:key", "x".repeat(40)); localStorage.setItem("mitos:lang", "fr"); localStorage.setItem("mitos:theme", "dark"); });
+  await p7.reload({ waitUntil: "networkidle" });
+  await p7.waitForTimeout(300);
+  await p7.click('[data-view="stats"]');
+  await p7.waitForSelector(".spark");
+  await p7.waitForTimeout(300);
+
+  const bar = await p7.evaluate(() => {
+    const i = document.querySelector(".spark i");
+    const track = document.querySelector(".spark");
+    return { w: i.getBoundingClientRect().width, track: track.getBoundingClientRect().width };
+  });
+  ok("a single day is a bar, not a slab",
+     bar.w <= 24, `${Math.round(bar.w)}px of ${Math.round(bar.track)}px`);
+
+  /* TWO. The save bar sat at bottom:0, which is behind the floating tab bar:
+     the merchant could not press Enregistrer, and its colour bled up through
+     the glass and turned the whole tab bar green. */
+  await p7.click('[data-view="rates"]');
+  await p7.waitForSelector(".savebar button");
+  await p7.waitForTimeout(300);
+  const clear = await p7.evaluate(() => {
+    const btn = document.querySelector(".savebar button").getBoundingClientRect();
+    const tab = document.querySelector(".tabbar__in").getBoundingClientRect();
+    return { btnBottom: btn.bottom, tabTop: tab.top, overlap: btn.bottom > tab.top };
+  });
+  ok("the save button is not hidden behind the tab bar", !clear.overlap,
+     `button ends at ${Math.round(clear.btnBottom)}, bar starts at ${Math.round(clear.tabTop)}`);
+  await p7.close();
+}
+
+console.log("\n11. A card says one thing in one colour");
 {
   /* The pressed status button used to wear the brand, whatever the status
      was: a cancelled order showed a red stripe, a red badge and a violet
@@ -420,7 +473,7 @@ console.log("\n10. A card says one thing in one colour");
   await p6.close();
 }
 
-console.log("\n11. A shop with no orders says so instead of showing zeros");
+console.log("\n12. A shop with no orders says so instead of showing zeros");
 {
   const p2 = await b.newPage({ viewport: { width: 390, height: 900 } });
   const shop = { domain: "neuf.myshopify.com", currency: "DZD" };

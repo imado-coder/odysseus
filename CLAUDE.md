@@ -328,6 +328,51 @@ where it is unsupported, so the fallback is the solid stand-in.
 short, plain centring pushes the logo off the top with no way to scroll back
 to it. A test checks the mark's top edge is never negative.
 
+### The dark palette is the elevated one, not black
+
+Apple ships two dark sets: a base one on `#000` for OLED, and an **elevated**
+one a step lighter that anything presented over something else uses — sheets,
+popovers, a phone's whole chrome. This app is a stack of cards on a ground, so
+it takes the elevated pair (`#1c1c1e` ground, `#2c2c2e` cards). On true black
+the cards read as holes cut out of the screen.
+
+### The hero is drawn, not fetched
+
+The sign-in screen's constellation is CSS and inline SVG. Not a video, not a
+Lottie file: this page has no network dependency by design, and the first
+thing a merchant ever sees must not be a blank rectangle on a slow morning. It
+is also a few hundred bytes instead of a few hundred kilobytes, stays sharp at
+any density, and follows the theme.
+
+Two rings turn at different speeds in opposite directions — one ring alone
+reads as a loading spinner. Each tile rotates out to its angle, translates
+along it, and rotates back; a second animation keeps it upright while the ring
+turns, because a static counter-rotation cannot cancel a moving parent.
+
+**Only one of the six tiles is somebody else's logo, and it is the one
+integration that exists.** Drawing Meta's mark or a courier's would put a claim
+on the first screen a merchant sees — *we plug into that* — for integrations
+that are not built, and would mean approximating trademarks by hand. The other
+five are what this app does: a call, a parcel, a courier, the wilayas, the
+figures.
+
+A test asserts the page loads **zero** remote assets, which is what fails if
+anyone ever reaches for a CDN here.
+
+### Two bugs a screenshot caught that no assertion had
+
+**A shop on its first day saw a white slab.** `.spark i` was `flex:1 1 0` with
+`background:var(--ink)` — one day of data took the whole width at full height,
+which in dark mode is a white rectangle across the card. Bars are capped at
+22px and drawn in the brand gradient now, so they stay bars however few there
+are.
+
+**The save button was behind the tab bar.** `.savebar` sat at `bottom:0`,
+which is underneath the floating bar: a merchant could not press Enregistrer,
+and its green bled up through the glass and turned the whole tab bar green.
+It clears the bar now, and a test measures the button's bottom edge against
+the bar's top edge.
+
 ### Tested in a real browser
 
 `npm run test:dashboard` — **23 assertions**, Chromium at 320/360/390/430 px in
