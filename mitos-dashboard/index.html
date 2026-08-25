@@ -34,15 +34,40 @@
 -->
 <style>
   :root{
-    --ink:#101418; --sub:#5c6672; --line:#e7eaec; --bg:#f4f5f6; --card:#fff;
+    /* ── The system palette ──────────────────────────────────────────────
+     *
+     * These are Apple's own system colours, not approximations of them. A
+     * merchant runs this beside Téléphone and Réglages all day, and a screen
+     * with its own idea of what grey is looks like a web page pretending to
+     * be an app. The greys, the separators and the fills come from iOS; the
+     * violet-to-cyan gradient stays ours, because that is the part that is
+     * supposed to be different.
+     *
+     * The status colours are Apple's *accessible* variants, not the standard
+     * ones: systemGreen on white is 2.2:1, which is fine for a filled dot and
+     * unreadable as a word. These are the ones Apple ships for text.
+     */
+    --ink:#000; --sub:rgba(60,60,67,.6); --line:rgba(60,60,67,.18);
+    --bg:#f2f2f7; --card:#fff;
+    /* systemFill, the grey a segmented control's track is made of. */
+    --fill:rgba(120,120,128,.12);
+    --fill-2:rgba(120,120,128,.2);
     /* Status colours, chosen to sit beside a violet-to-cyan brand rather than
        against it — the previous set was a brown amber and a brick red, and a
        stripe of #a35b00 down the edge of a card reads as dirt. Each one is
        dark enough for bold small text on its own tint: measured on white at
        4.8:1 or better, which is where a status word stops being decoration
        and starts being readable. */
-    --ok:#047857; --bad:#dc2626; --warn:#b45309; --info:#2563eb;
-    --ok-bg:#ecfdf5; --bad-bg:#fef2f2; --warn-bg:#fffbeb; --info-bg:#eff6ff;
+    --ok:#248a3d; --bad:#d70015; --warn:#c93400; --info:#0040dd;
+    --ok-bg:rgba(52,199,89,.12); --bad-bg:rgba(255,59,48,.12);
+    --warn-bg:rgba(255,149,0,.14); --info-bg:rgba(0,122,255,.12);
+    /* A stripe is a fill, not a word. The accessible variants above are
+       darkened until small bold text reads on white, which makes them muddy
+       as a solid bar — #c93400 down the edge of a card looks like rust. These
+       are the plain system colours, used only where nothing has to be read
+       on top of them. */
+    --tint-ok:#34c759; --tint-bad:#ff3b30;
+    --tint-warn:#ff9500; --tint-info:#007aff;
 
     /* The brand, sampled from brand/mitos-mark.png rather than guessed: these
        are the two most saturated pixels at each end of the logo's gradient.
@@ -56,55 +81,88 @@
     --brand-soft:rgba(167,0,255,.09);
 
     /* The floating bar is translucent over whatever scrolls under it. */
-    --glass:rgba(255,255,255,.82);
-    --glass-line:rgba(16,20,24,.08);
-    --glass-shadow:0 8px 30px rgba(16,20,24,.13);
+    --glass:rgba(255,255,255,.72);
+    --glass-line:rgba(255,255,255,.5);
+    --glass-shadow:0 10px 34px rgba(0,0,0,.14),0 2px 8px rgba(0,0,0,.06);
   }
   @media (prefers-color-scheme: dark){
-    :root{--ink:#e9edf1;--sub:#9aa5b1;--line:#2a3138;--bg:#14181c;--card:#1b2126;
+    /* iOS dark: a true black base, cards one step up from it, and separators
+       that are light at low alpha rather than a dark grey — a dark-grey line
+       on a dark card disappears, which is why the borders vanished here. */
+    :root{--ink:#fff;--sub:rgba(235,235,245,.6);--line:rgba(84,84,88,.65);
+      --bg:#000;--card:#1c1c1e;
+      --fill:rgba(120,120,128,.24);--fill-2:rgba(120,120,128,.36);
       /* The mark is drawn for white. On a dark ground the violet end goes
          muddy, so the solid stand-in is lifted rather than reused. */
       --brand-ink:#c79bff; --brand-soft:rgba(167,0,255,.18);
-      --glass:rgba(27,33,38,.82); --glass-line:rgba(255,255,255,.10);
-      --glass-shadow:0 8px 30px rgba(0,0,0,.45);
+      --glass:rgba(30,30,32,.72); --glass-line:rgba(255,255,255,.10);
+      --glass-shadow:0 10px 34px rgba(0,0,0,.6);
       /* Lifted for a dark ground, and the tints are near-black washes: the
          light ones would each become a glowing block on a dark card. */
-      --ok:#34d399; --bad:#f87171; --warn:#fbbf24; --info:#60a5fa;
-      --ok-bg:rgba(52,211,153,.13); --bad-bg:rgba(248,113,113,.13);
-      --warn-bg:rgba(251,191,36,.13); --info-bg:rgba(96,165,250,.13)}
+      --ok:#30db5b; --bad:#ff6961; --warn:#ffb340; --info:#409cff;
+      --ok-bg:rgba(48,209,88,.18); --bad-bg:rgba(255,69,58,.18);
+      --warn-bg:rgba(255,159,10,.18); --info-bg:rgba(10,132,255,.18);
+      --tint-ok:#30d158; --tint-bad:#ff453a;
+      --tint-warn:#ff9f0a; --tint-info:#0a84ff}
   }
   *{box-sizing:border-box}
+
+  /* The blue that appears on every tap is Safari's, not ours: a translucent
+     highlight on touch and a system focus ring after it. Both are drawn in
+     the platform accent, which here sits beside a violet-to-cyan brand and
+     looks like a bug. They are replaced rather than merely removed — a
+     control still has to show it has focus for anyone using a keyboard. */
+  button,a,select,input,textarea{-webkit-tap-highlight-color:transparent}
+  button,select,.chip,.tabbar__item,.acts button,.seg__item{
+    -webkit-user-select:none;user-select:none}
+  :focus{outline:none}
+  :focus-visible{outline:2px solid var(--brand-ink);outline-offset:2px;
+    border-radius:10px}
   html{-webkit-text-size-adjust:100%}
   body{margin:0;background:var(--bg);color:var(--ink);
     font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
   .bar{position:sticky;top:0;z-index:5;background:var(--card);
     border-bottom:1px solid var(--line);padding:.75rem 1rem .5rem;
     padding-top:max(.75rem,env(safe-area-inset-top))}
-  .bar__row{display:flex;align-items:baseline;justify-content:space-between;
+  .bar__row{display:flex;align-items:center;justify-content:space-between;
     gap:.5rem;margin-bottom:.5rem}
-  h1{margin:0;font-size:1.0625rem;letter-spacing:-.01em}
-  /* The domain gives way first: it is the least useful thing on the row, and
-     without min-width:0 a nowrap flex item refuses to shrink and shoves the
-     language button off the screen instead. */
-  .shop{flex:1 1 auto;min-width:0;font-size:.8125rem;color:var(--sub);
-    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:end}
-  .chips{display:flex;gap:.375rem;overflow-x:auto;padding-bottom:.25rem;
-    scrollbar-width:none}
-  .chips::-webkit-scrollbar{display:none}
-  .chip{flex:0 0 auto;display:inline-flex;align-items:center;gap:.375rem;
-    min-height:36px;padding:0 .6875rem;border:1px solid var(--line);
-    border-radius:999px;background:transparent;color:var(--sub);
-    font:inherit;font-size:.8125rem;white-space:nowrap;cursor:pointer}
-  .chip b{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
-  .chip[aria-pressed="true"]{background:var(--brand);border-color:transparent;
-    color:#fff}
-  .chip[aria-pressed="true"] b{color:#fff}
+  /* A large title, the way an iOS screen names itself. */
+  h1{margin:0;font-size:1.625rem;font-weight:700;letter-spacing:-.022em;
+    line-height:1.15}
+  /* ── Filtering, as a segmented control ───────────────────────────────
+   *
+   * The filters were free-floating pills, which on a phone read as seven
+   * separate buttons rather than one choice with seven answers. A segmented
+   * control says it in the shape: a single track, one segment raised out of
+   * it, exactly one of them true at a time.
+   *
+   * The track scrolls when a shop has more statuses in play than fit — the
+   * alternative is segments too narrow to read, and a merchant filtering on
+   * "Sans réponse" needs to see the words.
+   */
+  .seg{display:flex;gap:2px;padding:2px;margin-bottom:.125rem;
+    border-radius:9px;background:var(--fill);
+    overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .seg::-webkit-scrollbar{display:none}
+  .seg__item{flex:1 0 auto;display:inline-flex;align-items:center;
+    justify-content:center;gap:.3125rem;min-height:30px;padding:0 .625rem;
+    border:0;border-radius:7px;background:transparent;color:var(--ink);
+    font:inherit;font-size:.8125rem;font-weight:500;white-space:nowrap;
+    cursor:pointer;transition:background-color .18s ease}
+  .seg__item b{font-weight:600;color:var(--sub);
+    font-variant-numeric:tabular-nums;unicode-bidi:plaintext}
+
+  /* The raised segment: white on the track in light, a lifted grey in dark,
+     with the shadow iOS actually uses under the thumb. */
+  .seg__item[aria-pressed="true"]{background:var(--card);font-weight:600;
+    box-shadow:0 3px 8px rgba(0,0,0,.12),0 3px 1px rgba(0,0,0,.04)}
+  .seg__item[aria-pressed="true"] b{color:var(--brand-ink)}
   main{padding:.75rem;display:grid;gap:.625rem;max-width:44rem;margin:0 auto;
     padding-bottom:max(1rem,env(safe-area-inset-bottom))}
   /* A card, not a boxed row: the hairline border made a list of orders read as
      a table, and this is a stack of things to act on. A soft shadow lifts each
      one off the page instead. */
-  .card{--accent:#ccd3da;position:relative;overflow:hidden;
+  .card{--accent:var(--fill-2);position:relative;overflow:hidden;
     background:var(--card);border:1px solid var(--line);border-radius:16px;
     padding:1rem;box-shadow:0 1px 2px rgba(16,20,24,.04),
     0 6px 16px -8px rgba(16,20,24,.10)}
@@ -116,10 +174,15 @@
      sitting on the wrong side of every card. */
   .card::before{content:"";position:absolute;top:0;bottom:0;
     inset-inline-start:0;width:3px;background:var(--accent)}
-  .c-PENDING{--accent:var(--info)}
-  .c-CONFIRMED,.c-SHIPPED{--accent:var(--warn)}
-  .c-DELIVERED{--accent:var(--ok)}
-  .c-CANCELLED,.c-RETURNED,.c-NO_ANSWER{--accent:var(--bad)}
+  /* Amber is the order that still needs the merchant to do something; blue is
+     the one already moving. That was the wrong way round — a confirmed order
+     was flagged in warning orange while an uncalled one sat in calm blue,
+     which is exactly backwards for a screen whose whole job is "who do I ring
+     next". */
+  .c-PENDING,.c-NO_ANSWER{--accent:var(--tint-warn)}
+  .c-CONFIRMED,.c-SHIPPED{--accent:var(--tint-info)}
+  .c-DELIVERED{--accent:var(--tint-ok)}
+  .c-CANCELLED,.c-RETURNED{--accent:var(--tint-bad)}
 
   .card__top{display:flex;justify-content:space-between;align-items:baseline;
     gap:.75rem}
@@ -136,16 +199,19 @@
   .amount--unsure{color:var(--warn)}
 
   .pill{flex:0 0 auto;font-size:.75rem;font-weight:600;padding:.1875rem .5rem;
-    border-radius:999px;background:#eef1f3;color:var(--sub)}
-  .s-PENDING{background:var(--info-bg);color:var(--info)}
-  .s-CONFIRMED,.s-SHIPPED{background:var(--warn-bg);color:var(--warn)}
+    border-radius:999px;background:var(--fill);color:var(--sub)}
+  /* The badge follows the stripe, or a card says two things at once. */
+  .s-PENDING{background:var(--warn-bg);color:var(--warn)}
+  .s-NO_ANSWER{background:var(--warn-bg);color:var(--warn)}
+  .s-CONFIRMED,.s-SHIPPED{background:var(--info-bg);color:var(--info)}
   .s-DELIVERED{background:var(--ok-bg);color:var(--ok)}
-  .s-CANCELLED,.s-RETURNED,.s-NO_ANSWER{background:var(--bad-bg);color:var(--bad)}
+  .s-CANCELLED,.s-RETURNED{background:var(--bad-bg);color:var(--bad)}
   .meta{display:flex;align-items:center;gap:.375rem .5rem;flex-wrap:wrap;
     margin-top:.375rem;font-size:.8125rem;color:var(--sub)}
   .num{font-variant-numeric:tabular-nums;color:var(--ink);font-weight:600;
     unicode-bidi:plaintext}
-  .dot{width:3px;height:3px;border-radius:50%;background:#ccd3da;flex:0 0 auto}
+  .dot{width:3px;height:3px;border-radius:50%;background:var(--fill-2);
+    flex:0 0 auto}
   .warn{color:var(--warn);font-weight:600}
   .what,.addr{margin-top:.375rem;font-size:.875rem}
   .addr{color:var(--sub)}
@@ -244,29 +310,37 @@
     /* The padded area is not a target — only the pill itself is, or a tap
        beside the bar would be swallowed. */
     pointer-events:none}
-  .tabbar__in{display:flex;gap:.25rem;max-width:26rem;margin:0 auto;
-    padding:.3125rem;border-radius:22px;pointer-events:auto;
-    background:var(--glass);border:1px solid var(--glass-line);
+  .tabbar__in{display:flex;gap:.125rem;max-width:25rem;margin:0 auto;
+    padding:.25rem;border-radius:26px;pointer-events:auto;
+    background:var(--glass);border:.5px solid var(--glass-line);
     box-shadow:var(--glass-shadow);
-    -webkit-backdrop-filter:saturate(180%) blur(20px);
-    backdrop-filter:saturate(180%) blur(20px)}
+    /* saturate before blur is what makes iOS material look like frosted glass
+       rather than a grey sheet: colour under it bleeds through instead of
+       being averaged away. */
+    -webkit-backdrop-filter:saturate(180%) blur(30px);
+    backdrop-filter:saturate(180%) blur(30px)}
   /* A browser without backdrop-filter would show the list straight through a
      translucent bar and make the labels unreadable, so it gets an opaque one. */
   @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
     .tabbar__in{background:var(--card)}
   }
   .tabbar__item{flex:1 1 0;min-width:0;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;gap:1px;
-    /* 48 px tall including the label: the same thumb target as every other
-       control on this screen. */
-    min-height:48px;padding:.25rem .125rem;border:0;border-radius:17px;
-    background:transparent;color:var(--sub);font:inherit;font-size:.625rem;
-    line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-    cursor:pointer;-webkit-tap-highlight-color:transparent}
-  .tabbar__item svg{width:23px;height:23px;flex:0 0 auto;display:block}
+    align-items:center;justify-content:center;gap:2px;
+    /* 49 px including the label — the height of a real iOS tab item, and the
+       same thumb target as every other control on this screen. */
+    min-height:49px;padding:.3125rem .125rem;border:0;border-radius:21px;
+    background:transparent;color:var(--sub);font:inherit;
+    /* 10px/600 is the iOS tab label. Smaller than it looks like it should be,
+       and the reason a tab bar reads as chrome rather than as content. */
+    font-size:10px;font-weight:600;letter-spacing:.005em;
+    line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    cursor:pointer;transition:background-color .2s ease,color .2s ease}
+  .tabbar__item svg{width:25px;height:25px;flex:0 0 auto;display:block}
   .tabbar__item span{max-width:100%;overflow:hidden;text-overflow:ellipsis}
   .tabbar__item[aria-current="page"]{color:var(--brand-ink);
-    background:var(--brand-soft);font-weight:600}
+    background:var(--brand-soft)}
+  /* A press should answer instantly; the transition above is for the release. */
+  .tabbar__item:active{transform:scale(.94);transition:transform .08s ease}
 
   /* The list must be able to scroll clear of the floating bar, or its last
      row is unreachable — the one bug a floating bar always ships with. */
@@ -370,7 +444,7 @@
      row and wrapped into the middle of a sentence. */
   .ship-line{display:flex;flex-wrap:wrap;gap:.25rem .5rem;align-items:center;
     margin-top:.625rem;padding:.4375rem .625rem;border-radius:11px;
-    background:#f1f3f5;color:var(--sub);
+    background:var(--fill);color:var(--sub);
     font-size:.8125rem;unicode-bidi:plaintext}
   .ship-line svg{width:15px;height:15px;flex:0 0 auto}
   .ship-line .num{font-variant-numeric:tabular-nums;color:inherit;
@@ -827,11 +901,11 @@ try {
     var counts = data.counts || {};
     var total = Object.keys(counts).reduce(function (a, k) { return a + counts[k]; }, 0);
 
-    var chips = '<button class="chip" data-filter=""' +
+    var chips = '<button class="seg__item" data-filter=""' +
       (filter === "" ? ' aria-pressed="true"' : "") +
       ">" + esc(t().all) + "<b>" + total + "</b></button>" +
       ORDER.filter(function (s) { return counts[s]; }).map(function (s) {
-        return '<button class="chip" data-filter="' + s + '"' +
+        return '<button class="seg__item" data-filter="' + s + '"' +
           (filter === s ? ' aria-pressed="true"' : "") + ">" +
           esc(t()[s]) + "<b>" + counts[s] + "</b></button>";
       }).join("");
@@ -842,7 +916,7 @@ try {
       : '<p class="note">' + esc(t().none) + "</p>";
 
     root.innerHTML =
-      bar(data, '<nav class="chips">' + chips + "</nav>") +
+      bar(data, '<nav class="seg">' + chips + "</nav>") +
       "<main>" + body + "</main>";
   }
 
@@ -852,7 +926,6 @@ try {
   function bar(data, below) {
     return '<header class="bar"><div class="bar__row">' +
         "<h1>" + esc(HEADING[view] ? t()[HEADING[view]] : t().title) + "</h1>" +
-        '<span class="shop">' + esc((data.shop && data.shop.domain) || "") + "</span>" +
         langButton() +
       "</div>" + (below || "") + "</header>";
   }

@@ -193,7 +193,41 @@ console.log("\n4. The range buttons refetch");
   await p.close();
 }
 
-console.log("\n5. A shop with no orders says so instead of showing zeros");
+console.log("\n5. Dark mode: nothing on a card is lighter than the card");
+{
+  /* A literal like #f1f3f5 baked into a rule is invisible to a media query,
+     so the shipment block shipped as a white slab on a black card with grey
+     text on it. Every surface colour goes through a token now, and this is
+     what notices when one stops.
+
+     A translucent token reports its own rgba rather than what lands on
+     screen, so it is composited over the card before being measured. */
+  const parse = (c) => { const n = c.match(/[\d.]+/g).map(Number); return { r:n[0], g:n[1], b:n[2], a: n[3] ?? 1 }; };
+  const over = (f, g) => ({ r: f.r*f.a + g.r*(1-f.a), g: f.g*f.a + g.g*(1-f.a), b: f.b*f.a + g.b*(1-f.a) });
+  const lum = (c) => .2126*c.r + .7152*c.g + .0722*c.b;
+
+  const p3 = await b.newPage({ viewport: { width: 390, height: 844 }, colorScheme: "dark" });
+  await p3.route("**/functions/v1/**", r => r.fulfill({ status: 200, contentType: "application/json", body: F("rich-orders.json") }));
+  await p3.goto(`http://localhost:${PORT}/index.html`);
+  await p3.evaluate(() => { localStorage.setItem("mitos:key", "x".repeat(40)); localStorage.setItem("mitos:lang", "fr"); });
+  await p3.reload({ waitUntil: "networkidle" });
+  await p3.waitForTimeout(300);
+
+  const r = await p3.evaluate(() => ({
+    card: getComputedStyle(document.querySelector(".card")).backgroundColor,
+    parts: [...new Map([...document.querySelectorAll(".card .ship-line, .card .pill, .card .dot")]
+      .map(n => [n.className, getComputedStyle(n).backgroundColor])).entries()],
+  }));
+  const cardLum = lum(parse(r.card));
+  for (const [cls, bg] of r.parts) {
+    const l = lum(over(parse(bg), parse(r.card)));
+    ok(`${cls.split(" ").pop()} does not glow on a dark card`, l < cardLum + 55,
+       `lum ${l.toFixed(0)} vs card ${cardLum.toFixed(0)}`);
+  }
+  await p3.close();
+}
+
+console.log("\n6. A shop with no orders says so instead of showing zeros");
 {
   const p2 = await b.newPage({ viewport: { width: 390, height: 900 } });
   const shop = { domain: "neuf.myshopify.com", currency: "DZD" };
