@@ -84,13 +84,17 @@
     border-radius:999px;background:transparent;color:var(--sub);
     font:inherit;font-size:.8125rem;white-space:nowrap;cursor:pointer}
   .chip b{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
-  .chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);
-    color:var(--card)}
-  .chip[aria-pressed="true"] b{color:var(--card)}
+  .chip[aria-pressed="true"]{background:var(--brand);border-color:transparent;
+    color:#fff}
+  .chip[aria-pressed="true"] b{color:#fff}
   main{padding:.75rem;display:grid;gap:.625rem;max-width:44rem;margin:0 auto;
     padding-bottom:max(1rem,env(safe-area-inset-bottom))}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;
-    padding:.875rem}
+  /* A card, not a boxed row: the hairline border made a list of orders read as
+     a table, and this is a stack of things to act on. A soft shadow lifts each
+     one off the page instead. */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:1rem;box-shadow:0 1px 2px rgba(16,20,24,.04),
+    0 6px 16px -8px rgba(16,20,24,.10)}
   .card__top{display:flex;justify-content:space-between;align-items:flex-start;
     gap:.5rem}
   .name{font-weight:600;letter-spacing:-.01em}
@@ -105,7 +109,7 @@
     margin-top:.5rem;font-size:.875rem;color:var(--sub)}
   .num{font-variant-numeric:tabular-nums;color:var(--ink);font-weight:600;
     unicode-bidi:plaintext}
-  .dot{width:3px;height:3px;border-radius:50%;background:#c3cad1;flex:0 0 auto}
+  .dot{width:3px;height:3px;border-radius:50%;background:#ccd3da;flex:0 0 auto}
   .warn{color:var(--warn);font-weight:600}
   .what,.addr{margin-top:.375rem;font-size:.875rem}
   .addr{color:var(--sub)}
@@ -114,16 +118,26 @@
   /* gap, not a space in the markup: the label and the number are two flex
      children and the whitespace between them is discarded, which is why this
      read "Appeler0770889900" for as long as the button has existed. */
+  /* The one action this whole screen exists for, so it carries the brand
+     rather than a generic green. The handset says "call"; the colour says
+     whose app this is. */
   .call{display:flex;align-items:center;justify-content:center;gap:.5rem;
-    min-height:48px;
-    margin-top:.75rem;border-radius:10px;background:var(--ok);color:#fff;
-    font-weight:600;text-decoration:none;unicode-bidi:plaintext}
+    min-height:50px;
+    margin-top:.75rem;border-radius:13px;background:var(--brand);color:#fff;
+    font-weight:600;text-decoration:none;unicode-bidi:plaintext;
+    box-shadow:0 6px 16px -6px rgba(167,0,255,.5)}
+  .call svg{width:18px;height:18px;flex:0 0 auto}
+  /* .num paints itself var(--ink) everywhere else on the card, which on this
+     button meant a near-black phone number on a saturated ground. The number
+     is part of the label here, so it takes the label's colour. */
+  .call .num{color:inherit}
   .acts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.375rem;
     margin-top:.5rem}
   .acts button{min-height:44px;border:1px solid var(--line);
     background:transparent;border-radius:10px;font:inherit;font-size:.875rem;
     color:var(--ink);cursor:pointer}
-  .acts button[aria-pressed="true"]{border-color:var(--ink);font-weight:600}
+  .acts button[aria-pressed="true"]{border-color:var(--brand-ink);
+    background:var(--brand-soft);color:var(--brand-ink);font-weight:600}
   .note{padding:2.5rem 1.25rem;text-align:center;color:var(--sub)}
   form.gate{max-width:22rem;margin:15vh auto;padding:0 1.25rem;text-align:center}
   /* alt="" on purpose: the <h1> underneath already says MITOS, and a
@@ -305,8 +319,8 @@
   .testout--ok{color:var(--ok)}
   .testout--bad{color:var(--bad)}
 
-  .ship{width:100%;min-height:48px;margin-top:.375rem;border:0;
-    border-radius:10px;background:var(--ink);color:var(--card);font:inherit;
+  .ship{width:100%;min-height:46px;margin-top:.5rem;border:1px solid var(--brand-ink);
+    border-radius:13px;background:transparent;color:var(--brand-ink);font:inherit;
     font-weight:600;cursor:pointer}
   .ship:disabled{opacity:.7}
 
@@ -717,8 +731,15 @@ try {
 
       shipLine(o) +
 
-      '<a class="call" href="tel:' + esc(o.phone) + '">' + esc(t().call) +
-        ' <span class="num">' + esc(o.phone) + "</span></a>" +
+      '<a class="call" href="tel:' + esc(o.phone) + '">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+          'stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ' +
+          'aria-hidden="true"><path d="M6.6 3H4.5A1.5 1.5 0 0 0 3 4.6C3 12.9 ' +
+          '11.1 21 19.4 21A1.5 1.5 0 0 0 21 19.5v-2.1a1 1 0 0 0-.8-1l-3.3-.7a1 ' +
+          '1 0 0 0-1 .4l-.9 1.2a13.4 13.4 0 0 1-5.3-5.3l1.2-.9a1 1 0 0 0 ' +
+          '.4-1l-.7-3.3a1 1 0 0 0-1-.8z"/></svg>' +
+        esc(t().call) +
+        '<span class="num">' + esc(o.phone) + "</span></a>" +
 
       '<div class="acts">' +
         ["CONFIRMED","NO_ANSWER","DELIVERED","CANCELLED"].map(function (s) {
