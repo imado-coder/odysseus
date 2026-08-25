@@ -73,6 +73,11 @@ output.txt.txt
 !docs/**/*.gif
 !docs/**/*.webp
 
+# …and the call list's own app icons. These are product assets, not uploads:
+# the web manifest names them, so a build without them installs on a phone
+# with a blank icon, or refuses to install at all.
+!mitos-dashboard/icons/*.png
+
 # Reports and temp files
 reports/
 tasks/
