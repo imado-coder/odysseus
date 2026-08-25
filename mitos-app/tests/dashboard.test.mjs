@@ -269,7 +269,84 @@ console.log("\n6. Dark mode: nothing on a card is lighter than the card");
   await p3.close();
 }
 
-console.log("\n7. A shop with no orders says so instead of showing zeros");
+console.log("\n7. The way in");
+{
+  /* The sign-in screen is the first thing a merchant ever sees, and the three
+     provider buttons are the part most likely to be quietly wrong: a label
+     that wraps, a badge sitting on top of the text, a page that scrolls
+     sideways in Arabic. */
+  for (const lang of ["fr", "ar"]) {
+    const p4 = await b.newPage({ viewport: { width: 390, height: 844 } });
+    await p4.goto(`http://localhost:${PORT}/index.html`);
+    await p4.evaluate((l) => { localStorage.clear(); localStorage.setItem("mitos:lang", l); }, lang);
+    await p4.reload({ waitUntil: "networkidle" });
+    await p4.waitForTimeout(200);
+
+    const r = await p4.evaluate(() => {
+      const ssos = [...document.querySelectorAll(".sso")];
+      return {
+        count: ssos.length,
+        heights: ssos.map(n => Math.round(n.getBoundingClientRect().height)),
+        clipped: ssos.filter(n => {
+          const t = n.querySelector("span");
+          return t.scrollWidth > t.clientWidth + 1;
+        }).length,
+        hOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        keyField: !!document.querySelector('.signin input[type="password"]'),
+      };
+    });
+    ok(`[${lang}] three providers are offered`, r.count === 3);
+    ok(`[${lang}] none of them wrapped to two lines`,
+       r.heights.every(h => h <= 56), JSON.stringify(r.heights));
+    ok(`[${lang}] none of the labels is cut off`, r.clipped === 0);
+    ok(`[${lang}] the page does not scroll sideways`, r.hOverflow <= 0, String(r.hOverflow));
+    /* The path that actually works has to be on the screen beside them. */
+    ok(`[${lang}] the access key is still offered`, r.keyField);
+    await p4.close();
+  }
+}
+
+console.log("\n8. Réglages");
+{
+  const p5 = await b.newPage({ viewport: { width: 390, height: 844 } });
+  await p5.route("**/functions/v1/**", r => r.fulfill({ status: 200, contentType: "application/json", body: F("rich-orders.json") }));
+  await p5.goto(`http://localhost:${PORT}/index.html`);
+  await p5.evaluate(() => { localStorage.setItem("mitos:key", "x".repeat(40)); localStorage.setItem("mitos:lang", "fr"); localStorage.removeItem("mitos:theme"); });
+  await p5.reload({ waitUntil: "networkidle" });
+  await p5.waitForTimeout(300);
+
+  await p5.click("[data-open-settings]");
+  await p5.waitForTimeout(500);
+  ok("the gear opens the sheet",
+     await p5.evaluate(() => document.body.classList.contains("sheet-open")));
+
+  /* The key is the only credential to a list of customers' names, phones and
+     addresses. Réglages must not print it where a shoulder can read it. */
+  const shown = await p5.evaluate(() => document.querySelector(".sheet").textContent);
+  ok("the access key is masked, not printed", !shown.includes("x".repeat(40)));
+
+  /* Appearance is a real setting, not a label: it writes the attribute the
+     whole palette hangs off, and it persists. */
+  await p5.click('[data-theme-set="dark"]');
+  await p5.waitForTimeout(200);
+  ok("choosing Sombre turns the app dark",
+     await p5.evaluate(() => document.documentElement.getAttribute("data-theme")) === "dark");
+  await p5.click('[data-theme-set="light"]');
+  await p5.waitForTimeout(200);
+  ok("choosing Clair turns it back",
+     await p5.evaluate(() => document.documentElement.getAttribute("data-theme")) === "light");
+  ok("and the choice is remembered",
+     await p5.evaluate(() => localStorage.getItem("mitos:theme")) === "light");
+
+  /* A sheet with one way out is a sheet people feel trapped in. */
+  await p5.keyboard.press("Escape");
+  await p5.waitForTimeout(500);
+  ok("escape closes it",
+     !(await p5.evaluate(() => document.body.classList.contains("sheet-open"))));
+  await p5.close();
+}
+
+console.log("\n9. A shop with no orders says so instead of showing zeros");
 {
   const p2 = await b.newPage({ viewport: { width: 390, height: 900 } });
   const shop = { domain: "neuf.myshopify.com", currency: "DZD" };

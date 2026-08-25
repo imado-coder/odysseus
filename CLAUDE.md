@@ -216,6 +216,50 @@ being rebuilt on a tap again.
 `prefers-reduced-motion` removes the travel and the press-scale; the thumb
 still ends up in the right place, it just gets there at once.
 
+### The way in, and Réglages
+
+The sign-in screen offers **Apple, Google and Facebook**, each drawn to its
+owner's guidelines — Apple black, Google white with its hairline, Facebook
+`#1877F2` — because a merchant recognises those shapes before they read them
+and a home-made approximation reads as a phishing page. In dark mode Apple's
+button inverts to white and Google's stays white, because those brands do not
+follow our theme.
+
+**None of them is wired, and none of them pretends to be.** One line under the
+group says so, and pressing one says what is missing. The access-key field
+below is the path that works, so it carries the brand gradient — the working
+action should be the branded one.
+
+Turning them on needs a provider client id each, and a decision this codebase
+has not made: today a key opens a *shop*, and an account would open a *user*
+who then has to be mapped to one.
+
+**Réglages is a sheet, not a fifth tab.** A tab bar is for the places a
+merchant works; this is a drawer they open, change one thing in, and close.
+Dismissed by the backdrop, the button, and Escape — a sheet with one way out
+is one people feel trapped in.
+
+It holds the language (its own group, headed by the word for what they are),
+the appearance, the shop, and the key. **The key is masked and copied, never
+printed**: it is the only credential to a list of customers' names, phones and
+addresses, and a merchant showing someone their settings should not hand it
+over by accident. A test asserts the full key never appears in the sheet.
+
+### Appearance is the merchant's choice, not the phone's
+
+`prefers-color-scheme` meant the phone decided and the merchant could not. The
+dark palette is keyed on `data-theme` now, written by script **before anything
+paints**, so a dark-mode user never sees a white flash on the way in.
+
+**"Auto" is the absence of a stored choice**, not a third palette. Storing the
+resolved answer instead would freeze a merchant into whichever theme their
+phone happened to be in the day they opened Réglages, and it would never
+follow again. A `matchMedia` listener keeps it following — but only while they
+have not chosen.
+
+`color-scheme: dark` is what makes the parts the page does not draw — form
+controls, scrollbars, the tap-and-hold menu — come out dark too.
+
 ### Tested in a real browser
 
 `npm run test:dashboard` — **23 assertions**, Chromium at 320/360/390/430 px in

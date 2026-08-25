@@ -85,11 +85,21 @@
     --glass-line:rgba(255,255,255,.5);
     --glass-shadow:0 10px 34px rgba(0,0,0,.14),0 2px 8px rgba(0,0,0,.06);
   }
-  @media (prefers-color-scheme: dark){
-    /* iOS dark: a true black base, cards one step up from it, and separators
-       that are light at low alpha rather than a dark grey — a dark-grey line
-       on a dark card disappears, which is why the borders vanished here. */
-    :root{--ink:#fff;--sub:rgba(235,235,245,.6);--line:rgba(84,84,88,.65);
+  /* ── Which theme, and who decides ────────────────────────────────────
+   *
+   * This was a plain prefers-color-scheme query, which means the phone
+   * decides and the merchant cannot. It is keyed on an attribute now, and
+   * the attribute is written by script before anything paints — so a
+   * dark-mode user never sees a white flash on the way in.
+   *
+   * "Auto" is not a third palette: it is the absence of a stored choice.
+   * The script resolves it against the system and keeps listening, so a
+   * phone that switches at sunset switches this with it.
+   *
+   * color-scheme is what makes the parts the page does not draw — form
+   * controls, scrollbars, the tap-and-hold menu — come out dark too.
+   */
+  :root[data-theme="dark"]{color-scheme:dark;--ink:#fff;--sub:rgba(235,235,245,.6);--line:rgba(84,84,88,.65);
       --bg:#000;--card:#1c1c1e;
       --fill:rgba(120,120,128,.24);--fill-2:rgba(120,120,128,.36);
       /* The mark is drawn for white. On a dark ground the violet end goes
@@ -104,7 +114,6 @@
       --warn-bg:rgba(255,159,10,.18); --info-bg:rgba(10,132,255,.18);
       --tint-ok:#30d158; --tint-bad:#ff453a;
       --tint-warn:#ff9f0a; --tint-info:#0a84ff}
-  }
   *{box-sizing:border-box}
 
   /* The blue that appears on every tap is Safari's, not ours: a translucent
@@ -451,6 +460,142 @@
     font-weight:600;cursor:pointer}
   .ship:disabled{opacity:.7}
 
+  /* ── The way in ──────────────────────────────────────────────────────────
+   *
+   * The sign-in buttons are drawn to each platform's own guidelines — Apple
+   * black, Google white with its hairline, Facebook #1877F2 — because a
+   * merchant recognises those before they read them, and a home-made
+   * approximation of them reads as a phishing page.
+   *
+   * They are visibly not ready. A button that looks live and does nothing is
+   * the worst thing on a sign-in screen; these carry a "bientôt" badge and
+   * say what is missing when pressed, and the key field beneath them is the
+   * path that actually works today.
+   */
+  .signin{max-width:22rem;margin:0 auto;padding:0 1.25rem
+    calc(2rem + env(safe-area-inset-bottom));min-height:100svh;
+    display:flex;flex-direction:column;justify-content:center;gap:.625rem}
+  .signin__mark{display:block;margin:0 auto .75rem;height:auto}
+  .signin h1{margin:0;text-align:center;font-size:1.75rem;font-weight:700;
+    letter-spacing:-.022em}
+  .signin__sub{margin:.25rem 0 1.25rem;text-align:center;color:var(--sub);
+    font-size:.9375rem}
+
+  /* The label is centred and the badge is taken out of the flow, so a long
+     translation ("Continuer avec Facebook") stays on one line instead of
+     wrapping into a two-line button. */
+  .sso{position:relative;display:flex;align-items:center;justify-content:center;
+    gap:.5rem;width:100%;min-height:50px;padding:0 .875rem;border-radius:13px;
+    border:1px solid transparent;font:inherit;font-size:.9375rem;
+    font-weight:600;white-space:nowrap;cursor:pointer}
+  .sso span:not(.sso__soon){overflow:hidden;text-overflow:ellipsis}
+  .sso svg{width:19px;height:19px;flex:0 0 auto}
+  .sso--apple{background:#000;color:#fff}
+  .sso--google{background:#fff;color:#1f1f1f;border-color:#dadce0}
+  .sso--fb{background:#1877f2;color:#fff}
+  /* Their brands do not follow our theme: Apple's button is black on a dark
+     screen too, and Google's stays white. Only the hairline is lifted so the
+     white button does not float edgeless on black. */
+  :root[data-theme="dark"] .sso--apple{background:#fff;color:#000}
+  :root[data-theme="dark"] .sso--google{border-color:rgba(0,0,0,.2)}
+  .sso:active{transform:scale(.985)}
+  /* One line under the group rather than a badge on each button: an absolutely
+     positioned badge sat on top of a centred label, and reserving room for it
+     on every button would have squeezed the longest translation instead. */
+  .signin__soon{margin:.125rem 0 .25rem;text-align:center;color:var(--sub);
+    font-size:.8125rem;line-height:1.45}
+
+  .signin__or{display:flex;align-items:center;gap:.75rem;margin:.5rem 0;
+    color:var(--sub);font-size:.8125rem}
+  .signin__or::before,.signin__or::after{content:"";flex:1 1 0;height:1px;
+    background:var(--line)}
+  .signin__legal{margin:.75rem 0 0;text-align:center;color:var(--sub);
+    font-size:.75rem;line-height:1.5}
+
+  /* The key form predates this screen and brought its own centring, its own
+     15vh margin and a full-width black button that competed with Apple's for
+     the same attention. Inside the sign-in screen it is a field and a
+     secondary action. */
+  .signin .gate{margin:0;padding:0;max-width:none;display:grid;gap:.5rem}
+  .signin .gate input{margin:0;min-height:50px;border-radius:13px}
+  /* The brand goes on the path that works. The three above carry their
+     owners' colours and are not ready; this one opens the app. */
+  .signin .gate button[type="submit"]{margin:0;min-height:50px;
+    border-radius:13px;background:var(--brand);color:#fff;
+    box-shadow:0 6px 16px -6px rgba(167,0,255,.5)}
+  .signin .lang-row{display:flex;justify-content:center;gap:.5rem;
+    margin-top:1rem}
+  .signin .lang{min-height:34px;padding:0 .875rem;border-radius:999px;
+    border:1px solid var(--line);background:transparent;color:var(--sub);
+    font:inherit;font-size:.8125rem;cursor:pointer}
+  .signin .lang[aria-pressed="true"]{border-color:var(--brand-ink);
+    color:var(--brand-ink);font-weight:600;background:var(--brand-soft)}
+
+  /* ── Réglages, as a sheet ────────────────────────────────────────────────
+   *
+   * Settings is not a fifth destination. A tab bar is for the places a
+   * merchant works, and this is a drawer they open, change one thing in, and
+   * close — so it arrives over the list rather than replacing it, and the
+   * list is still visibly there behind it.
+   *
+   * It is dismissed by the backdrop, by the button, and by Escape. A sheet
+   * with only one way out is a sheet people feel trapped in.
+   */
+  .scrim{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.4);
+    opacity:0;transition:opacity .3s ease;
+    -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
+  .sheet{position:fixed;inset-inline:0;bottom:0;z-index:41;
+    max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+    background:var(--bg);border-radius:14px 14px 0 0;
+    padding:0 1rem calc(1.5rem + env(safe-area-inset-bottom));
+    transform:translateY(100%);
+    transition:transform .42s cubic-bezier(.32,.72,0,1);
+    box-shadow:0 -8px 40px rgba(0,0,0,.22)}
+  body.sheet-open .scrim{opacity:1}
+  body.sheet-open .sheet{transform:translateY(0)}
+  @media (prefers-reduced-motion:reduce){
+    .scrim,.sheet{transition:none}
+  }
+
+  /* The grabber: the one piece of chrome that tells a phone user this can be
+     pulled down, before they have tried anything. */
+  .sheet__grab{width:36px;height:5px;border-radius:3px;background:var(--fill-2);
+    margin:.5rem auto .25rem}
+  .sheet__top{position:sticky;top:0;z-index:1;background:var(--bg);
+    display:flex;align-items:center;justify-content:space-between;
+    gap:.5rem;padding:.25rem 0 .75rem}
+  .sheet__top h2{margin:0;font-size:1.375rem;font-weight:700;
+    letter-spacing:-.02em}
+  .sheet__done{border:0;background:transparent;color:var(--brand-ink);
+    font:inherit;font-size:1rem;font-weight:600;cursor:pointer;padding:.25rem}
+
+  /* iOS inset-grouped rows: a titled group of a rounded card, hairlines
+     between rows and none at the ends. */
+  .grp{margin:1.25rem 0 0}
+  .grp__h{margin:0 0 .5rem .875rem;font-size:.8125rem;color:var(--sub);
+    text-transform:uppercase;letter-spacing:.05em}
+  .grp__body{background:var(--card);border-radius:12px;overflow:hidden}
+  .row2{display:flex;align-items:center;gap:.75rem;min-height:48px;
+    padding:.625rem .875rem;border-bottom:.5px solid var(--line)}
+  .row2:last-child{border-bottom:0}
+  .row2__l{flex:1 1 auto;min-width:0}
+  .row2__t{font-size:.9375rem}
+  .row2__s{font-size:.8125rem;color:var(--sub);margin-top:.0625rem;
+    overflow-wrap:anywhere;unicode-bidi:plaintext}
+  .row2__v{flex:0 0 auto;color:var(--sub);font-size:.9375rem;
+    unicode-bidi:plaintext}
+  button.row2{width:100%;border:0;background:transparent;color:var(--ink);
+    font:inherit;text-align:start;cursor:pointer;
+    border-bottom:.5px solid var(--line)}
+  button.row2:last-child{border-bottom:0}
+  button.row2:active{background:var(--fill)}
+  .row2--danger .row2__t{color:var(--bad);font-weight:600}
+  .row2__check{flex:0 0 auto;color:var(--brand-ink);font-weight:700}
+
+  /* The appearance choice reuses the segmented control, stacked in a row. */
+  .row2 .seg{flex:0 0 auto;margin:0;min-width:9.5rem}
+  .row2 .seg__item{font-size:.75rem;min-height:26px;padding:0 .5rem}
+
   /* ── The parcel, on the order it belongs to ──────────────────────────────
      A confirmed order whose push failed is the most expensive row on this
      screen: the customer is waiting for a parcel nobody created. It gets a
@@ -523,12 +668,18 @@
 </head>
 <body>
 <script>
-/* Direction before first paint. Set from the script below instead, and an
-   Arabic reader gets a frame of left-to-right layout on every visit. */
+/* Direction and theme before first paint. Set from the main script instead,
+   and an Arabic reader gets a frame of left-to-right layout on every visit,
+   and a dark-mode merchant a frame of white. */
 try {
   var d = localStorage.getItem("mitos:lang") === "ar";
   document.documentElement.dir = d ? "rtl" : "ltr";
   document.documentElement.lang = d ? "ar" : "fr";
+
+  var pref = localStorage.getItem("mitos:theme") || "auto";
+  var dark = pref === "dark" || (pref === "auto" &&
+    window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches);
+  document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
 } catch (e) {}
 </script>
 <!-- The header is a sibling of #root for the same reason the tab bar is: a
@@ -538,6 +689,13 @@ try {
      which segment is raised, which is exactly what makes the animation
      possible. -->
 <header class="bar" id="topbar" hidden></header>
+
+<!-- Réglages arrives over the list rather than replacing it: it is a drawer a
+     merchant opens, changes one thing in, and closes — not a fifth place to
+     work, which is what the tab bar is for. -->
+<div class="scrim" id="scrim" hidden></div>
+<aside class="sheet" id="sheet" hidden role="dialog" aria-modal="true"
+       aria-labelledby="sheet-title"></aside>
 
 <div id="root"><p class="note">…</p></div>
 
@@ -583,6 +741,21 @@ try {
       failed: "Commande non créée chez Shopify — ",
       call: "Appeler", saveFail: "Échec de l'enregistrement. Réessayez.",
       item: "article",
+      welcome: "Le carnet d'appels de votre boutique.",
+      contApple: "Continuer avec Apple", contGoogle: "Continuer avec Google",
+      contFb: "Continuer avec Facebook", orKey: "ou",
+      soonTitle: "Bientôt",
+      soon: "La connexion par compte n'est pas encore ouverte. Utilisez votre clé d'accès en attendant.",
+      legal: "En continuant, vous acceptez que MITOS traite les commandes de votre boutique.",
+      settings: "Réglages", done: "Terminé",
+      grpGeneral: "Général", grpAccount: "Boutique", grpAbout: "À propos",
+      language: "Langue", appearance: "Apparence",
+      thAuto: "Auto", thLight: "Clair", thDark: "Sombre",
+      shop: "Boutique", accessKey: "Clé d'accès", copyKey: "Copier la clé",
+      copied: "Copiée", signOut: "Se déconnecter",
+      signOutSure: "Oublier la clé sur cet appareil ?",
+      version: "Version", install: "Installer sur l'écran d'accueil",
+      installHow: "Partager, puis « Sur l'écran d'accueil ».",
       tabOrders: "Commandes", tabRates: "Livraison", tabStats: "Chiffres",
       statsHelp: "Ce que la boutique a réellement encaissé — pas ce que Shopify a compté.",
       d7: "7 j", d30: "30 j", d90: "90 j", noData: "Rien sur cette période.",
@@ -626,6 +799,21 @@ try {
       failed: "لم تُنشأ الطلبية في Shopify — ",
       call: "اتصل", saveFail: "لم يُسجّل التغيير. أعد المحاولة.",
       item: "قطعة",
+      welcome: "دفتر مكالمات متجرك.",
+      contApple: "تابع بـApple", contGoogle: "تابع بـGoogle",
+      contFb: "تابع بـFacebook", orKey: "أو",
+      soonTitle: "قريبًا",
+      soon: "الدخول بحساب لم يُفتح بعد. استعمل مفتاح الدخول في الأثناء.",
+      legal: "بالمتابعة، توافق على أن يعالج MITOS طلبيات متجرك.",
+      settings: "الإعدادات", done: "تمّ",
+      grpGeneral: "عامّ", grpAccount: "المتجر", grpAbout: "حول",
+      language: "اللغة", appearance: "المظهر",
+      thAuto: "تلقائي", thLight: "فاتح", thDark: "داكن",
+      shop: "المتجر", accessKey: "مفتاح الدخول", copyKey: "انسخ المفتاح",
+      copied: "نُسخ", signOut: "تسجيل الخروج",
+      signOutSure: "نسيان المفتاح على هذا الجهاز؟",
+      version: "الإصدار", install: "ثبّته في الشاشة الرئيسية",
+      installHow: "المشاركة، ثم «إضافة إلى الشاشة الرئيسية».",
       tabOrders: "الطلبيات", tabRates: "التوصيل", tabStats: "الأرقام",
       statsHelp: "ما قبضه المتجر فعلًا — لا ما حسبته Shopify.",
       d7: "٧ أيام", d30: "٣٠ يومًا", d90: "٩٠ يومًا",
@@ -675,6 +863,43 @@ try {
     document.documentElement.dir = t().dir;
     /* The tab is how a merchant finds this again among open tabs. */
     document.title = "MITOS — " + t().title;
+  }
+
+  /* ── Appearance ─────────────────────────────────────────────────────────
+   *
+   * Three choices, but only two palettes: "auto" is the absence of a stored
+   * one. Storing "light"/"dark" as the resolved answer instead would freeze a
+   * merchant into whichever theme their phone happened to be in the day they
+   * opened Réglages, and they would never see it follow again.
+   */
+  var THEME = "mitos:theme";
+  var theme = (function () {
+    try { return localStorage.getItem(THEME) || "auto"; } catch (e) { return "auto"; }
+  })();
+
+  function systemDark() {
+    return !!(window.matchMedia &&
+      matchMedia("(prefers-color-scheme: dark)").matches);
+  }
+
+  function applyTheme() {
+    var dark = theme === "dark" || (theme === "auto" && systemDark());
+    document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+  }
+
+  function setTheme(next) {
+    theme = next;
+    try { localStorage.setItem(THEME, next); } catch (e) {}
+    applyTheme();
+  }
+
+  /* A phone that switches at sunset switches this with it — but only while
+     the merchant has not made a choice of their own. */
+  if (window.matchMedia) {
+    var mq = matchMedia("(prefers-color-scheme: dark)");
+    var onSystem = function () { if (theme === "auto") applyTheme(); };
+    if (mq.addEventListener) mq.addEventListener("change", onSystem);
+    else if (mq.addListener) mq.addListener(onSystem);
   }
 
   function toggleLang() {
@@ -812,24 +1037,181 @@ try {
     document.body.classList.toggle("has-tabbar", on);
   }
 
+  /* ── Réglages ────────────────────────────────────────────────────────────
+   *
+   * Everything here is a thing that belongs to this device or this merchant
+   * rather than to the orders: which language, which theme, which shop, and
+   * the key that opens it.
+   *
+   * The key is shown masked and copied rather than displayed: it is the only
+   * credential to a list of customers' names, phones and addresses, and a
+   * merchant showing someone their settings should not be handing it over by
+   * accident.
+   */
+  var LANGS = [["fr", "Français"], ["ar", "العربية"]];
+
+  function row(title, sub, right, attrs) {
+    return "<div class=\"row2\" " + (attrs || "") + "><div class=\"row2__l\">" +
+      '<div class="row2__t">' + esc(title) + "</div>" +
+      (sub ? '<div class="row2__s">' + esc(sub) + "</div>" : "") +
+      "</div>" + (right || "") + "</div>";
+  }
+
+  function group(heading, inner) {
+    return '<section class="grp"><h3 class="grp__h">' + esc(heading) + "</h3>" +
+      '<div class="grp__body">' + inner + "</div></section>";
+  }
+
+  function renderSheet() {
+    var el = document.getElementById("sheet");
+    var k = key();
+    /* Enough to recognise it as theirs, not enough to be read off a screen
+       over someone's shoulder. */
+    var masked = k ? k.slice(0, 4) + "••••••••" + k.slice(-4) : "—";
+
+    var themes = '<nav class="seg">' +
+      '<span class="seg__thumb" aria-hidden="true"></span>' +
+      [["auto", "thAuto"], ["light", "thLight"], ["dark", "thDark"]]
+        .map(function (x) {
+          return '<button class="seg__item" type="button" data-theme-set="' +
+            x[0] + '"' + (theme === x[0] ? ' aria-pressed="true"' : "") + ">" +
+            esc(t()[x[1]]) + "</button>";
+        }).join("") + "</nav>";
+
+    el.innerHTML =
+      '<div class="sheet__grab" aria-hidden="true"></div>' +
+      '<div class="sheet__top"><h2 id="sheet-title">' + esc(t().settings) + "</h2>" +
+        '<button class="sheet__done" type="button" data-sheet-close>' +
+          esc(t().done) + "</button></div>" +
+
+      /* The languages are their own group, headed by the word for what they
+         are. Putting them under "Général" meant the unselected one needed a
+         subtitle to explain itself — "العربية / Langue" — which reads as a
+         label on the language rather than a name for the list. */
+      group(t().language,
+        LANGS.map(function (l) {
+          return '<button class="row2" type="button" data-lang-set="' + l[0] + '">' +
+            '<div class="row2__l"><div class="row2__t">' + esc(l[1]) + "</div></div>" +
+            (l[0] === lang ? '<span class="row2__check">✓</span>' : "") +
+            "</button>";
+        }).join("")) +
+
+      group(t().grpGeneral, row(t().appearance, "", themes)) +
+
+      group(t().grpAccount,
+        row(t().shop, sheetShop || "—", "") +
+        row(t().accessKey, masked, "") +
+        '<button class="row2" type="button" data-copy-key>' +
+          '<div class="row2__l"><div class="row2__t">' + esc(t().copyKey) +
+          "</div></div></button>" +
+        '<button class="row2 row2--danger" type="button" data-sign-out>' +
+          '<div class="row2__l"><div class="row2__t">' + esc(t().signOut) +
+          "</div></div></button>") +
+
+      group(t().grpAbout,
+        row(t().install, t().installHow, "") +
+        row(t().version, "", '<span class="row2__v">' + esc(VERSION) + "</span>"));
+
+    slide(el.querySelector(".seg"), false);
+  }
+
+  var VERSION = "1.4";
+  var sheetShop = "";
+
+  function openSheet() {
+    var el = document.getElementById("sheet");
+    var sc = document.getElementById("scrim");
+    el.hidden = false; sc.hidden = false;
+    renderSheet();
+    /* The element has to be in the layout at its off-screen position before
+       the class that moves it is added, or there is nothing to transition
+       from and the sheet simply appears. */
+    void el.offsetHeight;
+    document.body.classList.add("sheet-open");
+  }
+
+  function closeSheet() {
+    var el = document.getElementById("sheet");
+    var sc = document.getElementById("scrim");
+    document.body.classList.remove("sheet-open");
+    /* Hidden only once it has finished leaving, or it vanishes mid-slide. */
+    setTimeout(function () {
+      if (!document.body.classList.contains("sheet-open")) {
+        el.hidden = true; sc.hidden = true;
+      }
+    }, 420);
+  }
+
+  /* The header used to carry a FR/ع toggle. Language is a setting, not a
+     control a merchant needs at arm's reach forty times a day, and it was
+     sitting where the way into every other setting should be. */
   function langButton() {
-    return '<button class="lang" type="button" data-lang lang="' +
-      (lang === "fr" ? "ar" : "fr") + '">' + t().other + "</button>";
+    return '<button class="lang" type="button" data-open-settings ' +
+      'aria-label="' + esc(t().settings) + '">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+        'stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" ' +
+        'aria-hidden="true"><circle cx="12" cy="12" r="3.2"/>' +
+        '<path d="M19.4 14.5a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 ' +
+        '1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5v.2a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 ' +
+        '0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 ' +
+        '.3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 ' +
+        '1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3h.1a1.6 ' +
+        '1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 ' +
+        '1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8v.1a1.6 1.6 0 ' +
+        '0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg></button>';
+  }
+
+  /* Each mark drawn to its owner's guidelines. A merchant recognises these
+     shapes before they read the words, and an approximation of them is what
+     a phishing page looks like. */
+  var SSO = {
+    apple: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+      '<path d="M16.4 12.7c0-2.2 1.8-3.2 1.9-3.3-1-1.5-2.6-1.7-3.2-1.7-1.4-.1-2.7.8-3.3.8-.7 0-1.7-.8-2.8-.8-1.5 0-2.8.9-3.6 2.2-1.5 2.6-.4 6.5 1.1 8.6.7 1 1.6 2.2 2.7 2.2 1.1 0 1.5-.7 2.8-.7 1.3 0 1.6.7 2.8.7 1.2 0 1.9-1.1 2.6-2.1.8-1.2 1.2-2.4 1.2-2.4-.1 0-2.2-.9-2.2-3.5zM14.3 6.3c.6-.7 1-1.7.9-2.7-.9 0-2 .6-2.6 1.3-.6.6-1.1 1.7-.9 2.6 1 .1 2-.5 2.6-1.2z"/></svg>',
+    google: '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+      '<path fill="#4285F4" d="M23 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.2a5.3 5.3 0 0 1-2.3 3.5v2.9h3.7C21.7 18.9 23 15.9 23 12.3z"/>' +
+      '<path fill="#34A853" d="M12 23.5c3.1 0 5.7-1 7.6-2.8l-3.7-2.9c-1 .7-2.3 1.1-3.9 1.1-3 0-5.6-2-6.5-4.8H1.7v3A11.5 11.5 0 0 0 12 23.5z"/>' +
+      '<path fill="#FBBC05" d="M5.5 14.1a6.9 6.9 0 0 1 0-4.4v-3H1.7a11.5 11.5 0 0 0 0 10.4l3.8-3z"/>' +
+      '<path fill="#EA4335" d="M12 5.4c1.7 0 3.2.6 4.4 1.7l3.3-3.3A11.5 11.5 0 0 0 1.7 6.7l3.8 3c.9-2.8 3.5-4.3 6.5-4.3z"/></svg>',
+    fb: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+      '<path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.7-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.7l-.4 2.9h-2.3v7A10 10 0 0 0 22 12z"/></svg>',
+  };
+
+  function ssoButton(kind, labelKey, cls) {
+    return '<button class="sso ' + cls + '" type="button" data-sso="' + kind + '">' +
+      SSO[kind] + "<span>" + esc(t()[labelKey]) + "</span></button>";
   }
 
   function gate(message) {
     setChrome(false);
     root.innerHTML =
-      '<form class="gate">' +
-        '<img class="gate__mark" src="icons/mark.png" alt="" width="128" height="86" decoding="async">' +
-        '<h1>MITOS</h1>' +
-        '<p class="note" style="padding:.5rem 0">' + esc(t().ask) + "</p>" +
-        '<input type="password" name="k" autocomplete="current-password" ' +
-          'placeholder="' + esc(t().keyPh) + '" required>' +
-        "<button type=\"submit\">" + esc(t().open) + "</button>" +
-        (message ? '<p class="err">' + esc(message) + "</p>" : "") +
-        '<div class="lang-row">' + langButton() + "</div>" +
-      "</form>";
+      '<div class="signin">' +
+        '<img class="signin__mark" src="icons/mark.png" alt="" width="112" height="75" decoding="async">' +
+        "<h1>MITOS</h1>" +
+        '<p class="signin__sub">' + esc(t().welcome) + "</p>" +
+
+        ssoButton("apple", "contApple", "sso--apple") +
+        ssoButton("google", "contGoogle", "sso--google") +
+        ssoButton("fb", "contFb", "sso--fb") +
+        '<p class="signin__soon">' + esc(t().soon) + "</p>" +
+
+        '<div class="signin__or">' + esc(t().orKey) + "</div>" +
+
+        '<form class="gate">' +
+          '<input type="password" name="k" autocomplete="current-password" ' +
+            'placeholder="' + esc(t().keyPh) + '" required>' +
+          '<button type="submit">' + esc(t().open) + "</button>" +
+          (message ? '<p class="err">' + esc(message) + "</p>" : "") +
+        "</form>" +
+
+        '<p class="signin__legal">' + esc(t().legal) + "</p>" +
+        '<div class="lang-row">' +
+          LANGS.map(function (l) {
+            return '<button class="lang" type="button" data-lang-set="' + l[0] + '"' +
+              (l[0] === lang ? ' aria-pressed="true"' : "") + ">" +
+              esc(l[1]) + "</button>";
+          }).join("") +
+        "</div>" +
+      "</div>";
 
     root.querySelector("form").addEventListener("submit", function (e) {
       e.preventDefault();
@@ -962,6 +1344,10 @@ try {
   }
 
   function render(data) {
+    /* Réglages names the shop this key opens. Only the server knows it, so it
+       is kept from the last answer rather than asked for again when the sheet
+       is opened. */
+    sheetShop = (data.shop && data.shop.domain) || sheetShop;
     var counts = data.counts || {};
     var total = Object.keys(counts).reduce(function (a, k) { return a + counts[k]; }, 0);
 
@@ -1695,6 +2081,68 @@ try {
   }
 
   document.addEventListener("click", function (e) {
+    if (e.target.closest("[data-open-settings]")) return openSheet();
+
+    /* Pressed, and honest about it. Nothing is wired to a provider yet, so it
+       says so rather than spinning, failing silently, or pretending. */
+    var sso = e.target.closest("[data-sso]");
+    if (sso) return alert(t().soon);
+    if (e.target.closest("[data-sheet-close]") || e.target.closest("#scrim")) {
+      return closeSheet();
+    }
+
+    var pick = e.target.closest("[data-lang-set]");
+    if (pick) {
+      var next = pick.getAttribute("data-lang-set");
+      if (next === lang) return;
+      lang = next;
+      try { localStorage.setItem(LANG, lang); } catch (err) {}
+      applyLang();
+      /* The sheet is redrawn in the new language and the screen behind it
+         with it — barKey is cleared so the header rebuilds rather than
+         keeping French headings under an Arabic sheet. */
+      barKey = null;
+      /* On the sign-in screen there is no sheet and no app behind it — just
+         the gate, redrawn in the language that was chosen. */
+      if (!key()) return gate("");
+      renderSheet();
+      renderTabbar();
+      return show();
+    }
+
+    var th = e.target.closest("[data-theme-set]");
+    if (th) {
+      setTheme(th.getAttribute("data-theme-set"));
+      var track = th.closest(".seg");
+      var all = track.querySelectorAll("[data-theme-set]");
+      for (var i = 0; i < all.length; i++) {
+        if (all[i] === th) all[i].setAttribute("aria-pressed", "true");
+        else all[i].removeAttribute("aria-pressed");
+      }
+      slide(track, true);
+      return;
+    }
+
+    var copy = e.target.closest("[data-copy-key]");
+    if (copy) {
+      var label = copy.querySelector(".row2__t");
+      var was = label.textContent;
+      var done = function () {
+        label.textContent = t().copied;
+        setTimeout(function () { label.textContent = was; }, 1400);
+      };
+      if (navigator.clipboard) navigator.clipboard.writeText(key()).then(done, function () {});
+      else done();
+      return;
+    }
+
+    if (e.target.closest("[data-sign-out]")) {
+      if (!confirm(t().signOutSure)) return;
+      try { localStorage.removeItem(KEY); } catch (err) {}
+      closeSheet();
+      return gate("");
+    }
+
     var range = e.target.closest("[data-days]");
     if (range) {
       statsDays = Number(range.getAttribute("data-days"));
@@ -1835,6 +2283,13 @@ try {
     renderCarriers(carrierData);
   });
 
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && document.body.classList.contains("sheet-open")) {
+      closeSheet();
+    }
+  });
+
+  applyTheme();
   applyLang();
   show();
 })();
