@@ -78,6 +78,10 @@ output.txt.txt
 # with a blank icon, or refuses to install at all.
 !mitos-dashboard/icons/*.png
 
+# …and the brand itself. Every icon above is generated from these by
+# brand/make-icons.py, so losing them means the next size cannot be made.
+!brand/*.png
+
 # Reports and temp files
 reports/
 tasks/

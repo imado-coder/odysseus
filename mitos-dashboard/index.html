@@ -11,6 +11,7 @@
      day, standing up, and a tab among twenty tabs is not that. -->
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MITOS">
@@ -100,6 +101,9 @@
   .acts button[aria-pressed="true"]{border-color:var(--ink);font-weight:600}
   .note{padding:2.5rem 1.25rem;text-align:center;color:var(--sub)}
   form.gate{max-width:22rem;margin:15vh auto;padding:0 1.25rem;text-align:center}
+  /* alt="" on purpose: the <h1> underneath already says MITOS, and a
+     screen reader announcing it twice is noise, not information. */
+  form.gate .gate__mark{display:block;margin:0 auto .5rem;height:auto}
   form.gate input{width:100%;min-height:48px;margin-top:1rem;padding:0 .75rem;
     border:1px solid var(--line);border-radius:10px;background:var(--card);
     color:var(--ink);font:inherit;font-size:16px}
@@ -381,6 +385,7 @@ try {
   function gate(message) {
     root.innerHTML =
       '<form class="gate">' +
+        '<img class="gate__mark" src="icons/mark.png" alt="" width="128" height="86" decoding="async">' +
         '<h1>MITOS</h1>' +
         '<p class="note" style="padding:.5rem 0">' + esc(t().ask) + "</p>" +
         '<input type="password" name="k" autocomplete="current-password" ' +

@@ -113,6 +113,35 @@ The API token is **not in this repository**. Ask the user; it comes from
 Ecotrack → API et Synchronisation → Voir Token, and it is a single 60-character
 string (their UI wraps it across two lines).
 
+## The brand lives in `brand/`, and every icon is derived from it
+
+`brand/mitos-mark.png` is the M on its own, keyed off the white it was drawn
+on so it keeps a clean anti-aliased edge on any background.
+`brand/mitos-logo-stacked.png` and `-wide.png` are the two full lockups.
+
+**Do not hand-export an icon.** `python3 brand/make-icons.py` writes all eight
+— the four in the web manifest, the iOS one, the favicon, the gate's
+transparent mark, and the 1200×1200 the Shopify App Store listing asks for.
+Exported by hand they drift: one gets cropped a little tighter, one keeps a
+stale logo, and nobody sees it until a merchant has two different icons for
+the same product.
+
+Two paddings, on purpose. `purpose: any` fills the square. `purpose: maskable`
+is drawn much smaller because the launcher crops it to a circle or a squircle
+and only the middle 80 % is guaranteed — it looks over-padded as a file and
+correct on a phone. The `apple-touch-icon` is flattened to RGB: iOS composites
+an alpha channel onto black, and a mark drawn for white comes out unreadable.
+
+The background is white because the mark is a purple-to-cyan gradient that is
+muddy on anything dark, and white is how the brand was drawn. The manifest's
+`background_color` matches it, so the splash screen is the logo on its own
+card rather than floating on a different grey.
+
+`.gitignore` blanket-ignores `*.png`; `brand/*.png` and
+`mitos-dashboard/icons/*.png` are excepted. This has already bitten once — the
+first icon commit shipped a manifest pointing at four files git had silently
+dropped, which is a PWA that will not install and says nothing about why.
+
 ## Where secrets live — none are in the repo
 
 - **Shopify Admin token** → the `Session` table, written by OAuth or by

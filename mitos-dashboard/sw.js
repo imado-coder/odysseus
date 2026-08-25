@@ -21,7 +21,7 @@
  * to the network or fails visibly. Nothing in between.
  */
 
-const VERSION = "mitos-v1";
+const VERSION = "mitos-v2";
 const SHELL = [
   "./",
   "./index.html",
@@ -31,6 +31,8 @@ const SHELL = [
   "./icons/icon-maskable-192.png",
   "./icons/icon-maskable-512.png",
   "./icons/apple-touch-icon.png",
+  "./icons/favicon-32.png",
+  "./icons/mark.png",
 ];
 
 self.addEventListener("install", (event) => {
