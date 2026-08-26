@@ -424,7 +424,38 @@ console.log("\n10. The selection is a lens, not a rectangle");
   await p.close();
 }
 
-console.log("\n11. The carrier menu");
+console.log("\n11. Exactly one icon is ever lit, and the lens is under it");
+{
+  /* The gradient used to be applied from `view` at the moment of the tap,
+     which is before the lens has gone anywhere: for the length of the journey
+     the destination icon was already lit while the lens still sat on the old
+     one. Two tabs looked selected and the brighter one had nothing behind it.
+
+     The paint follows the lens now, so mid-flight there is nothing lit at
+     all — which is the assertion that fails the moment it goes back to
+     following the tap. */
+  const { p } = await page("fr", { rich: true });
+  const lit = () => p.evaluate(() => [...document.querySelectorAll(".tabbar__item")]
+    .filter(n => { const s = n.querySelector("svg"); return s && s.getAttribute("stroke") === "url(#mitos-g)"; })
+    .map(n => n.dataset.view));
+
+  const rest = await lit();
+  ok("at rest exactly one icon carries the brand", rest.length === 1, JSON.stringify(rest));
+  ok("and it is the section being shown", rest[0] === "orders", JSON.stringify(rest));
+
+  await p.click('[data-view="carriers"]');
+  await p.waitForTimeout(90);
+  const flight = await lit();
+  ok("mid-flight no icon is lit ahead of the lens", flight.length === 0, JSON.stringify(flight));
+
+  await p.waitForTimeout(700);
+  const after = await lit();
+  ok("on arrival the destination lights up", after.length === 1 && after[0] === "carriers",
+     JSON.stringify(after));
+  await p.close();
+}
+
+console.log("\n12. The carrier menu");
 {
   const carriers = JSON.stringify({ ok: true, shop: { domain: "boutique-dz.myshopify.com", currency: "DZD" },
     providers: [{ provider: "ECOTRACK", fields: [], needsBaseUrl: true }],
@@ -463,7 +494,7 @@ console.log("\n11. The carrier menu");
   await p8.close();
 }
 
-console.log("\n12. Two things a screenshot caught that no assertion had");
+console.log("\n13. Two things a screenshot caught that no assertion had");
 {
   const p7 = await b.newPage({ viewport: { width: 390, height: 844 }, colorScheme: "dark" });
 
@@ -507,7 +538,7 @@ console.log("\n12. Two things a screenshot caught that no assertion had");
   await p7.close();
 }
 
-console.log("\n13. A card says one thing in one colour");
+console.log("\n14. A card says one thing in one colour");
 {
   /* The pressed status button used to wear the brand, whatever the status
      was: a cancelled order showed a red stripe, a red badge and a violet
@@ -548,7 +579,7 @@ console.log("\n13. A card says one thing in one colour");
   await p6.close();
 }
 
-console.log("\n14. A shop with no orders says so instead of showing zeros");
+console.log("\n15. A shop with no orders says so instead of showing zeros");
 {
   const p2 = await b.newPage({ viewport: { width: 390, height: 900 } });
   const shop = { domain: "neuf.myshopify.com", currency: "DZD" };

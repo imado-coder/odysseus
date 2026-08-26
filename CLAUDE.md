@@ -420,6 +420,32 @@ A carrier's attributes stopped borrowing status colours at the same time.
 "Par défaut" in delivered-green and "Envoi automatique" in confirmed-blue took
 two meanings that belong to orders, on a screen that has none.
 
+### The paint follows the lens, not the tap
+
+The gradient on a tab's icon used to be applied from `view` at the moment of
+the tap — which is *before* the lens has gone anywhere. For the length of the
+journey the destination icon was already lit while the lens still sat on the
+old one: two tabs looked selected, and the brighter of the two had nothing
+behind it.
+
+`aria-current` still moves immediately, because a screen reader should be told
+where it is going the moment it is going there. The **paint** waits for the
+lens to land. Mid-flight nothing is lit at all, and a test asserts exactly
+that — it is what fails the moment the colour goes back to following the tap.
+
+### The icons are drawn, not borrowed
+
+Four glyphs on one 24 grid: same stroke weight, same corner radius, same 2px
+of optical padding. That consistency is the only thing separating an icon
+*set* from four drawings that happen to sit next to each other.
+
+Each silhouette is deliberately unlike the other three, because at 25px a
+merchant recognises the shape and never the detail: a stack of lines, a group
+of bars, a pin, a truck. The bars sit on a baseline with the tallest in the
+middle so the glyph balances on its own centre; the truck's wheels overlap its
+body by a hair, because flush underneath they read as two circles parked
+beside a box.
+
 ### Tested in a real browser
 
 `npm run test:dashboard` — **23 assertions**, Chromium at 320/360/390/430 px in

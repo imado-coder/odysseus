@@ -1269,25 +1269,71 @@ try {
      switches the whole icon between the muted colour and the brand gradient.
      Each silhouette is deliberately unlike the others — at 23 px a merchant
      recognises the shape, not the detail. */
+  /* ── The icon family ─────────────────────────────────────────────────────
+   *
+   * Drawn rather than borrowed. Four glyphs on the same 24 grid, with the
+   * same stroke weight, the same corner radius and the same 2 px of optical
+   * padding, so they read as one set instead of four separate drawings that
+   * happen to sit next to each other — which is the only thing that actually
+   * separates a professional icon set from a collection.
+   *
+   * Each silhouette is deliberately unlike the other three. At 25 px a
+   * merchant recognises the shape, never the detail: a stack of lines, a
+   * group of bars, a pin, a truck.
+   */
   var ICON_PATHS = {
-    orders: '<rect x="4" y="3" width="16" height="18" rx="2.5"/>' +
-            '<path d="M8.5 8.5h7M8.5 12h7M8.5 15.5h4"/>',
-    stats:  '<path d="M3.5 20.5h17"/>' +
-            '<rect x="5" y="11" width="3.6" height="6.5" rx="1.2"/>' +
-            '<rect x="10.2" y="6.5" width="3.6" height="11" rx="1.2"/>' +
-            '<rect x="15.4" y="13.5" width="3.6" height="4" rx="1.2"/>',
-    rates:  '<path d="M12 21.2s6.8-5.9 6.8-11.2a6.8 6.8 0 1 0-13.6 0c0 5.3 6.8 11.2 6.8 11.2z"/>' +
-            '<circle cx="12" cy="9.8" r="2.6"/>',
-    carriers: '<rect x="2.5" y="6.5" width="11.5" height="9.5" rx="1.5"/>' +
-              '<path d="M14 10h3.6l3.9 3.4V16H14z"/>' +
-              '<circle cx="7" cy="18.2" r="1.9"/><circle cx="17.4" cy="18.2" r="1.9"/>'
+    orders: '<rect x="3.8" y="4.2" width="16.4" height="15.6" rx="3"/>' +
+            '<path d="M7.7 9.4h8.6M7.7 12.6h8.6M7.7 15.8h5.2"/>',
+
+    /* Bars on a baseline, the tallest in the middle so the glyph balances on
+       its own centre rather than leaning. */
+    stats:  '<path d="M3.6 20.4h16.8"/>' +
+            '<rect x="5.3" y="12.3" width="3.5" height="5.5" rx="1.3"/>' +
+            '<rect x="10.25" y="7.5" width="3.5" height="10.3" rx="1.3"/>' +
+            '<rect x="15.2" y="10.1" width="3.5" height="7.7" rx="1.3"/>',
+
+    rates:  '<path d="M12 21c4.2-4.4 6.3-7.9 6.3-10.6A6.3 6.3 0 0 0 5.7 10.4' +
+            'C5.7 13.1 7.8 16.6 12 21z"/>' +
+            '<circle cx="12" cy="10.4" r="2.4"/>',
+
+    /* The wheels overlap the body by a hair. Sitting flush under it they read
+       as two circles parked beside a box. */
+    carriers: '<path d="M3 7.6a1.5 1.5 0 0 1 1.5-1.5h7.4a1.5 1.5 0 0 1 1.5 1.5v8.8H3z"/>' +
+              '<path d="M13.4 10.3h3.4a1.5 1.5 0 0 1 1.2.55l2.2 2.7a1.5 1.5 0 0 1 .3.95v1.9h-7.1z"/>' +
+              '<circle cx="7.1" cy="18.1" r="1.95"/>' +
+              '<circle cx="17.3" cy="18.1" r="1.95"/>',
   };
 
-  function icon(name, active) {
-    return '<svg viewBox="0 0 24 24" fill="none" stroke="' +
-      (active ? "url(#mitos-g)" : "currentColor") +
-      '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" ' +
+  /* Every icon is drawn in currentColor. The gradient is put on afterwards,
+     by paintIcon, once the lens has actually arrived — see below. */
+  function icon(name) {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" ' +
       'aria-hidden="true">' + ICON_PATHS[name] + "</svg>";
+  }
+
+  /**
+   * The gradient goes on the icon the lens is under, and nowhere else.
+   *
+   * It used to be applied from `view` at the moment of the tap, which is
+   * before the lens has gone anywhere: for the length of the journey the
+   * destination icon was already lit while the lens was still sitting on the
+   * old one. Two tabs looked selected, and the one that looked most selected
+   * had nothing behind it.
+   *
+   * So the paint follows the lens rather than the intent. `aria-current` still
+   * moves immediately, because a screen reader should be told where it is
+   * going the moment it is going there.
+   */
+  function paintIcon(track) {
+    if (!track) return;
+    var items = track.querySelectorAll(".tabbar__item");
+    for (var i = 0; i < items.length; i++) {
+      var svg = items[i].querySelector("svg");
+      if (!svg) continue;
+      var lit = items[i].getAttribute("aria-current") === "page";
+      svg.setAttribute("stroke", lit ? "url(#mitos-g)" : "currentColor");
+    }
   }
 
   /* Rebuilt only when the section or the language changes — never when data
@@ -1306,7 +1352,7 @@ try {
           : "";
         return '<button class="tabbar__item" type="button" data-view="' + v + '"' +
           (on ? ' aria-current="page"' : "") + ">" +
-          '<span class="tabbar__icon">' + icon(v, on) + badge + "</span>" +
+          '<span class="tabbar__icon">' + icon(v) + badge + "</span>" +
           "<span>" + esc(t()[TAB[v]]) + "</span></button>";
       }).join("") + "</div>";
 
@@ -1318,6 +1364,7 @@ try {
     var track = el.querySelector(".tabbar__in");
     var thumb = track.querySelector(".tabbar__thumb");
     if (!first && lastTab) thumb.style.transform = lastTab;
+    if (first) paintIcon(track);
     slideTab(track, !first);
   }
 
@@ -1926,6 +1973,9 @@ try {
     var travel = Math.abs(to - from);
     if (travel < 2) {
       thumb.style.transform = "translateX(" + to + "px)";
+      if (thumb.classList.contains("tabbar__thumb")) {
+        paintIcon(thumb.parentElement);
+      }
       return;
     }
 
@@ -1941,6 +1991,9 @@ try {
     thumb._settle = setTimeout(function () {
       thumb.style.transform = "translateX(" + to + "px)";
       thumb.classList.remove("is-travelling");
+      if (thumb.classList.contains("tabbar__thumb")) {
+        paintIcon(thumb.parentElement);
+      }
     }, 210);
   }
 
